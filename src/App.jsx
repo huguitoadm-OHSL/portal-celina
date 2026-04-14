@@ -194,7 +194,7 @@ const formatDiaMes = (fechaIso, sumarDias = 0) => {
 
 // --- COMPONENTES UI ---
 const Input = ({ label, name, value, onChange, placeholder, type = "text", required = false }) => (
-  <div className="mb-5">
+  <div className="mb-4">
     <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">{label}</label>
     <input
       type={type}
@@ -203,13 +203,13 @@ const Input = ({ label, name, value, onChange, placeholder, type = "text", requi
       onChange={onChange}
       placeholder={placeholder}
       required={required}
-      className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 placeholder-slate-400 shadow-sm"
+      className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 placeholder-slate-400 shadow-sm text-sm"
     />
   </div>
 );
 
 const TextArea = ({ label, name, value, onChange, placeholder }) => (
-  <div className="mb-5">
+  <div className="mb-4">
     <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">{label}</label>
     <textarea
       name={name}
@@ -217,7 +217,7 @@ const TextArea = ({ label, name, value, onChange, placeholder }) => (
       onChange={onChange}
       placeholder={placeholder}
       rows="4"
-      className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 placeholder-slate-400 shadow-sm resize-none"
+      className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 placeholder-slate-400 shadow-sm resize-none text-sm"
     />
   </div>
 );
@@ -307,10 +307,10 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
         )}
       </div>
       
-      <div className="flex gap-3">
+      <div className="flex flex-col xl:flex-row gap-3">
         <button
           onClick={handleCopy}
-          className="flex-1 flex items-center justify-center py-3 px-4 bg-white border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 hover:border-slate-300 font-bold transition-all shadow-sm"
+          className="flex-1 flex items-center justify-center py-3 px-4 bg-white border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 hover:border-slate-300 font-bold transition-all shadow-sm whitespace-nowrap"
         >
           {copied ? <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-500" /> : <Copy className="w-4 h-4 mr-2 text-slate-400" />}
           {copied ? '¡Copiado!' : (htmlContent ? 'Copiar Formato' : 'Copiar Texto')}
@@ -318,7 +318,7 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
         {showTextPlain && (
           <button
             onClick={handleSendEmail}
-            className="flex-1 flex items-center justify-center py-3 px-4 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-900 hover:to-black text-white rounded-xl font-bold transition-all shadow-md shadow-slate-900/20"
+            className="flex-1 flex items-center justify-center py-3 px-4 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-900 hover:to-black text-white rounded-xl font-bold transition-all shadow-md shadow-slate-900/20 whitespace-nowrap"
           >
             <Mail className="w-4 h-4 mr-2" />
             Texto Plano
@@ -380,10 +380,7 @@ export default function App() {
         if (response.ok) {
           const data = await response.json();
           if (Array.isArray(data)) {
-            // NORMALIZACIÓN MÁGICA: Adaptamos las llaves del JSON a lo que la app espera, 
-            // sin importar si vienen en mayúsculas, minúsculas o con otros nombres.
             const lotesLimpios = data.map(item => {
-              // 1. Limpiar nombre del proyecto
               const rawProy = String(item.proyecto || item.PROYECTO || '').toUpperCase();
               let proyLimpio = rawProy;
               if (rawProy.includes("RENACER")) proyLimpio = "El Renacer";
@@ -392,7 +389,6 @@ export default function App() {
               else if (rawProy.includes("SANTA FE")) proyLimpio = "Santa Fe";
               else if (rawProy.includes("CAÑAVERAL") || rawProy.includes("CANAVERAL")) proyLimpio = "Cañaveral";
 
-              // 2. Limpiar números (cambiar coma por punto y convertir a número decimal)
               const rawM2 = String(item.superficie || item.SUPERFICIE || item.m2 || '0').replace(/[^0-9.,]/g, '').replace(',', '.');
               const rawPrecio = String(item.precio || item.PRECIO || item.precioM2 || '0').replace(/[^0-9.,]/g, '').replace(',', '.');
 
@@ -424,7 +420,7 @@ export default function App() {
     fetchLotes();
   }, []);
 
-  // --- OBTENER OPCIONES CASCADA (BÚSQUEDA INTELIGENTE) CON PROTECCIÓN DE ERRORES ---
+  // --- OBTENER OPCIONES CASCADA (BÚSQUEDA INTELIGENTE) PROTEGIDAS ---
   const safeToLower = (val) => (val === null || val === undefined) ? '' : String(val).toLowerCase();
   
   const pL_filtro = safeToLower(formDescuento.proyecto);
@@ -495,7 +491,6 @@ export default function App() {
     }
   };
 
-  // MANEJADOR ESPECIAL PARA DESCUENTOS (LIMPIA CASCADAS EN MODO INTELIGENTE)
   const handleDescuentoChange = (e) => {
     const { name, value } = e.target;
     setFormDescuento(prev => {
@@ -505,7 +500,6 @@ export default function App() {
         newState.modoBusqueda = 'manual';
       }
       
-      // Si estamos en búsqueda inteligente, debemos limpiar los campos hijos cuando un padre cambia
       if (newState.modoBusqueda === 'inteligente') {
         if (name === 'proyecto') {
           newState.uv = ''; newState.manzano = ''; newState.lote = ''; newState.m2 = ''; newState.precioM2 = ''; newState.categoria = '';
@@ -539,7 +533,7 @@ export default function App() {
 
   // --- LÓGICA DE DESCUENTOS CAMPAÑAS ---
   const calcularDescuento = () => {
-    const { proyecto, modalidad, cuota, modoCuota, m2, precioM2, descuentoManual, tipoDescuentoManual } = formDescuento;
+    const { proyecto, modalidad, cuota, modoCuota, m2, precioM2, descuentoManual, tipoDescuentoManual, categoria } = formDescuento;
     const m2Num = parseFloat(m2) || 0;
     const precioM2Num = parseFloat(precioM2) || 0;
     const vc = m2Num * precioM2Num;
@@ -569,21 +563,32 @@ export default function App() {
          descuentoTexto = descManualNum > 0 ? `$${descManualNum} por m²` : '0';
       }
     } else if (PROYECTOS_CONVENIO_1.includes(proyecto) || PROYECTOS_CONVENIO_2.includes(proyecto)) {
+      // Convenios: Los Jardines, El Renacer, Cañaveral
       let descuentoPorM2 = 0;
       if (modalidad === 'Contado') {
-        descuentoPorM2 = PROYECTOS_CONVENIO_1.includes(proyecto) ? 3 : 4;
+        descuentoPorM2 = PROYECTOS_CONVENIO_1.includes(proyecto) ? 3 : 4; // Jardines/Renacer=$3, Cañaveral=$4
       } else if (modalidad === 'Crédito') {
-        if (porcentajeCuota >= 3) descuentoPorM2 = 2;
-        else if (porcentajeCuota >= 1.5) descuentoPorM2 = 1;
+        if (porcentajeCuota >= 3) descuentoPorM2 = 2; // 3% en adelante -> $2
+        else if (porcentajeCuota >= 1.5) descuentoPorM2 = 1; // 1.5% al 2.9% -> $1
       }
       descuentoTotal = descuentoPorM2 * m2Num;
       descuentoTexto = descuentoPorM2 > 0 ? `$${descuentoPorM2} por m²` : '0';
+
     } else if (PROYECTOS_PROPIOS_1.includes(proyecto)) {
+      // Propios: Muyurina, Santa Fe
       let porcentaje = 0;
       if (modalidad === 'Contado') {
-        porcentaje = 30;
+        porcentaje = 30; // 30% al contado
       } else if (modalidad === 'Crédito') {
-        if (porcentajeCuota >= 1.5) porcentaje = 20;
+        const catUpper = String(categoria || '').toUpperCase();
+        // Determina si es Avenida, Parque o Radial para el descuento del 23%
+        const isAvenida = catUpper.includes('AV') || catUpper.includes('AVENIDA') || catUpper.includes('PARQUE') || catUpper.includes('RADIAL');
+
+        if (isAvenida && porcentajeCuota >= 5) {
+          porcentaje = 23; // 23% a Crédito en Avenida con >= 5% cuota
+        } else if (porcentajeCuota >= 1.5) {
+          porcentaje = 20; // 20% a Crédito base con >= 1.5% cuota
+        }
       }
       descuentoTotal = vc * (porcentaje / 100);
       descuentoTexto = porcentaje > 0 ? `${porcentaje}%` : '0%';
@@ -1065,7 +1070,7 @@ export default function App() {
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                   <Input label="Nombre del Asesor" name="asesor" value={formFisico.asesor} onChange={handleFisicoChange} placeholder="Ej. Oscar Saravia" />
                   <Input label="Nombre Completo del Cliente" name="nombre" value={formFisico.nombre} onChange={handleFisicoChange} placeholder="Ej. Juan Pérez" />
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <Input label="Número de Carnet (CI)" name="ci" value={formFisico.ci} onChange={handleFisicoChange} placeholder="Ej. 1234567" />
                     <Input label="Número de Contrato" name="contrato" value={formFisico.contrato} onChange={handleFisicoChange} placeholder="Ej. CT-9876" />
                   </div>
@@ -1138,15 +1143,15 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-8">
                   <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div><label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Proyecto</label><select name="proyecto" value={formDescuento.proyecto} onChange={handleDescuentoChange} className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm">{PROYECTOS.map(p => <option key={p} value={p}>{p.toUpperCase()}</option>)}</select></div>
-                      <div><label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Modalidad</label><select name="modalidad" value={formDescuento.modalidad} onChange={handleDescuentoChange} className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm"><option value="Contado">Al Contado</option><option value="Crédito">A Crédito (Plazos)</option></select></div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                      <div><label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Proyecto</label><select name="proyecto" value={formDescuento.proyecto} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm">{PROYECTOS.map(p => <option key={p} value={p}>{p.toUpperCase()}</option>)}</select></div>
+                      <div><label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Modalidad</label><select name="modalidad" value={formDescuento.modalidad} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm"><option value="Contado">Al Contado</option><option value="Crédito">A Crédito (Plazos)</option></select></div>
                     </div>
 
                     {formDescuento.proyecto === 'OTRO...' && (
-                      <div className="mb-4 bg-amber-50/80 p-4 rounded-xl border border-amber-200 shadow-sm">
+                      <div className="mb-5 bg-amber-50/80 p-4 rounded-xl border border-amber-200 shadow-sm">
                         <h4 className="font-bold text-amber-800 mb-3 text-sm flex items-center"><Edit3 className="w-4 h-4 mr-2" /> Proyecto Manual</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                            <div>
@@ -1171,11 +1176,11 @@ export default function App() {
                       <div className="mb-6 bg-blue-50/50 p-4 rounded-xl border border-blue-100/50">
                         <div className="flex flex-col w-full">
                           <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Ingresar Cuota Inicial</label>
-                          <div className="flex w-full gap-2">
+                          <div className="flex flex-col sm:flex-row w-full gap-3">
                             <select 
                               value={formDescuento.modoCuota} 
                               onChange={(e) => setFormDescuento({...formDescuento, modoCuota: e.target.value, cuota: ''})}
-                              className="w-1/3 px-3 py-2.5 border border-blue-200 rounded-xl bg-white text-slate-700 font-semibold focus:ring-2 focus:ring-blue-500 outline-none"
+                              className="w-full sm:w-1/3 px-3 py-2.5 border border-blue-200 rounded-xl bg-white text-slate-700 font-semibold focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                             >
                               <option value="monto">Monto ($)</option>
                               <option value="porcentaje">Porcentaje (%)</option>
@@ -1186,9 +1191,9 @@ export default function App() {
                               value={formDescuento.cuota} 
                               onChange={handleDescuentoChange} 
                               placeholder={formDescuento.modoCuota === 'monto' ? "Ej. 1000" : "Ej. 5"}
-                              className="w-1/3 px-4 py-2.5 border border-blue-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 outline-none shadow-inner" 
+                              className="w-full sm:w-1/3 px-3 py-2.5 border border-blue-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 outline-none shadow-inner text-sm" 
                             />
-                            <div className="w-1/3 flex items-center justify-center bg-blue-600 text-white rounded-xl font-bold text-sm shadow-sm transition-all">
+                            <div className="w-full sm:w-1/3 flex items-center justify-center bg-blue-600 text-white rounded-xl font-bold text-sm shadow-sm py-2.5 whitespace-nowrap">
                               {formDescuento.modoCuota === 'monto' 
                                 ? `${formatCurrency(porcentajeCuota)}%` 
                                 : `$ ${formatCurrency(montoCuotaNum)}`}
@@ -1201,24 +1206,24 @@ export default function App() {
                     {/* MENÚS CASCADA O MANUAL */}
                     {formDescuento.modoBusqueda === 'inteligente' && formDescuento.proyecto !== 'OTRO...' ? (
                       <div className="mb-6 p-4 bg-slate-50 border border-slate-100 rounded-xl">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                           <div>
                             <label className="block text-xs font-bold text-emerald-700 mb-1.5 ml-0.5 uppercase tracking-wide">Elegir UV</label>
-                            <select name="uv" value={formDescuento.uv} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 font-semibold cursor-pointer">
+                            <select name="uv" value={formDescuento.uv} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 font-semibold cursor-pointer text-sm">
                               <option value="">---</option>
                               {opcionesUV.map(u => <option key={u} value={u}>{u}</option>)}
                             </select>
                           </div>
                           <div>
                             <label className="block text-xs font-bold text-emerald-700 mb-1.5 ml-0.5 uppercase tracking-wide">Elegir MZN</label>
-                            <select name="manzano" value={formDescuento.manzano} onChange={handleDescuentoChange} disabled={!formDescuento.uv} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 font-semibold cursor-pointer disabled:opacity-50 disabled:bg-slate-100">
+                            <select name="manzano" value={formDescuento.manzano} onChange={handleDescuentoChange} disabled={!formDescuento.uv} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 font-semibold cursor-pointer disabled:opacity-50 disabled:bg-slate-100 text-sm">
                               <option value="">---</option>
                               {opcionesMZN.map(m => <option key={m} value={m}>{m}</option>)}
                             </select>
                           </div>
                           <div>
                             <label className="block text-xs font-bold text-emerald-700 mb-1.5 ml-0.5 uppercase tracking-wide">Elegir Lote</label>
-                            <select name="lote" value={formDescuento.lote} onChange={handleDescuentoChange} disabled={!formDescuento.manzano} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 font-semibold cursor-pointer disabled:opacity-50 disabled:bg-slate-100">
+                            <select name="lote" value={formDescuento.lote} onChange={handleDescuentoChange} disabled={!formDescuento.manzano} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 font-semibold cursor-pointer disabled:opacity-50 disabled:bg-slate-100 text-sm">
                               <option value="">---</option>
                               {opcionesLote.map(lt => <option key={lt} value={lt}>{lt}</option>)}
                             </select>
@@ -1236,7 +1241,7 @@ export default function App() {
                         ) : null}
                       </div>
                     ) : (
-                      <div className="grid grid-cols-3 gap-4 mb-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-3">
                         <Input label="UV" name="uv" value={formDescuento.uv} onChange={handleDescuentoChange} />
                         <Input label="Manzano" name="manzano" value={formDescuento.manzano} onChange={handleDescuentoChange} />
                         <Input label="Lote" name="lote" value={formDescuento.lote} onChange={handleDescuentoChange} />
@@ -1257,11 +1262,11 @@ export default function App() {
 
                     {loteAutocompletado && formDescuento.modoBusqueda === 'inteligente' && (
                       <div className="bg-emerald-50/80 border border-emerald-200 text-emerald-700 p-2.5 rounded-xl text-xs font-bold mb-5 flex items-center shadow-sm">
-                        <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-500" /> Superficie y Precio autocompletados desde tu Excel
+                        <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-500 flex-shrink-0" /> Superficie y Precio autocompletados
                       </div>
                     )}
 
-                    <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
                       <Input label="Superficie (M2)" name="m2" value={formDescuento.m2} onChange={handleDescuentoChange} type="number" />
                       <Input label="Precio Reg. (M2)" name="precioM2" value={formDescuento.precioM2} onChange={handleDescuentoChange} type="number" />
                     </div>
@@ -1280,7 +1285,7 @@ export default function App() {
               <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><TrendingUp className="w-6 h-6 mr-2 text-blue-600" /> Incremento de Cuota Inicial</h2></div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <Input label="Nro. Contrato" name="nroContrato" value={formCuota.nroContrato} onChange={handleCuotaChange} />
                     <Input label="Carnet (CI)" name="ci" value={formCuota.ci} onChange={handleCuotaChange} />
                   </div>
@@ -1289,12 +1294,12 @@ export default function App() {
                     <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Proyecto</label>
                     <select name="proyecto" value={formCuota.proyecto} onChange={handleCuotaChange} className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm">{PROYECTOS.map(p => <option key={p} value={p}>{p}</option>)}</select>
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                     <Input label="UV" name="uv" value={formCuota.uv} onChange={handleCuotaChange} />
                     <Input label="Manzano" name="manzano" value={formCuota.manzano} onChange={handleCuotaChange} />
                     <Input label="Lote" name="lote" value={formCuota.lote} onChange={handleCuotaChange} />
                   </div>
-                  <div className="grid grid-cols-2 gap-4 mt-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-2">
                     <Input label="Cuota Registrada ($)" name="cuotaInicial" value={formCuota.cuotaInicial} onChange={handleCuotaChange} type="number" />
                     <Input label="Nueva Cuota ($)" name="nuevaCuota" value={formCuota.nuevaCuota} onChange={handleCuotaChange} type="number" />
                   </div>
