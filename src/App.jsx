@@ -17,18 +17,16 @@ import {
   Trash2,
   BarChart,
   Database,
-  Save,
   AlertTriangle,
   Search,
   Edit3
 } from 'lucide-react';
 
 // --- CONFIGURACIÓN DE DATOS MOCK ---
-const PROYECTOS_CONVENIO_1 = ["Los Jardines", "El Renacer", "Rancho Nuevo"];
+const PROYECTOS_CONVENIO_1 = ["Los Jardines", "El Renacer"];
 const PROYECTOS_CONVENIO_2 = ["Cañaveral"];
-const PROYECTOS_PROPIOS_1 = ["Muyurina", "Santa Fe", "Celina VII Fase 1", "Celina VII Fase 2", "Celina X", "Tamarindo", "Clara Chuchio", "Urubo Norte", "Celina 8"];
-const PROYECTOS_PROPIOS_2 = ["Celina III", "Celina IV", "Celina V", "Celina Pailón", "Celina Villa Bella"];
-const PROYECTOS = [...PROYECTOS_CONVENIO_1, ...PROYECTOS_CONVENIO_2, ...PROYECTOS_PROPIOS_1, ...PROYECTOS_PROPIOS_2].sort();
+const PROYECTOS_PROPIOS_1 = ["Muyurina", "Santa Fe"];
+const PROYECTOS = ["Cañaveral", "El Renacer", "Los Jardines", "Muyurina", "Santa Fe", "OTRO..."];
 
 const SUPERVISORES = [
   { id: 'mreyes', nombre: 'Mauricio Reyes Suarez', correo: 'mreyes@celina.com.bo', genero: 'M', titulo: 'Lic. Mauricio' },
@@ -189,17 +187,6 @@ const formatDiaMes = (fechaIso, sumarDias = 0) => {
   return `${dia}-${mes}`;
 };
 
-// Cargar la BD desde la memoria del navegador
-const cargarLotesGuardados = () => {
-  try {
-    const guardado = localStorage.getItem('celina_bd_lotes_oficial');
-    if (guardado) return JSON.parse(guardado);
-  } catch (e) {
-    console.error("Error al cargar la BD", e);
-  }
-  return [];
-};
-
 // --- COMPONENTES UI ---
 const Input = ({ label, name, value, onChange, placeholder, type = "text", required = false }) => (
   <div className="mb-5">
@@ -341,10 +328,9 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('proyeccion');
   const [supervisorDestino, setSupervisorDestino] = useState(SUPERVISORES[0].correo);
   
-  // --- ESTADOS PARA LA BASE DE DATOS DE LOTES ---
-  const [lotesBD, setLotesBD] = useState(cargarLotesGuardados());
-  const [textoExcel, setTextoExcel] = useState('');
-  const [mensajeBD, setMensajeBD] = useState({ tipo: '', texto: '' });
+  // --- ESTADOS PARA LA BASE DE DATOS DE LOTES DESDE JSON ---
+  const [lotesBD, setLotesBD] = useState([]);
+  const [cargandoLotes, setCargandoLotes] = useState(true);
   const [loteAutocompletado, setLoteAutocompletado] = useState(false);
 
   const [formFisico, setFormFisico] = useState({
@@ -352,11 +338,12 @@ export default function App() {
   });
 
   const [formDescuento, setFormDescuento] = useState({
-    proyecto: 'Los Jardines', uv: '', manzano: '', lote: '', 
+    proyecto: 'El Renacer', uv: '', manzano: '', lote: '', 
     modalidad: 'Crédito', 
     cuota: '', modoCuota: 'monto',
-    modoBusqueda: lotesBD.length > 0 ? 'inteligente' : 'manual', // Nuevo estado para alternar Búsqueda
-    m2: '', precioM2: '', asesor: ''
+    modoBusqueda: 'manual', // Iniciará en manual por defecto hasta que cargue el JSON
+    m2: '', precioM2: '', categoria: '', asesor: '',
+    proyectoManual: '', descuentoManual: '', tipoDescuentoManual: 'porcentaje'
   });
 
   const [formCuota, setFormCuota] = useState({
@@ -380,101 +367,64 @@ export default function App() {
     }))
   });
 
-  // --- LÓGICA DE CARGA DE EXCEL ---
-  const procesarExcel = () => {
-    if (!textoExcel.trim()) {
-      setMensajeBD({ tipo: 'error', texto: 'Por favor, pega los datos desde Excel primero.' });
-      return;
-    }
-
-    const lineas = textoExcel.split('\n');
-    const nuevosLotes = [];
-    let lineasIgnoradas = 0;
-
-    lineas.forEach(linea => {
-      if (!linea.trim()) return;
-      const columnas = linea.split('\t');
-      
-      // Necesitamos al menos 6 columnas: Proyecto, UV, Manzano, Lote, M2, Precio
-      if (columnas.length >= 6) {
-        const proyecto = columnas[0].trim();
-        const uv = columnas[1].trim();
-        const manzano = columnas[2].trim();
-        const lote = columnas[3].trim();
-        
-        // Limpiamos los números (quitamos espacios, símbolos de dólar, y cambiamos comas por puntos)
-        const m2Str = columnas[4].toString().replace(/[^0-9.,]/g, '').replace(',', '.');
-        const precioStr = columnas[5].toString().replace(/[^0-9.,]/g, '').replace(',', '.');
-
-        const m2 = parseFloat(m2Str);
-        const precioM2 = parseFloat(precioStr);
-
-        if (proyecto && lote && !isNaN(m2) && !isNaN(precioM2)) {
-          nuevosLotes.push({ proyecto, uv, manzano, lote, m2, precioM2 });
-        } else {
-          lineasIgnoradas++;
-        }
-      } else {
-        lineasIgnoradas++;
-      }
-    });
-
-    if (nuevosLotes.length > 0) {
+  // --- CARGAR DATOS DESDE EL ARCHIVO JSON AL INICIAR ---
+  useEffect(() => {
+    const fetchLotes = async () => {
       try {
-        localStorage.setItem('celina_bd_lotes_oficial', JSON.stringify(nuevosLotes));
-        setLotesBD(nuevosLotes);
-        setTextoExcel('');
-        setMensajeBD({ 
-          tipo: 'success', 
-          texto: `¡Éxito! Se han guardado ${nuevosLotes.length} lotes en la memoria. Ya puedes hacer cotizaciones. (Líneas ignoradas: ${lineasIgnoradas})` 
-        });
-        setFormDescuento(prev => ({...prev, modoBusqueda: 'inteligente'})); // Activar inteligente al cargar
-      } catch (err) {
-         setMensajeBD({ tipo: 'error', texto: 'La cantidad de datos superó la memoria permitida. Intenta copiar menos filas (ej. de 5000 en 5000).' });
+        // Se usa ruta relativa para evitar errores de parseo en entornos de previsualización (iframes, blob URLs)
+        const response = await fetch('./lotes.json');
+        if (response.ok) {
+          const data = await response.json();
+          if (Array.isArray(data)) {
+            setLotesBD(data);
+            if (data.length > 0) {
+              setFormDescuento(prev => ({...prev, modoBusqueda: 'inteligente'}));
+            }
+          }
+        } else {
+          console.warn("Aviso: El archivo lotes.json no fue encontrado.");
+        }
+      } catch (error) {
+        // Se silencia el log del objeto completo para prevenir crashes de React en entornos restrictivos
+        console.warn("Aviso: Fallo al cargar lotes.json. El modo manual será el predeterminado.");
+      } finally {
+        setCargandoLotes(false);
       }
-    } else {
-      setMensajeBD({ tipo: 'error', texto: 'No se encontraron datos válidos. Asegúrate de copiar las 6 columnas en el orden correcto.' });
-    }
-  };
-
-  const borrarBaseDatos = () => {
-    if (window.confirm("¿Estás seguro de borrar todos los lotes de la memoria de tu navegador?")) {
-      localStorage.removeItem('celina_bd_lotes_oficial');
-      setLotesBD([]);
-      setFormDescuento(prev => ({...prev, modoBusqueda: 'manual'}));
-      setMensajeBD({ tipo: 'success', texto: 'La base de datos ha sido borrada.' });
-    }
-  };
+    };
+    fetchLotes();
+  }, []);
 
   // --- OBTENER OPCIONES CASCADA (BÚSQUEDA INTELIGENTE) ---
-  const opcionesUV = [...new Set(lotesBD.filter(l => l.proyecto.toLowerCase() === formDescuento.proyecto.toLowerCase()).map(l => l.uv))].sort((a,b) => a.localeCompare(b, undefined, {numeric: true}));
-  const opcionesMZN = [...new Set(lotesBD.filter(l => l.proyecto.toLowerCase() === formDescuento.proyecto.toLowerCase() && l.uv.toLowerCase() === formDescuento.uv.toLowerCase()).map(l => l.manzano))].sort((a,b) => a.localeCompare(b, undefined, {numeric: true}));
-  const opcionesLote = [...new Set(lotesBD.filter(l => l.proyecto.toLowerCase() === formDescuento.proyecto.toLowerCase() && l.uv.toLowerCase() === formDescuento.uv.toLowerCase() && l.manzano.toLowerCase() === formDescuento.manzano.toLowerCase()).map(l => l.lote))].sort((a,b) => a.localeCompare(b, undefined, {numeric: true}));
+  const opcionesUV = [...new Set(lotesBD.filter(l => l.proyecto.toLowerCase() === formDescuento.proyecto.toLowerCase()).map(l => l.uv))].sort((a,b) => a.toString().localeCompare(b.toString(), undefined, {numeric: true}));
+  const opcionesMZN = [...new Set(lotesBD.filter(l => l.proyecto.toLowerCase() === formDescuento.proyecto.toLowerCase() && l.uv.toString().toLowerCase() === formDescuento.uv.toString().toLowerCase()).map(l => l.manzano))].sort((a,b) => a.toString().localeCompare(b.toString(), undefined, {numeric: true}));
+  const opcionesLote = [...new Set(lotesBD.filter(l => l.proyecto.toLowerCase() === formDescuento.proyecto.toLowerCase() && l.uv.toString().toLowerCase() === formDescuento.uv.toString().toLowerCase() && l.manzano.toString().toLowerCase() === formDescuento.manzano.toString().toLowerCase()).map(l => l.lote))].sort((a,b) => a.toString().localeCompare(b.toString(), undefined, {numeric: true}));
 
   // --- EFECTO DE AUTOCOMPLETADO DE LOTES ---
   useEffect(() => {
     const { proyecto, uv, manzano, lote } = formDescuento;
     if (proyecto && uv && manzano && lote && lotesBD.length > 0) {
-      const pL = proyecto.toLowerCase();
-      const uL = uv.toLowerCase();
-      const mL = manzano.toLowerCase();
-      const loL = lote.toLowerCase();
+      const pL = proyecto.toString().toLowerCase();
+      const uL = uv.toString().toLowerCase();
+      const mL = manzano.toString().toLowerCase();
+      const loL = lote.toString().toLowerCase();
 
       const loteEncontrado = lotesBD.find(l => 
-        l.proyecto.toLowerCase() === pL && 
-        l.uv.toLowerCase() === uL && 
-        l.manzano.toLowerCase() === mL && 
-        l.lote.toLowerCase() === loL
+        l.proyecto.toString().toLowerCase() === pL && 
+        l.uv.toString().toLowerCase() === uL && 
+        l.manzano.toString().toLowerCase() === mL && 
+        l.lote.toString().toLowerCase() === loL
       );
       
       if (loteEncontrado) {
         setFormDescuento(prev => ({
           ...prev,
           m2: loteEncontrado.m2.toString(),
-          precioM2: loteEncontrado.precioM2.toString()
+          precioM2: loteEncontrado.precioM2.toString(),
+          categoria: loteEncontrado.categoria || ''
         }));
         setLoteAutocompletado(true);
       } else {
+        setFormDescuento(prev => ({ ...prev, categoria: '' }));
         setLoteAutocompletado(false);
       }
     } else {
@@ -504,14 +454,18 @@ export default function App() {
     setFormDescuento(prev => {
       const newState = { ...prev, [name]: value };
       
+      if (name === 'proyecto' && value === 'OTRO...') {
+        newState.modoBusqueda = 'manual';
+      }
+      
       // Si estamos en búsqueda inteligente, debemos limpiar los campos hijos cuando un padre cambia
-      if (prev.modoBusqueda === 'inteligente') {
+      if (newState.modoBusqueda === 'inteligente') {
         if (name === 'proyecto') {
-          newState.uv = ''; newState.manzano = ''; newState.lote = ''; newState.m2 = ''; newState.precioM2 = '';
+          newState.uv = ''; newState.manzano = ''; newState.lote = ''; newState.m2 = ''; newState.precioM2 = ''; newState.categoria = '';
         } else if (name === 'uv') {
-          newState.manzano = ''; newState.lote = ''; newState.m2 = ''; newState.precioM2 = '';
+          newState.manzano = ''; newState.lote = ''; newState.m2 = ''; newState.precioM2 = ''; newState.categoria = '';
         } else if (name === 'manzano') {
-          newState.lote = ''; newState.m2 = ''; newState.precioM2 = '';
+          newState.lote = ''; newState.m2 = ''; newState.precioM2 = ''; newState.categoria = '';
         }
       }
       return newState;
@@ -538,7 +492,7 @@ export default function App() {
 
   // --- LÓGICA DE DESCUENTOS CAMPAÑAS ---
   const calcularDescuento = () => {
-    const { proyecto, modalidad, cuota, modoCuota, m2, precioM2 } = formDescuento;
+    const { proyecto, modalidad, cuota, modoCuota, m2, precioM2, descuentoManual, tipoDescuentoManual } = formDescuento;
     const m2Num = parseFloat(m2) || 0;
     const precioM2Num = parseFloat(precioM2) || 0;
     const vc = m2Num * precioM2Num;
@@ -558,7 +512,16 @@ export default function App() {
     let descuentoTotal = 0;
     let descuentoTexto = "";
 
-    if (PROYECTOS_CONVENIO_1.includes(proyecto) || PROYECTOS_CONVENIO_2.includes(proyecto)) {
+    if (proyecto === 'OTRO...') {
+      let descManualNum = parseFloat(descuentoManual) || 0;
+      if (tipoDescuentoManual === 'porcentaje') {
+         descuentoTotal = vc * (descManualNum / 100);
+         descuentoTexto = descManualNum > 0 ? `${descManualNum}%` : '0%';
+      } else {
+         descuentoTotal = descManualNum * m2Num;
+         descuentoTexto = descManualNum > 0 ? `$${descManualNum} por m²` : '0';
+      }
+    } else if (PROYECTOS_CONVENIO_1.includes(proyecto) || PROYECTOS_CONVENIO_2.includes(proyecto)) {
       let descuentoPorM2 = 0;
       if (modalidad === 'Contado') {
         descuentoPorM2 = PROYECTOS_CONVENIO_1.includes(proyecto) ? 3 : 4;
@@ -568,16 +531,12 @@ export default function App() {
       }
       descuentoTotal = descuentoPorM2 * m2Num;
       descuentoTexto = descuentoPorM2 > 0 ? `$${descuentoPorM2} por m²` : '0';
-    } else if (PROYECTOS_PROPIOS_1.includes(proyecto) || PROYECTOS_PROPIOS_2.includes(proyecto)) {
+    } else if (PROYECTOS_PROPIOS_1.includes(proyecto)) {
       let porcentaje = 0;
       if (modalidad === 'Contado') {
-        porcentaje = PROYECTOS_PROPIOS_1.includes(proyecto) ? 30 : 32;
+        porcentaje = 30;
       } else if (modalidad === 'Crédito') {
-        if (PROYECTOS_PROPIOS_1.includes(proyecto)) {
-          if (porcentajeCuota >= 1.5) porcentaje = 20;
-        } else {
-          if (porcentajeCuota >= 1.5) porcentaje = 25;
-        }
+        if (porcentajeCuota >= 1.5) porcentaje = 20;
       }
       descuentoTotal = vc * (porcentaje / 100);
       descuentoTexto = porcentaje > 0 ? `${porcentaje}%` : '0%';
@@ -629,8 +588,9 @@ export default function App() {
     const { saludo, titulo } = obtenerDatosSupervisor();
     const mesActual = new Date().toLocaleString('es-ES', { month: 'long' });
     let condicionTexto = formDescuento.modalidad === 'Crédito' ? `con cuota inicial del ${formatCurrency(porcentajeCuota)}% venta a plazos` : `venta al contado`;
+    const nomProyecto = formDescuento.proyecto === 'OTRO...' ? (formDescuento.proyectoManual || 'PROYECTO MANUAL') : formDescuento.proyecto;
 
-    return `${obtenerSaludoTiempo()}\n${saludo} ${titulo},\n\nPor favor le solicito mediante el presente correo, la aplicación del descuento correspondiente a la campaña mes de ${mesActual} proyecto ${formDescuento.proyecto}: ${descuentoTexto} ${condicionTexto}:\n\n------------------------------------------------------------\n• Superficie:             ${formDescuento.m2 || '0'} m²\n• Precio M2:              $ ${formatCurrency(formDescuento.precioM2 || 0)}\n• Precio Original:        $ ${formatCurrency(vc)}\n------------------------------------------------------------\n• Condición (${formDescuento.proyecto}): ${descuentoTexto}  [-$ ${formatCurrency(descuentoTotal)}]\n• Total Valor Contrato (VC):   $ ${formatCurrency(vc)}\n• Total Dscto Campañas:       -$ ${formatCurrency(descuentoTotal)}\n------------------------------------------------------------\n• Nuevo Precio Promoción:      $ ${formatCurrency(nuevoPrecioTotal)}\n\nPRECIO M2 A APLICAR:        $ ${formatCurrency(nuevoPrecioM2)}\nUV ${formDescuento.uv || 'SN'} • MZN ${formDescuento.manzano || '---'} • LT ${formDescuento.lote || '---'}\n\nQuedo atento a su aprobación para continuar con el proceso del cierre de la venta.\n\nSaludos cordiales,\n${formDescuento.asesor || '[Nombre del Asesor]'}`;
+    return `${obtenerSaludoTiempo()}\n${saludo} ${titulo},\n\nPor favor le solicito mediante el presente correo, la aplicación del descuento correspondiente a la campaña mes de ${mesActual} proyecto ${nomProyecto}: ${descuentoTexto} ${condicionTexto}:\n\n------------------------------------------------------------\n• Superficie:             ${formDescuento.m2 || '0'} m²\n• Precio M2:              $ ${formatCurrency(formDescuento.precioM2 || 0)}\n• Precio Original:        $ ${formatCurrency(vc)}\n------------------------------------------------------------\n• Condición (${nomProyecto}): ${descuentoTexto}  [-$ ${formatCurrency(descuentoTotal)}]\n• Total Valor Contrato (VC):   $ ${formatCurrency(vc)}\n• Total Dscto Campañas:       -$ ${formatCurrency(descuentoTotal)}\n------------------------------------------------------------\n• Nuevo Precio Promoción:      $ ${formatCurrency(nuevoPrecioTotal)}\n\nPRECIO M2 A APLICAR:        $ ${formatCurrency(nuevoPrecioM2)}\nUV ${formDescuento.uv || 'SN'} • MZN ${formDescuento.manzano || '---'} • LT ${formDescuento.lote || '---'}\n${formDescuento.categoria ? `CATEGORÍA: ${formDescuento.categoria.toUpperCase()}\n\n` : '\n'}Quedo atento a su aprobación para continuar con el proceso del cierre de la venta.\n\nSaludos cordiales,\n${formDescuento.asesor || '[Nombre del Asesor]'}`;
   };
 
   const generarHtmlDescuento = () => {
@@ -638,12 +598,13 @@ export default function App() {
     const { saludo, titulo } = obtenerDatosSupervisor();
     const mesActual = new Date().toLocaleString('es-ES', { month: 'long' });
     let condicionTexto = formDescuento.modalidad === 'Crédito' ? `con cuota inicial del ${formatCurrency(porcentajeCuota)}% venta a plazos` : `venta al contado`;
+    const nomProyecto = formDescuento.proyecto === 'OTRO...' ? (formDescuento.proyectoManual || 'PROYECTO MANUAL') : formDescuento.proyecto;
 
     return `
     <div style="font-family: 'Aptos', Arial, sans-serif; font-size: 14px; color: #1e293b; max-width: 650px; line-height: 1.5; text-align: justify;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
       <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${titulo},</p>
-      <p style="margin-bottom: 20px;">Por favor le solicito mediante el presente correo, la aplicaci&oacute;n del descuento correspondiente a la campa&ntilde;a mes de ${mesActual} proyecto ${formDescuento.proyecto}: ${descuentoTexto} ${condicionTexto}:</p>
+      <p style="margin-bottom: 20px;">Por favor le solicito mediante el presente correo, la aplicaci&oacute;n del descuento correspondiente a la campa&ntilde;a mes de ${mesActual} proyecto ${nomProyecto}: ${descuentoTexto} ${condicionTexto}:</p>
 
       <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-family: 'Aptos', Arial, sans-serif; overflow: hidden; text-align: left;">
         <tr><td style="padding: 15px; border-bottom: 1px solid #e2e8f0; background-color: #f8fafc;">
@@ -667,7 +628,7 @@ export default function App() {
           </td></tr>
         <tr><td style="padding: 0 15px 15px 15px;">
              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
-                <tr><td style="padding: 14px; border-bottom: 1px dashed #e2e8f0; font-size: 13px; color: #475569;">Condici&oacute;n (${formDescuento.proyecto})</td>
+                <tr><td style="padding: 14px; border-bottom: 1px dashed #e2e8f0; font-size: 13px; color: #475569;">Condici&oacute;n (${nomProyecto})</td>
                    <td align="right" style="padding: 14px; border-bottom: 1px dashed #e2e8f0;"><span style="background-color: #fef3c7; color: #b45309; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-right: 12px;">${descuentoTexto || '0'}</span><strong style="font-size: 14px; color: #0f172a;">-$${formatCurrency(descuentoTotal)}</strong></td></tr>
                 <tr><td style="padding: 14px; border-bottom: 1px dashed #e2e8f0; font-size: 13px; color: #475569;">Total Valor Contrato (VC)</td>
                    <td align="right" style="padding: 14px; border-bottom: 1px dashed #e2e8f0; font-size: 14px; font-weight: bold; color: #0f172a;">$${formatCurrency(vc)}</td></tr>
@@ -684,6 +645,7 @@ export default function App() {
                 <tr><td colspan="2" style="padding: 0 20px 20px 20px;">
                       <div style="background-color: #1e293b; padding: 10px; border-radius: 6px; text-align: center; font-size: 11px; font-family: monospace; color: #94a3b8; letter-spacing: 1px;">
                          UV <strong style="color: #ffffff;">${formDescuento.uv || 'SN'}</strong> &nbsp;&bull;&nbsp; MZN <strong style="color: #ffffff;">${formDescuento.manzano || '-'}</strong> &nbsp;&bull;&nbsp; LT <strong style="color: #ffffff;">${formDescuento.lote || '-'}</strong>
+                         ${formDescuento.categoria ? `<br><span style="color: #38bdf8; display: inline-block; margin-top: 6px; font-weight: bold;">CATEGORÍA: ${formDescuento.categoria.toUpperCase()}</span>` : ''}
                       </div>
                    </td></tr>
              </table>
@@ -920,11 +882,6 @@ export default function App() {
             <TrendingUp className="w-5 h-5 mr-3" /> Inc. Cuota Inicial
           </button>
 
-          <div className="pt-5 pb-2"><p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Configuración</p></div>
-          <button onClick={() => setActiveTab('basedatos')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'basedatos' ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30 border border-emerald-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
-            <Database className="w-5 h-5 mr-3" /> Base de Lotes
-          </button>
-
         </nav>
         
         <div className="p-5 border-t border-slate-800/50 bg-slate-950/30">
@@ -953,86 +910,7 @@ export default function App() {
                   <div className="p-6 bg-gradient-to-br from-blue-50 to-white rounded-2xl border border-blue-100/50 shadow-sm flex flex-col items-center text-center transition-transform hover:-translate-y-1"><div className="p-3 bg-blue-100 rounded-xl mb-4"><FileText className="w-8 h-8 text-blue-600" /></div><h3 className="font-bold text-slate-800">Cero Errores</h3></div>
                   <div className="p-6 bg-gradient-to-br from-emerald-50 to-white rounded-2xl border border-emerald-100/50 shadow-sm flex flex-col items-center text-center transition-transform hover:-translate-y-1"><div className="p-3 bg-emerald-100 rounded-xl mb-4"><TrendingUp className="w-8 h-8 text-emerald-600" /></div><h3 className="font-bold text-slate-800">Más Rápido</h3></div>
                   <div className="p-6 bg-gradient-to-br from-amber-50 to-white rounded-2xl border border-amber-100/50 shadow-sm flex flex-col items-center text-center transition-transform hover:-translate-y-1"><div className="p-3 bg-amber-100 rounded-xl mb-4"><Calculator className="w-8 h-8 text-amber-600" /></div><h3 className="font-bold text-slate-800">Cálculos Exactos</h3></div>
-                  <div className="p-6 bg-gradient-to-br from-purple-50 to-white rounded-2xl border border-purple-100/50 shadow-sm flex flex-col items-center text-center transition-transform hover:-translate-y-1"><div className="p-3 bg-purple-100 rounded-xl mb-4"><Database className="w-8 h-8 text-purple-600" /></div><h3 className="font-bold text-slate-800">Autocompletado</h3></div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* FORM: BASE DE DATOS DE LOTES (NUEVA PESTAÑA) */}
-          {activeTab === 'basedatos' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="mb-6 flex justify-between items-end">
-                <div>
-                  <h2 className="text-2xl font-bold text-slate-800 flex items-center">
-                    <Database className="w-6 h-6 mr-2 text-emerald-600" /> Base de Datos de Lotes
-                  </h2>
-                  <p className="text-slate-500">Carga tu Excel aquí para autocompletar mágicamente las superficies y precios en tus cotizaciones.</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-8">
-                {/* Instrucciones */}
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                  <h3 className="font-bold text-slate-800 mb-4 flex items-center"><Info className="w-5 h-5 mr-2 text-blue-500"/> ¿Cómo cargar los datos?</h3>
-                  <div className="space-y-4 text-sm text-slate-600">
-                    <p><strong>Paso 1:</strong> En tu archivo Excel, asegúrate de tener <strong className="text-emerald-600">exactamente 6 columnas</strong> en este orden estricto:</p>
-                    <ol className="list-decimal pl-5 space-y-1 bg-slate-50 p-3 rounded-lg font-medium text-slate-700">
-                      <li>Proyecto (ej. Los Jardines)</li>
-                      <li>UV</li>
-                      <li>Manzano</li>
-                      <li>Lote</li>
-                      <li>Superficie M2</li>
-                      <li>Precio M2</li>
-                    </ol>
-                    <p><strong>Paso 2:</strong> Selecciona todas las filas de tus lotes en Excel y presiona <strong>Copiar</strong> (Ctrl + C).</p>
-                    <p><strong>Paso 3:</strong> Haz clic en el recuadro grande de la derecha y presiona <strong>Pegar</strong> (Ctrl + V).</p>
-                    <p><strong>Paso 4:</strong> Dale al botón "Guardar Base de Datos".</p>
-                    
-                    <div className="mt-6 pt-4 border-t border-slate-200">
-                      <p className="font-bold text-slate-800 mb-2 flex items-center">
-                        <Database className="w-4 h-4 mr-2 text-slate-500" /> Estado de tu Memoria:
-                      </p>
-                      <div className="bg-slate-100 p-4 rounded-lg text-center">
-                        <span className="text-3xl font-black text-emerald-600">{lotesBD.length}</span>
-                        <p className="text-xs text-slate-500 uppercase mt-1 font-bold">Lotes Guardados</p>
-                      </div>
-                      
-                      {lotesBD.length > 0 && (
-                        <button onClick={borrarBaseDatos} className="mt-4 w-full flex items-center justify-center py-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg text-sm font-medium transition-colors">
-                          <Trash2 className="w-4 h-4 mr-2" /> Borrar todo
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Área de pegado */}
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col">
-                  {mensajeBD.texto && (
-                    <div className={`mb-4 p-4 rounded-lg flex items-start ${mensajeBD.tipo === 'error' ? 'bg-red-50 border border-red-200 text-red-800' : 'bg-emerald-50 border border-emerald-200 text-emerald-800'}`}>
-                      {mensajeBD.tipo === 'error' ? <AlertTriangle className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" /> : <CheckCircle2 className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />}
-                      <p className="text-sm font-medium">{mensajeBD.texto}</p>
-                    </div>
-                  )}
-
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Pega aquí los datos copiados de Excel:</label>
-                  <textarea
-                    value={textoExcel}
-                    onChange={(e) => setTextoExcel(e.target.value)}
-                    placeholder="Ejemplo de lo que debes pegar:&#10;Los Jardines    1    10    5    300.5    45.00&#10;El Renacer    2    20    1    360.0    50.00"
-                    className="flex-1 w-full p-4 border-2 border-dashed border-slate-300 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-mono text-xs whitespace-pre overflow-auto bg-slate-50"
-                    style={{ minHeight: '300px' }}
-                  />
-                  
-                  <div className="mt-4 flex justify-end">
-                    <button
-                      onClick={procesarExcel}
-                      className="flex items-center py-3 px-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-colors shadow-md"
-                    >
-                      <Save className="w-5 h-5 mr-2" /> Guardar Base de Datos
-                    </button>
-                  </div>
+                  <div className="p-6 bg-gradient-to-br from-purple-50 to-white rounded-2xl border border-purple-100/50 shadow-sm flex flex-col items-center text-center transition-transform hover:-translate-y-1"><div className="p-3 bg-purple-100 rounded-xl mb-4"><Database className="w-8 h-8 text-purple-600" /></div><h3 className="font-bold text-slate-800">Conectado a BD</h3></div>
                 </div>
               </div>
             </div>
@@ -1188,6 +1066,7 @@ export default function App() {
           {/* FORM: DESCUENTO CAMPAÑAS */}
           {activeTab === 'descuento' && (() => {
             const { porcentajeCuota, montoCuotaNum } = calcularDescuento();
+            const nomProyectoFinal = formDescuento.proyecto === 'OTRO...' ? (formDescuento.proyectoManual || 'PROYECTO MANUAL') : formDescuento.proyecto;
             return (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="mb-6 flex justify-between items-end">
@@ -1197,7 +1076,8 @@ export default function App() {
                   <div className="bg-slate-200/60 p-1 rounded-full inline-flex">
                     <button 
                       onClick={() => setFormDescuento({...formDescuento, modoBusqueda: 'inteligente'})}
-                      className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center ${formDescuento.modoBusqueda === 'inteligente' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-500 hover:text-slate-700'}`}
+                      disabled={formDescuento.proyecto === 'OTRO...'}
+                      className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center ${formDescuento.modoBusqueda === 'inteligente' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-500 hover:text-slate-700'} disabled:opacity-40`}
                     >
                       <Search className="w-3.5 h-3.5 mr-1.5" /> Automático
                     </button>
@@ -1213,9 +1093,31 @@ export default function App() {
                 <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8">
                   <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div><label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Proyecto</label><select name="proyecto" value={formDescuento.proyecto} onChange={handleDescuentoChange} className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm">{PROYECTOS.map(p => <option key={p} value={p}>{p}</option>)}</select></div>
+                      <div><label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Proyecto</label><select name="proyecto" value={formDescuento.proyecto} onChange={handleDescuentoChange} className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm">{PROYECTOS.map(p => <option key={p} value={p}>{p.toUpperCase()}</option>)}</select></div>
                       <div><label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Modalidad</label><select name="modalidad" value={formDescuento.modalidad} onChange={handleDescuentoChange} className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm"><option value="Contado">Al Contado</option><option value="Crédito">A Crédito (Plazos)</option></select></div>
                     </div>
+
+                    {formDescuento.proyecto === 'OTRO...' && (
+                      <div className="mb-4 bg-amber-50/80 p-4 rounded-xl border border-amber-200 shadow-sm">
+                        <h4 className="font-bold text-amber-800 mb-3 text-sm flex items-center"><Edit3 className="w-4 h-4 mr-2" /> Proyecto Manual</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                           <div>
+                             <label className="block text-xs font-bold text-slate-700 mb-1.5 ml-0.5">Nombre del Proyecto</label>
+                             <input type="text" name="proyectoManual" value={formDescuento.proyectoManual} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-amber-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none bg-white text-sm" placeholder="Ej. Celina VII"/>
+                           </div>
+                           <div>
+                             <label className="block text-xs font-bold text-slate-700 mb-1.5 ml-0.5">Descuento a Aplicar</label>
+                             <div className="flex w-full gap-2">
+                               <select name="tipoDescuentoManual" value={formDescuento.tipoDescuentoManual} onChange={handleDescuentoChange} className="w-1/2 px-2 py-2.5 border border-amber-200 rounded-xl bg-white text-sm font-semibold focus:ring-2 focus:ring-amber-500 outline-none">
+                                  <option value="porcentaje">% Desc.</option>
+                                  <option value="monto">$ por m²</option>
+                               </select>
+                               <input type="number" name="descuentoManual" value={formDescuento.descuentoManual} onChange={handleDescuentoChange} className="w-1/2 px-3 py-2.5 border border-amber-200 rounded-xl bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm" placeholder="Ej. 10"/>
+                             </div>
+                           </div>
+                        </div>
+                      </div>
+                    )}
 
                     {formDescuento.modalidad === 'Crédito' && (
                       <div className="mb-6 bg-blue-50/50 p-4 rounded-xl border border-blue-100/50">
@@ -1249,7 +1151,7 @@ export default function App() {
                     )}
                     
                     {/* MENÚS CASCADA O MANUAL */}
-                    {formDescuento.modoBusqueda === 'inteligente' ? (
+                    {formDescuento.modoBusqueda === 'inteligente' && formDescuento.proyecto !== 'OTRO...' ? (
                       <div className="mb-6 p-4 bg-slate-50 border border-slate-100 rounded-xl">
                         <div className="grid grid-cols-3 gap-4">
                           <div>
@@ -1274,11 +1176,16 @@ export default function App() {
                             </select>
                           </div>
                         </div>
-                        {lotesBD.length === 0 && (
+                        {lotesBD.length === 0 && !cargandoLotes ? (
                           <p className="text-xs text-amber-600 mt-3 flex items-center">
-                            <AlertTriangle className="w-4 h-4 mr-1" /> Tu base de datos está vacía. Carga tu Excel en "Base de Lotes".
+                            <AlertTriangle className="w-4 h-4 mr-1" /> Cargando base de datos o archivo lotes.json no encontrado.
                           </p>
-                        )}
+                        ) : null}
+                        {cargandoLotes ? (
+                          <p className="text-xs text-slate-500 mt-3 flex items-center">
+                             Cargando base de datos segura...
+                          </p>
+                        ) : null}
                       </div>
                     ) : (
                       <div className="grid grid-cols-3 gap-4 mb-2">
@@ -1287,6 +1194,18 @@ export default function App() {
                         <Input label="Lote" name="lote" value={formDescuento.lote} onChange={handleDescuentoChange} />
                       </div>
                     )}
+
+                    {/* ETIQUETA DE CATEGORÍA (ESTILO DARK) */}
+                    {formDescuento.modoBusqueda === 'inteligente' && formDescuento.categoria ? (
+                      <div className="bg-slate-900 border border-slate-800 text-white p-3.5 rounded-xl text-xs font-bold mb-5 flex items-center shadow-md uppercase tracking-wider">
+                        <Tag className="w-4 h-4 mr-2.5 text-cyan-400" />
+                        <span className="text-slate-400 mr-1.5 font-semibold">Categoría:</span> {formDescuento.categoria}
+                      </div>
+                    ) : formDescuento.modoBusqueda === 'manual' ? (
+                      <div className="mb-4">
+                         <Input label="Categoría (Opcional)" name="categoria" value={formDescuento.categoria} onChange={handleDescuentoChange} placeholder="Ej. AVENIDA PRINCIPAL CON PAVIMENTO" />
+                      </div>
+                    ) : null}
 
                     {loteAutocompletado && formDescuento.modoBusqueda === 'inteligente' && (
                       <div className="bg-emerald-50/80 border border-emerald-200 text-emerald-700 p-2.5 rounded-xl text-xs font-bold mb-5 flex items-center shadow-sm">
@@ -1301,7 +1220,7 @@ export default function App() {
                     
                     <div className="border-t border-slate-100 pt-5 mt-2"><Input label="Nombre del Asesor" name="asesor" value={formDescuento.asesor} onChange={handleDescuentoChange} /></div>
                   </div>
-                  <div><ResultCard title="Descuento" text={generarTextoDescuento()} htmlContent={generarHtmlDescuento()} subject={`Solicitud Descuento Campañas - ${formDescuento.proyecto} Mz${formDescuento.manzano} Lt${formDescuento.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
+                  <div><ResultCard title="Descuento" text={generarTextoDescuento()} htmlContent={generarHtmlDescuento()} subject={`Solicitud Descuento Campañas - ${nomProyectoFinal} Mz${formDescuento.manzano} Lt${formDescuento.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
                 </div>
               </div>
             );
