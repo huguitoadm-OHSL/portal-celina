@@ -18,7 +18,9 @@ import {
   BarChart,
   Database,
   Save,
-  AlertTriangle
+  AlertTriangle,
+  Search,
+  Edit3
 } from 'lucide-react';
 
 // --- CONFIGURACIÓN DE DATOS MOCK ---
@@ -200,8 +202,8 @@ const cargarLotesGuardados = () => {
 
 // --- COMPONENTES UI ---
 const Input = ({ label, name, value, onChange, placeholder, type = "text", required = false }) => (
-  <div className="mb-4">
-    <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
+  <div className="mb-5">
+    <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">{label}</label>
     <input
       type={type}
       name={name}
@@ -209,21 +211,21 @@ const Input = ({ label, name, value, onChange, placeholder, type = "text", requi
       onChange={onChange}
       placeholder={placeholder}
       required={required}
-      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white"
+      className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 placeholder-slate-400 shadow-sm"
     />
   </div>
 );
 
 const TextArea = ({ label, name, value, onChange, placeholder }) => (
-  <div className="mb-4">
-    <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
+  <div className="mb-5">
+    <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">{label}</label>
     <textarea
       name={name}
       value={value}
       onChange={onChange}
       placeholder={placeholder}
       rows="4"
-      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white"
+      className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 placeholder-slate-400 shadow-sm resize-none"
     />
   </div>
 );
@@ -277,18 +279,18 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
   };
 
   return (
-    <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 sticky top-6 shadow-sm">
-      <h3 className="text-lg font-semibold text-slate-800 mb-3 flex items-center">
-        <CheckCircle2 className="w-5 h-5 text-emerald-500 mr-2" />
+    <div className="bg-white/90 backdrop-blur-xl border border-slate-200/80 rounded-2xl p-6 sticky top-8 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+      <h3 className="text-xl font-extrabold text-slate-800 mb-4 flex items-center tracking-tight">
+        <CheckCircle2 className="w-6 h-6 text-emerald-500 mr-2" />
         Vista Previa del Correo
       </h3>
 
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-slate-700 mb-1">Enviar consolidado a:</label>
+      <div className="mb-5">
+        <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Enviar consolidado a:</label>
         <select 
           value={supervisorDestino}
           onChange={(e) => setSupervisorDestino(e.target.value)}
-          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white text-sm shadow-sm font-medium"
+          className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 text-slate-800 font-semibold shadow-sm cursor-pointer"
         >
           {SUPERVISORES.map(s => (
             <option key={s.id} value={s.correo}>{s.nombre} ({s.correo})</option>
@@ -297,37 +299,37 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
       </div>
 
       {htmlContent && (
-        <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg flex gap-3 items-start">
-          <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-blue-800">
-            <strong>Recomendado:</strong> Usa <b>"Copiar Formato Correo"</b> y pégalo directamente en tu gestor de correo para enviar la tabla con su diseño profesional y alineación justificada.
+        <div className="mb-4 p-3.5 bg-indigo-50/50 border border-indigo-100 rounded-xl flex gap-3 items-start shadow-sm">
+          <Info className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-indigo-800 leading-relaxed">
+            <strong>Recomendado:</strong> Usa <b>"Copiar Formato Correo"</b> y pégalo directamente en tu gestor de correo para enviar la tabla con su dise&ntilde;o profesional y alineaci&oacute;n justificada.
           </p>
         </div>
       )}
 
-      <div className="bg-white p-4 rounded-lg border border-slate-200 mb-4 h-96 overflow-y-auto shadow-inner">
+      <div className="bg-[#f8fafc] p-5 rounded-xl border border-slate-200 mb-5 h-[22rem] overflow-y-auto shadow-inner">
         {htmlContent ? (
           <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
         ) : (
-          <div className="font-mono text-sm text-slate-700 whitespace-pre-wrap">{text}</div>
+          <div className="font-mono text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{text}</div>
         )}
       </div>
       
       <div className="flex gap-3">
         <button
           onClick={handleCopy}
-          className="flex-1 flex items-center justify-center py-2.5 px-4 bg-white border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-bold transition-colors shadow-sm"
+          className="flex-1 flex items-center justify-center py-3 px-4 bg-white border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 hover:border-slate-300 font-bold transition-all shadow-sm"
         >
-          {copied ? <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-500" /> : <Copy className="w-4 h-4 mr-2" />}
-          {copied ? '¡Copiado!' : (htmlContent ? 'Copiar Formato Correo' : 'Copiar Texto')}
+          {copied ? <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-500" /> : <Copy className="w-4 h-4 mr-2 text-slate-400" />}
+          {copied ? '¡Copiado!' : (htmlContent ? 'Copiar Formato' : 'Copiar Texto')}
         </button>
         {showTextPlain && (
           <button
             onClick={handleSendEmail}
-            className="flex-1 flex items-center justify-center py-2.5 px-4 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-medium transition-colors shadow-sm"
+            className="flex-1 flex items-center justify-center py-3 px-4 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-900 hover:to-black text-white rounded-xl font-bold transition-all shadow-md shadow-slate-900/20"
           >
             <Mail className="w-4 h-4 mr-2" />
-            Texto Plano (Básico)
+            Texto Plano
           </button>
         )}
       </div>
@@ -353,6 +355,7 @@ export default function App() {
     proyecto: 'Los Jardines', uv: '', manzano: '', lote: '', 
     modalidad: 'Crédito', 
     cuota: '', modoCuota: 'monto',
+    modoBusqueda: lotesBD.length > 0 ? 'inteligente' : 'manual', // Nuevo estado para alternar Búsqueda
     m2: '', precioM2: '', asesor: ''
   });
 
@@ -425,6 +428,7 @@ export default function App() {
           tipo: 'success', 
           texto: `¡Éxito! Se han guardado ${nuevosLotes.length} lotes en la memoria. Ya puedes hacer cotizaciones. (Líneas ignoradas: ${lineasIgnoradas})` 
         });
+        setFormDescuento(prev => ({...prev, modoBusqueda: 'inteligente'})); // Activar inteligente al cargar
       } catch (err) {
          setMensajeBD({ tipo: 'error', texto: 'La cantidad de datos superó la memoria permitida. Intenta copiar menos filas (ej. de 5000 en 5000).' });
       }
@@ -437,9 +441,15 @@ export default function App() {
     if (window.confirm("¿Estás seguro de borrar todos los lotes de la memoria de tu navegador?")) {
       localStorage.removeItem('celina_bd_lotes_oficial');
       setLotesBD([]);
+      setFormDescuento(prev => ({...prev, modoBusqueda: 'manual'}));
       setMensajeBD({ tipo: 'success', texto: 'La base de datos ha sido borrada.' });
     }
   };
+
+  // --- OBTENER OPCIONES CASCADA (BÚSQUEDA INTELIGENTE) ---
+  const opcionesUV = [...new Set(lotesBD.filter(l => l.proyecto.toLowerCase() === formDescuento.proyecto.toLowerCase()).map(l => l.uv))].sort((a,b) => a.localeCompare(b, undefined, {numeric: true}));
+  const opcionesMZN = [...new Set(lotesBD.filter(l => l.proyecto.toLowerCase() === formDescuento.proyecto.toLowerCase() && l.uv.toLowerCase() === formDescuento.uv.toLowerCase()).map(l => l.manzano))].sort((a,b) => a.localeCompare(b, undefined, {numeric: true}));
+  const opcionesLote = [...new Set(lotesBD.filter(l => l.proyecto.toLowerCase() === formDescuento.proyecto.toLowerCase() && l.uv.toLowerCase() === formDescuento.uv.toLowerCase() && l.manzano.toLowerCase() === formDescuento.manzano.toLowerCase()).map(l => l.lote))].sort((a,b) => a.localeCompare(b, undefined, {numeric: true}));
 
   // --- EFECTO DE AUTOCOMPLETADO DE LOTES ---
   useEffect(() => {
@@ -475,7 +485,6 @@ export default function App() {
 
   // --- HANDLERS COMUNES ---
   const handleFisicoChange = (e) => setFormFisico({ ...formFisico, [e.target.name]: e.target.value });
-  const handleDescuentoChange = (e) => setFormDescuento({ ...formDescuento, [e.target.name]: e.target.value });
   const handleCuotaChange = (e) => setFormCuota({ ...formCuota, [e.target.name]: e.target.value });
   const handleReenvioChange = (index, field, value) => {
     const nuevosContratos = [...formReenvio.contratos];
@@ -487,6 +496,26 @@ export default function App() {
     if (formReenvio.contratos.length > 1) {
       setFormReenvio({ ...formReenvio, contratos: formReenvio.contratos.filter((_, i) => i !== index) });
     }
+  };
+
+  // MANEJADOR ESPECIAL PARA DESCUENTOS (LIMPIA CASCADAS EN MODO INTELIGENTE)
+  const handleDescuentoChange = (e) => {
+    const { name, value } = e.target;
+    setFormDescuento(prev => {
+      const newState = { ...prev, [name]: value };
+      
+      // Si estamos en búsqueda inteligente, debemos limpiar los campos hijos cuando un padre cambia
+      if (prev.modoBusqueda === 'inteligente') {
+        if (name === 'proyecto') {
+          newState.uv = ''; newState.manzano = ''; newState.lote = ''; newState.m2 = ''; newState.precioM2 = '';
+        } else if (name === 'uv') {
+          newState.manzano = ''; newState.lote = ''; newState.m2 = ''; newState.precioM2 = '';
+        } else if (name === 'manzano') {
+          newState.lote = ''; newState.m2 = ''; newState.precioM2 = '';
+        }
+      }
+      return newState;
+    });
   };
 
   const handleEquipoChange = (e) => {
@@ -1161,22 +1190,42 @@ export default function App() {
             const { porcentajeCuota, montoCuotaNum } = calcularDescuento();
             return (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><Tag className="w-6 h-6 mr-2 text-blue-600" /> Descuentos Campañas</h2></div>
+                <div className="mb-6 flex justify-between items-end">
+                  <h2 className="text-2xl font-bold text-slate-800 flex items-center"><Tag className="w-6 h-6 mr-2 text-blue-600" /> Descuentos Campañas</h2>
+                  
+                  {/* BOTÓN TOGGLE BÚSQUEDA INTELIGENTE / MANUAL */}
+                  <div className="bg-slate-200/60 p-1 rounded-full inline-flex">
+                    <button 
+                      onClick={() => setFormDescuento({...formDescuento, modoBusqueda: 'inteligente'})}
+                      className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center ${formDescuento.modoBusqueda === 'inteligente' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-500 hover:text-slate-700'}`}
+                    >
+                      <Search className="w-3.5 h-3.5 mr-1.5" /> Automático
+                    </button>
+                    <button 
+                      onClick={() => setFormDescuento({...formDescuento, modoBusqueda: 'manual'})}
+                      className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center ${formDescuento.modoBusqueda === 'manual' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+                    >
+                      <Edit3 className="w-3.5 h-3.5 mr-1.5" /> Manual
+                    </button>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8">
                   <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div><label className="block text-sm font-medium text-slate-700 mb-1">Proyecto</label><select name="proyecto" value={formDescuento.proyecto} onChange={handleDescuentoChange} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-white">{PROYECTOS.map(p => <option key={p} value={p}>{p}</option>)}</select></div>
-                      <div><label className="block text-sm font-medium text-slate-700 mb-1">Modalidad</label><select name="modalidad" value={formDescuento.modalidad} onChange={handleDescuentoChange} className="w-full px-3 py-2 border rounded-lg bg-white"><option value="Contado">Al Contado</option><option value="Crédito">A Crédito (Plazos)</option></select></div>
+                      <div><label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Proyecto</label><select name="proyecto" value={formDescuento.proyecto} onChange={handleDescuentoChange} className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm">{PROYECTOS.map(p => <option key={p} value={p}>{p}</option>)}</select></div>
+                      <div><label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Modalidad</label><select name="modalidad" value={formDescuento.modalidad} onChange={handleDescuentoChange} className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm"><option value="Contado">Al Contado</option><option value="Crédito">A Crédito (Plazos)</option></select></div>
                     </div>
+
                     {formDescuento.modalidad === 'Crédito' && (
-                      <div className="mb-4 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                      <div className="mb-6 bg-blue-50/50 p-4 rounded-xl border border-blue-100/50">
                         <div className="flex flex-col w-full">
-                          <label className="block text-sm font-medium text-slate-700 mb-1">Ingresar Cuota Inicial</label>
+                          <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Ingresar Cuota Inicial</label>
                           <div className="flex w-full gap-2">
                             <select 
                               value={formDescuento.modoCuota} 
                               onChange={(e) => setFormDescuento({...formDescuento, modoCuota: e.target.value, cuota: ''})}
-                              className="w-1/3 px-3 py-2 border rounded-lg bg-slate-50 text-slate-700 font-semibold focus:ring-2 focus:ring-blue-500 outline-none"
+                              className="w-1/3 px-3 py-2.5 border border-blue-200 rounded-xl bg-white text-slate-700 font-semibold focus:ring-2 focus:ring-blue-500 outline-none"
                             >
                               <option value="monto">Monto ($)</option>
                               <option value="porcentaje">Porcentaje (%)</option>
@@ -1187,9 +1236,9 @@ export default function App() {
                               value={formDescuento.cuota} 
                               onChange={handleDescuentoChange} 
                               placeholder={formDescuento.modoCuota === 'monto' ? "Ej. 1000" : "Ej. 5"}
-                              className="w-1/3 px-3 py-2 border rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none" 
+                              className="w-1/3 px-4 py-2.5 border border-blue-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 outline-none shadow-inner" 
                             />
-                            <div className="w-1/3 flex items-center justify-center bg-blue-200 text-blue-800 rounded-lg font-bold text-sm shadow-sm transition-all">
+                            <div className="w-1/3 flex items-center justify-center bg-blue-600 text-white rounded-xl font-bold text-sm shadow-sm transition-all">
                               {formDescuento.modoCuota === 'monto' 
                                 ? `${formatCurrency(porcentajeCuota)}%` 
                                 : `$ ${formatCurrency(montoCuotaNum)}`}
@@ -1199,15 +1248,49 @@ export default function App() {
                       </div>
                     )}
                     
-                    <div className="grid grid-cols-3 gap-4 mb-4">
-                      <Input label="UV" name="uv" value={formDescuento.uv} onChange={handleDescuentoChange} />
-                      <Input label="Manzano" name="manzano" value={formDescuento.manzano} onChange={handleDescuentoChange} />
-                      <Input label="Lote" name="lote" value={formDescuento.lote} onChange={handleDescuentoChange} />
-                    </div>
+                    {/* MENÚS CASCADA O MANUAL */}
+                    {formDescuento.modoBusqueda === 'inteligente' ? (
+                      <div className="mb-6 p-4 bg-slate-50 border border-slate-100 rounded-xl">
+                        <div className="grid grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold text-emerald-700 mb-1.5 ml-0.5 uppercase tracking-wide">Elegir UV</label>
+                            <select name="uv" value={formDescuento.uv} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 font-semibold cursor-pointer">
+                              <option value="">---</option>
+                              {opcionesUV.map(u => <option key={u} value={u}>{u}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-emerald-700 mb-1.5 ml-0.5 uppercase tracking-wide">Elegir MZN</label>
+                            <select name="manzano" value={formDescuento.manzano} onChange={handleDescuentoChange} disabled={!formDescuento.uv} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 font-semibold cursor-pointer disabled:opacity-50 disabled:bg-slate-100">
+                              <option value="">---</option>
+                              {opcionesMZN.map(m => <option key={m} value={m}>{m}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-emerald-700 mb-1.5 ml-0.5 uppercase tracking-wide">Elegir Lote</label>
+                            <select name="lote" value={formDescuento.lote} onChange={handleDescuentoChange} disabled={!formDescuento.manzano} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 font-semibold cursor-pointer disabled:opacity-50 disabled:bg-slate-100">
+                              <option value="">---</option>
+                              {opcionesLote.map(lt => <option key={lt} value={lt}>{lt}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                        {lotesBD.length === 0 && (
+                          <p className="text-xs text-amber-600 mt-3 flex items-center">
+                            <AlertTriangle className="w-4 h-4 mr-1" /> Tu base de datos está vacía. Carga tu Excel en "Base de Lotes".
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-4 mb-2">
+                        <Input label="UV" name="uv" value={formDescuento.uv} onChange={handleDescuentoChange} />
+                        <Input label="Manzano" name="manzano" value={formDescuento.manzano} onChange={handleDescuentoChange} />
+                        <Input label="Lote" name="lote" value={formDescuento.lote} onChange={handleDescuentoChange} />
+                      </div>
+                    )}
 
-                    {loteAutocompletado && (
-                      <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 p-2 rounded-lg text-xs font-medium mb-4 flex items-center">
-                        <Database className="w-4 h-4 mr-2" /> Datos autocompletados desde la base de datos
+                    {loteAutocompletado && formDescuento.modoBusqueda === 'inteligente' && (
+                      <div className="bg-emerald-50/80 border border-emerald-200 text-emerald-700 p-2.5 rounded-xl text-xs font-bold mb-5 flex items-center shadow-sm">
+                        <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-500" /> Superficie y Precio autocompletados desde tu Excel
                       </div>
                     )}
 
@@ -1216,7 +1299,7 @@ export default function App() {
                       <Input label="Precio Reg. (M2)" name="precioM2" value={formDescuento.precioM2} onChange={handleDescuentoChange} type="number" />
                     </div>
                     
-                    <div className="border-t border-slate-100 pt-4 mt-2"><Input label="Nombre del Asesor" name="asesor" value={formDescuento.asesor} onChange={handleDescuentoChange} /></div>
+                    <div className="border-t border-slate-100 pt-5 mt-2"><Input label="Nombre del Asesor" name="asesor" value={formDescuento.asesor} onChange={handleDescuentoChange} /></div>
                   </div>
                   <div><ResultCard title="Descuento" text={generarTextoDescuento()} htmlContent={generarHtmlDescuento()} subject={`Solicitud Descuento Campañas - ${formDescuento.proyecto} Mz${formDescuento.manzano} Lt${formDescuento.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
                 </div>
@@ -1235,7 +1318,10 @@ export default function App() {
                     <Input label="Carnet (CI)" name="ci" value={formCuota.ci} onChange={handleCuotaChange} />
                   </div>
                   <Input label="Nombre del Cliente" name="cliente" value={formCuota.cliente} onChange={handleCuotaChange} />
-                  <div className="mb-4"><label className="block text-sm font-medium text-slate-700 mb-1">Proyecto</label><select name="proyecto" value={formCuota.proyecto} onChange={handleCuotaChange} className="w-full px-3 py-2 border rounded-lg bg-white">{PROYECTOS.map(p => <option key={p} value={p}>{p}</option>)}</select></div>
+                  <div className="mb-5">
+                    <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Proyecto</label>
+                    <select name="proyecto" value={formCuota.proyecto} onChange={handleCuotaChange} className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm">{PROYECTOS.map(p => <option key={p} value={p}>{p}</option>)}</select>
+                  </div>
                   <div className="grid grid-cols-3 gap-4">
                     <Input label="UV" name="uv" value={formCuota.uv} onChange={handleCuotaChange} />
                     <Input label="Manzano" name="manzano" value={formCuota.manzano} onChange={handleCuotaChange} />
@@ -1246,7 +1332,7 @@ export default function App() {
                     <Input label="Nueva Cuota ($)" name="nuevaCuota" value={formCuota.nuevaCuota} onChange={handleCuotaChange} type="number" />
                   </div>
                   <TextArea label="Motivo del incremento" name="motivo" value={formCuota.motivo} onChange={handleCuotaChange} />
-                  <div className="border-t border-slate-100 pt-4 mt-2"><Input label="Nombre del Asesor" name="asesorVentas" value={formCuota.asesorVentas} onChange={handleCuotaChange} /></div>
+                  <div className="border-t border-slate-100 pt-5 mt-2"><Input label="Nombre del Asesor" name="asesorVentas" value={formCuota.asesorVentas} onChange={handleCuotaChange} /></div>
                 </div>
                 <div><ResultCard title="Incremento Cuota" text={generarTextoCuota()} htmlContent={generarHtmlCuota()} subject={`Incremento Cuota Inicial - ${formCuota.proyecto} Mz${formCuota.manzano} Lt${formCuota.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
               </div>
