@@ -36,23 +36,27 @@ const SUPERVISORES = [
   { id: 'jjsenseve', nombre: 'Jorge Justiniano Senseve', correo: 'jjsenseve@celina.com.bo', genero: 'M', titulo: 'Lic. Jorge' },
   { id: 'ropaz', nombre: 'Roberto Paz Paz', correo: 'ropaz@celina.com.bo', genero: 'M', titulo: 'Lic. Roberto' },
   { id: 'rvalverded', nombre: 'Rene Valverde Duran', correo: 'rvalverded@celina.com.bo', genero: 'M', titulo: 'Lic. Rene' },
-  { id: 'cbaldiviezo', nombre: 'Cristhiand Baldiviezo Balcazar', correo: 'cbaldiviezo@celina.com.bo', genero: 'M', titulo: 'Lic. Cristhiand' }
+  { id: 'cbaldiviezo', nombre: 'Cristhiand Baldiviezo Balcazar', correo: 'cbaldiviezo@celina.com.bo', genero: 'M', titulo: 'Lic. Cristhiand' },
+  { id: 'rvaca', nombre: 'Robert Vaca', correo: 'rvaca@grupopaz.com.bo', genero: 'M', titulo: 'Lic. Robert' },
+  { id: 'lbakovic', nombre: 'Lucio Bakovic', correo: 'lbakovic@grupopaz.com.bo', genero: 'M', titulo: 'Lic. Lucio' },
+  { id: 'vchoque', nombre: 'Verenice Choque', correo: 'vchoque@celina.com.bo', genero: 'F', titulo: 'Lic. Verenice' },
+  { id: 'gcuenca', nombre: 'Gabriel Cuenca', correo: 'gcuenca@celina.com.bo', genero: 'M', titulo: 'Lic. Gabriel' },
+  { id: 'ohsaravia', nombre: 'Oscar Hugo Saravia L.', correo: 'ohsaravia@celina.com.bo', genero: 'M', titulo: 'Lic. Oscar' }
 ];
 
 // --- EQUIPOS DE ASESORES POR SUPERVISOR ---
 const EQUIPOS_ASESORES = {
   "Oscar Saravia": [
-    { nombre: "Carlos Enrique Calderon", colAct: 13829.20 },
-    { nombre: "Daniel Angulo Maldonado", colAct: 0 },
-    { nombre: "Ely Gonzales Garcia", colAct: 0 },
-    { nombre: "Gloriana Silva Almenda", colAct: 6600.00 },
-    { nombre: "Jaime F. Rios Castro", colAct: 0 },
-    { nombre: "Leonardo Gonzales", colAct: 0 },
+    { nombre: "Marisol Urgel", colAct: 42024 },
+    { nombre: "Carlos Enrique Calderon", colAct: 13829 },
+    { nombre: "Gloriana Silva", colAct: 13200 },
+    { nombre: "Ely Gonzales", colAct: 0 },
+    { nombre: "Jaime Fabricio Rios", colAct: 0 },
+    { nombre: "Leonardo Santiago Gonzales", colAct: 0 },
     { nombre: "Marioly Viñolas", colAct: 0 },
-    { nombre: "Marisol Urgel Pizarro", colAct: 24312.00 },
-    { nombre: "Merly Mendez Hurtado", colAct: 0 },
+    { nombre: "Merly Mendez", colAct: 0 },
     { nombre: "Nataly Heredia", colAct: 0 },
-    { nombre: "Rodrigo Rojas Siles", colAct: 0 }
+    { nombre: "Rodrigo Rojas", colAct: 0 }
   ],
   "Ana Karen Parada Vaca": [
     { nombre: "Maria Julieta Ortuste", colAct: 106980 },
@@ -89,10 +93,10 @@ const EQUIPOS_ASESORES = {
   ],
   "Cristhiand Baldiviezo Balcazar": [
     { nombre: "Miguel Rene Rivero", colAct: 17712 },
+    { nombre: "Sheila Rubi Sheidl", colAct: 16500 },
     { nombre: "Gabriela Vidal", colAct: 10850 },
     { nombre: "Daniel Mauricio Chipunavi", colAct: 7700 },
     { nombre: "Jimena Mayta", colAct: 7500 },
-    { nombre: "Sheila Rubi Sheidl", colAct: 6600 },
     { nombre: "Nahely Gonzales", colAct: 6400 },
     { nombre: "Lider Cabral", colAct: 5750 },
     { nombre: "Ana Karla Castro", colAct: 0 },
@@ -102,18 +106,18 @@ const EQUIPOS_ASESORES = {
     { nombre: "Wilson Saucedo", colAct: 0 }
   ],
   "Fernando Jose Almanza Urquiza": [
+    { nombre: "Laura Ximena Vallejos", colAct: 30240 },
     { nombre: "Karina Mercedes Molina", colAct: 22409 },
     { nombre: "Diana Perez", colAct: 13709 },
     { nombre: "Hilda Mendoza", colAct: 10368 },
     { nombre: "Blanca Merving Cuellar", colAct: 0 },
-    { nombre: "Laura Ximena Vallejos", colAct: 0 },
     { nombre: "Renata Veronica Guzman", colAct: 0 }
   ],
   "Jorge Justiniano Senseve": [
     { nombre: "Marvin Negrette", colAct: 36770 },
     { nombre: "Juan Pablo Vaca", colAct: 30841 },
+    { nombre: "Lino Flores", colAct: 19600 },
     { nombre: "Freddy Fernando Delgadillo", colAct: 15550 },
-    { nombre: "Lino Flores", colAct: 10150 },
     { nombre: "Carlos Alberto Chavez", colAct: 7800 },
     { nombre: "German Suarez", colAct: 6000 },
     { nombre: "Alejandra Montero", colAct: 0 },
@@ -127,11 +131,11 @@ const EQUIPOS_ASESORES = {
   ],
   "Rene Valverde Duran": [
     { nombre: "Luis Enrique Choque", colAct: 221883 },
-    { nombre: "Rodrigo Lara", colAct: 34080 },
-    { nombre: "Rosa Maria Hurtado", colAct: 16945 },
+    { nombre: "Rodrigo Lara", colAct: 53061 },
+    { nombre: "Rosa Maria Hurtado", colAct: 25345 },
     { nombre: "Katherine Albitre", colAct: 12600 },
+    { nombre: "Andrea Garcia", colAct: 8250 },
     { nombre: "Ghigliola Moreno", colAct: 7200 },
-    { nombre: "Andrea Garcia", colAct: 0 },
     { nombre: "Carlos Rodas", colAct: 0 },
     { nombre: "Cristian Erick Rocha", colAct: 0 },
     { nombre: "Rodrigo Roca", colAct: 0 },
@@ -146,6 +150,7 @@ const EQUIPOS_ASESORES = {
     { nombre: "Anahi Velasco", colAct: 0 },
     { nombre: "Freimi Maely Subirana", colAct: 0 },
     { nombre: "Heydy Laura Gutierrez", colAct: 0 },
+    { nombre: "Madeline Carballo", colAct: 0 },
     { nombre: "Maria Sendy Quispe", colAct: 0 },
     { nombre: "Mariel Becerra", colAct: 0 },
     { nombre: "Samuel Rivero", colAct: 0 }
@@ -371,13 +376,39 @@ export default function App() {
   useEffect(() => {
     const fetchLotes = async () => {
       try {
-        // Se usa ruta relativa para evitar errores de parseo en entornos de previsualización (iframes, blob URLs)
         const response = await fetch('./lotes.json');
         if (response.ok) {
           const data = await response.json();
           if (Array.isArray(data)) {
-            setLotesBD(data);
-            if (data.length > 0) {
+            // NORMALIZACIÓN MÁGICA: Adaptamos las llaves del JSON a lo que la app espera, 
+            // sin importar si vienen en mayúsculas, minúsculas o con otros nombres.
+            const lotesLimpios = data.map(item => {
+              // 1. Limpiar nombre del proyecto
+              const rawProy = String(item.proyecto || item.PROYECTO || '').toUpperCase();
+              let proyLimpio = rawProy;
+              if (rawProy.includes("RENACER")) proyLimpio = "El Renacer";
+              else if (rawProy.includes("JARDINES")) proyLimpio = "Los Jardines";
+              else if (rawProy.includes("MUYURINA")) proyLimpio = "Muyurina";
+              else if (rawProy.includes("SANTA FE")) proyLimpio = "Santa Fe";
+              else if (rawProy.includes("CAÑAVERAL") || rawProy.includes("CANAVERAL")) proyLimpio = "Cañaveral";
+
+              // 2. Limpiar números (cambiar coma por punto y convertir a número decimal)
+              const rawM2 = String(item.superficie || item.SUPERFICIE || item.m2 || '0').replace(/[^0-9.,]/g, '').replace(',', '.');
+              const rawPrecio = String(item.precio || item.PRECIO || item.precioM2 || '0').replace(/[^0-9.,]/g, '').replace(',', '.');
+
+              return {
+                proyecto: proyLimpio,
+                uv: String(item.uv || item.UV || ''),
+                manzano: String(item.mzn || item.MZN || item.manzano || item.MANZANO || ''),
+                lote: String(item.lote || item.LOTE || ''),
+                m2: parseFloat(rawM2) || 0,
+                precioM2: parseFloat(rawPrecio) || 0,
+                categoria: String(item.categoria || item.CATEGORIA || '')
+              };
+            }).filter(l => l.proyecto !== '' && l.uv !== '' && l.manzano !== '' && l.lote !== '');
+
+            setLotesBD(lotesLimpios);
+            if (lotesLimpios.length > 0) {
               setFormDescuento(prev => ({...prev, modoBusqueda: 'inteligente'}));
             }
           }
@@ -385,7 +416,6 @@ export default function App() {
           console.warn("Aviso: El archivo lotes.json no fue encontrado.");
         }
       } catch (error) {
-        // Se silencia el log del objeto completo para prevenir crashes de React en entornos restrictivos
         console.warn("Aviso: Fallo al cargar lotes.json. El modo manual será el predeterminado.");
       } finally {
         setCargandoLotes(false);
@@ -394,33 +424,50 @@ export default function App() {
     fetchLotes();
   }, []);
 
-  // --- OBTENER OPCIONES CASCADA (BÚSQUEDA INTELIGENTE) ---
-  const opcionesUV = [...new Set(lotesBD.filter(l => l.proyecto.toLowerCase() === formDescuento.proyecto.toLowerCase()).map(l => l.uv))].sort((a,b) => a.toString().localeCompare(b.toString(), undefined, {numeric: true}));
-  const opcionesMZN = [...new Set(lotesBD.filter(l => l.proyecto.toLowerCase() === formDescuento.proyecto.toLowerCase() && l.uv.toString().toLowerCase() === formDescuento.uv.toString().toLowerCase()).map(l => l.manzano))].sort((a,b) => a.toString().localeCompare(b.toString(), undefined, {numeric: true}));
-  const opcionesLote = [...new Set(lotesBD.filter(l => l.proyecto.toLowerCase() === formDescuento.proyecto.toLowerCase() && l.uv.toString().toLowerCase() === formDescuento.uv.toString().toLowerCase() && l.manzano.toString().toLowerCase() === formDescuento.manzano.toString().toLowerCase()).map(l => l.lote))].sort((a,b) => a.toString().localeCompare(b.toString(), undefined, {numeric: true}));
+  // --- OBTENER OPCIONES CASCADA (BÚSQUEDA INTELIGENTE) CON PROTECCIÓN DE ERRORES ---
+  const safeToLower = (val) => (val === null || val === undefined) ? '' : String(val).toLowerCase();
+  
+  const pL_filtro = safeToLower(formDescuento.proyecto);
+  const uL_filtro = safeToLower(formDescuento.uv);
+  const mL_filtro = safeToLower(formDescuento.manzano);
+
+  const opcionesUV = [...new Set(lotesBD
+    .filter(l => safeToLower(l.proyecto) === pL_filtro)
+    .map(l => l.uv)
+  )].filter(val => val !== null && val !== undefined && val !== '').sort((a,b) => String(a).localeCompare(String(b), undefined, {numeric: true}));
+
+  const opcionesMZN = [...new Set(lotesBD
+    .filter(l => safeToLower(l.proyecto) === pL_filtro && safeToLower(l.uv) === uL_filtro)
+    .map(l => l.manzano)
+  )].filter(val => val !== null && val !== undefined && val !== '').sort((a,b) => String(a).localeCompare(String(b), undefined, {numeric: true}));
+
+  const opcionesLote = [...new Set(lotesBD
+    .filter(l => safeToLower(l.proyecto) === pL_filtro && safeToLower(l.uv) === uL_filtro && safeToLower(l.manzano) === mL_filtro)
+    .map(l => l.lote)
+  )].filter(val => val !== null && val !== undefined && val !== '').sort((a,b) => String(a).localeCompare(String(b), undefined, {numeric: true}));
 
   // --- EFECTO DE AUTOCOMPLETADO DE LOTES ---
   useEffect(() => {
     const { proyecto, uv, manzano, lote } = formDescuento;
     if (proyecto && uv && manzano && lote && lotesBD.length > 0) {
-      const pL = proyecto.toString().toLowerCase();
-      const uL = uv.toString().toLowerCase();
-      const mL = manzano.toString().toLowerCase();
-      const loL = lote.toString().toLowerCase();
+      const pL = safeToLower(proyecto);
+      const uL = safeToLower(uv);
+      const mL = safeToLower(manzano);
+      const loL = safeToLower(lote);
 
       const loteEncontrado = lotesBD.find(l => 
-        l.proyecto.toString().toLowerCase() === pL && 
-        l.uv.toString().toLowerCase() === uL && 
-        l.manzano.toString().toLowerCase() === mL && 
-        l.lote.toString().toLowerCase() === loL
+        safeToLower(l.proyecto) === pL && 
+        safeToLower(l.uv) === uL && 
+        safeToLower(l.manzano) === mL && 
+        safeToLower(l.lote) === loL
       );
       
       if (loteEncontrado) {
         setFormDescuento(prev => ({
           ...prev,
-          m2: loteEncontrado.m2.toString(),
-          precioM2: loteEncontrado.precioM2.toString(),
-          categoria: loteEncontrado.categoria || ''
+          m2: loteEncontrado.m2 !== null && loteEncontrado.m2 !== undefined ? String(loteEncontrado.m2) : '',
+          precioM2: loteEncontrado.precioM2 !== null && loteEncontrado.precioM2 !== undefined ? String(loteEncontrado.precioM2) : '',
+          categoria: loteEncontrado.categoria ? String(loteEncontrado.categoria) : ''
         }));
         setLoteAutocompletado(true);
       } else {
