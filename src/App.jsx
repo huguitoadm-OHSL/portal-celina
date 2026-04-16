@@ -362,10 +362,10 @@ export default function App() {
   });
 
   const [formRecompra, setFormRecompra] = useState({
-    proyecto: 'Muyurina', sucursal: 'MONTERO',
-    fechaVentaNuevo: '', nombreNuevo: '', contratoNuevo: '', aplicoDescuento: 'NO', cuotasPagadas: '2', procesadoNuevo: 'SI', vigenteNuevo: 'SI',
+    asesor: '', proyecto: 'Muyurina', sucursal: '', 
+    fechaVentaNuevo: '', nombreNuevo: '', contratoNuevo: '', aplicoDescuento: 'NO', cuotasPagadas: '', procesadoNuevo: 'SI', vigenteNuevo: 'SI',
     nombreAntiguo: '', contratoAntiguo: '', fechaVentaAntiguo: '', fechaPago: '', procesadoAntiguo: 'SI', vigenteAntiguo: 'SI', patrocinador: '',
-    valorCuota: '', asesor: ''
+    valorCuota: ''
   });
 
   const [formDescuento, setFormDescuento] = useState({
@@ -411,7 +411,7 @@ export default function App() {
               let proyLimpio = rawProy;
               if (rawProy.includes("RENACER")) proyLimpio = "El Renacer";
               else if (rawProy.includes("JARDINES")) proyLimpio = "Los Jardines";
-              else if (rawProy.includes("MUYURina")) proyLimpio = "Muyurina";
+              else if (rawProy.includes("MUYURINA")) proyLimpio = "Muyurina";
               else if (rawProy.includes("SANTA FE")) proyLimpio = "Santa Fe";
               else if (rawProy.includes("CAÑAVERAL") || rawProy.includes("CANAVERAL")) proyLimpio = "Cañaveral";
 
@@ -512,14 +512,13 @@ export default function App() {
     const { name, value } = e.target;
     setFormRecompra(prev => {
       const newState = { ...prev, [name]: value };
-      // Autocompletar nombre antiguo si se escribe en el nuevo y estaba vacío
-      if (name === 'nombreNuevo' && prev.nombreAntiguo === prev.nombreNuevo) {
+      if (name === 'nombreNuevo' && (!prev.nombreAntiguo || prev.nombreAntiguo === prev.nombreNuevo)) {
         newState.nombreAntiguo = value;
       }
       return newState;
     });
   };
-  
+
   const handleBeneficiarioChange = (index, field, value) => {
     const nuevosBeneficiarios = [...formSeguro.beneficiarios];
     nuevosBeneficiarios[index][field] = value;
@@ -652,13 +651,13 @@ export default function App() {
 
     return { vc, descuentoTotal, descuentoTexto, nuevoPrecioTotal, nuevoPrecioM2, porcentajeCuota, montoCuotaNum };
   };
-  
+
   // --- LÓGICA BENEFICIO RECOMPRA ---
   const calcularBeneficioRecompra = () => {
     const p = formRecompra.proyecto.toUpperCase();
     if (p.includes('MUYURINA')) return 200;
     if (p.includes('RANCHO NUEVO')) return 50;
-    // El resto de los mencionados aplican $100
+    // Resto: Renacer, Jardines, Santa Fe, Cañaveral, Celina 10, Celina 3, Celina 4, Celina 5, Celina 7
     return 100;
   };
 
@@ -674,46 +673,48 @@ export default function App() {
   // --- GENERADORES DE TEXTOS Y HTML ---
   const generarTextoRecompra = () => {
     const beneficio = calcularBeneficioRecompra();
-    return `${obtenerSaludoTiempo()}\nEstimado Ing. Charles por favor su ayuda con el código de pago por recompra de este cliente, le toca pagar su cuota el ${formRecompra.fechaPago || '[FECHA PAGO]'} muchas gracias de antemano:\n\nCONTRATO NUEVO\nAgencia: ${formRecompra.sucursal || '-'}\nFecha de Venta: ${formRecompra.fechaVentaNuevo || '-'}\nNombre: ${formRecompra.nombreNuevo || '-'}\nContrato: ${formRecompra.contratoNuevo || '-'}\n¿Se aplicó dscto por m2?: ${formRecompra.aplicoDescuento}\nCant. de cuotas pagadas: ${formRecompra.cuotasPagadas}\n¿Procesado?: ${formRecompra.procesadoNuevo}\n¿Vigente?: ${formRecompra.vigenteNuevo}\n\nCONTRATO ANTIGUO\nNombre: ${formRecompra.nombreAntiguo || '-'}\nContrato: ${formRecompra.contratoAntiguo || '-'}\nFecha de venta: ${formRecompra.fechaVentaAntiguo || '-'}\nFecha Pago: ${formRecompra.fechaPago || '-'}\n¿Procesado?: ${formRecompra.procesadoAntiguo}\n¿Vigente?: ${formRecompra.vigenteAntiguo}\nPatrocinador: ${formRecompra.patrocinador || '-'}\n\nValor de Cuota: ${formRecompra.valorCuota || '0'}\nBeneficio $: ${beneficio}\n\nSaludos cordiales,\n${formRecompra.asesor || '[Nombre del Asesor]'}`;
+    const { saludo, nombrePila } = obtenerDatosSupervisor();
+    return `${obtenerSaludoTiempo()}\n${saludo} ${nombrePila},\n\nPor favor su ayuda con el código de pago por recompra de este cliente, le toca pagar su cuota el ${formRecompra.fechaPago || '[FECHA PAGO]'} muchas gracias de antemano:\n\nCONTRATO NUEVO\nAgencia: ${formRecompra.sucursal || '-'}\nFecha de Venta: ${formRecompra.fechaVentaNuevo || '-'}\nNombre: ${formRecompra.nombreNuevo || '-'}\nContrato: ${formRecompra.contratoNuevo || '-'}\n¿Se aplicó dscto por m2?: ${formRecompra.aplicoDescuento}\nCant. de cuotas pagadas: ${formRecompra.cuotasPagadas}\n¿Procesado?: ${formRecompra.procesadoNuevo}\n¿Vigente?: ${formRecompra.vigenteNuevo}\n\nCONTRATO ANTIGUO\nNombre: ${formRecompra.nombreAntiguo || '-'}\nContrato: ${formRecompra.contratoAntiguo || '-'}\nFecha de venta: ${formRecompra.fechaVentaAntiguo || '-'}\nFecha Pago: ${formRecompra.fechaPago || '-'}\n¿Procesado?: ${formRecompra.procesadoAntiguo}\n¿Vigente?: ${formRecompra.vigenteAntiguo}\nPatrocinador: ${formRecompra.patrocinador || '-'}\n\nValor de Cuota: $${formRecompra.valorCuota || '0'}\nBeneficio $: ${beneficio}\n\nSaludos cordiales,\n${formRecompra.asesor || '[Nombre del Asesor]'}`;
   };
 
   const generarHtmlRecompra = () => {
     const beneficio = calcularBeneficioRecompra();
+    const { saludo, nombrePila } = obtenerDatosSupervisor();
     return `
-    <div style="font-family: 'Aptos', Arial, sans-serif; font-size: 14px; color: #333; max-width: 1000px; line-height: 1.5; text-align: left;">
+    <div style="font-family: 'Aptos', Arial, sans-serif; font-size: 14px; color: #333; max-width: 1200px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()},</p>
-      <p style="margin-top: 0; margin-bottom: 25px;">Estimado Ing. Charles por favor su ayuda con el c&oacute;digo de pago por recompra de este cliente, le toca pagar su cuota el <strong>${formRecompra.fechaPago || '[FECHA PAGO]'}</strong> muchas gracias de antemano:</p>
+      <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${nombrePila} por favor su ayuda con el c&oacute;digo de pago por recompra de este cliente, le toca pagar su cuota el <strong>${formRecompra.fechaPago || '[FECHA PAGO]'}</strong> muchas gracias de antemano:</p>
       
-      <div style="overflow-x: auto; padding-bottom: 10px;">
+      <div style="overflow-x: auto; padding-bottom: 10px; width: 100%;">
         <table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse; font-family: 'Aptos', Arial, sans-serif; font-size: 11px; text-align: center; width: 100%; min-width: 1200px; border: 1px solid #000;">
           <thead>
             <tr>
-              <th colspan="8" style="background-color: #ffc000; border: 1px solid #000; padding: 6px; font-weight: bold;">CONTRATO NUEVO</th>
-              <th colspan="7" style="background-color: #ed7d31; border: 1px solid #000; padding: 6px; font-weight: bold;">CONTRATO ANTIGUO</th>
-              <th rowspan="2" style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; font-weight: bold;">VALOR DE<br>CUOTA</th>
-              <th rowspan="2" style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; font-weight: bold;">BENEFICIO $</th>
+              <th colspan="8" style="background-color: #ffc000; border: 1px solid #000; padding: 6px; font-weight: bold; color: #000;">CONTRATO NUEVO</th>
+              <th colspan="7" style="background-color: #ed7d31; border: 1px solid #000; padding: 6px; font-weight: bold; color: #000;">CONTRATO ANTIGUO</th>
+              <th rowspan="2" style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; font-weight: bold; color: #000;">VALOR DE<br>CUOTA $</th>
+              <th rowspan="2" style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; font-weight: bold; color: #000;">BENEFICIO $</th>
             </tr>
             <tr>
-              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px;">Agencia</th>
-              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px;">Fecha de<br>venta</th>
-              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px; min-width: 120px;">Nombre</th>
-              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px;">Contrato</th>
-              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px;">Se aplico<br>descuento<br>por metro ?</th>
-              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px;">Cant. De<br>cuotas ya<br>pagadas</th>
-              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px;">¿Procesado?</th>
-              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px;">¿Vigente?</th>
+              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px; color: #000;">Agencia</th>
+              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px; color: #000;">Fecha de<br>venta</th>
+              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px; min-width: 120px; color: #000;">Nombre</th>
+              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px; color: #000;">Contrato</th>
+              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px; color: #000;">Se aplico<br>descuento<br>por metro ?</th>
+              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px; color: #000;">Cant. De<br>cuotas ya<br>pagadas</th>
+              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px; color: #000;">¿Procesado?</th>
+              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px; color: #000;">¿Vigente?</th>
 
-              <th style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; min-width: 120px;">Nombre</th>
-              <th style="background-color: #fce4d6; border: 1px solid #000; padding: 6px;">Contrato</th>
-              <th style="background-color: #fce4d6; border: 1px solid #000; padding: 6px;">Fecha de<br>venta</th>
-              <th style="background-color: #fce4d6; border: 1px solid #000; padding: 6px;">Fecha Pago</th>
-              <th style="background-color: #fce4d6; border: 1px solid #000; padding: 6px;">¿Procesado?</th>
-              <th style="background-color: #fce4d6; border: 1px solid #000; padding: 6px;">¿Vigente?</th>
-              <th style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; min-width: 120px;">Patrocinador</th>
+              <th style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; min-width: 120px; color: #000;">Nombre</th>
+              <th style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; color: #000;">Contrato</th>
+              <th style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; color: #000;">Fecha de<br>venta</th>
+              <th style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; color: #000;">Fecha Pago</th>
+              <th style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; color: #000;">¿Procesado?</th>
+              <th style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; color: #000;">¿Vigente?</th>
+              <th style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; min-width: 120px; color: #000;">Patrocinador</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
+            <tr style="background-color: #ffffff;">
               <td style="border: 1px solid #000; padding: 6px; text-transform: uppercase;">${formRecompra.sucursal || ''}</td>
               <td style="border: 1px solid #000; padding: 6px;">${formRecompra.fechaVentaNuevo || ''}</td>
               <td style="border: 1px solid #000; padding: 6px; text-transform: uppercase;">${formRecompra.nombreNuevo || ''}</td>
@@ -1016,6 +1017,7 @@ export default function App() {
       <p>${saludo} ${nombrePila},</p>
       <p>Adjunto el consolidado de proyecci&oacute;n de ventas semanal del equipo correspondiente a la semana actual.</p>
       
+      <div style="overflow-x: auto; width: 100%;">
       <table style="border-collapse: collapse; font-family: 'Aptos', Arial, sans-serif; font-size: 11px; margin-top: 15px; width: 100%; min-width: 900px; text-align: left;">
         <thead>
           <tr>
@@ -1045,6 +1047,7 @@ export default function App() {
           </tr>
         </tbody>
       </table>
+      </div>
 
       <table style="border-collapse: collapse; font-family: 'Aptos', Arial, sans-serif; font-size: 11px; margin-top: 20px; width: 300px; text-align: left;">
         <tr><td style="background-color: #002060; color: white; padding: 5px 8px; font-weight: bold; border: 1px solid white;">Proyeccion ${capMes}</td><td style="background-color: #002060; color: white; padding: 5px 8px; font-weight: bold; border: 1px solid white; text-align: center;">-</td><td style="border: none;"></td></tr>
@@ -1155,7 +1158,7 @@ export default function App() {
 
       {/* MAIN CONTENT */}
       <div className="flex-1 overflow-auto p-6 md:p-10 w-full">
-        <div className="max-w-7xl mx-auto w-full">
+        <div className="max-w-[1600px] mx-auto w-full">
           
           {/* DASHBOARD VIEW */}
           {activeTab === 'dashboard' && (
@@ -1218,7 +1221,7 @@ export default function App() {
           {activeTab === 'seguro' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
               <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><Shield className="w-6 h-6 mr-2 text-blue-600" /> Adición Beneficiarios Seguro</h2></div>
-              <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_1fr] gap-8 w-full">
+              <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_1fr] 2xl:grid-cols-[1.5fr_1fr] gap-8 w-full">
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full">
                    <div className="mb-4"><Input label="Nombre del Asesor" name="asesor" value={formSeguro.asesor} onChange={handleSeguroChange} placeholder="Ej. Oscar Saravia" /></div>
                    
@@ -1273,7 +1276,7 @@ export default function App() {
           {activeTab === 'recompra' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
               <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><Repeat className="w-6 h-6 mr-2 text-blue-600" /> Solicitud de Recompra</h2></div>
-              <div className="grid grid-cols-1 xl:grid-cols-[1.3fr_1fr] gap-8 w-full">
+              <div className="grid grid-cols-1 xl:grid-cols-[1.3fr_1fr] 2xl:grid-cols-[1.5fr_1fr] gap-8 w-full">
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full">
                    
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mb-6">
@@ -1296,18 +1299,18 @@ export default function App() {
                       </div>
                    </div>
 
-                   <div className="grid grid-cols-1 gap-8 w-full">
+                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
                      {/* CONTRATO NUEVO */}
                      <div className="bg-amber-50/50 p-5 rounded-xl border border-amber-200">
                         <h3 className="text-sm font-extrabold text-amber-600 mb-4 border-b border-amber-200 pb-2">DATOS CONTRATO NUEVO</h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full mb-2">
-                           <Input label="Agencia" name="sucursal" value={formRecompra.sucursal} onChange={handleRecompraChange} placeholder="Ej. YAPACANI" />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mb-2">
+                           <Input label="Agencia / Sucursal" name="sucursal" value={formRecompra.sucursal} onChange={handleRecompraChange} placeholder="Ej. YAPACANI" />
                            <Input label="Fecha de venta" name="fechaVentaNuevo" value={formRecompra.fechaVentaNuevo} onChange={handleRecompraChange} placeholder="Ej. 27/8/2025" />
                         </div>
                         <Input label="Nombre del Cliente" name="nombreNuevo" value={formRecompra.nombreNuevo} onChange={handleRecompraChange} placeholder="Ej. DILSON DURY MARIACA" />
                         <Input label="Contrato Nuevo" name="contratoNuevo" value={formRecompra.contratoNuevo} onChange={handleRecompraChange} placeholder="Ej. C2504001327" />
                         
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
+                        <div className="grid grid-cols-2 gap-4 mt-2">
                            <div className="w-full">
                              <label className="block text-xs font-bold text-slate-700 mb-1.5 truncate">¿Aplicó Dscto por m2?</label>
                              <select name="aplicoDescuento" value={formRecompra.aplicoDescuento} onChange={handleRecompraChange} className="w-full px-3 py-2 border border-slate-200 rounded bg-white text-sm">
@@ -1339,7 +1342,7 @@ export default function App() {
                         <Input label="Nombre del Cliente Antiguo" name="nombreAntiguo" value={formRecompra.nombreAntiguo} onChange={handleRecompraChange} placeholder="Ej. DILSON DURY MARIACA" />
                         <Input label="Contrato Antiguo" name="contratoAntiguo" value={formRecompra.contratoAntiguo} onChange={handleRecompraChange} placeholder="Ej. C2504001326" />
                         
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full mb-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mb-2">
                            <Input label="Fecha de venta" name="fechaVentaAntiguo" value={formRecompra.fechaVentaAntiguo} onChange={handleRecompraChange} placeholder="Ej. 27/8/2025" />
                            <Input label="Fecha Pago de Cuota" name="fechaPago" value={formRecompra.fechaPago} onChange={handleRecompraChange} placeholder="Ej. 7-dic-25" />
                         </div>
@@ -1347,7 +1350,7 @@ export default function App() {
                         <Input label="Patrocinador" name="patrocinador" value={formRecompra.patrocinador} onChange={handleRecompraChange} placeholder="Ej. JHOVANA ALMANZA VALLEJOS" />
                         <Input label="Valor de Cuota ($)" name="valorCuota" value={formRecompra.valorCuota} onChange={handleRecompraChange} placeholder="Ej. 304.8" type="number" />
                         
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                        <div className="grid grid-cols-2 gap-4 mt-2">
                            <div className="w-full">
                              <label className="block text-xs font-bold text-slate-700 mb-1.5 truncate">¿Procesado?</label>
                              <select name="procesadoAntiguo" value={formRecompra.procesadoAntiguo} onChange={handleRecompraChange} className="w-full px-3 py-2 border border-slate-200 rounded bg-white text-sm">
@@ -1371,8 +1374,8 @@ export default function App() {
                      text={generarTextoRecompra()} 
                      htmlContent={generarHtmlRecompra()} 
                      subject={`solicitud de código de descuento RECOMPRA cliente: ${formRecompra.nombreNuevo || 'NOMBRE'}`} 
-                     fixedDestinoLabel="Charles Barretto"
-                     fixedDestinoEmail="cbarretto@celina.com.bo"
+                     supervisorDestino={supervisorDestino} 
+                     setSupervisorDestino={setSupervisorDestino} 
                    />
                 </div>
               </div>
@@ -1391,7 +1394,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-[2fr_1fr] gap-6 w-full">
+              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-[2fr_1fr] 2xl:grid-cols-[2.5fr_1fr] gap-6 w-full">
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col w-full">
                   <div className="p-4 border-b border-slate-100 flex flex-wrap gap-4 bg-slate-50 items-center w-full">
                     <div className="flex-1 min-w-[200px]">
@@ -1495,7 +1498,7 @@ export default function App() {
           {activeTab === 'reenvio' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><FileSignature className="w-6 h-6 mr-2 text-blue-600" /> Reenvío Firma Digital</h2></div>
-              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-[1.2fr_1fr] gap-8 w-full">
+              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-[1.2fr_1fr] 2xl:grid-cols-[1.5fr_1fr] gap-8 w-full">
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 border-b border-slate-100 pb-3 gap-3">
                     <h3 className="text-lg font-medium text-slate-800">Listado de Contratos</h3>
@@ -1557,7 +1560,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-[1.3fr_1fr] gap-8 w-full">
+                <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-[1.3fr_1fr] 2xl:grid-cols-[1.5fr_1fr] gap-8 w-full">
                   <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5 w-full">
                       <div className="w-full">
