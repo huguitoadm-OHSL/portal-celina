@@ -389,7 +389,8 @@ export default function App() {
     cuota: '', modoCuota: 'monto',
     modoBusqueda: 'manual', 
     m2: '', precioM2: '', categoria: '', asesor: '',
-    proyectoManual: '', descuentoManual: '', tipoDescuentoManual: 'porcentaje'
+    proyectoManual: '', descuentoManual: '', tipoDescuentoManual: 'porcentaje',
+    descuentoPropiosManual: '23' // Estado para el descuento personalizado de proyectos propios
   });
 
   const [formCuota, setFormCuota] = useState({
@@ -600,7 +601,7 @@ export default function App() {
 
   // --- LÓGICA DE DESCUENTOS CAMPAÑAS ---
   const calcularDescuento = () => {
-    const { proyecto, modalidad, cuota, modoCuota, m2, precioM2, descuentoManual, tipoDescuentoManual, categoria } = formDescuento;
+    const { proyecto, modalidad, cuota, modoCuota, m2, precioM2, descuentoManual, tipoDescuentoManual } = formDescuento;
     const m2Num = parseFloat(m2) || 0;
     const precioM2Num = parseFloat(precioM2) || 0;
     const vc = m2Num * precioM2Num;
@@ -647,12 +648,14 @@ export default function App() {
       if (modalidad === 'Contado') {
         porcentaje = 30; // 30% al contado
       } else if (modalidad === 'Crédito') {
-        const catUpper = String(categoria || '').toUpperCase();
-        // Determina si es Avenida, Parque o Radial para el descuento del 23%
-        const isAvenida = catUpper.includes('AV') || catUpper.includes('AVENIDA') || catUpper.includes('PARQUE') || catUpper.includes('RADIAL');
-
-        if (isAvenida && porcentajeCuota >= 5) {
-          porcentaje = 23; // 23% a Crédito en Avenida con >= 5% cuota
+        // Nueva Lógica: Si la cuota es 5% o más (Sin importar la categoría)
+        if (porcentajeCuota >= 5) {
+          const maxDesc = 23;
+          let inputDesc = parseFloat(formDescuento.descuentoPropiosManual);
+          if (isNaN(inputDesc)) inputDesc = maxDesc;
+          
+          // Aseguramos que nunca supere el 23% y tampoco baje de 0
+          porcentaje = Math.max(0, Math.min(inputDesc, maxDesc));
         } else if (porcentajeCuota >= 1.5) {
           porcentaje = 20; // 20% a Crédito base con >= 1.5% cuota
         }
@@ -850,26 +853,24 @@ export default function App() {
   const generarTextoDescuento = () => {
     const { vc, descuentoTotal, descuentoTexto, nuevoPrecioTotal, nuevoPrecioM2, porcentajeCuota } = calcularDescuento();
     const { saludo, titulo } = obtenerDatosSupervisor();
-    const mesActual = new Date().toLocaleString('es-ES', { month: 'long' });
-    let condicionTexto = formDescuento.modalidad === 'Crédito' ? `con cuota inicial del ${formatCurrency(porcentajeCuota)}% venta a plazos` : `venta al contado`;
     const nomProyecto = formDescuento.proyecto === 'OTRO...' ? (formDescuento.proyectoManual || 'PROYECTO MANUAL') : formDescuento.proyecto;
+    let condicionTexto = formDescuento.modalidad === 'Crédito' ? `con cuota inicial del ${formatCurrency(porcentajeCuota)}% venta a plazos` : `venta al contado`;
     const catStr = formDescuento.categoria ? String(formDescuento.categoria).toUpperCase() : '';
 
-    return `${obtenerSaludoTiempo()}\n${saludo} ${titulo},\n\nPor favor le solicito mediante el presente correo, la aplicación del descuento correspondiente a la campaña mes de ${mesActual} proyecto ${nomProyecto}: ${descuentoTexto} ${condicionTexto}:\n\n------------------------------------------------------------\n• Superficie:             ${formDescuento.m2 || '0'} m²\n• Precio M2:              $ ${formatCurrency(formDescuento.precioM2 || 0)}\n• Precio Original:        $ ${formatCurrency(vc)}\n------------------------------------------------------------\n• Condición (${nomProyecto}): ${descuentoTexto}  [-$ ${formatCurrency(descuentoTotal)}]\n• Total Valor Contrato (VC):   $ ${formatCurrency(vc)}\n• Total Dscto Campañas:       -$ ${formatCurrency(descuentoTotal)}\n------------------------------------------------------------\n• Nuevo Precio Promoción:      $ ${formatCurrency(nuevoPrecioTotal)}\n\nPRECIO M2 A APLICAR:        $ ${formatCurrency(nuevoPrecioM2)}\nUV ${formDescuento.uv || 'SN'} • MZN ${formDescuento.manzano || '---'} • LT ${formDescuento.lote || '---'}\n${catStr ? `CATEGORÍA: ${catStr}\n\n` : '\n'}Quedo atento a su aprobación para continuar con el proceso del cierre de la venta.\n\nSaludos cordiales,\n${formDescuento.asesor || '[Nombre del Asesor]'}`;
+    return `${obtenerSaludoTiempo()}\n${saludo} ${titulo},\n\nPor favor le solicito mediante el presente correo, la aplicación del descuento correspondiente a la campaña vigente del proyecto ${nomProyecto}: ${descuentoTexto} ${condicionTexto}:\n\n------------------------------------------------------------\n• Superficie:             ${formDescuento.m2 || '0'} m²\n• Precio M2:              $ ${formatCurrency(formDescuento.precioM2 || 0)}\n• Precio Original:        $ ${formatCurrency(vc)}\n------------------------------------------------------------\n• Condición (${nomProyecto}): ${descuentoTexto}  [-$ ${formatCurrency(descuentoTotal)}]\n• Total Valor Contrato (VC):   $ ${formatCurrency(vc)}\n• Total Dscto Campañas:       -$ ${formatCurrency(descuentoTotal)}\n------------------------------------------------------------\n• Nuevo Precio Promoción:      $ ${formatCurrency(nuevoPrecioTotal)}\n\nPRECIO M2 A APLICAR:        $ ${formatCurrency(nuevoPrecioM2)}\nUV ${formDescuento.uv || 'SN'} • MZN ${formDescuento.manzano || '---'} • LT ${formDescuento.lote || '---'}\n${catStr ? `CATEGORÍA: ${catStr}\n\n` : '\n'}Quedo atento a su aprobación para continuar con el proceso del cierre de la venta.\n\nSaludos cordiales,\n${formDescuento.asesor || '[Nombre del Asesor]'}`;
   };
 
   const generarHtmlDescuento = () => {
     const { vc, descuentoTotal, descuentoTexto, nuevoPrecioTotal, nuevoPrecioM2, porcentajeCuota } = calcularDescuento();
     const { saludo, titulo } = obtenerDatosSupervisor();
-    const mesActual = new Date().toLocaleString('es-ES', { month: 'long' });
-    let condicionTexto = formDescuento.modalidad === 'Crédito' ? `con cuota inicial del ${formatCurrency(porcentajeCuota)}% venta a plazos` : `venta al contado`;
     const nomProyecto = formDescuento.proyecto === 'OTRO...' ? (formDescuento.proyectoManual || 'PROYECTO MANUAL') : formDescuento.proyecto;
+    let condicionTexto = formDescuento.modalidad === 'Crédito' ? `con cuota inicial del ${formatCurrency(porcentajeCuota)}% venta a plazos` : `venta al contado`;
 
     return `
     <div style="font-family: 'Aptos', Arial, sans-serif; font-size: 14px; color: #1e293b; max-width: 650px; line-height: 1.5; text-align: justify;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
       <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${titulo},</p>
-      <p style="margin-bottom: 20px;">Por favor le solicito mediante el presente correo, la aplicaci&oacute;n del descuento correspondiente a la campa&ntilde;a mes de ${mesActual} proyecto ${nomProyecto}: ${descuentoTexto} ${condicionTexto}:</p>
+      <p style="margin-bottom: 20px;">Por favor le solicito mediante el presente correo, la aplicaci&oacute;n del descuento correspondiente a la campa&ntilde;a vigente del proyecto ${nomProyecto}: ${descuentoTexto} ${condicionTexto}:</p>
 
       <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-family: 'Aptos', Arial, sans-serif; overflow: hidden; text-align: left;">
         <tr><td style="padding: 15px; border-bottom: 1px solid #e2e8f0; background-color: #f8fafc;">
@@ -1173,7 +1174,7 @@ export default function App() {
 
       {/* MAIN CONTENT */}
       <div className="flex-1 overflow-auto p-6 md:p-10 w-full">
-        <div className="max-w-7xl mx-auto w-full">
+        <div className="max-w-[1600px] mx-auto w-full">
           
           {/* DASHBOARD VIEW */}
           {activeTab === 'dashboard' && (
@@ -1643,6 +1644,28 @@ export default function App() {
                             </div>
                           </div>
                         </div>
+                      </div>
+                    )}
+
+                    {/* NUEVO BLOQUE: DESCUENTO MANUAL PROYECTOS PROPIOS >= 5% */}
+                    {PROYECTOS_PROPIOS_1.includes(formDescuento.proyecto) && formDescuento.modalidad === 'Crédito' && porcentajeCuota >= 5 && (
+                      <div className="mb-6 bg-purple-50/80 p-4 rounded-xl border border-purple-200 shadow-sm w-full flex flex-col sm:flex-row items-center justify-between gap-4">
+                         <div className="flex-1">
+                           <label className="block text-sm font-bold text-purple-900 mb-1">¡Aplica a Descuento Especial!</label>
+                           <p className="text-xs text-purple-700 leading-tight">Puedes ajustar el % manualmente si lo deseas (Máximo 23%).</p>
+                         </div>
+                         <div className="w-full sm:w-auto flex items-center bg-white rounded-lg border border-purple-200 overflow-hidden">
+                           <input
+                             type="number"
+                             name="descuentoPropiosManual"
+                             value={formDescuento.descuentoPropiosManual}
+                             onChange={handleDescuentoChange}
+                             max="23"
+                             min="0"
+                             className="w-20 px-3 py-2 text-center font-bold text-purple-700 focus:outline-none"
+                           />
+                           <span className="pr-3 font-bold text-purple-500">%</span>
+                         </div>
                       </div>
                     )}
                     
