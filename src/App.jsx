@@ -19,7 +19,10 @@ import {
   Database,
   AlertTriangle,
   Search,
-  Edit3
+  Edit3,
+  PhoneCall,
+  Shield,
+  Repeat
 } from 'lucide-react';
 
 // --- CONFIGURACIÓN DE DATOS MOCK ---
@@ -37,10 +40,6 @@ const SUPERVISORES = [
   { id: 'ropaz', nombre: 'Roberto Paz Paz', correo: 'ropaz@celina.com.bo', genero: 'M', titulo: 'Lic. Roberto' },
   { id: 'rvalverded', nombre: 'Rene Valverde Duran', correo: 'rvalverded@celina.com.bo', genero: 'M', titulo: 'Lic. Rene' },
   { id: 'cbaldiviezo', nombre: 'Cristhiand Baldiviezo Balcazar', correo: 'cbaldiviezo@celina.com.bo', genero: 'M', titulo: 'Lic. Cristhiand' },
-  { id: 'rvaca', nombre: 'Robert Vaca', correo: 'rvaca@grupopaz.com.bo', genero: 'M', titulo: 'Lic. Robert' },
-  { id: 'lbakovic', nombre: 'Lucio Bakovic', correo: 'lbakovic@grupopaz.com.bo', genero: 'M', titulo: 'Lic. Lucio' },
-  { id: 'vchoque', nombre: 'Verenice Choque', correo: 'vchoque@celina.com.bo', genero: 'F', titulo: 'Lic. Verenice' },
-  { id: 'gcuenca', nombre: 'Gabriel Cuenca', correo: 'gcuenca@celina.com.bo', genero: 'M', titulo: 'Lic. Gabriel' },
   { id: 'ohsaravia', nombre: 'Oscar Hugo Saravia L.', correo: 'ohsaravia@celina.com.bo', genero: 'M', titulo: 'Lic. Oscar' }
 ];
 
@@ -52,7 +51,7 @@ const EQUIPOS_ASESORES = {
     { nombre: "Gloriana Silva", colAct: 13200 },
     { nombre: "Ely Gonzales", colAct: 0 },
     { nombre: "Jaime Fabricio Rios", colAct: 0 },
-    { nombre: "Leonardo Santiago Gonzales", colAct: 0 },
+    { nombre: "Daniel Angulo", colAct: 0 },
     { nombre: "Marioly Viñolas", colAct: 0 },
     { nombre: "Merly Mendez", colAct: 0 },
     { nombre: "Nataly Heredia", colAct: 0 },
@@ -194,8 +193,8 @@ const formatDiaMes = (fechaIso, sumarDias = 0) => {
 
 // --- COMPONENTES UI ---
 const Input = ({ label, name, value, onChange, placeholder, type = "text", required = false }) => (
-  <div className="mb-4">
-    <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">{label}</label>
+  <div className="mb-4 w-full">
+    <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5 truncate">{label}</label>
     <input
       type={type}
       name={name}
@@ -209,8 +208,8 @@ const Input = ({ label, name, value, onChange, placeholder, type = "text", requi
 );
 
 const TextArea = ({ label, name, value, onChange, placeholder }) => (
-  <div className="mb-4">
-    <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">{label}</label>
+  <div className="mb-4 w-full">
+    <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5 truncate">{label}</label>
     <textarea
       name={name}
       value={value}
@@ -222,7 +221,7 @@ const TextArea = ({ label, name, value, onChange, placeholder }) => (
   </div>
 );
 
-const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setSupervisorDestino, showTextPlain = true }) => {
+const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setSupervisorDestino, showTextPlain = true, fixedDestinoLabel, fixedDestinoEmail, ccEmails }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -266,7 +265,9 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
   };
 
   const handleSendEmail = () => {
-    const mailtoLink = `mailto:${supervisorDestino}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
+    const to = fixedDestinoEmail || supervisorDestino;
+    const ccQuery = ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : '';
+    const mailtoLink = `mailto:${to}?subject=${encodeURIComponent(subject)}${ccQuery}&body=${encodeURIComponent(text)}`;
     window.location.href = mailtoLink;
   };
 
@@ -277,21 +278,30 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
         Vista Previa del Correo
       </h3>
 
-      <div className="mb-5">
-        <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Enviar consolidado a:</label>
-        <select 
-          value={supervisorDestino}
-          onChange={(e) => setSupervisorDestino(e.target.value)}
-          className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 text-slate-800 font-semibold shadow-sm cursor-pointer"
-        >
-          {SUPERVISORES.map(s => (
-            <option key={s.id} value={s.correo}>{s.nombre} ({s.correo})</option>
-          ))}
-        </select>
+      <div className="mb-5 w-full">
+        <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Enviar a:</label>
+        {fixedDestinoEmail ? (
+          <div className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-slate-100/70 text-slate-700 font-semibold shadow-inner truncate text-sm">
+            {fixedDestinoLabel} ({fixedDestinoEmail})
+          </div>
+        ) : (
+          <select 
+            value={supervisorDestino}
+            onChange={(e) => setSupervisorDestino && setSupervisorDestino(e.target.value)}
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 text-slate-800 font-semibold shadow-sm cursor-pointer text-sm"
+          >
+            {SUPERVISORES.map(s => (
+              <option key={s.id} value={s.correo}>{s.nombre} ({s.correo})</option>
+            ))}
+          </select>
+        )}
+        {ccEmails && (
+            <p className="text-xs text-slate-500 mt-2 ml-1"><strong>CC:</strong> {ccEmails}</p>
+        )}
       </div>
 
       {htmlContent && (
-        <div className="mb-4 p-3.5 bg-indigo-50/50 border border-indigo-100 rounded-xl flex gap-3 items-start shadow-sm">
+        <div className="mb-4 p-3.5 bg-indigo-50/50 border border-indigo-100 rounded-xl flex gap-3 items-start shadow-sm w-full">
           <Info className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
           <p className="text-xs text-indigo-800 leading-relaxed">
             <strong>Recomendado:</strong> Usa <b>"Copiar Formato Correo"</b> y pégalo directamente en tu gestor de correo para enviar la tabla con su dise&ntilde;o profesional y alineaci&oacute;n justificada.
@@ -299,7 +309,7 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
         </div>
       )}
 
-      <div className="bg-[#f8fafc] p-5 rounded-xl border border-slate-200 mb-5 h-[22rem] overflow-y-auto shadow-inner">
+      <div className="bg-[#f8fafc] p-5 rounded-xl border border-slate-200 mb-5 h-[22rem] overflow-y-auto shadow-inner w-full">
         {htmlContent ? (
           <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
         ) : (
@@ -307,7 +317,7 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
         )}
       </div>
       
-      <div className="flex flex-col xl:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-3 w-full">
         <button
           onClick={handleCopy}
           className="flex-1 flex items-center justify-center py-3 px-4 bg-white border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 hover:border-slate-300 font-bold transition-all shadow-sm whitespace-nowrap"
@@ -342,11 +352,27 @@ export default function App() {
     nombre: '', ci: '', contrato: '', motivo: '', asesor: ''
   });
 
+  const [formLlamada, setFormLlamada] = useState({
+    asesor: '', nombreReferido: '', ciReferido: '', horaLlamada: '', nombreBeneficiario: '', ciBeneficiario: ''
+  });
+  
+  const [formSeguro, setFormSeguro] = useState({
+    asesor: '', cliente: '', nroContrato: '', uv: '', manzano: '', lote: '',
+    beneficiarios: [{ nombre: '', parentesco: '', porcentaje: '', ci: '' }]
+  });
+
+  const [formRecompra, setFormRecompra] = useState({
+    proyecto: 'Muyurina', sucursal: 'YAPACANI',
+    fechaVentaNuevo: '', nombreNuevo: '', contratoNuevo: '', aplicoDescuento: 'NO', cuotasPagadas: '2', procesadoNuevo: 'SI', vigenteNuevo: 'SI',
+    nombreAntiguo: '', contratoAntiguo: '', fechaVentaAntiguo: '', fechaPago: '', procesadoAntiguo: 'SI', vigenteAntiguo: 'SI', patrocinador: '',
+    valorCuota: '', asesor: ''
+  });
+
   const [formDescuento, setFormDescuento] = useState({
     proyecto: 'El Renacer', uv: '', manzano: '', lote: '', 
     modalidad: 'Crédito', 
     cuota: '', modoCuota: 'monto',
-    modoBusqueda: 'manual', // Iniciará en manual por defecto hasta que cargue el JSON
+    modoBusqueda: 'manual', 
     m2: '', precioM2: '', categoria: '', asesor: '',
     proyectoManual: '', descuentoManual: '', tipoDescuentoManual: 'porcentaje'
   });
@@ -479,6 +505,33 @@ export default function App() {
   // --- HANDLERS COMUNES ---
   const handleFisicoChange = (e) => setFormFisico({ ...formFisico, [e.target.name]: e.target.value });
   const handleCuotaChange = (e) => setFormCuota({ ...formCuota, [e.target.name]: e.target.value });
+  const handleLlamadaChange = (e) => setFormLlamada({ ...formLlamada, [e.target.name]: e.target.value });
+  const handleSeguroChange = (e) => setFormSeguro({ ...formSeguro, [e.target.name]: e.target.value });
+  
+  const handleRecompraChange = (e) => {
+    const { name, value } = e.target;
+    setFormRecompra(prev => {
+      const newState = { ...prev, [name]: value };
+      // Autocompletar nombre antiguo si se escribe en el nuevo y estaba vacío
+      if (name === 'nombreNuevo' && prev.nombreAntiguo === prev.nombreNuevo) {
+        newState.nombreAntiguo = value;
+      }
+      return newState;
+    });
+  };
+  
+  const handleBeneficiarioChange = (index, field, value) => {
+    const nuevosBeneficiarios = [...formSeguro.beneficiarios];
+    nuevosBeneficiarios[index][field] = value;
+    setFormSeguro({ ...formSeguro, beneficiarios: nuevosBeneficiarios });
+  };
+  const agregarBeneficiario = () => setFormSeguro({ ...formSeguro, beneficiarios: [...formSeguro.beneficiarios, { nombre: '', parentesco: '', porcentaje: '', ci: '' }] });
+  const eliminarBeneficiario = (index) => {
+    if (formSeguro.beneficiarios.length > 1) {
+      setFormSeguro({ ...formSeguro, beneficiarios: formSeguro.beneficiarios.filter((_, i) => i !== index) });
+    }
+  };
+
   const handleReenvioChange = (index, field, value) => {
     const nuevosContratos = [...formReenvio.contratos];
     nuevosContratos[index][field] = value;
@@ -599,6 +652,15 @@ export default function App() {
 
     return { vc, descuentoTotal, descuentoTexto, nuevoPrecioTotal, nuevoPrecioM2, porcentajeCuota, montoCuotaNum };
   };
+  
+  // --- LÓGICA BENEFICIO RECOMPRA ---
+  const calcularBeneficioRecompra = () => {
+    const p = formRecompra.proyecto.toUpperCase();
+    if (p.includes('MUYURINA')) return 200;
+    if (p.includes('RANCHO NUEVO')) return 50;
+    // El resto de los mencionados aplican $100
+    return 100;
+  };
 
   const obtenerDatosSupervisor = () => {
     const supervisorSeleccionado = SUPERVISORES.find(s => s.correo === supervisorDestino) || SUPERVISORES[0];
@@ -610,6 +672,140 @@ export default function App() {
   };
 
   // --- GENERADORES DE TEXTOS Y HTML ---
+  const generarTextoRecompra = () => {
+    const beneficio = calcularBeneficioRecompra();
+    return `${obtenerSaludoTiempo()}\nEstimado Ing. Charles por favor su ayuda con el código de pago por recompra de este cliente, le toca pagar su cuota el ${formRecompra.fechaPago || '[FECHA PAGO]'} muchas gracias de antemano:\n\nCONTRATO NUEVO\nSucursal: ${formRecompra.sucursal || '-'}\nFecha de Venta: ${formRecompra.fechaVentaNuevo || '-'}\nNombre: ${formRecompra.nombreNuevo || '-'}\nContrato: ${formRecompra.contratoNuevo || '-'}\n¿Se aplicó dscto por m2?: ${formRecompra.aplicoDescuento}\nCant. de cuotas pagadas: ${formRecompra.cuotasPagadas}\n¿Procesado?: ${formRecompra.procesadoNuevo}\n¿Vigente?: ${formRecompra.vigenteNuevo}\n\nCONTRATO ANTIGUO\nNombre: ${formRecompra.nombreAntiguo || '-'}\nContrato: ${formRecompra.contratoAntiguo || '-'}\nFecha de venta: ${formRecompra.fechaVentaAntiguo || '-'}\nFecha Pago: ${formRecompra.fechaPago || '-'}\n¿Procesado?: ${formRecompra.procesadoAntiguo}\n¿Vigente?: ${formRecompra.vigenteAntiguo}\nPatrocinador: ${formRecompra.patrocinador || '-'}\n\nValor de Cuota $: ${formRecompra.valorCuota || '0'}\nBeneficio $: ${beneficio}\n\nSaludos cordiales,\n${formRecompra.asesor || '[Nombre del Asesor]'}`;
+  };
+
+  const generarHtmlRecompra = () => {
+    const beneficio = calcularBeneficioRecompra();
+    return `
+    <div style="font-family: 'Aptos', Arial, sans-serif; font-size: 14px; color: #333; max-width: 1000px; line-height: 1.5; text-align: left;">
+      <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()},</p>
+      <p style="margin-top: 0; margin-bottom: 25px;">Estimado Ing. Charles por favor su ayuda con el c&oacute;digo de pago por recompra de este cliente, le toca pagar su cuota el <strong>${formRecompra.fechaPago || '[FECHA PAGO]'}</strong> muchas gracias de antemano:</p>
+      
+      <div style="overflow-x: auto; padding-bottom: 10px;">
+        <table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse; font-family: 'Aptos', Arial, sans-serif; font-size: 11px; text-align: center; width: 100%; border: 1px solid #000;">
+          <thead>
+            <tr>
+              <th colspan="8" style="background-color: #ffc000; border: 1px solid #000; padding: 4px;">CONTRATO NUEVO</th>
+              <th colspan="7" style="background-color: #ed7d31; border: 1px solid #000; padding: 4px;">CONTRATO ANTIGUO</th>
+              <th rowspan="2" style="background-color: #fce4d6; border: 1px solid #000; padding: 4px;">VALOR<br>DE<br>CUOTA<br>$</th>
+              <th rowspan="2" style="background-color: #fce4d6; border: 1px solid #000; padding: 4px;">BENEFICIO $</th>
+            </tr>
+            <tr>
+              <th style="background-color: #ffe699; border: 1px solid #000; padding: 4px; width: 80px;">Sucursal</th>
+              <th style="background-color: #ffe699; border: 1px solid #000; padding: 4px; width: 70px;">Fecha de<br>venta</th>
+              <th style="background-color: #ffe699; border: 1px solid #000; padding: 4px; min-width: 120px;">Nombre</th>
+              <th style="background-color: #ffe699; border: 1px solid #000; padding: 4px; width: 80px;">Contrato</th>
+              <th style="background-color: #ffe699; border: 1px solid #000; padding: 4px; width: 70px;">Se aplico<br>descuento por<br>metro ?</th>
+              <th style="background-color: #ffe699; border: 1px solid #000; padding: 4px; width: 70px;">Cant. De<br>cuotas ya<br>pagadas</th>
+              <th style="background-color: #ffe699; border: 1px solid #000; padding: 4px; width: 60px;">¿Procesado?</th>
+              <th style="background-color: #ffe699; border: 1px solid #000; padding: 4px; width: 60px;">¿Vigente?</th>
+
+              <th style="background-color: #f8cbad; border: 1px solid #000; padding: 4px; min-width: 120px;">Nombre</th>
+              <th style="background-color: #f8cbad; border: 1px solid #000; padding: 4px; width: 80px;">Contrato</th>
+              <th style="background-color: #f8cbad; border: 1px solid #000; padding: 4px; width: 70px;">Fecha de<br>venta</th>
+              <th style="background-color: #f8cbad; border: 1px solid #000; padding: 4px; width: 70px;">Fecha Pago</th>
+              <th style="background-color: #f8cbad; border: 1px solid #000; padding: 4px; width: 60px;">¿Procesado?</th>
+              <th style="background-color: #f8cbad; border: 1px solid #000; padding: 4px; width: 60px;">¿Vigente?</th>
+              <th style="background-color: #f8cbad; border: 1px solid #000; padding: 4px; min-width: 100px;">Patrocinador</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="border: 1px solid #000; padding: 4px; text-transform: uppercase;">${formRecompra.sucursal || ''}</td>
+              <td style="border: 1px solid #000; padding: 4px;">${formRecompra.fechaVentaNuevo || ''}</td>
+              <td style="border: 1px solid #000; padding: 4px; text-transform: uppercase;">${formRecompra.nombreNuevo || ''}</td>
+              <td style="border: 1px solid #000; padding: 4px; text-transform: uppercase;">${formRecompra.contratoNuevo || ''}</td>
+              <td style="border: 1px solid #000; padding: 4px;">${formRecompra.aplicoDescuento || 'NO'}</td>
+              <td style="border: 1px solid #000; padding: 4px;">${formRecompra.cuotasPagadas || '0'}</td>
+              <td style="border: 1px solid #000; padding: 4px;">${formRecompra.procesadoNuevo || 'SI'}</td>
+              <td style="border: 1px solid #000; padding: 4px;">${formRecompra.vigenteNuevo || 'SI'}</td>
+              
+              <td style="border: 1px solid #000; padding: 4px; text-transform: uppercase;">${formRecompra.nombreAntiguo || ''}</td>
+              <td style="border: 1px solid #000; padding: 4px; text-transform: uppercase;">${formRecompra.contratoAntiguo || ''}</td>
+              <td style="border: 1px solid #000; padding: 4px;">${formRecompra.fechaVentaAntiguo || ''}</td>
+              <td style="border: 1px solid #000; padding: 4px;">${formRecompra.fechaPago || ''}</td>
+              <td style="border: 1px solid #000; padding: 4px;">${formRecompra.procesadoAntiguo || 'SI'}</td>
+              <td style="border: 1px solid #000; padding: 4px;">${formRecompra.vigenteAntiguo || 'SI'}</td>
+              <td style="border: 1px solid #000; padding: 4px; text-transform: uppercase;">${formRecompra.patrocinador || ''}</td>
+              
+              <td style="border: 1px solid #000; padding: 4px;">${formRecompra.valorCuota || ''}</td>
+              <td style="border: 1px solid #000; padding: 4px;">${beneficio}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p style="margin-top: 25px; margin-bottom: 2px;">Saludos cordiales,</p>
+      <p style="margin-top: 0; font-weight: bold; color: #333;">${formRecompra.asesor || '[Nombre del Asesor]'}</p>
+    </div>`;
+  };
+
+  const generarTextoLlamada = () => {
+    return `${obtenerSaludoTiempo()}\nEstimada Olivia,\n\nPor favor su ayuda con la validación de llamada de este cliente referido, el cliente menciona que tendrá tiempo de contestar hoy a las ${formLlamada.horaLlamada || '[HORA]'}, por favor pido la ayuda de tu equipo para que la puedan llamar a esa hora:\n\nCliente referido:\n${formLlamada.nombreReferido || '[NOMBRE REFERIDO]'}, ${formLlamada.ciReferido || '[CI REFERIDO]'}\n\nCliente beneficiaria:\n${formLlamada.nombreBeneficiario || '[NOMBRE BENEFICIARIA]'}, ${formLlamada.ciBeneficiario || '[CI BENEFICIARIA]'}\n\nSaludos cordiales\n${formLlamada.asesor || '[Nombre del Asesor]'}`;
+  };
+
+  const generarHtmlLlamada = () => {
+    return `
+    <div style="font-family: 'Aptos', Arial, sans-serif; font-size: 14px; color: #333; max-width: 800px; line-height: 1.5; text-align: justify;">
+      <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
+      <p style="margin-top: 0; margin-bottom: 25px;">Estimada Olivia,</p>
+      <p style="margin-bottom: 20px;">Por favor su ayuda con la validaci&oacute;n de llamada de este cliente referido, el cliente menciona que tendr&aacute; tiempo de contestar hoy a las <strong>${formLlamada.horaLlamada || '[HORA]'}</strong>, por favor pido la ayuda de tu equipo para que la puedan llamar a esa hora:</p>
+      
+      <p style="margin-bottom: 5px; color: #555;">Cliente referido:</p>
+      <p style="margin-top: 0; margin-bottom: 15px; font-weight: bold; font-size: 15px; color: #000;">${formLlamada.nombreReferido || '[NOMBRE REFERIDO]'}, ${formLlamada.ciReferido || '[CI REFERIDO]'}</p>
+      
+      <p style="margin-bottom: 5px; color: #555;">Cliente beneficiaria:</p>
+      <p style="margin-top: 0; margin-bottom: 25px; font-weight: bold; font-size: 15px; color: #000;">${formLlamada.nombreBeneficiario || '[NOMBRE BENEFICIARIA]'}, ${formLlamada.ciBeneficiario || '[CI BENEFICIARIA]'}</p>
+      
+      <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
+      <p style="margin-top: 0; font-weight: bold; color: #333;">${formLlamada.asesor || '[Nombre del Asesor]'}</p>
+    </div>`;
+  };
+
+  const generarTextoSeguro = () => {
+    const { saludo, nombrePila } = obtenerDatosSupervisor();
+    const cant = formSeguro.beneficiarios.length;
+    let lista = "NOMBRE\tPARENTESCO\t%\tCI.\n";
+    formSeguro.beneficiarios.forEach(b => {
+      lista += `${b.nombre || '---'}\t${b.parentesco || '---'}\t${b.porcentaje ? b.porcentaje + '%' : '---'}\t${b.ci || '---'}\n`;
+    });
+
+    return `${obtenerSaludoTiempo()}\n${saludo} ${nombrePila},\n\nPor favor tu ayuda adicionando a estos ${cant} beneficiarios al seguro de vida de esta venta, detallo todo a continuación:\n\nCliente(s): ${formSeguro.cliente || '[Nombre del Cliente]'}\nNro. Contrato: ${formSeguro.nroContrato || '[Nro]'}\nUV: ${formSeguro.uv || 'SN'} MZN: ${formSeguro.manzano || 'SN'} LOTE: ${formSeguro.lote || 'SN'}\n\nBeneficiarios del seguro ${cant} personas:\n${lista}\nMuchísimas gracias de antemano.\n\nSaludos cordiales,\n${formSeguro.asesor || '[Nombre del Asesor]'}`;
+  };
+
+  const generarHtmlSeguro = () => {
+    const { saludo, nombrePila } = obtenerDatosSupervisor();
+    const cant = formSeguro.beneficiarios.length;
+    let filas = "";
+    formSeguro.beneficiarios.forEach(b => {
+      filas += `<tr><td style="border: 1px solid #cbd5e1; padding: 8px 12px; font-weight: 500;">${b.nombre || '---'}</td><td style="border: 1px solid #cbd5e1; padding: 8px 12px;">${b.parentesco || '---'}</td><td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center;">${b.porcentaje ? b.porcentaje + '%' : '---'}</td><td style="border: 1px solid #cbd5e1; padding: 8px 12px;">${b.ci || '---'}</td></tr>`;
+    });
+
+    return `
+    <div style="font-family: 'Aptos', Arial, sans-serif; font-size: 14px; color: #333; max-width: 800px; line-height: 1.5; text-align: justify;">
+      <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
+      <p style="margin-top: 0; margin-bottom: 20px;">${saludo} ${nombrePila},</p>
+      <p style="margin-bottom: 20px;">Por favor tu ayuda adicionando a estos ${cant} beneficiarios al seguro de vida de esta venta, detallo todo a continuaci&oacute;n:</p>
+      
+      <p style="margin-bottom: 5px;"><strong>Cliente(s):</strong> ${formSeguro.cliente || '[Nombre del Cliente]'}</p>
+      <p style="margin-bottom: 5px; margin-top: 0;"><strong>Nro. Contrato:</strong> ${formSeguro.nroContrato || '[Nro]'}</p>
+      <p style="margin-bottom: 20px; margin-top: 0;"><strong>UV:</strong> ${formSeguro.uv || 'SN'} &nbsp;&nbsp;&nbsp;<strong>MZN:</strong> ${formSeguro.manzano || 'SN'} &nbsp;&nbsp;&nbsp;<strong>LOTE:</strong> ${formSeguro.lote || 'SN'}</p>
+
+      <p style="margin-bottom: 10px; font-weight: bold;">Beneficiarios del seguro ${cant} personas:</p>
+      <table cellpadding="0" cellspacing="0" style="border-collapse: collapse; border: 1px solid #cbd5e1; font-family: 'Aptos', Arial, sans-serif; font-size: 13px; margin-bottom: 25px; width: 100%; text-align: left;">
+        <thead><tr style="background-color: #f8fafc;"><th style="border: 1px solid #cbd5e1; padding: 8px 12px;">NOMBRE</th><th style="border: 1px solid #cbd5e1; padding: 8px 12px;">PARENTESCO</th><th style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center;">%</th><th style="border: 1px solid #cbd5e1; padding: 8px 12px;">CI.</th></tr></thead>
+        <tbody>${filas}</tbody>
+      </table>
+      
+      <p style="margin-bottom: 25px;">Much&iacute;simas gracias de antemano.</p>
+      <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
+      <p style="margin-top: 0; font-weight: bold; color: #333;">${formSeguro.asesor || '[Nombre del Asesor]'}</p>
+    </div>`;
+  };
+
   const generarTextoFisico = () => {
     const { saludo, titulo } = obtenerDatosSupervisor();
     return `${obtenerSaludoTiempo()}\n${saludo} ${titulo},\n\nPor medio de la presente, solicito el cambio de contrato digital a físico para el siguiente cliente:\n\n- Nombre del Cliente: ${formFisico.nombre || '[Nombre]'}\n- Número de Carnet (CI): ${formFisico.ci || '[CI]'}\n- Número de Contrato: ${formFisico.contrato || '[Nro Contrato]'}\n\nMotivo de la solicitud:\n${formFisico.motivo || '[Describa el motivo...]'}\n\nQuedo atento a la confirmación. \n\nSaludos cordiales,\n${formFisico.asesor || '[Nombre del Asesor]'}`;
@@ -920,14 +1116,23 @@ export default function App() {
           </button>
           
           <div className="pt-5 pb-2"><p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Trámites Generales</p></div>
+          <button onClick={() => setActiveTab('llamada')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'llamada' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+            <PhoneCall className="w-5 h-5 mr-3" /> Validación Llamada
+          </button>
           <button onClick={() => setActiveTab('fisico')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'fisico' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <FileText className="w-5 h-5 mr-3" /> Contrato Físico
           </button>
           <button onClick={() => setActiveTab('reenvio')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'reenvio' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <FileSignature className="w-5 h-5 mr-3" /> Reenvío Firma Digital
           </button>
+          <button onClick={() => setActiveTab('seguro')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'seguro' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+            <Shield className="w-5 h-5 mr-3" /> Seguro de Vida
+          </button>
 
-          <div className="pt-5 pb-2"><p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Cotizaciones</p></div>
+          <div className="pt-5 pb-2"><p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Cotizaciones y Recompras</p></div>
+          <button onClick={() => setActiveTab('recompra')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'recompra' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+            <Repeat className="w-5 h-5 mr-3" /> Recompra
+          </button>
           <button onClick={() => setActiveTab('descuento')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'descuento' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <Tag className="w-5 h-5 mr-3" /> Descuentos Campañas
           </button>
@@ -949,8 +1154,8 @@ export default function App() {
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 overflow-auto p-6 md:p-10">
-        <div className="max-w-6xl mx-auto">
+      <div className="flex-1 overflow-auto p-6 md:p-10 w-full">
+        <div className="max-w-7xl mx-auto w-full">
           
           {/* DASHBOARD VIEW */}
           {activeTab === 'dashboard' && (
@@ -969,6 +1174,205 @@ export default function App() {
             </div>
           )}
 
+          {/* FORM: VALIDACIÓN LLAMADA */}
+          {activeTab === 'llamada' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><PhoneCall className="w-6 h-6 mr-2 text-blue-600" /> Validación de Llamada (Referidos)</h2></div>
+              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full">
+                  <Input label="Nombre del Asesor" name="asesor" value={formLlamada.asesor} onChange={handleLlamadaChange} placeholder="Ej. Oscar Saravia" />
+                  
+                  <div className="mt-6 mb-4 pb-2 border-b border-slate-100">
+                    <h3 className="text-sm font-bold text-slate-800">Datos del Cliente Referido</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
+                    <Input label="Nombre del Referido" name="nombreReferido" value={formLlamada.nombreReferido} onChange={handleLlamadaChange} placeholder="Ej. Maria Fernanda Ramos Escobar" />
+                    <Input label="Carnet (CI) Referido" name="ciReferido" value={formLlamada.ciReferido} onChange={handleLlamadaChange} placeholder="Ej. C2604002026" />
+                  </div>
+                  <Input label="Hora para la llamada" name="horaLlamada" value={formLlamada.horaLlamada} onChange={handleLlamadaChange} placeholder="Ej. 16:00 PM" />
+
+                  <div className="mt-6 mb-4 pb-2 border-b border-slate-100">
+                    <h3 className="text-sm font-bold text-slate-800">Datos del Cliente Beneficiaria</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
+                    <Input label="Nombre de la Beneficiaria" name="nombreBeneficiario" value={formLlamada.nombreBeneficiario} onChange={handleLlamadaChange} placeholder="Ej. Crispina García López" />
+                    <Input label="Carnet (CI) Beneficiaria" name="ciBeneficiario" value={formLlamada.ciBeneficiario} onChange={handleLlamadaChange} placeholder="Ej. C2604201165" />
+                  </div>
+                </div>
+                <div className="w-full">
+                  <ResultCard 
+                    title="Validación Llamada" 
+                    text={generarTextoLlamada()} 
+                    htmlContent={generarHtmlLlamada()} 
+                    subject={`Solicitud de validación llamada Cliente referido: ${formLlamada.nombreReferido || 'NOMBRE'}, ${formLlamada.ciReferido || 'CI'}`} 
+                    fixedDestinoLabel="Olivia Mendoza Duran"
+                    fixedDestinoEmail="omendoza@celina.com.bo"
+                    ccEmails="elizarraga@celina.com.bo, aperez@celina.com.bo"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* FORM: SEGURO DE VIDA */}
+          {activeTab === 'seguro' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
+              <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><Shield className="w-6 h-6 mr-2 text-blue-600" /> Adición Beneficiarios Seguro</h2></div>
+              <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_1fr] gap-8 w-full">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full">
+                   <div className="mb-4"><Input label="Nombre del Asesor" name="asesor" value={formSeguro.asesor} onChange={handleSeguroChange} placeholder="Ej. Oscar Saravia" /></div>
+                   
+                   <div className="mt-6 mb-4 pb-2 border-b border-slate-100">
+                      <h3 className="text-sm font-bold text-slate-800">Datos de la Venta</h3>
+                   </div>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mb-2">
+                      <Input label="Nombre del Cliente(s)" name="cliente" value={formSeguro.cliente} onChange={handleSeguroChange} placeholder="Ej. Celso Aguilera Barboza" />
+                      <Input label="Nro. Contrato" name="nroContrato" value={formSeguro.nroContrato} onChange={handleSeguroChange} placeholder="Ej. C2504200808" />
+                   </div>
+                   <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full mb-4">
+                      <Input label="UV" name="uv" value={formSeguro.uv} onChange={handleSeguroChange} placeholder="Ej. SN" />
+                      <Input label="Manzano" name="manzano" value={formSeguro.manzano} onChange={handleSeguroChange} placeholder="Ej. 52" />
+                      <Input label="Lote" name="lote" value={formSeguro.lote} onChange={handleSeguroChange} placeholder="Ej. 10" />
+                   </div>
+
+                   <div className="mt-6 mb-4 pb-2 border-b border-slate-100">
+                      <h3 className="text-sm font-bold text-slate-800">Beneficiarios del Seguro</h3>
+                   </div>
+                   <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 w-full">
+                      {formSeguro.beneficiarios.map((b, index) => (
+                        <div key={index} className="p-4 bg-slate-50 border border-slate-200 rounded-xl relative group w-full">
+                          {formSeguro.beneficiarios.length > 1 && (<button onClick={() => eliminarBeneficiario(index)} className="absolute -top-2 -right-2 bg-red-100 text-red-600 p-1.5 rounded-full z-10"><Trash2 className="w-4 h-4" /></button>)}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3 w-full">
+                            <div className="w-full"><label className="block text-xs font-semibold text-slate-600 mb-1">Nombre</label><input type="text" value={b.nombre} onChange={(e) => handleBeneficiarioChange(index, 'nombre', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm bg-white uppercase" placeholder="Ej. Carla Aguilera Chávez" /></div>
+                            <div className="w-full"><label className="block text-xs font-semibold text-slate-600 mb-1">Parentesco</label><input type="text" value={b.parentesco} onChange={(e) => handleBeneficiarioChange(index, 'parentesco', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm bg-white uppercase" placeholder="Ej. HIJA" /></div>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full">
+                            <div className="w-full"><label className="block text-xs font-semibold text-slate-600 mb-1">Porcentaje (%)</label><input type="number" value={b.porcentaje} onChange={(e) => handleBeneficiarioChange(index, 'porcentaje', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm bg-white" placeholder="Ej. 50" /></div>
+                            <div className="w-full"><label className="block text-xs font-semibold text-slate-600 mb-1">C.I.</label><input type="text" value={b.ci} onChange={(e) => handleBeneficiarioChange(index, 'ci', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm bg-white uppercase" placeholder="Ej. OTROS" /></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <button onClick={agregarBeneficiario} className="mt-4 w-full flex items-center justify-center py-3 border-2 border-dashed rounded-xl text-slate-600 hover:text-blue-600 font-medium text-sm transition-colors"><Plus className="w-4 h-4 mr-1" /> Añadir otro beneficiario</button>
+                </div>
+                <div className="w-full">
+                   <ResultCard 
+                     title="Adición Beneficiarios Seguro" 
+                     text={generarTextoSeguro()} 
+                     htmlContent={generarHtmlSeguro()} 
+                     subject={`solicitud de adición de ${formSeguro.beneficiarios.length} beneficiarios al seguro de vida ${formSeguro.nroContrato}`} 
+                     supervisorDestino={supervisorDestino} 
+                     setSupervisorDestino={setSupervisorDestino} 
+                   />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* FORM: RECOMPRA */}
+          {activeTab === 'recompra' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
+              <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><Repeat className="w-6 h-6 mr-2 text-blue-600" /> Solicitud de Recompra</h2></div>
+              <div className="grid grid-cols-1 xl:grid-cols-[1fr] gap-8 w-full">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full">
+                   
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mb-6">
+                      <Input label="Nombre del Asesor" name="asesor" value={formRecompra.asesor} onChange={handleRecompraChange} placeholder="Ej. Oscar Saravia" />
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Proyecto (Para Beneficio $)</label>
+                        <select name="proyecto" value={formRecompra.proyecto} onChange={handleRecompraChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm text-sm">
+                           <option value="Muyurina">Muyurina ($200)</option>
+                           <option value="El Renacer">El Renacer ($100)</option>
+                           <option value="Los Jardines">Los Jardines ($100)</option>
+                           <option value="Santa Fe">Santa Fe ($100)</option>
+                           <option value="Cañaveral">Cañaveral ($100)</option>
+                           <option value="Celina 3">Celina 3 ($100)</option>
+                           <option value="Celina 4">Celina 4 ($100)</option>
+                           <option value="Celina 5">Celina 5 ($100)</option>
+                           <option value="Celina 7">Celina 7 ($100)</option>
+                           <option value="Celina 10">Celina 10 ($100)</option>
+                           <option value="Rancho Nuevo">Rancho Nuevo ($50)</option>
+                        </select>
+                      </div>
+                   </div>
+
+                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
+                     {/* CONTRATO NUEVO */}
+                     <div className="bg-amber-50/50 p-5 rounded-xl border border-amber-200">
+                        <h3 className="text-sm font-extrabold text-amber-600 mb-4 border-b border-amber-200 pb-2">DATOS CONTRATO NUEVO</h3>
+                        <Input label="Sucursal / Agencia" name="sucursal" value={formRecompra.sucursal} onChange={handleRecompraChange} placeholder="Ej. YAPACANI" />
+                        <Input label="Fecha de venta" name="fechaVentaNuevo" value={formRecompra.fechaVentaNuevo} onChange={handleRecompraChange} placeholder="Ej. 27/8/2025" />
+                        <Input label="Nombre del Cliente" name="nombreNuevo" value={formRecompra.nombreNuevo} onChange={handleRecompraChange} placeholder="Ej. DILSON DURY MARIACA" />
+                        <Input label="Contrato Nuevo" name="contratoNuevo" value={formRecompra.contratoNuevo} onChange={handleRecompraChange} placeholder="Ej. C2504001327" />
+                        
+                        <div className="grid grid-cols-2 gap-4 mt-2">
+                           <div className="w-full">
+                             <label className="block text-xs font-bold text-slate-700 mb-1.5">¿Aplicó Dscto por m2?</label>
+                             <select name="aplicoDescuento" value={formRecompra.aplicoDescuento} onChange={handleRecompraChange} className="w-full px-3 py-2 border border-slate-200 rounded bg-white text-sm">
+                               <option value="NO">NO</option><option value="SI">SI</option>
+                             </select>
+                           </div>
+                           <div className="w-full">
+                             <label className="block text-xs font-bold text-slate-700 mb-1.5">Cuotas Pagadas</label>
+                             <input type="number" name="cuotasPagadas" value={formRecompra.cuotasPagadas} onChange={handleRecompraChange} className="w-full px-3 py-2 border border-slate-200 rounded text-sm" placeholder="Ej. 2" />
+                           </div>
+                           <div className="w-full">
+                             <label className="block text-xs font-bold text-slate-700 mb-1.5">¿Procesado?</label>
+                             <select name="procesadoNuevo" value={formRecompra.procesadoNuevo} onChange={handleRecompraChange} className="w-full px-3 py-2 border border-slate-200 rounded bg-white text-sm">
+                               <option value="SI">SI</option><option value="NO">NO</option>
+                             </select>
+                           </div>
+                           <div className="w-full">
+                             <label className="block text-xs font-bold text-slate-700 mb-1.5">¿Vigente?</label>
+                             <select name="vigenteNuevo" value={formRecompra.vigenteNuevo} onChange={handleRecompraChange} className="w-full px-3 py-2 border border-slate-200 rounded bg-white text-sm">
+                               <option value="SI">SI</option><option value="NO">NO</option>
+                             </select>
+                           </div>
+                        </div>
+                     </div>
+
+                     {/* CONTRATO ANTIGUO */}
+                     <div className="bg-orange-50/50 p-5 rounded-xl border border-orange-200">
+                        <h3 className="text-sm font-extrabold text-orange-600 mb-4 border-b border-orange-200 pb-2">DATOS CONTRATO ANTIGUO</h3>
+                        <Input label="Nombre del Cliente Antiguo" name="nombreAntiguo" value={formRecompra.nombreAntiguo} onChange={handleRecompraChange} placeholder="Ej. DILSON DURY MARIACA" />
+                        <Input label="Contrato Antiguo" name="contratoAntiguo" value={formRecompra.contratoAntiguo} onChange={handleRecompraChange} placeholder="Ej. C2504001326" />
+                        <Input label="Fecha de venta" name="fechaVentaAntiguo" value={formRecompra.fechaVentaAntiguo} onChange={handleRecompraChange} placeholder="Ej. 27/8/2025" />
+                        <Input label="Fecha Pago de Cuota" name="fechaPago" value={formRecompra.fechaPago} onChange={handleRecompraChange} placeholder="Ej. 7-dic-25" />
+                        <Input label="Patrocinador" name="patrocinador" value={formRecompra.patrocinador} onChange={handleRecompraChange} placeholder="Ej. JHOVANA ALMANZA VALLEJOS" />
+                        <Input label="Valor de Cuota ($)" name="valorCuota" value={formRecompra.valorCuota} onChange={handleRecompraChange} placeholder="Ej. 304.8" type="number" />
+                        
+                        <div className="grid grid-cols-2 gap-4 mt-2">
+                           <div className="w-full">
+                             <label className="block text-xs font-bold text-slate-700 mb-1.5">¿Procesado?</label>
+                             <select name="procesadoAntiguo" value={formRecompra.procesadoAntiguo} onChange={handleRecompraChange} className="w-full px-3 py-2 border border-slate-200 rounded bg-white text-sm">
+                               <option value="SI">SI</option><option value="NO">NO</option>
+                             </select>
+                           </div>
+                           <div className="w-full">
+                             <label className="block text-xs font-bold text-slate-700 mb-1.5">¿Vigente?</label>
+                             <select name="vigenteAntiguo" value={formRecompra.vigenteAntiguo} onChange={handleRecompraChange} className="w-full px-3 py-2 border border-slate-200 rounded bg-white text-sm">
+                               <option value="SI">SI</option><option value="NO">NO</option>
+                             </select>
+                           </div>
+                        </div>
+                     </div>
+                   </div>
+
+                </div>
+                <div className="w-full">
+                   <ResultCard 
+                     title="Solicitud Recompra" 
+                     text={generarTextoRecompra()} 
+                     htmlContent={generarHtmlRecompra()} 
+                     subject={`solicitud de código de descuento RECOMPRA cliente: ${formRecompra.nombreNuevo || 'NOMBRE'}`} 
+                     fixedDestinoLabel="Charles Barretto"
+                     fixedDestinoEmail="cbarretto@celina.com.bo"
+                   />
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* FORM: PROYECCIÓN SEMANAL */}
           {activeTab === 'proyeccion' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -981,10 +1385,10 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-                  <div className="p-4 border-b border-slate-100 flex gap-4 bg-slate-50 items-center">
-                    <div className="flex-1">
+              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-[2fr_1fr] gap-6 w-full">
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col w-full">
+                  <div className="p-4 border-b border-slate-100 flex flex-wrap gap-4 bg-slate-50 items-center w-full">
+                    <div className="flex-1 min-w-[200px]">
                       <label className="block text-xs font-bold text-slate-500 uppercase">Equipo Supervisor</label>
                       <select 
                         value={formProyeccion.equipo} 
@@ -996,17 +1400,17 @@ export default function App() {
                         ))}
                       </select>
                     </div>
-                    <div className="w-40">
+                    <div className="w-full sm:w-40">
                       <label className="block text-xs font-bold text-slate-500 uppercase">Semana del (Lunes)</label>
                       <input type="date" value={formProyeccion.fechaInicio} onChange={(e) => setFormProyeccion({...formProyeccion, fechaInicio: e.target.value})} className="w-full px-3 py-1.5 mt-1 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 bg-white" />
                     </div>
-                    <div className="w-40">
+                    <div className="w-full sm:w-40">
                       <label className="block text-xs font-bold text-slate-500 uppercase">Objetivo Mes</label>
                       <input type="number" value={formProyeccion.objetivoMensual} onChange={(e) => setFormProyeccion({...formProyeccion, objetivoMensual: parseFloat(e.target.value) || 0})} className="w-full px-3 py-1.5 mt-1 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 bg-white" />
                     </div>
                   </div>
 
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto w-full">
                     <table className="w-full text-left border-collapse text-[11px] whitespace-nowrap">
                       <thead>
                         <tr>
@@ -1025,16 +1429,16 @@ export default function App() {
                           <tr key={i} className="hover:bg-blue-50/50">
                             <td className="p-2 border border-slate-300 font-medium text-slate-800">{i+1}. {asesor.nombre}</td>
                             <td className="p-1 border border-slate-300">
-                              <input type="number" value={asesor.colAct === 0 ? '' : asesor.colAct} onChange={(e) => updateAsesorProyeccion(i, 'colAct', e.target.value)} className="w-20 p-1 text-right text-xs bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded" placeholder="0" />
+                              <input type="number" value={asesor.colAct === 0 ? '' : asesor.colAct} onChange={(e) => updateAsesorProyeccion(i, 'colAct', e.target.value)} className="w-full min-w-[60px] p-1 text-right text-xs bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded" placeholder="0" />
                             </td>
                             {asesor.dias.map((diaVal, dIdx) => (
                               <td key={dIdx} className="p-1 border border-slate-300">
-                                <input type="number" value={diaVal === 0 ? '' : diaVal} onChange={(e) => updateAsesorArrayProyeccion(i, 'dias', dIdx, e.target.value)} className="w-16 p-1 text-center text-xs bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded" placeholder="-" />
+                                <input type="number" value={diaVal === 0 ? '' : diaVal} onChange={(e) => updateAsesorArrayProyeccion(i, 'dias', dIdx, e.target.value)} className="w-full min-w-[40px] p-1 text-center text-xs bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded" placeholder="-" />
                               </td>
                             ))}
                             {asesor.proy.map((proyVal, pIdx) => (
                               <td key={pIdx} className="p-1 border border-slate-300 bg-green-50/30">
-                                <input type="number" value={proyVal === 0 ? '' : proyVal} onChange={(e) => updateAsesorArrayProyeccion(i, 'proy', pIdx, e.target.value)} className="w-12 p-1 text-center text-xs font-bold text-slate-700 bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded" placeholder="0" />
+                                <input type="number" value={proyVal === 0 ? '' : proyVal} onChange={(e) => updateAsesorArrayProyeccion(i, 'proy', pIdx, e.target.value)} className="w-full min-w-[40px] p-1 text-center text-xs font-bold text-slate-700 bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded" placeholder="0" />
                               </td>
                             ))}
                           </tr>
@@ -1043,11 +1447,11 @@ export default function App() {
                     </table>
                   </div>
                   <div className="p-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 flex items-center">
-                     <Info className="w-4 h-4 mr-2" /> Los totales por semana, por mes y promedios se calculan solos en la vista previa a la derecha.
+                     <Info className="w-4 h-4 mr-2 flex-shrink-0" /> Los totales por semana, por mes y promedios se calculan solos en la vista previa a la derecha.
                   </div>
                 </div>
 
-                <div>
+                <div className="w-full">
                   <ResultCard 
                     title="Proyección Semanal" 
                     text={generarTextoProyeccion()} 
@@ -1066,17 +1470,17 @@ export default function App() {
           {activeTab === 'fisico' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><FileText className="w-6 h-6 mr-2 text-blue-600" /> Habilitación de Contrato Físico</h2></div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full">
                   <Input label="Nombre del Asesor" name="asesor" value={formFisico.asesor} onChange={handleFisicoChange} placeholder="Ej. Oscar Saravia" />
                   <Input label="Nombre Completo del Cliente" name="nombre" value={formFisico.nombre} onChange={handleFisicoChange} placeholder="Ej. Juan Pérez" />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
                     <Input label="Número de Carnet (CI)" name="ci" value={formFisico.ci} onChange={handleFisicoChange} placeholder="Ej. 1234567" />
                     <Input label="Número de Contrato" name="contrato" value={formFisico.contrato} onChange={handleFisicoChange} placeholder="Ej. CT-9876" />
                   </div>
                   <TextArea label="Motivo detallado" name="motivo" value={formFisico.motivo} onChange={handleFisicoChange} placeholder="Ej. El cliente es una persona mayor..." />
                 </div>
-                <div><ResultCard title="Contrato Físico" text={generarTextoFisico()} htmlContent={generarHtmlFisico()} subject={`Solicitud Contrato Físico - ${formFisico.nombre || 'Cliente'}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
+                <div className="w-full"><ResultCard title="Contrato Físico" text={generarTextoFisico()} htmlContent={generarHtmlFisico()} subject={`Solicitud Contrato Físico - ${formFisico.nombre || 'Cliente'}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
               </div>
             </div>
           )}
@@ -1085,33 +1489,37 @@ export default function App() {
           {activeTab === 'reenvio' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><FileSignature className="w-6 h-6 mr-2 text-blue-600" /> Reenvío Firma Digital</h2></div>
-              <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                  <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-2">
+              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-[1.2fr_1fr] gap-8 w-full">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 border-b border-slate-100 pb-3 gap-3">
                     <h3 className="text-lg font-medium text-slate-800">Listado de Contratos</h3>
-                    <div className="w-1/3"><select value={formReenvio.proyecto} onChange={(e) => setFormReenvio({...formReenvio, proyecto: e.target.value})} className="w-full px-3 py-1.5 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">{PROYECTOS.map(p => <option key={p} value={p}>{p}</option>)}</select></div>
+                    <div className="w-full sm:w-1/2 md:w-1/3">
+                      <select value={formReenvio.proyecto} onChange={(e) => setFormReenvio({...formReenvio, proyecto: e.target.value})} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+                        {PROYECTOS.map(p => <option key={p} value={p}>{p}</option>)}
+                      </select>
+                    </div>
                   </div>
                   <div className="mb-4"><Input label="Nombre del Asesor" name="asesor" value={formReenvio.asesor} onChange={(e) => setFormReenvio({...formReenvio, asesor: e.target.value})} placeholder="Ej. Oscar Saravia" /></div>
-                  <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                  <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 w-full">
                     {formReenvio.contratos.map((contrato, index) => (
-                      <div key={index} className="p-4 bg-slate-50 border border-slate-200 rounded-xl relative group">
-                        {formReenvio.contratos.length > 1 && (<button onClick={() => eliminarContratoReenvio(index)} className="absolute -top-2 -right-2 bg-red-100 text-red-600 p-1.5 rounded-full"><Trash2 className="w-4 h-4" /></button>)}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                          <div><label className="block text-xs font-semibold text-slate-600 mb-1">Nro. Contrato</label><input type="text" value={contrato.nroContrato} onChange={(e) => handleReenvioChange(index, 'nroContrato', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm bg-white" /></div>
-                          <div><label className="block text-xs font-semibold text-slate-600 mb-1">Carnet (CI)</label><input type="text" value={contrato.ci} onChange={(e) => handleReenvioChange(index, 'ci', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm bg-white" /></div>
+                      <div key={index} className="p-4 bg-slate-50 border border-slate-200 rounded-xl relative group w-full">
+                        {formReenvio.contratos.length > 1 && (<button onClick={() => eliminarContratoReenvio(index)} className="absolute -top-2 -right-2 bg-red-100 text-red-600 p-1.5 rounded-full z-10"><Trash2 className="w-4 h-4" /></button>)}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3 w-full">
+                          <div className="w-full"><label className="block text-xs font-semibold text-slate-600 mb-1">Nro. Contrato</label><input type="text" value={contrato.nroContrato} onChange={(e) => handleReenvioChange(index, 'nroContrato', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm bg-white" /></div>
+                          <div className="w-full"><label className="block text-xs font-semibold text-slate-600 mb-1">Carnet (CI)</label><input type="text" value={contrato.ci} onChange={(e) => handleReenvioChange(index, 'ci', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm bg-white" /></div>
                         </div>
-                        <div className="mb-3"><label className="block text-xs font-semibold text-slate-600 mb-1">Nombre del Cliente</label><input type="text" value={contrato.cliente} onChange={(e) => handleReenvioChange(index, 'cliente', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm uppercase bg-white" /></div>
-                        <div className="grid grid-cols-3 gap-3">
-                          <div className="flex items-center"><span className="text-xs text-slate-500 mr-2">UV:</span><input type="text" value={contrato.uv} onChange={(e) => handleReenvioChange(index, 'uv', e.target.value)} className="w-full px-2.5 py-1 border rounded text-sm bg-white" /></div>
-                          <div className="flex items-center"><span className="text-xs text-slate-500 mr-2">Mzn:</span><input type="text" value={contrato.manzano} onChange={(e) => handleReenvioChange(index, 'manzano', e.target.value)} className="w-full px-2.5 py-1 border rounded text-sm bg-white" /></div>
-                          <div className="flex items-center"><span className="text-xs text-slate-500 mr-2">Lote:</span><input type="text" value={contrato.lote} onChange={(e) => handleReenvioChange(index, 'lote', e.target.value)} className="w-full px-2.5 py-1 border rounded text-sm bg-white" /></div>
+                        <div className="mb-3 w-full"><label className="block text-xs font-semibold text-slate-600 mb-1">Nombre del Cliente</label><input type="text" value={contrato.cliente} onChange={(e) => handleReenvioChange(index, 'cliente', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm uppercase bg-white" /></div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full">
+                          <div className="flex flex-col w-full"><label className="text-xs text-slate-500 mb-1">UV:</label><input type="text" value={contrato.uv} onChange={(e) => handleReenvioChange(index, 'uv', e.target.value)} className="w-full px-2.5 py-1 border rounded text-sm bg-white" /></div>
+                          <div className="flex flex-col w-full"><label className="text-xs text-slate-500 mb-1">Mzn:</label><input type="text" value={contrato.manzano} onChange={(e) => handleReenvioChange(index, 'manzano', e.target.value)} className="w-full px-2.5 py-1 border rounded text-sm bg-white" /></div>
+                          <div className="flex flex-col w-full"><label className="text-xs text-slate-500 mb-1">Lote:</label><input type="text" value={contrato.lote} onChange={(e) => handleReenvioChange(index, 'lote', e.target.value)} className="w-full px-2.5 py-1 border rounded text-sm bg-white" /></div>
                         </div>
                       </div>
                     ))}
                   </div>
-                  <button onClick={agregarContratoReenvio} className="mt-4 w-full flex items-center justify-center py-2 border-2 border-dashed rounded-xl text-slate-600 hover:text-blue-600 font-medium text-sm"><Plus className="w-4 h-4 mr-1" /> Añadir otro contrato</button>
+                  <button onClick={agregarContratoReenvio} className="mt-4 w-full flex items-center justify-center py-3 border-2 border-dashed rounded-xl text-slate-600 hover:text-blue-600 font-medium text-sm transition-colors"><Plus className="w-4 h-4 mr-1" /> Añadir otro contrato</button>
                 </div>
-                <div><ResultCard title="Reenvío Firma Digital" text={generarTextoReenvio()} htmlContent={generarHtmlReenvio()} subject={`Solicitud Reenvío de Correo Firma Digital - ${formReenvio.proyecto}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
+                <div className="w-full"><ResultCard title="Reenvío Firma Digital" text={generarTextoReenvio()} htmlContent={generarHtmlReenvio()} subject={`Solicitud Reenvío de Correo Firma Digital - ${formReenvio.proyecto}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
               </div>
             </div>
           )}
@@ -1121,12 +1529,12 @@ export default function App() {
             const { porcentajeCuota, montoCuotaNum } = calcularDescuento();
             const nomProyectoFinal = formDescuento.proyecto === 'OTRO...' ? (formDescuento.proyectoManual || 'PROYECTO MANUAL') : formDescuento.proyecto;
             return (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="mb-6 flex justify-between items-end">
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
+                <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
                   <h2 className="text-2xl font-bold text-slate-800 flex items-center"><Tag className="w-6 h-6 mr-2 text-blue-600" /> Descuentos Campañas</h2>
                   
                   {/* BOTÓN TOGGLE BÚSQUEDA INTELIGENTE / MANUAL */}
-                  <div className="bg-slate-200/60 p-1 rounded-full inline-flex">
+                  <div className="bg-slate-200/60 p-1 rounded-full inline-flex self-start sm:self-auto">
                     <button 
                       onClick={() => setFormDescuento({...formDescuento, modoBusqueda: 'inteligente'})}
                       disabled={formDescuento.proyecto === 'OTRO...'}
@@ -1143,29 +1551,40 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-8">
-                  <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
-                      <div><label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Proyecto</label><select name="proyecto" value={formDescuento.proyecto} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm">{PROYECTOS.map(p => <option key={p} value={p}>{p.toUpperCase()}</option>)}</select></div>
-                      <div><label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Modalidad</label><select name="modalidad" value={formDescuento.modalidad} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm"><option value="Contado">Al Contado</option><option value="Crédito">A Crédito (Plazos)</option></select></div>
+                <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-[1.3fr_1fr] gap-8 w-full">
+                  <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5 w-full">
+                      <div className="w-full">
+                        <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Proyecto</label>
+                        <select name="proyecto" value={formDescuento.proyecto} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm text-sm">
+                          {PROYECTOS.map(p => <option key={p} value={p}>{p.toUpperCase()}</option>)}
+                        </select>
+                      </div>
+                      <div className="w-full">
+                        <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Modalidad</label>
+                        <select name="modalidad" value={formDescuento.modalidad} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm text-sm">
+                          <option value="Contado">Al Contado</option>
+                          <option value="Crédito">A Crédito (Plazos)</option>
+                        </select>
+                      </div>
                     </div>
 
                     {formDescuento.proyecto === 'OTRO...' && (
-                      <div className="mb-5 bg-amber-50/80 p-4 rounded-xl border border-amber-200 shadow-sm">
+                      <div className="mb-5 bg-amber-50/80 p-4 rounded-xl border border-amber-200 shadow-sm w-full">
                         <h4 className="font-bold text-amber-800 mb-3 text-sm flex items-center"><Edit3 className="w-4 h-4 mr-2" /> Proyecto Manual</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                           <div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                           <div className="w-full">
                              <label className="block text-xs font-bold text-slate-700 mb-1.5 ml-0.5">Nombre del Proyecto</label>
                              <input type="text" name="proyectoManual" value={formDescuento.proyectoManual} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-amber-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none bg-white text-sm" placeholder="Ej. Celina VII"/>
                            </div>
-                           <div>
+                           <div className="w-full">
                              <label className="block text-xs font-bold text-slate-700 mb-1.5 ml-0.5">Descuento a Aplicar</label>
-                             <div className="flex w-full gap-2">
-                               <select name="tipoDescuentoManual" value={formDescuento.tipoDescuentoManual} onChange={handleDescuentoChange} className="w-1/2 px-2 py-2.5 border border-amber-200 rounded-xl bg-white text-sm font-semibold focus:ring-2 focus:ring-amber-500 outline-none">
+                             <div className="flex flex-col sm:flex-row w-full gap-2">
+                               <select name="tipoDescuentoManual" value={formDescuento.tipoDescuentoManual} onChange={handleDescuentoChange} className="w-full sm:w-1/2 px-2 py-2.5 border border-amber-200 rounded-xl bg-white text-sm font-semibold focus:ring-2 focus:ring-amber-500 outline-none">
                                   <option value="porcentaje">% Desc.</option>
                                   <option value="monto">$ por m²</option>
                                </select>
-                               <input type="number" name="descuentoManual" value={formDescuento.descuentoManual} onChange={handleDescuentoChange} className="w-1/2 px-3 py-2.5 border border-amber-200 rounded-xl bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm" placeholder="Ej. 10"/>
+                               <input type="number" name="descuentoManual" value={formDescuento.descuentoManual} onChange={handleDescuentoChange} className="w-full sm:w-1/2 px-3 py-2.5 border border-amber-200 rounded-xl bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm" placeholder="Ej. 10"/>
                              </div>
                            </div>
                         </div>
@@ -1173,14 +1592,14 @@ export default function App() {
                     )}
 
                     {formDescuento.modalidad === 'Crédito' && (
-                      <div className="mb-6 bg-blue-50/50 p-4 rounded-xl border border-blue-100/50">
+                      <div className="mb-6 bg-blue-50/50 p-5 rounded-xl border border-blue-100/50 w-full">
                         <div className="flex flex-col w-full">
-                          <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Ingresar Cuota Inicial</label>
+                          <label className="block text-sm font-bold text-slate-700 mb-2 ml-0.5">Ingresar Cuota Inicial</label>
                           <div className="flex flex-col sm:flex-row w-full gap-3">
                             <select 
                               value={formDescuento.modoCuota} 
                               onChange={(e) => setFormDescuento({...formDescuento, modoCuota: e.target.value, cuota: ''})}
-                              className="w-full sm:w-1/3 px-3 py-2.5 border border-blue-200 rounded-xl bg-white text-slate-700 font-semibold focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                              className="flex-1 px-3 py-2.5 border border-blue-200 rounded-xl bg-white text-slate-700 font-semibold focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                             >
                               <option value="monto">Monto ($)</option>
                               <option value="porcentaje">Porcentaje (%)</option>
@@ -1191,9 +1610,9 @@ export default function App() {
                               value={formDescuento.cuota} 
                               onChange={handleDescuentoChange} 
                               placeholder={formDescuento.modoCuota === 'monto' ? "Ej. 1000" : "Ej. 5"}
-                              className="w-full sm:w-1/3 px-3 py-2.5 border border-blue-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 outline-none shadow-inner text-sm" 
+                              className="flex-1 px-3 py-2.5 border border-blue-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 outline-none shadow-inner text-sm" 
                             />
-                            <div className="w-full sm:w-1/3 flex items-center justify-center bg-blue-600 text-white rounded-xl font-bold text-sm shadow-sm py-2.5 whitespace-nowrap">
+                            <div className="flex-1 flex items-center justify-center bg-blue-600 text-white rounded-xl font-bold text-sm shadow-sm py-2.5 px-2">
                               {formDescuento.modoCuota === 'monto' 
                                 ? `${formatCurrency(porcentajeCuota)}%` 
                                 : `$ ${formatCurrency(montoCuotaNum)}`}
@@ -1205,23 +1624,23 @@ export default function App() {
                     
                     {/* MENÚS CASCADA O MANUAL */}
                     {formDescuento.modoBusqueda === 'inteligente' && formDescuento.proyecto !== 'OTRO...' ? (
-                      <div className="mb-6 p-4 bg-slate-50 border border-slate-100 rounded-xl">
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                          <div>
+                      <div className="mb-6 p-5 bg-slate-50 border border-slate-100 rounded-xl w-full">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
+                          <div className="w-full">
                             <label className="block text-xs font-bold text-emerald-700 mb-1.5 ml-0.5 uppercase tracking-wide">Elegir UV</label>
                             <select name="uv" value={formDescuento.uv} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 font-semibold cursor-pointer text-sm">
                               <option value="">---</option>
                               {opcionesUV.map(u => <option key={u} value={u}>{u}</option>)}
                             </select>
                           </div>
-                          <div>
+                          <div className="w-full">
                             <label className="block text-xs font-bold text-emerald-700 mb-1.5 ml-0.5 uppercase tracking-wide">Elegir MZN</label>
                             <select name="manzano" value={formDescuento.manzano} onChange={handleDescuentoChange} disabled={!formDescuento.uv} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 font-semibold cursor-pointer disabled:opacity-50 disabled:bg-slate-100 text-sm">
                               <option value="">---</option>
                               {opcionesMZN.map(m => <option key={m} value={m}>{m}</option>)}
                             </select>
                           </div>
-                          <div>
+                          <div className="w-full">
                             <label className="block text-xs font-bold text-emerald-700 mb-1.5 ml-0.5 uppercase tracking-wide">Elegir Lote</label>
                             <select name="lote" value={formDescuento.lote} onChange={handleDescuentoChange} disabled={!formDescuento.manzano} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 font-semibold cursor-pointer disabled:opacity-50 disabled:bg-slate-100 text-sm">
                               <option value="">---</option>
@@ -1230,18 +1649,18 @@ export default function App() {
                           </div>
                         </div>
                         {lotesBD.length === 0 && !cargandoLotes ? (
-                          <p className="text-xs text-amber-600 mt-3 flex items-center">
-                            <AlertTriangle className="w-4 h-4 mr-1" /> Cargando base de datos o archivo lotes.json no encontrado.
+                          <p className="text-xs text-amber-600 mt-4 flex items-center">
+                            <AlertTriangle className="w-4 h-4 mr-1 flex-shrink-0" /> Cargando base de datos o archivo lotes.json no encontrado.
                           </p>
                         ) : null}
                         {cargandoLotes ? (
-                          <p className="text-xs text-slate-500 mt-3 flex items-center">
+                          <p className="text-xs text-slate-500 mt-4 flex items-center">
                              Cargando base de datos segura...
                           </p>
                         ) : null}
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-3 w-full">
                         <Input label="UV" name="uv" value={formDescuento.uv} onChange={handleDescuentoChange} />
                         <Input label="Manzano" name="manzano" value={formDescuento.manzano} onChange={handleDescuentoChange} />
                         <Input label="Lote" name="lote" value={formDescuento.lote} onChange={handleDescuentoChange} />
@@ -1250,30 +1669,31 @@ export default function App() {
 
                     {/* ETIQUETA DE CATEGORÍA (ESTILO DARK) */}
                     {formDescuento.modoBusqueda === 'inteligente' && formDescuento.categoria ? (
-                      <div className="bg-slate-900 border border-slate-800 text-white p-3.5 rounded-xl text-xs font-bold mb-5 flex items-center shadow-md uppercase tracking-wider">
-                        <Tag className="w-4 h-4 mr-2.5 text-cyan-400" />
-                        <span className="text-slate-400 mr-1.5 font-semibold">Categoría:</span> {formDescuento.categoria}
+                      <div className="bg-slate-900 border border-slate-800 text-white p-4 rounded-xl text-xs font-bold mb-5 flex items-center shadow-md uppercase tracking-wider w-full overflow-hidden">
+                        <Tag className="w-4 h-4 mr-2.5 text-cyan-400 flex-shrink-0" />
+                        <span className="text-slate-400 mr-1.5 font-semibold flex-shrink-0">Categoría:</span> 
+                        <span className="truncate">{formDescuento.categoria}</span>
                       </div>
                     ) : formDescuento.modoBusqueda === 'manual' ? (
-                      <div className="mb-4">
+                      <div className="mb-4 w-full">
                          <Input label="Categoría (Opcional)" name="categoria" value={formDescuento.categoria} onChange={handleDescuentoChange} placeholder="Ej. AVENIDA PRINCIPAL CON PAVIMENTO" />
                       </div>
                     ) : null}
 
                     {loteAutocompletado && formDescuento.modoBusqueda === 'inteligente' && (
-                      <div className="bg-emerald-50/80 border border-emerald-200 text-emerald-700 p-2.5 rounded-xl text-xs font-bold mb-5 flex items-center shadow-sm">
+                      <div className="bg-emerald-50/80 border border-emerald-200 text-emerald-700 p-3 rounded-xl text-xs font-bold mb-5 flex items-center shadow-sm w-full">
                         <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-500 flex-shrink-0" /> Superficie y Precio autocompletados
                       </div>
                     )}
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5 w-full">
                       <Input label="Superficie (M2)" name="m2" value={formDescuento.m2} onChange={handleDescuentoChange} type="number" />
                       <Input label="Precio Reg. (M2)" name="precioM2" value={formDescuento.precioM2} onChange={handleDescuentoChange} type="number" />
                     </div>
                     
-                    <div className="border-t border-slate-100 pt-5 mt-2"><Input label="Nombre del Asesor" name="asesor" value={formDescuento.asesor} onChange={handleDescuentoChange} /></div>
+                    <div className="border-t border-slate-100 pt-5 mt-2 w-full"><Input label="Nombre del Asesor" name="asesor" value={formDescuento.asesor} onChange={handleDescuentoChange} /></div>
                   </div>
-                  <div><ResultCard title="Descuento" text={generarTextoDescuento()} htmlContent={generarHtmlDescuento()} subject={`Solicitud Descuento Campañas - ${nomProyectoFinal} Mz${formDescuento.manzano} Lt${formDescuento.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
+                  <div className="w-full"><ResultCard title="Descuento" text={generarTextoDescuento()} htmlContent={generarHtmlDescuento()} subject={`Solicitud Descuento Campañas - ${nomProyectoFinal} Mz${formDescuento.manzano} Lt${formDescuento.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
                 </div>
               </div>
             );
@@ -1281,32 +1701,32 @@ export default function App() {
 
           {/* FORM: INCREMENTO CUOTA */}
           {activeTab === 'cuota' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
               <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><TrendingUp className="w-6 h-6 mr-2 text-blue-600" /> Incremento de Cuota Inicial</h2></div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
                     <Input label="Nro. Contrato" name="nroContrato" value={formCuota.nroContrato} onChange={handleCuotaChange} />
                     <Input label="Carnet (CI)" name="ci" value={formCuota.ci} onChange={handleCuotaChange} />
                   </div>
                   <Input label="Nombre del Cliente" name="cliente" value={formCuota.cliente} onChange={handleCuotaChange} />
-                  <div className="mb-5">
+                  <div className="mb-5 w-full">
                     <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Proyecto</label>
-                    <select name="proyecto" value={formCuota.proyecto} onChange={handleCuotaChange} className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm">{PROYECTOS.map(p => <option key={p} value={p}>{p}</option>)}</select>
+                    <select name="proyecto" value={formCuota.proyecto} onChange={handleCuotaChange} className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm text-sm">{PROYECTOS.map(p => <option key={p} value={p}>{p}</option>)}</select>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full">
                     <Input label="UV" name="uv" value={formCuota.uv} onChange={handleCuotaChange} />
                     <Input label="Manzano" name="manzano" value={formCuota.manzano} onChange={handleCuotaChange} />
                     <Input label="Lote" name="lote" value={formCuota.lote} onChange={handleCuotaChange} />
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-2 w-full">
                     <Input label="Cuota Registrada ($)" name="cuotaInicial" value={formCuota.cuotaInicial} onChange={handleCuotaChange} type="number" />
                     <Input label="Nueva Cuota ($)" name="nuevaCuota" value={formCuota.nuevaCuota} onChange={handleCuotaChange} type="number" />
                   </div>
                   <TextArea label="Motivo del incremento" name="motivo" value={formCuota.motivo} onChange={handleCuotaChange} />
-                  <div className="border-t border-slate-100 pt-5 mt-2"><Input label="Nombre del Asesor" name="asesorVentas" value={formCuota.asesorVentas} onChange={handleCuotaChange} /></div>
+                  <div className="border-t border-slate-100 pt-5 mt-2 w-full"><Input label="Nombre del Asesor" name="asesorVentas" value={formCuota.asesorVentas} onChange={handleCuotaChange} /></div>
                 </div>
-                <div><ResultCard title="Incremento Cuota" text={generarTextoCuota()} htmlContent={generarHtmlCuota()} subject={`Incremento Cuota Inicial - ${formCuota.proyecto} Mz${formCuota.manzano} Lt${formCuota.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
+                <div className="w-full"><ResultCard title="Incremento Cuota" text={generarTextoCuota()} htmlContent={generarHtmlCuota()} subject={`Incremento Cuota Inicial - ${formCuota.proyecto} Mz${formCuota.manzano} Lt${formCuota.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
               </div>
             </div>
           )}
