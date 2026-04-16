@@ -340,6 +340,21 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
 };
 
 export default function App() {
+
+  // --- FIX PARA PANTALLA COMPLETA (Elimina las restricciones por defecto de Vite en Desktop) ---
+  useEffect(() => {
+    const root = document.getElementById('root');
+    if (root) {
+      root.style.maxWidth = '100%';
+      root.style.width = '100%';
+      root.style.padding = '0';
+      root.style.margin = '0';
+      root.style.textAlign = 'left';
+    }
+    document.body.style.margin = '0';
+    document.body.style.display = 'block';
+  }, []);
+
   const [activeTab, setActiveTab] = useState('proyeccion');
   const [supervisorDestino, setSupervisorDestino] = useState(SUPERVISORES[0].correo);
   
@@ -1158,7 +1173,7 @@ export default function App() {
 
       {/* MAIN CONTENT */}
       <div className="flex-1 overflow-auto p-6 md:p-10 w-full">
-        <div className="max-w-[1600px] mx-auto w-full">
+        <div className="max-w-7xl mx-auto w-full">
           
           {/* DASHBOARD VIEW */}
           {activeTab === 'dashboard' && (
