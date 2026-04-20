@@ -46,16 +46,16 @@ const SUPERVISORES = [
 // --- EQUIPOS DE ASESORES POR SUPERVISOR ---
 const EQUIPOS_ASESORES = {
   "Oscar Saravia": [
-    { nombre: "Marisol Urgel", colAct: 42024 },
-    { nombre: "Carlos Enrique Calderon", colAct: 13829 },
-    { nombre: "Gloriana Silva", colAct: 13200 },
-    { nombre: "Ely Gonzales", colAct: 0 },
-    { nombre: "Jaime Fabricio Rios", colAct: 0 },
-    { nombre: "Daniel Angulo", colAct: 0 },
+    { nombre: "Carlos Enrique Calderon", colAct: 13829.20 },
+    { nombre: "Daniel Angulo Maldonado", colAct: 62640.00 },
+    { nombre: "Ely Gonzales Garcia", colAct: 0 },
+    { nombre: "Gloriana Silva Almenda", colAct: 6600.00 },
+    { nombre: "Jaime F. Rios Castro", colAct: 0 },
     { nombre: "Marioly Viñolas", colAct: 0 },
-    { nombre: "Merly Mendez", colAct: 0 },
-    { nombre: "Nataly Heredia", colAct: 0 },
-    { nombre: "Rodrigo Rojas", colAct: 0 }
+    { nombre: "Marisol Urgel Pizarro", colAct: 58146.00 },
+    { nombre: "Merly Mendez Hurtado", colAct: 7750.00 },
+    { nombre: "Rodrigo Rojas Siles", colAct: 0 },
+    { nombre: "Yocelin Salvatierra", colAct: 7500.00 }
   ],
   "Ana Karen Parada Vaca": [
     { nombre: "Maria Julieta Ortuste", colAct: 106980 },
