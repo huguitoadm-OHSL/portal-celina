@@ -264,16 +264,22 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
     }
   };
 
-  const handleSendEmail = () => {
+  // --- TRUCO MAGICO PARA CELULARES ---
+  const handleOpenEmailApp = () => {
+    handleCopy();
+    
     const to = fixedDestinoEmail || supervisorDestino;
     const ccQuery = ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : '';
-    // Usamos 'text', que ahora está diseñado con Emojis para celulares
-    const mailtoLink = `mailto:${to}?subject=${encodeURIComponent(subject)}${ccQuery}&body=${encodeURIComponent(text)}`;
-    window.location.href = mailtoLink;
+    const instruccionPega = "(Por favor, borra este texto, mantén presionado aquí y selecciona 'Pegar' para insertar la tabla con su formato oficial)";
+    const mailtoLink = `mailto:${to}?subject=${encodeURIComponent(subject)}${ccQuery}&body=${encodeURIComponent(instruccionPega)}`;
+    
+    setTimeout(() => {
+      window.location.href = mailtoLink;
+    }, 400);
   };
 
   return (
-    <div className="bg-white/90 backdrop-blur-xl border border-slate-200/80 rounded-2xl p-6 sticky top-8 shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex flex-col h-full max-h-[85vh]">
+    <div className="bg-white/90 backdrop-blur-xl border border-slate-200/80 rounded-2xl p-6 sticky top-8 shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex flex-col h-full max-h-[85vh] min-w-0 w-full">
       <h3 className="text-xl font-extrabold text-slate-800 mb-4 flex items-center tracking-tight">
         <CheckCircle2 className="w-6 h-6 text-emerald-500 mr-2" />
         Vista Previa del Correo
@@ -305,13 +311,14 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
         <div className="mb-4 p-3.5 bg-indigo-50/50 border border-indigo-100 rounded-xl flex gap-3 items-start shadow-sm w-full">
           <Info className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
           <p className="text-xs text-indigo-800 leading-relaxed">
-            <strong>Modo PC:</strong> Usa <b>"Copiar Formato"</b> y pégalo en tu correo.<br/>
-            <strong>Modo Celular:</strong> Usa <b>"Enviar desde Celular"</b> para un texto adaptado.
+            <strong>Modo PC:</strong> Usa <b>"Copiar Formato PC"</b> y pégalo en tu correo.<br/>
+            <strong>Modo Celular:</strong> Usa <b>"Copiar y Abrir Correo"</b> y sigue las instrucciones para mantener los cuadros.
           </p>
         </div>
       )}
 
-      <div className="bg-[#f8fafc] p-5 rounded-xl border border-slate-200 mb-5 flex-1 overflow-auto shadow-inner w-full">
+      {/* AQUÍ ESTÁ EL FIX DE MIN-W-0 PARA QUE LA TABLA NO ROMPA LA PANTALLA EN PC */}
+      <div className="bg-[#f8fafc] p-5 rounded-xl border border-slate-200 mb-5 flex-1 overflow-auto shadow-inner w-full min-w-0">
         {htmlContent ? (
           <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
         ) : (
@@ -325,15 +332,15 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
           className="flex-1 flex items-center justify-center py-3 px-4 bg-white border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 hover:border-slate-300 font-bold transition-all shadow-sm whitespace-nowrap"
         >
           {copied ? <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-500" /> : <Copy className="w-4 h-4 mr-2 text-slate-400" />}
-          {copied ? '¡Copiado!' : (htmlContent ? 'Copiar Formato PC' : 'Copiar Texto')}
+          {copied ? '¡Copiado Exitosamente!' : 'Copiar Formato PC'}
         </button>
         {showTextPlain && (
           <button
-            onClick={handleSendEmail}
+            onClick={handleOpenEmailApp}
             className="flex-1 flex items-center justify-center py-3 px-4 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-900 hover:to-black text-white rounded-xl font-bold transition-all shadow-md shadow-slate-900/20 whitespace-nowrap"
           >
             <Mail className="w-4 h-4 mr-2" />
-            Enviar desde Celular
+            Copiar y Abrir Correo
           </button>
         )}
       </div>
@@ -407,14 +414,33 @@ export default function App() {
     contratos: [{ nroContrato: '', cliente: '', ci: '', uv: '', manzano: '', lote: '' }]
   });
 
-  const [formProyeccion, setFormProyeccion] = useState({
-    equipo: 'Oscar Saravia',
-    fechaInicio: new Date().toISOString().split('T')[0], // Hoy
-    objetivoMensual: OBJETIVOS_MENSUALES['Oscar Saravia'],
-    asesores: EQUIPOS_ASESORES["Oscar Saravia"].map(a => ({
-      nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0] 
-    }))
+  // --- ESTADO PARA PROYECCIÓN (AHORA CARGA DESDE LOCALSTORAGE SI EXISTE) ---
+  const [formProyeccion, setFormProyeccion] = useState(() => {
+    const savedData = localStorage.getItem('portalAsesores_proyeccion_Oscar Saravia');
+    if (savedData) {
+      try {
+        return JSON.parse(savedData);
+      } catch(e) {
+        console.error("Error cargando proyección de localStorage", e);
+      }
+    }
+    // Si no hay nada guardado, carga los datos por defecto
+    return {
+      equipo: 'Oscar Saravia',
+      fechaInicio: new Date().toISOString().split('T')[0], // Hoy
+      objetivoMensual: OBJETIVOS_MENSUALES['Oscar Saravia'],
+      asesores: EQUIPOS_ASESORES["Oscar Saravia"].map(a => ({
+        nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0] 
+      }))
+    };
   });
+
+  // --- EFECTO PARA GUARDAR PROYECCIÓN EN LOCALSTORAGE CADA VEZ QUE CAMBIA ---
+  useEffect(() => {
+    if (formProyeccion.equipo) {
+      localStorage.setItem(`portalAsesores_proyeccion_${formProyeccion.equipo}`, JSON.stringify(formProyeccion));
+    }
+  }, [formProyeccion]);
 
   // --- CARGAR DATOS DESDE EL ARCHIVO JSON AL INICIAR ---
   useEffect(() => {
@@ -585,11 +611,24 @@ export default function App() {
 
   const handleEquipoChange = (e) => {
     const nuevoEquipo = e.target.value;
+    
+    const savedData = localStorage.getItem(`portalAsesores_proyeccion_${nuevoEquipo}`);
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        setFormProyeccion(parsedData);
+        return; 
+      } catch(error) {
+        console.error(`Error cargando proyeccion de ${nuevoEquipo}`, error);
+      }
+    }
+    
     const nuevosAsesores = EQUIPOS_ASESORES[nuevoEquipo].map(a => ({
       nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0]
     }));
     setFormProyeccion({ ...formProyeccion, equipo: nuevoEquipo, asesores: nuevosAsesores, objetivoMensual: OBJETIVOS_MENSUALES[nuevoEquipo] || 0 });
   };
+  
   const updateAsesorProyeccion = (index, field, valStr) => {
     const nuevosAsesores = [...formProyeccion.asesores];
     nuevosAsesores[index][field] = parseFloat(valStr) || 0;
@@ -633,33 +672,30 @@ export default function App() {
          descuentoTexto = descManualNum > 0 ? `$${descManualNum} por m²` : '0';
       }
     } else if (PROYECTOS_CONVENIO_1.includes(proyecto) || PROYECTOS_CONVENIO_2.includes(proyecto)) {
-      // Convenios: Los Jardines, El Renacer, Cañaveral
+      // Convenios
       let descuentoPorM2 = 0;
       if (modalidad === 'Contado') {
-        descuentoPorM2 = PROYECTOS_CONVENIO_1.includes(proyecto) ? 3 : 4; // Jardines/Renacer=$3, Cañaveral=$4
+        descuentoPorM2 = PROYECTOS_CONVENIO_1.includes(proyecto) ? 3 : 4; 
       } else if (modalidad === 'Crédito') {
-        if (porcentajeCuota >= 3) descuentoPorM2 = 2; // 3% en adelante -> $2
-        else if (porcentajeCuota >= 1.5) descuentoPorM2 = 1; // 1.5% al 2.9% -> $1
+        if (porcentajeCuota >= 3) descuentoPorM2 = 2; 
+        else if (porcentajeCuota >= 1.5) descuentoPorM2 = 1; 
       }
       descuentoTotal = descuentoPorM2 * m2Num;
       descuentoTexto = descuentoPorM2 > 0 ? `$${descuentoPorM2} por m²` : '0';
 
     } else if (PROYECTOS_PROPIOS_1.includes(proyecto)) {
-      // Propios: Muyurina, Santa Fe
+      // Propios
       let porcentaje = 0;
       if (modalidad === 'Contado') {
-        porcentaje = 30; // 30% al contado
+        porcentaje = 30; 
       } else if (modalidad === 'Crédito') {
-        // Nueva Lógica: Si la cuota es 5% o más (Sin importar la categoría)
         if (porcentajeCuota >= 5) {
           const maxDesc = 23;
           let inputDesc = parseFloat(formDescuento.descuentoPropiosManual);
           if (isNaN(inputDesc)) inputDesc = maxDesc;
-          
-          // Aseguramos que nunca supere el 23% y tampoco baje de 0
           porcentaje = Math.max(0, Math.min(inputDesc, maxDesc));
         } else if (porcentajeCuota >= 1.5) {
-          porcentaje = 20; // 20% a Crédito base con >= 1.5% cuota
+          porcentaje = 20; 
         }
       }
       descuentoTotal = vc * (porcentaje / 100);
@@ -672,12 +708,10 @@ export default function App() {
     return { vc, descuentoTotal, descuentoTexto, nuevoPrecioTotal, nuevoPrecioM2, porcentajeCuota, montoCuotaNum };
   };
 
-  // --- LÓGICA BENEFICIO RECOMPRA ---
   const calcularBeneficioRecompra = () => {
     const p = formRecompra.proyecto.toUpperCase();
     if (p.includes('MUYURINA')) return 200;
     if (p.includes('RANCHO NUEVO')) return 50;
-    // Resto: Renacer, Jardines, Santa Fe, Cañaveral, Celina 10, Celina 3, Celina 4, Celina 5, Celina 7
     return 100;
   };
 
@@ -690,33 +724,29 @@ export default function App() {
     };
   };
 
-  // --- GENERADORES DE TEXTOS Y HTML ---
+  // --- GENERADORES DE TEXTOS PLANOS PARA CELULAR ---
   
-  // FUNCIÓN PARA TEXTO PLANO CELULARES: RECOMPRA
   const generarTextoRecompraCelular = () => {
     const beneficio = calcularBeneficioRecompra();
     const { saludo, nombrePila } = obtenerDatosSupervisor();
     return `👋 ${obtenerSaludoTiempo()}\n${saludo} ${nombrePila},\n\nPor favor su ayuda con el código de pago por recompra de este cliente:\n\n*🆕 CONTRATO NUEVO*\n🏢 Agencia: ${formRecompra.sucursal || '-'}\n📅 Venta: ${formRecompra.fechaVentaNuevo || '-'}\n👤 Nombre: ${formRecompra.nombreNuevo || '-'}\n📄 Contrato: ${formRecompra.contratoNuevo || '-'}\n🏷️ Aplicó Descuento: ${formRecompra.aplicoDescuento}\n💵 Cuotas Pagadas: ${formRecompra.cuotasPagadas}\n✅ Procesado: ${formRecompra.procesadoNuevo}\n🟢 Vigente: ${formRecompra.vigenteNuevo}\n\n*🕰️ CONTRATO ANTIGUO*\n👤 Nombre: ${formRecompra.nombreAntiguo || '-'}\n📄 Contrato: ${formRecompra.contratoAntiguo || '-'}\n📅 Venta: ${formRecompra.fechaVentaAntiguo || '-'}\n💰 Fecha Pago: ${formRecompra.fechaPago || '-'}\n✅ Procesado: ${formRecompra.procesadoAntiguo}\n🟢 Vigente: ${formRecompra.vigenteAntiguo}\n🤝 Patrocinador: ${formRecompra.patrocinador || '-'}\n\n*💵 VALOR CUOTA: $ ${formRecompra.valorCuota || '0'}*\n*🎁 BENEFICIO: $ ${beneficio}*\n\nSaludos cordiales,\n*${formRecompra.asesor || 'Asesor'}*`;
   };
 
-  // FUNCIÓN PARA TEXTO PLANO CELULARES: DESCUENTO
   const generarTextoDescuentoCelular = () => {
-    const { vc, descuentoTotal, descuentoTexto, nuevoPrecioTotal, nuevoPrecioM2, pos } = calcularDescuento();
+    const { vc, descuentoTotal, descuentoTexto, nuevoPrecioTotal, nuevoPrecioM2, porcentajeCuota } = calcularDescuento();
     const { saludo, titulo } = obtenerDatosSupervisor();
     const nomProyecto = formDescuento.proyecto === 'OTRO...' ? (formDescuento.proyectoManual || 'PROYECTO MANUAL') : formDescuento.proyecto;
-    let condicionTexto = formDescuento.modalidad === 'Crédito' ? `con cuota inicial del ${formatCurrency(calcularDescuento().porcentajeCuota)}% venta a plazos` : `venta al contado`;
+    let condicionTexto = formDescuento.modalidad === 'Crédito' ? `con cuota inicial del ${formatCurrency(porcentajeCuota)}% venta a plazos` : `venta al contado`;
     const catStr = formDescuento.categoria ? String(formDescuento.categoria).toUpperCase() : '';
 
     return `👋 ${obtenerSaludoTiempo()}\n${saludo} ${titulo},\n\nPor favor le solicito la aplicación del descuento de la campaña vigente del proyecto *${nomProyecto}*:\n\n*📌 DATOS DEL LOTE*\n📐 Superficie: ${formDescuento.m2 || '0'} m²\n💵 Precio M2 Normal: $ ${formatCurrency(formDescuento.precioM2 || 0)}\n💰 *Precio Original: $ ${formatCurrency(vc)}*\n\n*🏷️ APLICACIÓN DE CAMPAÑA*\n✅ Condición: ${descuentoTexto} ${condicionTexto}\n🔥 *Descuento Total: -$ ${formatCurrency(descuentoTotal)}*\n\n*✨ PRECIO FINAL PROMOCIÓN ✨*\n➡️ *Precio Final: $ ${formatCurrency(nuevoPrecioTotal)}*\n➡️ *Precio M2 Final: $ ${formatCurrency(nuevoPrecioM2)}*\n\n*📍 UBICACIÓN*\nUV: ${formDescuento.uv || 'SN'} | MZN: ${formDescuento.manzano || '---'} | LT: ${formDescuento.lote || '---'}\n${catStr ? `🏢 Categoría: ${catStr}\n` : ''}\nQuedo atento a su aprobación para continuar con el proceso de venta.\n\nSaludos cordiales,\n*${formDescuento.asesor || 'Nombre del Asesor'}*`;
   };
 
-  // FUNCIÓN PARA TEXTO PLANO CELULARES: CUOTA INICIAL
   const generarTextoCuotaCelular = () => {
     const { saludo, titulo } = obtenerDatosSupervisor();
     return `👋 ${obtenerSaludoTiempo()}\n${saludo} ${titulo},\n\nPor favor su autorización para proceder con la anulación y reingreso del siguiente contrato para incrementar su cuota inicial:\n\n*👤 DATOS DEL CLIENTE*\n👤 Cliente: ${formCuota.cliente || '---'}\n📄 Nro. Contrato: ${formCuota.nroContrato || '---'}\n🪪 CI: ${formCuota.ci || '---'}\n📍 Ubicación: ${formCuota.proyecto} | UV ${formCuota.uv || '-'} | MZN ${formCuota.manzano || '-'} | LOTE ${formCuota.lote || '-'}\n\n*💰 INCREMENTO*\n📉 Cuota Registrada: $ ${formatCurrency(formCuota.cuotaInicial || 0)}\n📈 *NUEVA CUOTA: $ ${formatCurrency(formCuota.nuevaCuota || 0)}*\n\n*📝 OBSERVACIONES*\n${formCuota.motivo || '---'}\n\nQuedo atento a su aprobación.\n\nSaludos,\n*${formCuota.asesorVentas || 'Asesor'}*`;
   };
 
-  // FUNCIÓN PARA TEXTO PLANO CELULARES: SEGURO
   const generarTextoSeguroCelular = () => {
     const { saludo, nombrePila } = obtenerDatosSupervisor();
     const cant = formSeguro.beneficiarios.length;
@@ -728,13 +758,11 @@ export default function App() {
     return `👋 ${obtenerSaludoTiempo()}\n${saludo} ${nombrePila},\n\nPor favor tu ayuda adicionando a estos ${cant} beneficiarios al seguro de vida:\n\n*📄 DATOS DEL CONTRATO*\n👤 Cliente: ${formSeguro.cliente || '---'}\n📑 Contrato: ${formSeguro.nroContrato || '---'}\n📍 UV: ${formSeguro.uv || 'SN'} | MZN: ${formSeguro.manzano || 'SN'} | LOTE: ${formSeguro.lote || 'SN'}\n\n*📋 LISTA DE BENEFICIARIOS*${lista}\nMuchísimas gracias.\n\nSaludos,\n*${formSeguro.asesor || 'Asesor'}*`;
   };
   
-  // FUNCIÓN PARA TEXTO PLANO CELULARES: FISICO
   const generarTextoFisicoCelular = () => {
     const { saludo, titulo } = obtenerDatosSupervisor();
     return `👋 ${obtenerSaludoTiempo()}\n${saludo} ${titulo},\n\nSolicito el cambio de contrato digital a físico para el siguiente cliente:\n\n*👤 DATOS DEL CLIENTE*\n👤 Nombre: ${formFisico.nombre || '---'}\n🪪 CI: ${formFisico.ci || '---'}\n📄 Contrato: ${formFisico.contrato || '---'}\n\n*📝 MOTIVO*\n${formFisico.motivo || '---'}\n\nQuedo atento a la confirmación.\n\nSaludos,\n*${formFisico.asesor || 'Asesor'}*`;
   };
 
-  // FUNCIÓN PARA TEXTO PLANO CELULARES: REENVIO
   const generarTextoReenvioCelular = () => {
     const { saludo, nombrePila } = obtenerDatosSupervisor();
     let lista = "";
@@ -745,12 +773,10 @@ export default function App() {
     return `👋 ${obtenerSaludoTiempo()}\n${saludo} ${nombrePila},\n\nSolicito tu apoyo habilitando nuevamente el envío del correo para la firma digital del proyecto *${formReenvio.proyecto.toUpperCase()}* debido a un error involuntario del cliente.\n\n*📋 CONTRATOS AFECTADOS:*${lista}\nQuedo atento a tu confirmación.\n\nSaludos,\n*${formReenvio.asesor || 'Asesor'}*`;
   };
 
-  // FUNCIÓN PARA TEXTO PLANO CELULARES: LLAMADA
   const generarTextoLlamadaCelular = () => {
     return `👋 ${obtenerSaludoTiempo()}\nEstimada Olivia,\n\nPor favor su ayuda con la validación de llamada de este cliente referido, solicita que lo llamen a las *${formLlamada.horaLlamada || '[HORA]'}*:\n\n*🗣️ REFERIDO*\n👤 Nombre: ${formLlamada.nombreReferido || '---'}\n🪪 CI: ${formLlamada.ciReferido || '---'}\n\n*🎁 BENEFICIARIA*\n👤 Nombre: ${formLlamada.nombreBeneficiario || '---'}\n🪪 CI: ${formLlamada.ciBeneficiario || '---'}\n\nSaludos cordiales,\n*${formLlamada.asesor || 'Asesor'}*`;
   };
 
-  // FUNCIÓN PARA TEXTO PLANO CELULARES: PROYECCION
   const generarTextoProyeccionCelular = () => {
     const { saludo, nombrePila } = obtenerDatosSupervisor();
     let texto = `👋 ${obtenerSaludoTiempo()}\n${saludo} ${nombrePila},\n\nAdjunto el resumen del consolidado de proyección de ventas semanal del equipo.\n\n`;
@@ -791,84 +817,188 @@ export default function App() {
     const beneficio = calcularBeneficioRecompra();
     const { saludo, nombrePila } = obtenerDatosSupervisor();
     return `
-    <div style="font-family: 'Aptos', Arial, sans-serif; font-size: 14px; color: #333; max-width: 1200px; line-height: 1.5; text-align: left;">
+    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 1200px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()},</p>
       <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${nombrePila} por favor su ayuda con el c&oacute;digo de pago por recompra de este cliente, le toca pagar su cuota el <strong>${formRecompra.fechaPago || '[FECHA PAGO]'}</strong> muchas gracias de antemano:</p>
       
-      <div style="overflow-x: auto; padding-bottom: 10px; width: 100%;">
-        <table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse; font-family: 'Aptos', Arial, sans-serif; font-size: 11px; text-align: center; width: 100%; min-width: 1200px; border: 1px solid #000;">
+      <div style="overflow-x: auto; padding-bottom: 10px; width: 100%; max-width: 100%;">
+        <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; font-family: Arial, sans-serif; font-size: 11px; text-align: center; width: 100%; min-width: 1200px; border: 1px solid #000000; color: #000000;">
           <thead>
             <tr>
-              <th colspan="8" style="background-color: #ffc000; border: 1px solid #000; padding: 6px; font-weight: bold; color: #000;">CONTRATO NUEVO</th>
-              <th colspan="7" style="background-color: #ed7d31; border: 1px solid #000; padding: 6px; font-weight: bold; color: #000;">CONTRATO ANTIGUO</th>
-              <th rowspan="2" style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; font-weight: bold; color: #000;">VALOR DE<br>CUOTA $</th>
-              <th rowspan="2" style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; font-weight: bold; color: #000;">BENEFICIO $</th>
+              <th colspan="8" style="background-color: #ffc000; border: 1px solid #000000; padding: 6px;"><font color="#000000"><b>CONTRATO NUEVO</b></font></th>
+              <th colspan="7" style="background-color: #ed7d31; border: 1px solid #000000; padding: 6px;"><font color="#000000"><b>CONTRATO ANTIGUO</b></font></th>
+              <th rowspan="2" style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px;"><font color="#000000"><b>VALOR DE<br>CUOTA $</b></font></th>
+              <th rowspan="2" style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px;"><font color="#000000"><b>BENEFICIO $</b></font></th>
             </tr>
             <tr>
-              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px; color: #000;">Agencia</th>
-              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px; color: #000;">Fecha de<br>venta</th>
-              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px; min-width: 120px; color: #000;">Nombre</th>
-              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px; color: #000;">Contrato</th>
-              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px; color: #000;">Se aplico<br>descuento<br>por metro ?</th>
-              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px; color: #000;">Cant. De<br>cuotas ya<br>pagadas</th>
-              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px; color: #000;">¿Procesado?</th>
-              <th style="background-color: #ffe699; border: 1px solid #000; padding: 6px; color: #000;">¿Vigente?</th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px;"><font color="#000000"><b>Agencia</b></font></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>Fecha de<br>venta</b></font></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; min-width: 150px;"><font color="#000000"><b>Nombre</b></font></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>Contrato</b></font></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>Se aplico<br>descuento<br>por metro ?</b></font></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>Cant. De<br>cuotas ya<br>pagadas</b></font></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>¿Procesado?</b></font></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>¿Vigente?</b></font></th>
 
-              <th style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; min-width: 120px; color: #000;">Nombre</th>
-              <th style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; color: #000;">Contrato</th>
-              <th style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; color: #000;">Fecha de<br>venta</th>
-              <th style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; color: #000;">Fecha Pago</th>
-              <th style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; color: #000;">¿Procesado?</th>
-              <th style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; color: #000;">¿Vigente?</th>
-              <th style="background-color: #fce4d6; border: 1px solid #000; padding: 6px; min-width: 120px; color: #000;">Patrocinador</th>
+              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; min-width: 150px;"><font color="#000000"><b>Nombre</b></font></th>
+              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>Contrato</b></font></th>
+              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>Fecha de<br>venta</b></font></th>
+              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>Fecha Pago</b></font></th>
+              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>¿Procesado?</b></font></th>
+              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>¿Vigente?</b></font></th>
+              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; min-width: 120px;"><font color="#000000"><b>Patrocinador</b></font></th>
             </tr>
           </thead>
           <tbody>
             <tr style="background-color: #ffffff;">
-              <td style="border: 1px solid #000; padding: 6px; text-transform: uppercase;">${formRecompra.sucursal || ''}</td>
-              <td style="border: 1px solid #000; padding: 6px;">${formRecompra.fechaVentaNuevo || ''}</td>
-              <td style="border: 1px solid #000; padding: 6px; text-transform: uppercase;">${formRecompra.nombreNuevo || ''}</td>
-              <td style="border: 1px solid #000; padding: 6px; text-transform: uppercase;">${formRecompra.contratoNuevo || ''}</td>
-              <td style="border: 1px solid #000; padding: 6px;">${formRecompra.aplicoDescuento || 'NO'}</td>
-              <td style="border: 1px solid #000; padding: 6px;">${formRecompra.cuotasPagadas || '0'}</td>
-              <td style="border: 1px solid #000; padding: 6px;">${formRecompra.procesadoNuevo || 'SI'}</td>
-              <td style="border: 1px solid #000; padding: 6px;">${formRecompra.vigenteNuevo || 'SI'}</td>
+              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase;"><font color="#000000">${formRecompra.sucursal || ''}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000">${formRecompra.fechaVentaNuevo || ''}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase;"><font color="#000000">${formRecompra.nombreNuevo || ''}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase; white-space: nowrap;"><font color="#000000">${formRecompra.contratoNuevo || ''}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><font color="#000000">${formRecompra.aplicoDescuento || 'NO'}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><font color="#000000">${formRecompra.cuotasPagadas || '0'}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><font color="#000000">${formRecompra.procesadoNuevo || 'SI'}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><font color="#000000">${formRecompra.vigenteNuevo || 'SI'}</font></td>
               
-              <td style="border: 1px solid #000; padding: 6px; text-transform: uppercase;">${formRecompra.nombreAntiguo || ''}</td>
-              <td style="border: 1px solid #000; padding: 6px; text-transform: uppercase;">${formRecompra.contratoAntiguo || ''}</td>
-              <td style="border: 1px solid #000; padding: 6px;">${formRecompra.fechaVentaAntiguo || ''}</td>
-              <td style="border: 1px solid #000; padding: 6px;">${formRecompra.fechaPago || ''}</td>
-              <td style="border: 1px solid #000; padding: 6px;">${formRecompra.procesadoAntiguo || 'SI'}</td>
-              <td style="border: 1px solid #000; padding: 6px;">${formRecompra.vigenteAntiguo || 'SI'}</td>
-              <td style="border: 1px solid #000; padding: 6px; text-transform: uppercase;">${formRecompra.patrocinador || ''}</td>
+              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase;"><font color="#000000">${formRecompra.nombreAntiguo || ''}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase; white-space: nowrap;"><font color="#000000">${formRecompra.contratoAntiguo || ''}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000">${formRecompra.fechaVentaAntiguo || ''}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000">${formRecompra.fechaPago || ''}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><font color="#000000">${formRecompra.procesadoAntiguo || 'SI'}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><font color="#000000">${formRecompra.vigenteAntiguo || 'SI'}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase;"><font color="#000000">${formRecompra.patrocinador || ''}</font></td>
               
-              <td style="border: 1px solid #000; padding: 6px;">${formRecompra.valorCuota || ''}</td>
-              <td style="border: 1px solid #000; padding: 6px; font-weight: bold;">${beneficio}</td>
+              <td style="border: 1px solid #000000; padding: 6px;"><font color="#000000">${formRecompra.valorCuota || ''}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><font color="#000000"><b>${beneficio}</b></font></td>
             </tr>
           </tbody>
         </table>
       </div>
 
       <p style="margin-top: 25px; margin-bottom: 2px;">Saludos cordiales,</p>
-      <p style="margin-top: 0; font-weight: bold; color: #333;">${formRecompra.asesor || '[Nombre del Asesor]'}</p>
+      <p style="margin-top: 0; font-weight: bold; color: #333333;">${formRecompra.asesor || '[Nombre del Asesor]'}</p>
+    </div>`;
+  };
+
+  const generarHtmlProyeccion = () => {
+    const { saludo, nombrePila } = obtenerDatosSupervisor();
+    let filasAsesoresHtml = "";
+    
+    let sumColAct = 0;
+    let sumProyA = [0,0,0,0,0];
+    let sumTotalProySemanal = 0;
+    let sumTotalColMes = 0;
+
+    formProyeccion.asesores.forEach((asesor, i) => {
+      const sumDias = asesor.dias.reduce((a, b) => a + b, 0);
+      const totalColMes = asesor.colAct + sumDias;
+      
+      sumColAct += asesor.colAct;
+      asesor.proy.forEach((val, idx) => sumProyA[idx] += val);
+      sumTotalProySemanal += sumDias;
+      sumTotalColMes += totalColMes;
+
+      const formatVacio = (val) => val === 0 ? '-' : formatCurrency(val);
+      const formatDias = (val) => val === 0 ? '-' : val;
+
+      filasAsesoresHtml += `
+        <tr>
+          <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><font color="#000000"><b>${i+1}</b></font></td>
+          <td style="border: 1px solid #cbd5e1; padding: 6px; background-color: #ffffff; white-space: nowrap;"><font color="#000000"><b>${asesor.nombre}</b></font></td>
+          <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap;"><font color="#000000">${formatVacio(asesor.colAct)}</font></td>
+          ${asesor.dias.map(d => `<td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><font color="#000000">${formatDias(d)}</font></td>`).join('')}
+          ${asesor.proy.map(p => `<td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><font color="#000000"><b>${p}</b></font></td>`).join('')}
+          <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap;"><font color="#000000"><b>${formatVacio(sumDias)}</b></font></td>
+          <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap;"><font color="#000000"><b>${formatVacio(totalColMes)}</b></font></td>
+          <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><font color="#000000"></font></td>
+        </tr>
+      `;
+    });
+
+    const mesStr = new Date(formProyeccion.fechaInicio || new Date()).toLocaleString('es-ES', { month: 'long' });
+    const capMes = mesStr.charAt(0).toUpperCase() + mesStr.slice(1);
+    const porcentajeAvance = formProyeccion.objetivoMensual ? (sumColAct / formProyeccion.objetivoMensual) * 100 : 0;
+    const porcentajeFin = formProyeccion.objetivoMensual ? (sumTotalColMes / formProyeccion.objetivoMensual) * 100 : 0;
+
+    return `
+    <div style="font-family: Arial, sans-serif; font-size: 13px; color: #333333; text-align: left;">
+      <p>${obtenerSaludoTiempo()}</p>
+      <p>${saludo} ${nombrePila},</p>
+      <p>Adjunto el consolidado de proyecci&oacute;n de ventas semanal del equipo correspondiente a la semana actual.</p>
+      
+      <div style="overflow-x: auto; width: 100%; max-width: 100%;">
+      <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; font-family: Arial, sans-serif; font-size: 11px; margin-top: 15px; width: 100%; min-width: 900px; text-align: left; border-color: #cbd5e1; background-color: #ffffff;">
+        <thead>
+          <tr>
+            <th colspan="3" style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: left;"><font color="#ffffff"><b>Proyeccion Equipo: ${formProyeccion.equipo}</b></font></th>
+            <th colspan="7" style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center;"><font color="#ffffff"><b>Ventas</b></font></th>
+            <th colspan="5" style="background-color: #92d050; border: 1px solid #ffffff; padding: 6px; text-align: center;"><font color="#000000"><b>Proyectos</b></font></th>
+            <th rowspan="2" style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center; vertical-align: bottom;"><font color="#ffffff"><b>Total<br>Proyeccion<br>semanal</b></font></th>
+            <th rowspan="2" style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center; vertical-align: bottom;"><font color="#ffffff"><b>Total<br>colocacion<br>asesor/mes</b></font></th>
+            <th rowspan="2" style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center; vertical-align: bottom;"><font color="#ffffff"><b>Productivo<br>valor = $25.000</b></font></th>
+          </tr>
+          <tr>
+            <th style="background-color: #002060; border: 1px solid #ffffff; padding: 6px;"></th>
+            <th style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: left; white-space: nowrap;"><font color="#ffffff"><b>Asesor</b></font></th>
+            <th style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center; white-space: nowrap;"><font color="#ffffff"><b>Colocacion<br>actual</b></font></th>
+            ${[0,1,2,3,4,5,6].map(d => `<th style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center; white-space: nowrap;"><font color="#ffffff"><b>${formatDiaMes(formProyeccion.fechaInicio, d)}</b></font></th>`).join('')}
+            ${NOMBRES_PROYECTOS_PROYECCION.map(p => `<th style="background-color: #92d050; border: 1px solid #ffffff; padding: 6px; text-align: center; white-space: nowrap;"><font color="#000000"><b>${p}</b></font></th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          ${filasAsesoresHtml}
+          <tr>
+            <td colspan="10" style="border: none; background-color: #ffffff;"></td>
+            ${sumProyA.map(p => `<td style="background-color: #8faadc; border: 1px solid #cbd5e1; text-align: center; padding: 6px;"><font color="#000000"><b>${p}</b></font></td>`).join('')}
+            <td style="border: none; background-color: #ffffff;"></td>
+            <td style="background-color: #f8fafc; border: 1px solid #cbd5e1; text-align: right; padding: 6px; white-space: nowrap;"><font color="#000000"><b>${formatCurrency(sumTotalColMes)}</b></font></td>
+            <td style="border: 1px solid #cbd5e1; text-align: center; padding: 6px; background-color: #ffffff;"><font color="#ff0000"><b>0%</b></font></td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+
+      <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; font-family: Arial, sans-serif; font-size: 11px; margin-top: 20px; width: 350px; text-align: left; border-color: #cbd5e1; background-color: #ffffff;">
+        <tr>
+          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px;"><font color="#ffffff"><b>Proyeccion ${capMes}</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center;"><font color="#ffffff"><b>-</b></font></td>
+          <td style="border: none; background-color: #ffffff;"></td>
+        </tr>
+        <tr>
+          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px;"><font color="#ffffff"><b>Colocacion actual</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: right; white-space: nowrap;"><font color="#ffffff"><b>${formatCurrency(sumColAct)}</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center;"><font color="#ffffff"><b>${formatCurrency(porcentajeAvance)}%</b></font></td>
+        </tr>
+        <tr>
+          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px;"><font color="#ffffff"><b>Objetivo ${capMes} ${new Date().getFullYear()}</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: right; white-space: nowrap;"><font color="#ffffff"><b>${formatCurrency(formProyeccion.objetivoMensual)}</b></font></td>
+          <td style="border: none; background-color: #ffffff;"></td>
+        </tr>
+        <tr>
+          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px;"><font color="#ffffff"><b>Colocacion fin de mes</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: right; white-space: nowrap;"><font color="#ffffff"><b>${formatCurrency(sumTotalColMes)}</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center;"><font color="#ffffff"><b>${formatCurrency(porcentajeFin)}%</b></font></td>
+        </tr>
+      </table>
+      <p style="margin-top: 25px; margin-bottom: 2px;">Saludos cordiales.</p>
     </div>`;
   };
 
   const generarHtmlLlamada = () => {
     return `
-    <div style="font-family: 'Aptos', Arial, sans-serif; font-size: 14px; color: #333; max-width: 800px; line-height: 1.5; text-align: justify;">
+    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
       <p style="margin-top: 0; margin-bottom: 25px;">Estimada Olivia,</p>
       <p style="margin-bottom: 20px;">Por favor su ayuda con la validaci&oacute;n de llamada de este cliente referido, el cliente menciona que tendr&aacute; tiempo de contestar hoy a las <strong>${formLlamada.horaLlamada || '[HORA]'}</strong>, por favor pido la ayuda de tu equipo para que la puedan llamar a esa hora:</p>
       
-      <p style="margin-bottom: 5px; color: #555;">Cliente referido:</p>
-      <p style="margin-top: 0; margin-bottom: 15px; font-weight: bold; font-size: 15px; color: #000;">${formLlamada.nombreReferido || '[NOMBRE REFERIDO]'}, ${formLlamada.ciReferido || '[CI REFERIDO]'}</p>
+      <p style="margin-bottom: 5px; color: #555555;">Cliente referido:</p>
+      <p style="margin-top: 0; margin-bottom: 15px; font-weight: bold; font-size: 15px; color: #000000;">${formLlamada.nombreReferido || '[NOMBRE REFERIDO]'}, ${formLlamada.ciReferido || '[CI REFERIDO]'}</p>
       
-      <p style="margin-bottom: 5px; color: #555;">Cliente beneficiaria:</p>
-      <p style="margin-top: 0; margin-bottom: 25px; font-weight: bold; font-size: 15px; color: #000;">${formLlamada.nombreBeneficiario || '[NOMBRE BENEFICIARIA]'}, ${formLlamada.ciBeneficiario || '[CI BENEFICIARIA]'}</p>
+      <p style="margin-bottom: 5px; color: #555555;">Cliente beneficiaria:</p>
+      <p style="margin-top: 0; margin-bottom: 25px; font-weight: bold; font-size: 15px; color: #000000;">${formLlamada.nombreBeneficiario || '[NOMBRE BENEFICIARIA]'}, ${formLlamada.ciBeneficiario || '[CI BENEFICIARIA]'}</p>
       
       <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
-      <p style="margin-top: 0; font-weight: bold; color: #333;">${formLlamada.asesor || '[Nombre del Asesor]'}</p>
+      <p style="margin-top: 0; font-weight: bold; color: #333333;">${formLlamada.asesor || '[Nombre del Asesor]'}</p>
     </div>`;
   };
 
@@ -877,11 +1007,11 @@ export default function App() {
     const cant = formSeguro.beneficiarios.length;
     let filas = "";
     formSeguro.beneficiarios.forEach(b => {
-      filas += `<tr><td style="border: 1px solid #cbd5e1; padding: 8px 12px; font-weight: 500;">${b.nombre || '---'}</td><td style="border: 1px solid #cbd5e1; padding: 8px 12px;">${b.parentesco || '---'}</td><td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center;">${b.porcentaje ? b.porcentaje + '%' : '---'}</td><td style="border: 1px solid #cbd5e1; padding: 8px 12px;">${b.ci || '---'}</td></tr>`;
+      filas += `<tr style="background-color: #ffffff;"><td style="border: 1px solid #cbd5e1; padding: 8px 12px; font-weight: bold;"><font color="#000000">${b.nombre || '---'}</font></td><td style="border: 1px solid #cbd5e1; padding: 8px 12px;"><font color="#000000">${b.parentesco || '---'}</font></td><td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center;"><font color="#000000">${b.porcentaje ? b.porcentaje + '%' : '---'}</font></td><td style="border: 1px solid #cbd5e1; padding: 8px 12px;"><font color="#000000">${b.ci || '---'}</font></td></tr>`;
     });
 
     return `
-    <div style="font-family: 'Aptos', Arial, sans-serif; font-size: 14px; color: #333; max-width: 800px; line-height: 1.5; text-align: justify;">
+    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
       <p style="margin-top: 0; margin-bottom: 20px;">${saludo} ${nombrePila},</p>
       <p style="margin-bottom: 20px;">Por favor tu ayuda adicionando a estos ${cant} beneficiarios al seguro de vida de esta venta, detallo todo a continuaci&oacute;n:</p>
@@ -891,21 +1021,21 @@ export default function App() {
       <p style="margin-bottom: 20px; margin-top: 0;"><strong>UV:</strong> ${formSeguro.uv || 'SN'} &nbsp;&nbsp;&nbsp;<strong>MZN:</strong> ${formSeguro.manzano || 'SN'} &nbsp;&nbsp;&nbsp;<strong>LOTE:</strong> ${formSeguro.lote || 'SN'}</p>
 
       <p style="margin-bottom: 10px; font-weight: bold;">Beneficiarios del seguro ${cant} personas:</p>
-      <table cellpadding="0" cellspacing="0" style="border-collapse: collapse; border: 1px solid #cbd5e1; font-family: 'Aptos', Arial, sans-serif; font-size: 13px; margin-bottom: 25px; width: 100%; text-align: left;">
-        <thead><tr style="background-color: #f8fafc;"><th style="border: 1px solid #cbd5e1; padding: 8px 12px;">NOMBRE</th><th style="border: 1px solid #cbd5e1; padding: 8px 12px;">PARENTESCO</th><th style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center;">%</th><th style="border: 1px solid #cbd5e1; padding: 8px 12px;">CI.</th></tr></thead>
+      <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; border: 1px solid #cbd5e1; font-family: Arial, sans-serif; font-size: 13px; margin-bottom: 25px; width: 100%; text-align: left; background-color: #ffffff;">
+        <thead><tr style="background-color: #f8fafc;"><th style="border: 1px solid #cbd5e1; padding: 8px 12px;"><font color="#0f172a"><b>NOMBRE</b></font></th><th style="border: 1px solid #cbd5e1; padding: 8px 12px;"><font color="#0f172a"><b>PARENTESCO</b></font></th><th style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center;"><font color="#0f172a"><b>%</b></font></th><th style="border: 1px solid #cbd5e1; padding: 8px 12px;"><font color="#0f172a"><b>CI.</b></font></th></tr></thead>
         <tbody>${filas}</tbody>
       </table>
       
       <p style="margin-bottom: 25px;">Much&iacute;simas gracias de antemano.</p>
       <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
-      <p style="margin-top: 0; font-weight: bold; color: #333;">${formSeguro.asesor || '[Nombre del Asesor]'}</p>
+      <p style="margin-top: 0; font-weight: bold; color: #333333;">${formSeguro.asesor || '[Nombre del Asesor]'}</p>
     </div>`;
   };
 
   const generarHtmlFisico = () => {
     const { saludo, titulo } = obtenerDatosSupervisor();
     return `
-    <div style="font-family: 'Aptos', Arial, sans-serif; font-size: 14px; color: #333; max-width: 800px; line-height: 1.5; text-align: justify;">
+    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
       <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${titulo},</p>
       <p style="margin-bottom: 20px;">Por medio de la presente, solicito el cambio de contrato digital a f&iacute;sico para el siguiente cliente:</p>
@@ -918,7 +1048,7 @@ export default function App() {
       <p style="margin-bottom: 20px;">${formFisico.motivo || '[Describa el motivo...]'}</p>
       <p style="margin-bottom: 25px;">Quedo atento a la confirmaci&oacute;n.</p>
       <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
-      <p style="margin-top: 0; font-weight: bold; color: #333;">${formFisico.asesor || '[Nombre del Asesor]'}</p>
+      <p style="margin-top: 0; font-weight: bold; color: #333333;">${formFisico.asesor || '[Nombre del Asesor]'}</p>
     </div>`;
   };
 
@@ -929,12 +1059,12 @@ export default function App() {
     let condicionTexto = formDescuento.modalidad === 'Crédito' ? `con cuota inicial del ${formatCurrency(porcentajeCuota)}% venta a plazos` : `venta al contado`;
 
     return `
-    <div style="font-family: 'Aptos', Arial, sans-serif; font-size: 14px; color: #1e293b; max-width: 650px; line-height: 1.5; text-align: justify;">
+    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #1e293b; max-width: 650px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
       <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${titulo},</p>
       <p style="margin-bottom: 20px;">Por favor le solicito mediante el presente correo, la aplicaci&oacute;n del descuento correspondiente a la campa&ntilde;a vigente del proyecto ${nomProyecto}: ${descuentoTexto} ${condicionTexto}:</p>
 
-      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-family: 'Aptos', Arial, sans-serif; overflow: hidden; text-align: left;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-family: Arial, sans-serif; overflow: hidden; text-align: left;">
         <tr><td style="padding: 15px; border-bottom: 1px solid #e2e8f0; background-color: #f8fafc;">
              <table width="100%" cellpadding="0" cellspacing="0"><tr><td style="color: #334155; font-size: 13px; font-weight: bold; letter-spacing: 1px;">&#128195; RESUMEN DE DESCUENTOS</td><td align="right"><span style="background-color: #d1fae5; color: #047857; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">ACTIVO</span></td></tr></table>
           </td></tr>
@@ -968,8 +1098,8 @@ export default function App() {
           </td></tr>
         <tr><td style="padding: 0 15px 15px 15px;">
              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #0f172a; border-radius: 8px;">
-                <tr><td style="padding: 20px 20px 10px 20px; font-size: 12px; font-weight: bold; color: #cbd5e1; text-transform: uppercase;">Precio M2 a Aplicar</td>
-                   <td align="right" style="padding: 20px 20px 10px 20px; font-size: 26px; font-weight: bold; color: #34d399;">$${formatCurrency(nuevoPrecioM2)}</td></tr>
+                <tr><td style="padding: 20px 20px 10px 20px; font-size: 12px; font-weight: bold; color: #cbd5e1; text-transform: uppercase;"><font color="#cbd5e1">Precio M2 a Aplicar</font></td>
+                   <td align="right" style="padding: 20px 20px 10px 20px; font-size: 26px; font-weight: bold; color: #34d399;"><font color="#34d399">$${formatCurrency(nuevoPrecioM2)}</font></td></tr>
                 <tr><td colspan="2" style="padding: 0 20px 20px 20px;">
                       <div style="background-color: #1e293b; padding: 10px; border-radius: 6px; text-align: center; font-size: 11px; font-family: monospace; color: #94a3b8; letter-spacing: 1px;">
                          UV <strong style="color: #ffffff;">${formDescuento.uv || 'SN'}</strong> &nbsp;&bull;&nbsp; MZN <strong style="color: #ffffff;">${formDescuento.manzano || '-'}</strong> &nbsp;&bull;&nbsp; LT <strong style="color: #ffffff;">${formDescuento.lote || '-'}</strong>
@@ -988,7 +1118,7 @@ export default function App() {
   const generarHtmlCuota = () => {
     const { saludo, titulo } = obtenerDatosSupervisor();
     return `
-    <div style="font-family: 'Aptos', Arial, sans-serif; font-size: 14px; color: #333; max-width: 800px; line-height: 1.5; text-align: justify;">
+    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
       <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${titulo},</p>
       <p style="margin-bottom: 20px;">Por favor su autorizaci&oacute;n para proceder con la anulaci&oacute;n del contrato actual del cliente <strong>${formCuota.cliente || '[Nombre del Cliente]'}</strong> y realizar un reingreso. El motivo de esta gesti&oacute;n es que el cliente desea incrementar significativamente su cuota inicial para reducir sus pagos mensuales.</p>
@@ -1002,7 +1132,7 @@ export default function App() {
       <p style="margin-bottom: 20px;">${formCuota.motivo || '[Detalle el motivo del incremento...]'}</p>
       <p style="margin-bottom: 25px;">Quedo atento a su aprobaci&oacute;n para proceder.</p>
       <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
-      <p style="margin-top: 0; font-weight: bold; color: #333;">${formCuota.asesorVentas || '[Nombre del Asesor]'}</p>
+      <p style="margin-top: 0; font-weight: bold; color: #333333;">${formCuota.asesorVentas || '[Nombre del Asesor]'}</p>
     </div>`;
   };
 
@@ -1010,109 +1140,21 @@ export default function App() {
     const { saludo, nombrePila } = obtenerDatosSupervisor();
     let filas = "";
     formReenvio.contratos.forEach(c => {
-      filas += `<tr><td style="border: 1px solid #333; padding: 4px 8px; font-weight: bold;">${c.nroContrato || '---'}</td><td style="border: 1px solid #333; padding: 4px 8px;">${c.cliente || '---'}</td><td style="border: 1px solid #333; padding: 4px 8px;">${c.ci || '---'}</td><td style="border: 1px solid #333; padding: 4px 8px;">UV: ${c.uv || 'SN'} - Mzn: ${c.manzano || '-'} - Lote: ${c.lote || '-'}</td></tr>`;
+      filas += `<tr style="background-color: #ffffff;"><td style="border: 1px solid #333333; padding: 6px 8px; font-weight: bold;"><font color="#000000">${c.nroContrato || '---'}</font></td><td style="border: 1px solid #333333; padding: 6px 8px;"><font color="#000000">${c.cliente || '---'}</font></td><td style="border: 1px solid #333333; padding: 6px 8px;"><font color="#000000">${c.ci || '---'}</font></td><td style="border: 1px solid #333333; padding: 6px 8px;"><font color="#000000">UV: ${c.uv || 'SN'} - Mzn: ${c.manzano || '-'} - Lote: ${c.lote || '-'}</font></td></tr>`;
     });
     const esMultiple = formReenvio.contratos.length > 1;
     return `
-    <div style="font-family: 'Aptos', Arial, sans-serif; font-size: 14px; color: #333; max-width: 800px; line-height: 1.5; text-align: justify;">
+    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
       <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${nombrePila},</p>
       <p style="margin-bottom: 20px;">Te escribo para solicitar tu apoyo habilitando nuevamente el env&iacute;o del correo para la firma digital de ${esMultiple ? "los siguientes contratos" : "el siguiente contrato"}. Debido a un error involuntario por parte de ${esMultiple ? "los clientes" : "el cliente"}, el proceso no se pudo completar en la primera instancia.</p>
-      <table cellpadding="0" cellspacing="0" style="border-collapse: collapse; border: 1px solid #333; font-family: 'Aptos', Arial, sans-serif; font-size: 13px; margin-bottom: 25px;">
-        <thead><tr style="background-color: #f2f2f2;"><th style="border: 1px solid #333; padding: 4px 8px; text-align: left;">Nro. Contrato</th><th style="border: 1px solid #333; padding: 4px 8px; text-align: left;">Cliente</th><th style="border: 1px solid #333; padding: 4px 8px; text-align: left;">Carnet (CI)</th><th style="border: 1px solid #333; padding: 4px 8px; text-align: left;">Ubicaci&oacute;n</th></tr></thead>
+      <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; border: 1px solid #333333; font-family: Arial, sans-serif; font-size: 13px; margin-bottom: 25px; width: 100%; text-align: left; background-color: #ffffff;">
+        <thead><tr style="background-color: #f2f2f2;"><th style="border: 1px solid #333333; padding: 6px 8px;"><font color="#000000"><b>Nro. Contrato</b></font></th><th style="border: 1px solid #333333; padding: 6px 8px;"><font color="#000000"><b>Cliente</b></font></th><th style="border: 1px solid #333333; padding: 6px 8px;"><font color="#000000"><b>Carnet (CI)</b></font></th><th style="border: 1px solid #333333; padding: 6px 8px;"><font color="#000000"><b>Ubicaci&oacute;n</b></font></th></tr></thead>
         <tbody>${filas}</tbody>
       </table>
       <p style="margin-bottom: 25px;">Quedo atento a tu confirmaci&oacute;n para proceder con la regularizaci&oacute;n.</p>
       <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
-      <p style="margin-top: 0; font-weight: bold; color: #333;">${formReenvio.asesor || '[Nombre del Asesor]'}</p>
-    </div>`;
-  };
-
-  const generarHtmlProyeccion = () => {
-    const { saludo, nombrePila } = obtenerDatosSupervisor();
-    let filasAsesoresHtml = "";
-    
-    let sumColAct = 0;
-    let sumProyA = [0,0,0,0,0];
-    let sumTotalProySemanal = 0;
-    let sumTotalColMes = 0;
-
-    formProyeccion.asesores.forEach((asesor, i) => {
-      const sumDias = asesor.dias.reduce((a, b) => a + b, 0);
-      const totalColMes = asesor.colAct + sumDias;
-      
-      sumColAct += asesor.colAct;
-      asesor.proy.forEach((val, idx) => sumProyA[idx] += val);
-      sumTotalProySemanal += sumDias;
-      sumTotalColMes += totalColMes;
-
-      const formatVacio = (val) => val === 0 ? '-' : formatCurrency(val);
-      const formatDias = (val) => val === 0 ? '-' : val;
-
-      filasAsesoresHtml += `
-        <tr>
-          <td style="border: 1px solid #cbd5e1; padding: 4px; text-align: center; font-weight: bold; background: white;">${i+1}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 4px 6px; font-weight: bold; background: white;">${asesor.nombre}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 4px; text-align: right; background: white;">${formatVacio(asesor.colAct)}</td>
-          ${asesor.dias.map(d => `<td style="border: 1px solid #cbd5e1; padding: 4px; text-align: center; background: white;">${formatDias(d)}</td>`).join('')}
-          ${asesor.proy.map(p => `<td style="border: 1px solid #cbd5e1; padding: 4px; text-align: center; font-weight: bold; background: white;">${p}</td>`).join('')}
-          <td style="border: 1px solid #cbd5e1; padding: 4px; text-align: right; font-weight: bold; background: white;">${formatVacio(sumDias)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 4px; text-align: right; font-weight: bold; background: white;">${formatVacio(totalColMes)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 4px; text-align: center; background: white;"></td>
-        </tr>
-      `;
-    });
-
-    const mesStr = new Date(formProyeccion.fechaInicio || new Date()).toLocaleString('es-ES', { month: 'long' });
-    const capMes = mesStr.charAt(0).toUpperCase() + mesStr.slice(1);
-    const porcentajeAvance = formProyeccion.objetivoMensual ? (sumColAct / formProyeccion.objetivoMensual) * 100 : 0;
-    const porcentajeFin = formProyeccion.objetivoMensual ? (sumTotalColMes / formProyeccion.objetivoMensual) * 100 : 0;
-
-    return `
-    <div style="font-family: 'Aptos', Arial, sans-serif; font-size: 13px; color: #333; text-align: justify;">
-      <p>${obtenerSaludoTiempo()}</p>
-      <p>${saludo} ${nombrePila},</p>
-      <p>Adjunto el consolidado de proyecci&oacute;n de ventas semanal del equipo correspondiente a la semana actual.</p>
-      
-      <div style="overflow-x: auto; width: 100%;">
-      <table style="border-collapse: collapse; font-family: 'Aptos', Arial, sans-serif; font-size: 11px; margin-top: 15px; width: 100%; min-width: 900px; text-align: left;">
-        <thead>
-          <tr>
-            <th colspan="3" style="background-color: #002060; color: white; padding: 6px; border: 1px solid white; text-align: left;">Proyeccion Equipo: ${formProyeccion.equipo}</th>
-            <th colspan="7" style="background-color: #002060; color: white; padding: 6px; border: 1px solid white; text-align: center;">Ventas</th>
-            <th colspan="5" style="background-color: #92d050; color: black; padding: 6px; border: 1px solid white; text-align: center;">Proyectos</th>
-            <th rowspan="2" style="background-color: #002060; color: white; padding: 6px; border: 1px solid white; text-align: center; vertical-align: bottom;">Total<br>Proyeccion<br>semanal</th>
-            <th rowspan="2" style="background-color: #002060; color: white; padding: 6px; border: 1px solid white; text-align: center; vertical-align: bottom;">Total<br>colocacion<br>asesor/mes</th>
-            <th rowspan="2" style="background-color: #002060; color: white; padding: 6px; border: 1px solid white; text-align: center; vertical-align: bottom;">Productivo<br>valor = $25.000</th>
-          </tr>
-          <tr>
-            <th style="background-color: #002060; color: white; border: 1px solid white;"></th>
-            <th style="background-color: #002060; color: white; padding: 6px; border: 1px solid white; text-align: left;">Asesor</th>
-            <th style="background-color: #002060; color: white; padding: 6px; border: 1px solid white; text-align: center;">Colocacion<br>actual</th>
-            ${[0,1,2,3,4,5,6].map(d => `<th style="background-color: #002060; color: white; padding: 6px; border: 1px solid white; text-align: center;">${formatDiaMes(formProyeccion.fechaInicio, d)}</th>`).join('')}
-            ${NOMBRES_PROYECTOS_PROYECCION.map(p => `<th style="background-color: #92d050; color: white; padding: 6px; border: 1px solid white; text-align: center;">${p}</th>`).join('')}
-          </tr>
-        </thead>
-        <tbody>
-          ${filasAsesoresHtml}
-          <tr>
-            <td colspan="10" style="border: none;"></td>
-            ${sumProyA.map(p => `<td style="background-color: #8faadc; color: black; font-weight: bold; border: 1px solid #cbd5e1; text-align: center; padding: 4px;">${p}</td>`).join('')}
-            <td style="border: none;"></td>
-            <td style="background-color: #f8fafc; font-weight: bold; border: 1px solid #cbd5e1; text-align: right; padding: 4px;">${formatCurrency(sumTotalColMes)}</td>
-            <td style="font-weight: bold; color: red; text-align: center; padding: 4px;">0%</td>
-          </tr>
-        </tbody>
-      </table>
-      </div>
-
-      <table style="border-collapse: collapse; font-family: 'Aptos', Arial, sans-serif; font-size: 11px; margin-top: 20px; width: 300px; text-align: left;">
-        <tr><td style="background-color: #002060; color: white; padding: 5px 8px; font-weight: bold; border: 1px solid white;">Proyeccion ${capMes}</td><td style="background-color: #002060; color: white; padding: 5px 8px; font-weight: bold; border: 1px solid white; text-align: center;">-</td><td style="border: none;"></td></tr>
-        <tr><td style="background-color: #002060; color: white; padding: 5px 8px; font-weight: bold; border: 1px solid white;">Colocacion actual</td><td style="background-color: #002060; color: white; padding: 5px 8px; font-weight: bold; border: 1px solid white; text-align: right;">${formatCurrency(sumColAct)}</td><td style="background-color: #002060; color: white; padding: 5px 8px; font-weight: bold; border: 1px solid white; text-align: center;">${formatCurrency(porcentajeAvance)}%</td></tr>
-        <tr><td style="background-color: #002060; color: white; padding: 5px 8px; font-weight: bold; border: 1px solid white;">Objetivo ${capMes} ${new Date().getFullYear()}</td><td style="background-color: #002060; color: white; padding: 5px 8px; font-weight: bold; border: 1px solid white; text-align: right;">${formatCurrency(formProyeccion.objetivoMensual)}</td><td style="border: none;"></td></tr>
-        <tr><td style="background-color: #002060; color: white; padding: 5px 8px; font-weight: bold; border: 1px solid white;">Colocacion fin de mes</td><td style="background-color: #002060; color: white; padding: 5px 8px; font-weight: bold; border: 1px solid white; text-align: right;">${formatCurrency(sumTotalColMes)}</td><td style="background-color: #002060; color: white; padding: 5px 8px; font-weight: bold; border: 1px solid white; text-align: center;">${formatCurrency(porcentajeFin)}%</td></tr>
-      </table>
-      <p style="margin-top: 25px;">Saludos cordiales.</p>
+      <p style="margin-top: 0; font-weight: bold; color: #333333;">${formReenvio.asesor || '[Nombre del Asesor]'}</p>
     </div>`;
   };
 
@@ -1204,7 +1246,7 @@ export default function App() {
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><PhoneCall className="w-6 h-6 mr-2 text-blue-600" /> Validación de Llamada (Referidos)</h2></div>
               <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
                   <Input label="Nombre del Asesor" name="asesor" value={formLlamada.asesor} onChange={handleLlamadaChange} placeholder="Ej. Oscar Saravia" />
                   
                   <div className="mt-6 mb-4 pb-2 border-b border-slate-100">
@@ -1224,7 +1266,7 @@ export default function App() {
                     <Input label="Carnet (CI) Beneficiaria" name="ciBeneficiario" value={formLlamada.ciBeneficiario} onChange={handleLlamadaChange} placeholder="Ej. C2604201165" />
                   </div>
                 </div>
-                <div className="w-full">
+                <div className="w-full min-w-0">
                   <ResultCard 
                     title="Validación Llamada" 
                     text={generarTextoLlamadaCelular()} 
@@ -1244,7 +1286,7 @@ export default function App() {
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
               <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><Shield className="w-6 h-6 mr-2 text-blue-600" /> Adición Beneficiarios Seguro</h2></div>
               <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_1fr] 2xl:grid-cols-[1.5fr_1fr] gap-8 w-full">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
                    <div className="mb-4"><Input label="Nombre del Asesor" name="asesor" value={formSeguro.asesor} onChange={handleSeguroChange} placeholder="Ej. Oscar Saravia" /></div>
                    
                    <div className="mt-6 mb-4 pb-2 border-b border-slate-100">
@@ -1280,7 +1322,7 @@ export default function App() {
                     </div>
                     <button onClick={agregarBeneficiario} className="mt-4 w-full flex items-center justify-center py-3 border-2 border-dashed rounded-xl text-slate-600 hover:text-blue-600 font-medium text-sm transition-colors"><Plus className="w-4 h-4 mr-1" /> Añadir otro beneficiario</button>
                 </div>
-                <div className="w-full">
+                <div className="w-full min-w-0">
                    <ResultCard 
                      title="Adición Beneficiarios Seguro" 
                      text={generarTextoSeguroCelular()} 
@@ -1299,7 +1341,7 @@ export default function App() {
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
               <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><Repeat className="w-6 h-6 mr-2 text-blue-600" /> Solicitud de Recompra</h2></div>
               <div className="grid grid-cols-1 xl:grid-cols-[1.3fr_1fr] 2xl:grid-cols-[1.5fr_1fr] gap-8 w-full">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
                    
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mb-6">
                       <Input label="Nombre del Asesor" name="asesor" value={formRecompra.asesor} onChange={handleRecompraChange} placeholder="Ej. Oscar Saravia" />
@@ -1390,7 +1432,7 @@ export default function App() {
                    </div>
 
                 </div>
-                <div className="w-full">
+                <div className="w-full min-w-0">
                    <ResultCard 
                      title="Solicitud Recompra" 
                      text={generarTextoRecompraCelular()} 
@@ -1417,7 +1459,7 @@ export default function App() {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-[2fr_1fr] 2xl:grid-cols-[2.5fr_1fr] gap-6 w-full">
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col w-full">
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col w-full min-w-0">
                   <div className="p-4 border-b border-slate-100 flex flex-wrap gap-4 bg-slate-50 items-center w-full">
                     <div className="flex-1 min-w-[200px]">
                       <label className="block text-xs font-bold text-slate-500 uppercase">Equipo Supervisor</label>
@@ -1482,7 +1524,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="w-full">
+                <div className="w-full min-w-0">
                   <ResultCard 
                     title="Proyección Semanal" 
                     text={generarTextoProyeccionCelular()} 
@@ -1502,7 +1544,7 @@ export default function App() {
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><FileText className="w-6 h-6 mr-2 text-blue-600" /> Habilitación de Contrato Físico</h2></div>
               <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
                   <Input label="Nombre del Asesor" name="asesor" value={formFisico.asesor} onChange={handleFisicoChange} placeholder="Ej. Oscar Saravia" />
                   <Input label="Nombre Completo del Cliente" name="nombre" value={formFisico.nombre} onChange={handleFisicoChange} placeholder="Ej. Juan Pérez" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
@@ -1511,7 +1553,7 @@ export default function App() {
                   </div>
                   <TextArea label="Motivo detallado" name="motivo" value={formFisico.motivo} onChange={handleFisicoChange} placeholder="Ej. El cliente es una persona mayor..." />
                 </div>
-                <div className="w-full"><ResultCard title="Contrato Físico" text={generarTextoFisicoCelular()} htmlContent={generarHtmlFisico()} subject={`Solicitud Contrato Físico - ${formFisico.nombre || 'Cliente'}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
+                <div className="w-full min-w-0"><ResultCard title="Contrato Físico" text={generarTextoFisicoCelular()} htmlContent={generarHtmlFisico()} subject={`Solicitud Contrato Físico - ${formFisico.nombre || 'Cliente'}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
               </div>
             </div>
           )}
@@ -1521,7 +1563,7 @@ export default function App() {
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><FileSignature className="w-6 h-6 mr-2 text-blue-600" /> Reenvío Firma Digital</h2></div>
               <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-[1.2fr_1fr] 2xl:grid-cols-[1.5fr_1fr] gap-8 w-full">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 border-b border-slate-100 pb-3 gap-3">
                     <h3 className="text-lg font-medium text-slate-800">Listado de Contratos</h3>
                     <div className="w-full sm:w-1/2 md:w-1/3">
@@ -1550,7 +1592,7 @@ export default function App() {
                   </div>
                   <button onClick={agregarContratoReenvio} className="mt-4 w-full flex items-center justify-center py-3 border-2 border-dashed rounded-xl text-slate-600 hover:text-blue-600 font-medium text-sm transition-colors"><Plus className="w-4 h-4 mr-1" /> Añadir otro contrato</button>
                 </div>
-                <div className="w-full"><ResultCard title="Reenvío Firma Digital" text={generarTextoReenvioCelular()} htmlContent={generarHtmlReenvio()} subject={`Solicitud Reenvío de Correo Firma Digital - ${formReenvio.proyecto}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
+                <div className="w-full min-w-0"><ResultCard title="Reenvío Firma Digital" text={generarTextoReenvioCelular()} htmlContent={generarHtmlReenvio()} subject={`Solicitud Reenvío de Correo Firma Digital - ${formReenvio.proyecto}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
               </div>
             </div>
           )}
@@ -1583,7 +1625,7 @@ export default function App() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-[1.3fr_1fr] 2xl:grid-cols-[1.5fr_1fr] gap-8 w-full">
-                  <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full">
+                  <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5 w-full">
                       <div className="w-full">
                         <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Proyecto</label>
@@ -1746,7 +1788,7 @@ export default function App() {
                     
                     <div className="border-t border-slate-100 pt-5 mt-2 w-full"><Input label="Nombre del Asesor" name="asesor" value={formDescuento.asesor} onChange={handleDescuentoChange} /></div>
                   </div>
-                  <div className="w-full"><ResultCard title="Descuento" text={generarTextoDescuentoCelular()} htmlContent={generarHtmlDescuento()} subject={`Solicitud Descuento Campañas - ${nomProyectoFinal} Mz${formDescuento.manzano} Lt${formDescuento.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
+                  <div className="w-full min-w-0"><ResultCard title="Descuento" text={generarTextoDescuentoCelular()} htmlContent={generarHtmlDescuento()} subject={`Solicitud Descuento Campañas - ${nomProyectoFinal} Mz${formDescuento.manzano} Lt${formDescuento.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
                 </div>
               </div>
             );
@@ -1757,7 +1799,7 @@ export default function App() {
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
               <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><TrendingUp className="w-6 h-6 mr-2 text-blue-600" /> Incremento de Cuota Inicial</h2></div>
               <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
                     <Input label="Nro. Contrato" name="nroContrato" value={formCuota.nroContrato} onChange={handleCuotaChange} />
                     <Input label="Carnet (CI)" name="ci" value={formCuota.ci} onChange={handleCuotaChange} />
@@ -1779,7 +1821,7 @@ export default function App() {
                   <TextArea label="Motivo del incremento" name="motivo" value={formCuota.motivo} onChange={handleCuotaChange} />
                   <div className="border-t border-slate-100 pt-5 mt-2 w-full"><Input label="Nombre del Asesor" name="asesorVentas" value={formCuota.asesorVentas} onChange={handleCuotaChange} /></div>
                 </div>
-                <div className="w-full"><ResultCard title="Incremento Cuota" text={generarTextoCuotaCelular()} htmlContent={generarHtmlCuota()} subject={`Incremento Cuota Inicial - ${formCuota.proyecto} Mz${formCuota.manzano} Lt${formCuota.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
+                <div className="w-full min-w-0"><ResultCard title="Incremento Cuota" text={generarTextoCuotaCelular()} htmlContent={generarHtmlCuota()} subject={`Incremento Cuota Inicial - ${formCuota.proyecto} Mz${formCuota.manzano} Lt${formCuota.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
               </div>
             </div>
           )}
