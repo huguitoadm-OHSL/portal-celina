@@ -267,6 +267,7 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
   const handleSendEmail = () => {
     const to = fixedDestinoEmail || supervisorDestino;
     const ccQuery = ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : '';
+    // Usamos 'text', que ahora está diseñado con Emojis para celulares
     const mailtoLink = `mailto:${to}?subject=${encodeURIComponent(subject)}${ccQuery}&body=${encodeURIComponent(text)}`;
     window.location.href = mailtoLink;
   };
@@ -304,7 +305,8 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
         <div className="mb-4 p-3.5 bg-indigo-50/50 border border-indigo-100 rounded-xl flex gap-3 items-start shadow-sm w-full">
           <Info className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
           <p className="text-xs text-indigo-800 leading-relaxed">
-            <strong>Recomendado:</strong> Usa <b>"Copiar Formato Correo"</b> y pégalo directamente en tu gestor de correo para enviar la tabla con su dise&ntilde;o profesional y alineaci&oacute;n justificada.
+            <strong>Modo PC:</strong> Usa <b>"Copiar Formato"</b> y pégalo en tu correo.<br/>
+            <strong>Modo Celular:</strong> Usa <b>"Enviar desde Celular"</b> para un texto adaptado.
           </p>
         </div>
       )}
@@ -323,7 +325,7 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
           className="flex-1 flex items-center justify-center py-3 px-4 bg-white border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 hover:border-slate-300 font-bold transition-all shadow-sm whitespace-nowrap"
         >
           {copied ? <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-500" /> : <Copy className="w-4 h-4 mr-2 text-slate-400" />}
-          {copied ? '¡Copiado!' : (htmlContent ? 'Copiar Formato' : 'Copiar Texto')}
+          {copied ? '¡Copiado!' : (htmlContent ? 'Copiar Formato PC' : 'Copiar Texto')}
         </button>
         {showTextPlain && (
           <button
@@ -331,7 +333,7 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
             className="flex-1 flex items-center justify-center py-3 px-4 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-900 hover:to-black text-white rounded-xl font-bold transition-all shadow-md shadow-slate-900/20 whitespace-nowrap"
           >
             <Mail className="w-4 h-4 mr-2" />
-            Texto Plano
+            Enviar desde Celular
           </button>
         )}
       </div>
@@ -601,7 +603,7 @@ export default function App() {
 
   // --- LÓGICA DE DESCUENTOS CAMPAÑAS ---
   const calcularDescuento = () => {
-    const { proyecto, modalidad, cuota, modoCuota, m2, precioM2, descuentoManual, tipoDescuentoManual } = formDescuento;
+    const { proyecto, modalidad, cuota, modoCuota, m2, precioM2, descuentoManual, tipoDescuentoManual, categoria } = formDescuento;
     const m2Num = parseFloat(m2) || 0;
     const precioM2Num = parseFloat(precioM2) || 0;
     const vc = m2Num * precioM2Num;
@@ -689,12 +691,102 @@ export default function App() {
   };
 
   // --- GENERADORES DE TEXTOS Y HTML ---
-  const generarTextoRecompra = () => {
+  
+  // FUNCIÓN PARA TEXTO PLANO CELULARES: RECOMPRA
+  const generarTextoRecompraCelular = () => {
     const beneficio = calcularBeneficioRecompra();
     const { saludo, nombrePila } = obtenerDatosSupervisor();
-    return `${obtenerSaludoTiempo()}\n${saludo} ${nombrePila},\n\nPor favor su ayuda con el código de pago por recompra de este cliente, le toca pagar su cuota el ${formRecompra.fechaPago || '[FECHA PAGO]'} muchas gracias de antemano:\n\nCONTRATO NUEVO\nAgencia: ${formRecompra.sucursal || '-'}\nFecha de Venta: ${formRecompra.fechaVentaNuevo || '-'}\nNombre: ${formRecompra.nombreNuevo || '-'}\nContrato: ${formRecompra.contratoNuevo || '-'}\n¿Se aplicó dscto por m2?: ${formRecompra.aplicoDescuento}\nCant. de cuotas pagadas: ${formRecompra.cuotasPagadas}\n¿Procesado?: ${formRecompra.procesadoNuevo}\n¿Vigente?: ${formRecompra.vigenteNuevo}\n\nCONTRATO ANTIGUO\nNombre: ${formRecompra.nombreAntiguo || '-'}\nContrato: ${formRecompra.contratoAntiguo || '-'}\nFecha de venta: ${formRecompra.fechaVentaAntiguo || '-'}\nFecha Pago: ${formRecompra.fechaPago || '-'}\n¿Procesado?: ${formRecompra.procesadoAntiguo}\n¿Vigente?: ${formRecompra.vigenteAntiguo}\nPatrocinador: ${formRecompra.patrocinador || '-'}\n\nValor de Cuota: $${formRecompra.valorCuota || '0'}\nBeneficio $: ${beneficio}\n\nSaludos cordiales,\n${formRecompra.asesor || '[Nombre del Asesor]'}`;
+    return `👋 ${obtenerSaludoTiempo()}\n${saludo} ${nombrePila},\n\nPor favor su ayuda con el código de pago por recompra de este cliente:\n\n*🆕 CONTRATO NUEVO*\n🏢 Agencia: ${formRecompra.sucursal || '-'}\n📅 Venta: ${formRecompra.fechaVentaNuevo || '-'}\n👤 Nombre: ${formRecompra.nombreNuevo || '-'}\n📄 Contrato: ${formRecompra.contratoNuevo || '-'}\n🏷️ Aplicó Descuento: ${formRecompra.aplicoDescuento}\n💵 Cuotas Pagadas: ${formRecompra.cuotasPagadas}\n✅ Procesado: ${formRecompra.procesadoNuevo}\n🟢 Vigente: ${formRecompra.vigenteNuevo}\n\n*🕰️ CONTRATO ANTIGUO*\n👤 Nombre: ${formRecompra.nombreAntiguo || '-'}\n📄 Contrato: ${formRecompra.contratoAntiguo || '-'}\n📅 Venta: ${formRecompra.fechaVentaAntiguo || '-'}\n💰 Fecha Pago: ${formRecompra.fechaPago || '-'}\n✅ Procesado: ${formRecompra.procesadoAntiguo}\n🟢 Vigente: ${formRecompra.vigenteAntiguo}\n🤝 Patrocinador: ${formRecompra.patrocinador || '-'}\n\n*💵 VALOR CUOTA: $ ${formRecompra.valorCuota || '0'}*\n*🎁 BENEFICIO: $ ${beneficio}*\n\nSaludos cordiales,\n*${formRecompra.asesor || 'Asesor'}*`;
   };
 
+  // FUNCIÓN PARA TEXTO PLANO CELULARES: DESCUENTO
+  const generarTextoDescuentoCelular = () => {
+    const { vc, descuentoTotal, descuentoTexto, nuevoPrecioTotal, nuevoPrecioM2, pos } = calcularDescuento();
+    const { saludo, titulo } = obtenerDatosSupervisor();
+    const nomProyecto = formDescuento.proyecto === 'OTRO...' ? (formDescuento.proyectoManual || 'PROYECTO MANUAL') : formDescuento.proyecto;
+    let condicionTexto = formDescuento.modalidad === 'Crédito' ? `con cuota inicial del ${formatCurrency(calcularDescuento().porcentajeCuota)}% venta a plazos` : `venta al contado`;
+    const catStr = formDescuento.categoria ? String(formDescuento.categoria).toUpperCase() : '';
+
+    return `👋 ${obtenerSaludoTiempo()}\n${saludo} ${titulo},\n\nPor favor le solicito la aplicación del descuento de la campaña vigente del proyecto *${nomProyecto}*:\n\n*📌 DATOS DEL LOTE*\n📐 Superficie: ${formDescuento.m2 || '0'} m²\n💵 Precio M2 Normal: $ ${formatCurrency(formDescuento.precioM2 || 0)}\n💰 *Precio Original: $ ${formatCurrency(vc)}*\n\n*🏷️ APLICACIÓN DE CAMPAÑA*\n✅ Condición: ${descuentoTexto} ${condicionTexto}\n🔥 *Descuento Total: -$ ${formatCurrency(descuentoTotal)}*\n\n*✨ PRECIO FINAL PROMOCIÓN ✨*\n➡️ *Precio Final: $ ${formatCurrency(nuevoPrecioTotal)}*\n➡️ *Precio M2 Final: $ ${formatCurrency(nuevoPrecioM2)}*\n\n*📍 UBICACIÓN*\nUV: ${formDescuento.uv || 'SN'} | MZN: ${formDescuento.manzano || '---'} | LT: ${formDescuento.lote || '---'}\n${catStr ? `🏢 Categoría: ${catStr}\n` : ''}\nQuedo atento a su aprobación para continuar con el proceso de venta.\n\nSaludos cordiales,\n*${formDescuento.asesor || 'Nombre del Asesor'}*`;
+  };
+
+  // FUNCIÓN PARA TEXTO PLANO CELULARES: CUOTA INICIAL
+  const generarTextoCuotaCelular = () => {
+    const { saludo, titulo } = obtenerDatosSupervisor();
+    return `👋 ${obtenerSaludoTiempo()}\n${saludo} ${titulo},\n\nPor favor su autorización para proceder con la anulación y reingreso del siguiente contrato para incrementar su cuota inicial:\n\n*👤 DATOS DEL CLIENTE*\n👤 Cliente: ${formCuota.cliente || '---'}\n📄 Nro. Contrato: ${formCuota.nroContrato || '---'}\n🪪 CI: ${formCuota.ci || '---'}\n📍 Ubicación: ${formCuota.proyecto} | UV ${formCuota.uv || '-'} | MZN ${formCuota.manzano || '-'} | LOTE ${formCuota.lote || '-'}\n\n*💰 INCREMENTO*\n📉 Cuota Registrada: $ ${formatCurrency(formCuota.cuotaInicial || 0)}\n📈 *NUEVA CUOTA: $ ${formatCurrency(formCuota.nuevaCuota || 0)}*\n\n*📝 OBSERVACIONES*\n${formCuota.motivo || '---'}\n\nQuedo atento a su aprobación.\n\nSaludos,\n*${formCuota.asesorVentas || 'Asesor'}*`;
+  };
+
+  // FUNCIÓN PARA TEXTO PLANO CELULARES: SEGURO
+  const generarTextoSeguroCelular = () => {
+    const { saludo, nombrePila } = obtenerDatosSupervisor();
+    const cant = formSeguro.beneficiarios.length;
+    let lista = "";
+    formSeguro.beneficiarios.forEach((b, i) => {
+      lista += `\n*Beneficiario ${i+1}:*\n👤 Nombre: ${b.nombre || '---'}\n👥 Parentesco: ${b.parentesco || '---'}\n📊 Porcentaje: ${b.porcentaje ? b.porcentaje + '%' : '---'}\n🪪 CI: ${b.ci || '---'}\n`;
+    });
+
+    return `👋 ${obtenerSaludoTiempo()}\n${saludo} ${nombrePila},\n\nPor favor tu ayuda adicionando a estos ${cant} beneficiarios al seguro de vida:\n\n*📄 DATOS DEL CONTRATO*\n👤 Cliente: ${formSeguro.cliente || '---'}\n📑 Contrato: ${formSeguro.nroContrato || '---'}\n📍 UV: ${formSeguro.uv || 'SN'} | MZN: ${formSeguro.manzano || 'SN'} | LOTE: ${formSeguro.lote || 'SN'}\n\n*📋 LISTA DE BENEFICIARIOS*${lista}\nMuchísimas gracias.\n\nSaludos,\n*${formSeguro.asesor || 'Asesor'}*`;
+  };
+  
+  // FUNCIÓN PARA TEXTO PLANO CELULARES: FISICO
+  const generarTextoFisicoCelular = () => {
+    const { saludo, titulo } = obtenerDatosSupervisor();
+    return `👋 ${obtenerSaludoTiempo()}\n${saludo} ${titulo},\n\nSolicito el cambio de contrato digital a físico para el siguiente cliente:\n\n*👤 DATOS DEL CLIENTE*\n👤 Nombre: ${formFisico.nombre || '---'}\n🪪 CI: ${formFisico.ci || '---'}\n📄 Contrato: ${formFisico.contrato || '---'}\n\n*📝 MOTIVO*\n${formFisico.motivo || '---'}\n\nQuedo atento a la confirmación.\n\nSaludos,\n*${formFisico.asesor || 'Asesor'}*`;
+  };
+
+  // FUNCIÓN PARA TEXTO PLANO CELULARES: REENVIO
+  const generarTextoReenvioCelular = () => {
+    const { saludo, nombrePila } = obtenerDatosSupervisor();
+    let lista = "";
+    formReenvio.contratos.forEach((c, i) => {
+      lista += `\n*Contrato ${i+1}:*\n📄 Nro: ${c.nroContrato || '---'}\n👤 Cliente: ${c.cliente || '---'}\n🪪 CI: ${c.ci || '---'}\n📍 UV: ${c.uv || 'SN'} | MZN: ${c.manzano || '-'} | LT: ${c.lote || '-'}\n`;
+    });
+
+    return `👋 ${obtenerSaludoTiempo()}\n${saludo} ${nombrePila},\n\nSolicito tu apoyo habilitando nuevamente el envío del correo para la firma digital del proyecto *${formReenvio.proyecto.toUpperCase()}* debido a un error involuntario del cliente.\n\n*📋 CONTRATOS AFECTADOS:*${lista}\nQuedo atento a tu confirmación.\n\nSaludos,\n*${formReenvio.asesor || 'Asesor'}*`;
+  };
+
+  // FUNCIÓN PARA TEXTO PLANO CELULARES: LLAMADA
+  const generarTextoLlamadaCelular = () => {
+    return `👋 ${obtenerSaludoTiempo()}\nEstimada Olivia,\n\nPor favor su ayuda con la validación de llamada de este cliente referido, solicita que lo llamen a las *${formLlamada.horaLlamada || '[HORA]'}*:\n\n*🗣️ REFERIDO*\n👤 Nombre: ${formLlamada.nombreReferido || '---'}\n🪪 CI: ${formLlamada.ciReferido || '---'}\n\n*🎁 BENEFICIARIA*\n👤 Nombre: ${formLlamada.nombreBeneficiario || '---'}\n🪪 CI: ${formLlamada.ciBeneficiario || '---'}\n\nSaludos cordiales,\n*${formLlamada.asesor || 'Asesor'}*`;
+  };
+
+  // FUNCIÓN PARA TEXTO PLANO CELULARES: PROYECCION
+  const generarTextoProyeccionCelular = () => {
+    const { saludo, nombrePila } = obtenerDatosSupervisor();
+    let texto = `👋 ${obtenerSaludoTiempo()}\n${saludo} ${nombrePila},\n\nAdjunto el resumen del consolidado de proyección de ventas semanal del equipo.\n\n`;
+    
+    let sumColAct = 0;
+    let sumTotalColMes = 0;
+
+    formProyeccion.asesores.forEach((asesor, i) => {
+      const sumDias = asesor.dias.reduce((a, b) => a + b, 0);
+      const totalColMes = asesor.colAct + sumDias;
+      sumColAct += asesor.colAct;
+      sumTotalColMes += totalColMes;
+      
+      if (asesor.colAct > 0 || sumDias > 0) {
+        texto += `*${i+1}. ${asesor.nombre}*\n`;
+        texto += `   📈 Colocación Actual: $ ${formatCurrency(asesor.colAct)}\n`;
+        texto += `   🎯 Proyección Semanal: $ ${formatCurrency(sumDias)}\n`;
+        texto += `   🏁 Cierre de Mes: $ ${formatCurrency(totalColMes)}\n\n`;
+      }
+    });
+
+    const mesStr = new Date(formProyeccion.fechaInicio || new Date()).toLocaleString('es-ES', { month: 'long' });
+    const capMes = mesStr.charAt(0).toUpperCase() + mesStr.slice(1);
+    const porcentajeAvance = formProyeccion.objetivoMensual ? (sumColAct / formProyeccion.objetivoMensual) * 100 : 0;
+    const porcentajeFin = formProyeccion.objetivoMensual ? (sumTotalColMes / formProyeccion.objetivoMensual) * 100 : 0;
+
+    texto += `*📊 RESUMEN DEL EQUIPO*\n`;
+    texto += `🎯 Objetivo ${capMes}: $ ${formatCurrency(formProyeccion.objetivoMensual)}\n`;
+    texto += `📈 Colocación Actual: $ ${formatCurrency(sumColAct)} (${formatCurrency(porcentajeAvance)}%)\n`;
+    texto += `🏁 Colocación Fin de Mes: $ ${formatCurrency(sumTotalColMes)} (${formatCurrency(porcentajeFin)}%)\n\n`;
+    texto += `Saludos cordiales.`;
+
+    return texto;
+  };
+
+  // --- HTML PARA PC ---
   const generarHtmlRecompra = () => {
     const beneficio = calcularBeneficioRecompra();
     const { saludo, nombrePila } = obtenerDatosSupervisor();
@@ -762,10 +854,6 @@ export default function App() {
     </div>`;
   };
 
-  const generarTextoLlamada = () => {
-    return `${obtenerSaludoTiempo()}\nEstimada Olivia,\n\nPor favor su ayuda con la validación de llamada de este cliente referido, el cliente menciona que tendrá tiempo de contestar hoy a las ${formLlamada.horaLlamada || '[HORA]'}, por favor pido la ayuda de tu equipo para que la puedan llamar a esa hora:\n\nCliente referido:\n${formLlamada.nombreReferido || '[NOMBRE REFERIDO]'}, ${formLlamada.ciReferido || '[CI REFERIDO]'}\n\nCliente beneficiaria:\n${formLlamada.nombreBeneficiario || '[NOMBRE BENEFICIARIA]'}, ${formLlamada.ciBeneficiario || '[CI BENEFICIARIA]'}\n\nSaludos cordiales\n${formLlamada.asesor || '[Nombre del Asesor]'}`;
-  };
-
   const generarHtmlLlamada = () => {
     return `
     <div style="font-family: 'Aptos', Arial, sans-serif; font-size: 14px; color: #333; max-width: 800px; line-height: 1.5; text-align: justify;">
@@ -782,17 +870,6 @@ export default function App() {
       <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
       <p style="margin-top: 0; font-weight: bold; color: #333;">${formLlamada.asesor || '[Nombre del Asesor]'}</p>
     </div>`;
-  };
-
-  const generarTextoSeguro = () => {
-    const { saludo, nombrePila } = obtenerDatosSupervisor();
-    const cant = formSeguro.beneficiarios.length;
-    let lista = "NOMBRE\tPARENTESCO\t%\tCI.\n";
-    formSeguro.beneficiarios.forEach(b => {
-      lista += `${b.nombre || '---'}\t${b.parentesco || '---'}\t${b.porcentaje ? b.porcentaje + '%' : '---'}\t${b.ci || '---'}\n`;
-    });
-
-    return `${obtenerSaludoTiempo()}\n${saludo} ${nombrePila},\n\nPor favor tu ayuda adicionando a estos ${cant} beneficiarios al seguro de vida de esta venta, detallo todo a continuación:\n\nCliente(s): ${formSeguro.cliente || '[Nombre del Cliente]'}\nNro. Contrato: ${formSeguro.nroContrato || '[Nro]'}\nUV: ${formSeguro.uv || 'SN'} MZN: ${formSeguro.manzano || 'SN'} LOTE: ${formSeguro.lote || 'SN'}\n\nBeneficiarios del seguro ${cant} personas:\n${lista}\nMuchísimas gracias de antemano.\n\nSaludos cordiales,\n${formSeguro.asesor || '[Nombre del Asesor]'}`;
   };
 
   const generarHtmlSeguro = () => {
@@ -825,11 +902,6 @@ export default function App() {
     </div>`;
   };
 
-  const generarTextoFisico = () => {
-    const { saludo, titulo } = obtenerDatosSupervisor();
-    return `${obtenerSaludoTiempo()}\n${saludo} ${titulo},\n\nPor medio de la presente, solicito el cambio de contrato digital a físico para el siguiente cliente:\n\n- Nombre del Cliente: ${formFisico.nombre || '[Nombre]'}\n- Número de Carnet (CI): ${formFisico.ci || '[CI]'}\n- Número de Contrato: ${formFisico.contrato || '[Nro Contrato]'}\n\nMotivo de la solicitud:\n${formFisico.motivo || '[Describa el motivo...]'}\n\nQuedo atento a la confirmación. \n\nSaludos cordiales,\n${formFisico.asesor || '[Nombre del Asesor]'}`;
-  };
-
   const generarHtmlFisico = () => {
     const { saludo, titulo } = obtenerDatosSupervisor();
     return `
@@ -848,16 +920,6 @@ export default function App() {
       <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
       <p style="margin-top: 0; font-weight: bold; color: #333;">${formFisico.asesor || '[Nombre del Asesor]'}</p>
     </div>`;
-  };
-
-  const generarTextoDescuento = () => {
-    const { vc, descuentoTotal, descuentoTexto, nuevoPrecioTotal, nuevoPrecioM2, porcentajeCuota } = calcularDescuento();
-    const { saludo, titulo } = obtenerDatosSupervisor();
-    const nomProyecto = formDescuento.proyecto === 'OTRO...' ? (formDescuento.proyectoManual || 'PROYECTO MANUAL') : formDescuento.proyecto;
-    let condicionTexto = formDescuento.modalidad === 'Crédito' ? `con cuota inicial del ${formatCurrency(porcentajeCuota)}% venta a plazos` : `venta al contado`;
-    const catStr = formDescuento.categoria ? String(formDescuento.categoria).toUpperCase() : '';
-
-    return `${obtenerSaludoTiempo()}\n${saludo} ${titulo},\n\nPor favor le solicito mediante el presente correo, la aplicación del descuento correspondiente a la campaña vigente del proyecto ${nomProyecto}: ${descuentoTexto} ${condicionTexto}:\n\n------------------------------------------------------------\n• Superficie:             ${formDescuento.m2 || '0'} m²\n• Precio M2:              $ ${formatCurrency(formDescuento.precioM2 || 0)}\n• Precio Original:        $ ${formatCurrency(vc)}\n------------------------------------------------------------\n• Condición (${nomProyecto}): ${descuentoTexto}  [-$ ${formatCurrency(descuentoTotal)}]\n• Total Valor Contrato (VC):   $ ${formatCurrency(vc)}\n• Total Dscto Campañas:       -$ ${formatCurrency(descuentoTotal)}\n------------------------------------------------------------\n• Nuevo Precio Promoción:      $ ${formatCurrency(nuevoPrecioTotal)}\n\nPRECIO M2 A APLICAR:        $ ${formatCurrency(nuevoPrecioM2)}\nUV ${formDescuento.uv || 'SN'} • MZN ${formDescuento.manzano || '---'} • LT ${formDescuento.lote || '---'}\n${catStr ? `CATEGORÍA: ${catStr}\n\n` : '\n'}Quedo atento a su aprobación para continuar con el proceso del cierre de la venta.\n\nSaludos cordiales,\n${formDescuento.asesor || '[Nombre del Asesor]'}`;
   };
 
   const generarHtmlDescuento = () => {
@@ -923,11 +985,6 @@ export default function App() {
     </div>`;
   };
 
-  const generarTextoCuota = () => {
-    const { saludo, titulo } = obtenerDatosSupervisor();
-    return `${obtenerSaludoTiempo()}\n${saludo} ${titulo},\n\nPor favor su autorización para proceder con la anulación del contrato actual del cliente ${formCuota.cliente || '[Nombre del Cliente]'} y realizar un reingreso. El motivo de esta gestión es que el cliente desea incrementar significativamente su cuota inicial para reducir sus pagos mensuales.\n\nA continuación, detallo los datos de la operación actual en sistema:\n\n- Nro. Contrato:       ${formCuota.nroContrato || '[Nro]'}\n- Carnet (CI):         ${formCuota.ci || '[CI]'}\n- Ubicación:           Proyecto ${formCuota.proyecto} | UV ${formCuota.uv || '[X]'} | MZN ${formCuota.manzano || '[X]'} | LOTE ${formCuota.lote || '[X]'}\n\nMotivos del Reingreso / Observaciones:\n${formCuota.motivo || '[Detalle el motivo del incremento...]'}\n\nQuedo atento a su aprobación para proceder.\n\nSaludos cordiales,\n${formCuota.asesorVentas || '[Nombre del Asesor]'}`;
-  };
-
   const generarHtmlCuota = () => {
     const { saludo, titulo } = obtenerDatosSupervisor();
     return `
@@ -947,22 +1004,6 @@ export default function App() {
       <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
       <p style="margin-top: 0; font-weight: bold; color: #333;">${formCuota.asesorVentas || '[Nombre del Asesor]'}</p>
     </div>`;
-  };
-
-  const generarTextoReenvio = () => {
-    const { saludo, nombrePila } = obtenerDatosSupervisor();
-    let listaContratos = "";
-    formReenvio.contratos.forEach(c => {
-      listaContratos += `- Contrato: ${c.nroContrato || '[Nro]'} | Cliente: ${c.cliente || '[Nombre]'} | CI: ${c.ci || '[CI]'} | Ubicación: UV: ${c.uv || 'SN'} - Mzn: ${c.manzano || '-'} - Lote: ${c.lote || '-'}\n`;
-    });
-
-    const esMultiple = formReenvio.contratos.length > 1;
-    const txtSiguientes = esMultiple ? "los siguientes contratos" : "el siguiente contrato";
-    const txtClientes = esMultiple ? "los clientes" : "el cliente";
-    const txtDatos = esMultiple ? "los datos de los contratos afectados" : "los datos del contrato afectado";
-    const txtEstos = esMultiple ? "estos contratos" : "este contrato";
-
-    return `${obtenerSaludoTiempo()}\n${saludo} ${nombrePila},\n\nTe escribo para solicitar tu apoyo habilitando nuevamente el envío del correo para la firma digital de ${txtSiguientes}. Debido a un error involuntario por parte de ${txtClientes}, el proceso no se pudo completar en la primera instancia.\n\nA continuación, detallo ${txtDatos} del proyecto ${formReenvio.proyecto.toUpperCase()}:\n\n${listaContratos}\nQuedo atento a tu confirmación para proceder con la regularización de ${txtEstos}.\n\nSaludos cordiales,\n${formReenvio.asesor || '[Nombre del Asesor]'}`;
   };
 
   const generarHtmlReenvio = () => {
@@ -1073,41 +1114,6 @@ export default function App() {
       </table>
       <p style="margin-top: 25px;">Saludos cordiales.</p>
     </div>`;
-  };
-
-  const generarTextoProyeccion = () => {
-    const { saludo, nombrePila } = obtenerDatosSupervisor();
-    let texto = `${obtenerSaludoTiempo()}\n${saludo} ${nombrePila},\n\nAdjunto el resumen del consolidado de proyección de ventas semanal del equipo.\n\n`;
-    
-    let sumColAct = 0;
-    let sumTotalColMes = 0;
-
-    formProyeccion.asesores.forEach((asesor, i) => {
-      const sumDias = asesor.dias.reduce((a, b) => a + b, 0);
-      const totalColMes = asesor.colAct + sumDias;
-      sumColAct += asesor.colAct;
-      sumTotalColMes += totalColMes;
-      
-      if (asesor.colAct > 0 || sumDias > 0) {
-        texto += `${i+1}. ${asesor.nombre}\n`;
-        texto += `   • Colocación Actual: $${formatCurrency(asesor.colAct)}\n`;
-        texto += `   • Proyección Semanal: $${formatCurrency(sumDias)}\n`;
-        texto += `   • Cierre de Mes: $${formatCurrency(totalColMes)}\n\n`;
-      }
-    });
-
-    const mesStr = new Date(formProyeccion.fechaInicio || new Date()).toLocaleString('es-ES', { month: 'long' });
-    const capMes = mesStr.charAt(0).toUpperCase() + mesStr.slice(1);
-    const porcentajeAvance = formProyeccion.objetivoMensual ? (sumColAct / formProyeccion.objetivoMensual) * 100 : 0;
-    const porcentajeFin = formProyeccion.objetivoMensual ? (sumTotalColMes / formProyeccion.objetivoMensual) * 100 : 0;
-
-    texto += `--- RESUMEN DEL EQUIPO ---\n`;
-    texto += `Objetivo ${capMes}: $${formatCurrency(formProyeccion.objetivoMensual)}\n`;
-    texto += `Colocación Actual: $${formatCurrency(sumColAct)} (${formatCurrency(porcentajeAvance)}%)\n`;
-    texto += `Colocación Fin de Mes: $${formatCurrency(sumTotalColMes)} (${formatCurrency(porcentajeFin)}%)\n\n`;
-    texto += `Saludos cordiales.`;
-
-    return texto;
   };
 
   return (
@@ -1221,7 +1227,7 @@ export default function App() {
                 <div className="w-full">
                   <ResultCard 
                     title="Validación Llamada" 
-                    text={generarTextoLlamada()} 
+                    text={generarTextoLlamadaCelular()} 
                     htmlContent={generarHtmlLlamada()} 
                     subject={`Solicitud de validación llamada Cliente referido: ${formLlamada.nombreReferido || 'NOMBRE'}, ${formLlamada.ciReferido || 'CI'}`} 
                     fixedDestinoLabel="Olivia Mendoza Duran"
@@ -1277,7 +1283,7 @@ export default function App() {
                 <div className="w-full">
                    <ResultCard 
                      title="Adición Beneficiarios Seguro" 
-                     text={generarTextoSeguro()} 
+                     text={generarTextoSeguroCelular()} 
                      htmlContent={generarHtmlSeguro()} 
                      subject={`solicitud de adición de ${formSeguro.beneficiarios.length} beneficiarios al seguro de vida ${formSeguro.nroContrato}`} 
                      supervisorDestino={supervisorDestino} 
@@ -1387,7 +1393,7 @@ export default function App() {
                 <div className="w-full">
                    <ResultCard 
                      title="Solicitud Recompra" 
-                     text={generarTextoRecompra()} 
+                     text={generarTextoRecompraCelular()} 
                      htmlContent={generarHtmlRecompra()} 
                      subject={`solicitud de código de descuento RECOMPRA cliente: ${formRecompra.nombreNuevo || 'NOMBRE'}`} 
                      supervisorDestino={supervisorDestino} 
@@ -1479,7 +1485,7 @@ export default function App() {
                 <div className="w-full">
                   <ResultCard 
                     title="Proyección Semanal" 
-                    text={generarTextoProyeccion()} 
+                    text={generarTextoProyeccionCelular()} 
                     htmlContent={generarHtmlProyeccion()}
                     subject={`Proyección Semanal Equipo ${formProyeccion.equipo} - ${formatDiaMes(formProyeccion.fechaInicio, 0)}`} 
                     supervisorDestino={supervisorDestino}
@@ -1505,7 +1511,7 @@ export default function App() {
                   </div>
                   <TextArea label="Motivo detallado" name="motivo" value={formFisico.motivo} onChange={handleFisicoChange} placeholder="Ej. El cliente es una persona mayor..." />
                 </div>
-                <div className="w-full"><ResultCard title="Contrato Físico" text={generarTextoFisico()} htmlContent={generarHtmlFisico()} subject={`Solicitud Contrato Físico - ${formFisico.nombre || 'Cliente'}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
+                <div className="w-full"><ResultCard title="Contrato Físico" text={generarTextoFisicoCelular()} htmlContent={generarHtmlFisico()} subject={`Solicitud Contrato Físico - ${formFisico.nombre || 'Cliente'}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
               </div>
             </div>
           )}
@@ -1544,7 +1550,7 @@ export default function App() {
                   </div>
                   <button onClick={agregarContratoReenvio} className="mt-4 w-full flex items-center justify-center py-3 border-2 border-dashed rounded-xl text-slate-600 hover:text-blue-600 font-medium text-sm transition-colors"><Plus className="w-4 h-4 mr-1" /> Añadir otro contrato</button>
                 </div>
-                <div className="w-full"><ResultCard title="Reenvío Firma Digital" text={generarTextoReenvio()} htmlContent={generarHtmlReenvio()} subject={`Solicitud Reenvío de Correo Firma Digital - ${formReenvio.proyecto}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
+                <div className="w-full"><ResultCard title="Reenvío Firma Digital" text={generarTextoReenvioCelular()} htmlContent={generarHtmlReenvio()} subject={`Solicitud Reenvío de Correo Firma Digital - ${formReenvio.proyecto}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
               </div>
             </div>
           )}
@@ -1740,7 +1746,7 @@ export default function App() {
                     
                     <div className="border-t border-slate-100 pt-5 mt-2 w-full"><Input label="Nombre del Asesor" name="asesor" value={formDescuento.asesor} onChange={handleDescuentoChange} /></div>
                   </div>
-                  <div className="w-full"><ResultCard title="Descuento" text={generarTextoDescuento()} htmlContent={generarHtmlDescuento()} subject={`Solicitud Descuento Campañas - ${nomProyectoFinal} Mz${formDescuento.manzano} Lt${formDescuento.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
+                  <div className="w-full"><ResultCard title="Descuento" text={generarTextoDescuentoCelular()} htmlContent={generarHtmlDescuento()} subject={`Solicitud Descuento Campañas - ${nomProyectoFinal} Mz${formDescuento.manzano} Lt${formDescuento.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
                 </div>
               </div>
             );
@@ -1773,7 +1779,7 @@ export default function App() {
                   <TextArea label="Motivo del incremento" name="motivo" value={formCuota.motivo} onChange={handleCuotaChange} />
                   <div className="border-t border-slate-100 pt-5 mt-2 w-full"><Input label="Nombre del Asesor" name="asesorVentas" value={formCuota.asesorVentas} onChange={handleCuotaChange} /></div>
                 </div>
-                <div className="w-full"><ResultCard title="Incremento Cuota" text={generarTextoCuota()} htmlContent={generarHtmlCuota()} subject={`Incremento Cuota Inicial - ${formCuota.proyecto} Mz${formCuota.manzano} Lt${formCuota.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
+                <div className="w-full"><ResultCard title="Incremento Cuota" text={generarTextoCuotaCelular()} htmlContent={generarHtmlCuota()} subject={`Incremento Cuota Inicial - ${formCuota.proyecto} Mz${formCuota.manzano} Lt${formCuota.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
               </div>
             </div>
           )}
