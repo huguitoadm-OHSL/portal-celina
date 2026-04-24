@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { 
   FileText, 
   Percent, 
@@ -22,15 +25,30 @@ import {
   Edit3,
   PhoneCall,
   Shield,
-  Repeat,
-  Download,
-  Printer
+  Repeat
 } from 'lucide-react';
 
+// --- INICIALIZACIÓN DE BASE DE DATOS EN LA NUBE (FIREBASE) ---
+let app, auth, db;
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+try {
+  const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+  if (firebaseConfig) {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+  } else {
+    console.warn("Base de datos en la nube no detectada. Operando con Memoria Local (Vercel Mode).");
+  }
+} catch (error) {
+  console.error("Error inicializando la Nube:", error);
+}
+
 // --- CONFIGURACIÓN DE DATOS MOCK ---
-const PROYECTOS_CONVENIO_1 = ["Los Jardines", "El Renacer", "Rancho Nuevo"];
+const PROYECTOS_CONVENIO_1 = ["Los Jardines", "El Renacer", "Rancho Nuevo", "Santa Fe"];
 const PROYECTOS_CONVENIO_2 = ["Cañaveral"];
-const PROYECTOS_PROPIOS_1 = ["Muyurina", "Santa Fe"];
+const PROYECTOS_PROPIOS_1 = ["Muyurina"];
 const PROYECTOS = ["Cañaveral", "El Renacer", "Los Jardines", "Muyurina", "Rancho Nuevo", "Santa Fe", "OTRO..."];
 
 const SUPERVISORES = [
@@ -45,13 +63,14 @@ const SUPERVISORES = [
   { id: 'ohsaravia', nombre: 'Oscar Hugo Saravia L.', correo: 'ohsaravia@celina.com.bo', genero: 'M', titulo: 'Lic. Oscar' }
 ];
 
+// --- EQUIPOS DE ASESORES POR SUPERVISOR ---
 const EQUIPOS_ASESORES = {
   "Oscar Saravia": [
     { nombre: "Carlos Enrique Calderon", colAct: 13829.20 },
     { nombre: "Daniel Angulo Maldonado", colAct: 62640.00 },
-    { nombre: "Ely Gonzales Garcia", colAct: 0 },
-    { nombre: "Gloriana Silva Almenda", colAct: 6600.00 },
-    { nombre: "Jaime F. Rios Castro", colAct: 0 },
+    { nombre: "Ely Gonzales Garcia", colAct: 9100.00 },
+    { nombre: "Gloriana Silva Almenda", colAct: 12899.99 },
+    { nombre: "Jaime F. Rios Castro", colAct: 17280.00 },
     { nombre: "Marioly Viñolas", colAct: 0 },
     { nombre: "Marisol Urgel Pizarro", colAct: 58146.00 },
     { nombre: "Merly Mendez Hurtado", colAct: 7750.00 },
@@ -74,9 +93,9 @@ const EQUIPOS_ASESORES = {
     { nombre: "Waldo Gomez", colAct: 0 }
   ],
   "Angelica Pinto Sosa": [
+    { nombre: "Widen Barba", colAct: 82860 },
     { nombre: "Miguel Angel Gomez", colAct: 35871 },
     { nombre: "Emar Leandro Rivas", colAct: 32530 },
-    { nombre: "Widen Barba", colAct: 27660 },
     { nombre: "Jimmy Gonzales", colAct: 24789 },
     { nombre: "Carla Yessenia Carumetty", colAct: 17214 },
     { nombre: "Lucy Milena Gomez", colAct: 14471 },
@@ -93,6 +112,7 @@ const EQUIPOS_ASESORES = {
   "Cristhiand Baldiviezo Balcazar": [
     { nombre: "Miguel Rene Rivero", colAct: 116309 },
     { nombre: "Sheila Rubi Sheidl", colAct: 58260 },
+    { nombre: "Wilson Saucedo", colAct: 27840 },
     { nombre: "Gabriela Vidal", colAct: 17150 },
     { nombre: "Daniel Mauricio Chipunavi", colAct: 7700 },
     { nombre: "Jimena Mayta", colAct: 7500 },
@@ -101,8 +121,7 @@ const EQUIPOS_ASESORES = {
     { nombre: "Ana Karla Castro", colAct: 0 },
     { nombre: "Carlos Gaston Camacho", colAct: 0 },
     { nombre: "Delfy Rios", colAct: 0 },
-    { nombre: "Oscar Andres Cupary", colAct: 0 },
-    { nombre: "Wilson Saucedo", colAct: 0 }
+    { nombre: "Oscar Andres Cupary", colAct: 0 }
   ],
   "Fernando Jose Almanza Urquiza": [
     { nombre: "Blanca Merving Cuellar", colAct: 40861 },
@@ -315,7 +334,7 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
           <Info className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
           <p className="text-xs text-indigo-800 leading-relaxed">
             <strong>Si usas PC:</strong> Haz clic en <b>"Copiar Formato PC"</b> y pega directo en tu gestor de correo.<br/>
-            <strong>Si usas Celular:</strong> Usa <b>"Copiar y Abrir Correo"</b> y sigue las instrucciones para mantener los cuadros.
+            <strong>Si usas Celular:</strong> Usa <b>"Copiar y Abrir Correo"</b> y sigue las instrucciones.
           </p>
         </div>
       )}
@@ -351,6 +370,28 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
 };
 
 export default function App() {
+  const [user, setUser] = useState(null);
+
+  // --- INICIALIZACIÓN DE SESIÓN EN LA NUBE ---
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        if (auth && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else if (auth) {
+          await signInAnonymously(auth);
+        }
+      } catch (e) {
+        console.error("Error al iniciar sesión en la Nube:", e);
+      }
+    };
+    initAuth();
+    if (auth) {
+      const unsubscribe = onAuthStateChanged(auth, setUser);
+      return () => unsubscribe();
+    }
+  }, []);
+
   // --- FIX PARA PANTALLA COMPLETA ---
   useEffect(() => {
     const root = document.getElementById('root');
@@ -420,7 +461,6 @@ export default function App() {
   const [equipoSeleccionado, setEquipoSeleccionado] = useState('Oscar Saravia');
   
   const [formProyeccion, setFormProyeccion] = useState(() => {
-    // Inicialización segura
     try {
       const savedData = localStorage.getItem(`portalAsesores_proyeccion_Oscar Saravia`);
       if (savedData) {
@@ -463,9 +503,7 @@ export default function App() {
         } else if (EQUIPOS_ASESORES[team]) {
           teamAct = EQUIPOS_ASESORES[team].reduce((sum, a) => sum + (Number(a.colAct) || 0), 0);
         }
-      } catch (e) {
-         // Si hay un error parseando, no sumamos nada y evitamos que colapse
-      }
+      } catch (e) {}
 
       tGoal += teamGoal;
       tAct += teamAct;
@@ -481,13 +519,72 @@ export default function App() {
     setGlobalStats({ goal: tGoal, actual: tAct, teams: tTeams });
   }, [formProyeccion, activeTab]);
 
-  // Manejador robusto para guardar cambios en LocalStorage (Evita Vercel Crash)
-  const saveProyeccionState = (newState) => {
+  // Efecto para inicializar la proyección desde LocalStorage rápidamente
+  useEffect(() => {
+    const savedData = localStorage.getItem(`portalAsesores_proyeccion_${equipoSeleccionado}`);
+    if (savedData) {
+      try {
+        const pData = JSON.parse(savedData);
+        if (pData && Array.isArray(pData.asesores)) {
+          setFormProyeccion(pData);
+        }
+      } catch(e) {}
+    } else {
+      setFormProyeccion({
+        equipo: equipoSeleccionado,
+        fechaInicio: new Date().toISOString().split('T')[0],
+        objetivoMensual: OBJETIVOS_MENSUALES[equipoSeleccionado] || 0,
+        asesores: EQUIPOS_ASESORES[equipoSeleccionado] ? EQUIPOS_ASESORES[equipoSeleccionado].map(a => ({
+          nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0] 
+        })) : []
+      });
+    }
+  }, [equipoSeleccionado]);
+
+  // Efecto para conectarse a Firebase de forma segura para sincronización
+  useEffect(() => {
+    if (!user || !db) return;
+    
+    try {
+      // FIX: Limpiamos estrictamente el ID para prevenir errores de ruta en Firebase
+      const rawAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+      const safeId = String(rawAppId).replace(/[^a-zA-Z0-9_-]/g, '_');
+      const docRef = doc(db, 'artifacts', safeId, 'public', 'data', 'proyecciones', equipoSeleccionado);
+      
+      const unsubscribe = onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data && Array.isArray(data.asesores)) {
+            setFormProyeccion(data);
+            try { localStorage.setItem(`portalAsesores_proyeccion_${equipoSeleccionado}`, JSON.stringify(data)); } catch(e){}
+          }
+        }
+      }, (error) => {
+        console.warn("Aviso Firebase: Lectura en nube no disponible. Usando memoria local.");
+      });
+      return () => unsubscribe();
+    } catch(e) {
+      console.warn("No se pudo conectar a la base de datos.");
+    }
+  }, [user, equipoSeleccionado]);
+
+  // Función para empujar los cambios locales a Storage (y a Firebase si aplica)
+  const saveProyeccionState = async (newState) => {
+    setFormProyeccion(newState);
     try {
       localStorage.setItem(`portalAsesores_proyeccion_${newState.equipo}`, JSON.stringify(newState));
-      setFormProyeccion(newState);
-    } catch (e) {
-      console.warn("No se pudo guardar en LocalStorage", e);
+    } catch (e) {}
+
+    if (user && db) {
+      try {
+        // FIX: Reutilizamos el ID limpio para guardar de manera segura
+        const rawAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const safeId = String(rawAppId).replace(/[^a-zA-Z0-9_-]/g, '_');
+        const docRef = doc(db, 'artifacts', safeId, 'public', 'data', 'proyecciones', newState.equipo);
+        await setDoc(docRef, newState);
+      } catch (error) {
+        // Fallback silencioso si no hay nube configurada en el hosting
+      }
     }
   };
 
@@ -659,26 +756,9 @@ export default function App() {
     });
   };
 
+  // MANEJADOR PRINCIPAL DE EQUIPOS
   const handleEquipoChange = (e) => {
-    const newEq = String(e.target.value);
-    setEquipoSeleccionado(newEq);
-    
-    try {
-      const teamSaved = localStorage.getItem(`portalAsesores_proyeccion_${newEq}`);
-      if (teamSaved) {
-        setFormProyeccion(JSON.parse(teamSaved));
-        return; 
-      }
-    } catch(e) {}
-    
-    setFormProyeccion({
-        equipo: newEq,
-        fechaInicio: new Date().toISOString().split('T')[0],
-        objetivoMensual: OBJETIVOS_MENSUALES[newEq] || 0,
-        asesores: EQUIPOS_ASESORES[newEq] ? EQUIPOS_ASESORES[newEq].map(a => ({
-          nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0] 
-        })) : []
-    });
+    setEquipoSeleccionado(String(e.target.value));
   };
   
   const updateAsesorProyeccion = (index, field, valStr) => {
@@ -693,41 +773,6 @@ export default function App() {
     const nuevosAsesores = [...formProyeccion.asesores];
     nuevosAsesores[index][type][arrayIndex] = parseFloat(valStr) || 0;
     saveProyeccionState({ ...formProyeccion, asesores: nuevosAsesores });
-  };
-
-  // IMPRIMIR PDF DE LA PROYECCIÓN
-  const handlePrintPDF = () => {
-    const content = generarHtmlProyeccion();
-    const printWindow = window.open('', '', 'width=1000,height=800');
-    
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Reporte de Proyección - ${String(formProyeccion.equipo)}</title>
-          <style>
-            body { padding: 20px; background-color: #fff; font-family: sans-serif; }
-            @media print {
-              * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-              body { margin: 0; padding: 0; }
-              @page { size: landscape; margin: 10mm; }
-            }
-          </style>
-        </head>
-        <body>
-          <h2 style="color: #002060;">Reporte Oficial de Proyección</h2>
-          ${content}
-          <script>
-            window.onload = function() { 
-              setTimeout(function() {
-                window.print(); 
-                window.close();
-              }, 300);
-            }
-          </script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
   };
 
   // --- LÓGICA DE DESCUENTOS CAMPAÑAS ---
@@ -779,6 +824,7 @@ export default function App() {
       if (modalidad === 'Contado') {
         porcentaje = 30; 
       } else if (modalidad === 'Crédito') {
+        // Lógica Fuerte: Si la cuota es 5% o más (Sin importar la categoría)
         if (porcentajeCuota >= 5) {
           const maxDesc = 23;
           let inputDesc = parseFloat(formDescuento.descuentoPropiosManual);
@@ -1631,7 +1677,6 @@ export default function App() {
                       <label className="block text-xs font-bold text-slate-500 uppercase">Semana del (Lunes)</label>
                       <input type="date" value={formProyeccion.fechaInicio} onChange={(e) => {
                         const newState = {...formProyeccion, fechaInicio: e.target.value};
-                        setFormProyeccion(newState);
                         saveProyeccionState(newState);
                       }} className="w-full px-3 py-1.5 mt-1 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 bg-white" />
                     </div>
@@ -1639,7 +1684,6 @@ export default function App() {
                       <label className="block text-xs font-bold text-slate-500 uppercase">Objetivo Mes</label>
                       <input type="number" value={formProyeccion.objetivoMensual} onChange={(e) => {
                         const newState = {...formProyeccion, objetivoMensual: parseFloat(e.target.value) || 0};
-                        setFormProyeccion(newState);
                         saveProyeccionState(newState);
                       }} className="w-full px-3 py-1.5 mt-1 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 bg-white" />
                     </div>
@@ -1682,8 +1726,7 @@ export default function App() {
                     </table>
                   </div>
                   <div className="p-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 flex items-center justify-between">
-                     <span className="flex items-center"><Info className="w-4 h-4 mr-2 flex-shrink-0" /> Todo lo que se escriba aquí se guardará en tu navegador.</span>
-                     <button onClick={handlePrintPDF} className="flex items-center text-indigo-600 hover:text-indigo-800 font-bold bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-200 transition-all"><Download className="w-4 h-4 mr-1.5" /> Exportar PDF</button>
+                     <span className="flex items-center"><Info className="w-4 h-4 mr-2 flex-shrink-0" /> Los datos se guardan de forma local en tu navegador.</span>
                   </div>
                 </div>
 
