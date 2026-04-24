@@ -25,6 +25,10 @@ import {
   Repeat
 } from 'lucide-react';
 
+// --- CONTROL DE VERSIÓN DE DATOS ---
+// Cambiar este número fuerza a borrar la caché local antigua y cargar los datos nuevos
+const DATA_VERSION = "v1.1"; 
+
 // --- CONFIGURACIÓN DE DATOS MOCK ---
 const PROYECTOS_CONVENIO_1 = ["Los Jardines", "El Renacer", "Rancho Nuevo", "Santa Fe"];
 const PROYECTOS_CONVENIO_2 = ["Cañaveral"];
@@ -418,15 +422,38 @@ export default function App() {
   // --- ESTADO Y SINCRONIZACIÓN PARA PROYECCIÓN ---
   const [equipoSeleccionado, setEquipoSeleccionado] = useState('Oscar Saravia');
   
+  // VERIFICAR VERSIÓN DE DATOS AL CARGAR
+  useEffect(() => {
+    const currentVersion = localStorage.getItem('portalAsesores_dataVersion');
+    if (currentVersion !== DATA_VERSION) {
+      // Si la versión es antigua o no existe, limpiamos la caché de proyecciones
+      Object.keys(EQUIPOS_ASESORES).forEach(team => {
+        localStorage.removeItem(`portalAsesores_proyeccion_${team}`);
+      });
+      localStorage.setItem('portalAsesores_dataVersion', DATA_VERSION);
+      // Forzar recarga de los datos correctos a formProyeccion
+      setFormProyeccion({
+        equipo: 'Oscar Saravia',
+        fechaInicio: new Date().toISOString().split('T')[0],
+        objetivoMensual: OBJETIVOS_MENSUALES['Oscar Saravia'],
+        asesores: EQUIPOS_ASESORES['Oscar Saravia'].map(a => ({
+          nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0] 
+        }))
+      });
+    }
+  }, []);
+
   const [formProyeccion, setFormProyeccion] = useState(() => {
     try {
-      const savedData = localStorage.getItem(`portalAsesores_proyeccion_Oscar Saravia`);
-      if (savedData) {
-        return JSON.parse(savedData);
+      const currentVersion = localStorage.getItem('portalAsesores_dataVersion');
+      if (currentVersion === DATA_VERSION) {
+        const savedData = localStorage.getItem(`portalAsesores_proyeccion_Oscar Saravia`);
+        if (savedData) {
+          return JSON.parse(savedData);
+        }
       }
-    } catch (e) {
-      console.warn("Error leyendo localStorage inicial", e);
-    }
+    } catch (e) {}
+    
     return {
       equipo: 'Oscar Saravia',
       fechaInicio: new Date().toISOString().split('T')[0],
@@ -449,7 +476,7 @@ export default function App() {
       
       try {
         const teamSaved = localStorage.getItem(`portalAsesores_proyeccion_${team}`);
-        if (teamSaved) {
+        if (teamSaved && localStorage.getItem('portalAsesores_dataVersion') === DATA_VERSION) {
           const tData = JSON.parse(teamSaved);
           teamGoal = typeof tData.objetivoMensual === 'number' ? tData.objetivoMensual : teamGoal;
           if (Array.isArray(tData.asesores)) {
@@ -477,10 +504,10 @@ export default function App() {
     setGlobalStats({ goal: tGoal, actual: tAct, teams: tTeams });
   }, [formProyeccion, activeTab]);
 
-  // Efecto para inicializar la proyección desde LocalStorage rápidamente
+  // Efecto para cargar equipo al seleccionarlo
   useEffect(() => {
     const savedData = localStorage.getItem(`portalAsesores_proyeccion_${equipoSeleccionado}`);
-    if (savedData) {
+    if (savedData && localStorage.getItem('portalAsesores_dataVersion') === DATA_VERSION) {
       try {
         const pData = JSON.parse(savedData);
         if (pData && Array.isArray(pData.asesores)) {
