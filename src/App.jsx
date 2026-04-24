@@ -1,7 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { 
   FileText, 
   Percent, 
@@ -29,25 +26,6 @@ import {
   Download,
   Printer
 } from 'lucide-react';
-
-// --- INICIALIZACIÓN DE BASE DE DATOS EN LA NUBE (FIREBASE) ---
-let app, auth, db, safeAppId = 'default_app_id';
-
-try {
-  const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-  if (firebaseConfig) {
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db = getFirestore(app);
-    // Limpieza estricta del ID para evitar el error de "Invalid document reference" (segmentos impares)
-    const rawAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    safeAppId = String(rawAppId).replace(/[^a-zA-Z0-9_-]/g, '_');
-  } else {
-    console.warn("Firebase config no encontrada. Se usará almacenamiento local.");
-  }
-} catch (error) {
-  console.error("Error inicializando Firebase:", error);
-}
 
 // --- CONFIGURACIÓN DE DATOS MOCK ---
 const PROYECTOS_CONVENIO_1 = ["Los Jardines", "El Renacer"];
@@ -341,7 +319,7 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
         </div>
       )}
 
-      <div className="bg-[#f8fafc] p-5 rounded-xl border border-slate-200 mb-5 flex-1 overflow-auto shadow-inner w-full min-w-0">
+      <div className="bg-[#f8fafc] p-5 rounded-xl border border-slate-200 mb-5 flex-1 overflow-auto shadow-inner w-full min-w-0" id="vista-previa-contenido">
         {htmlContent ? (
           <div dangerouslySetInnerHTML={{ __html: String(htmlContent) }} />
         ) : (
@@ -372,28 +350,6 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
 };
 
 export default function App() {
-  const [user, setUser] = useState(null);
-
-  // --- INICIALIZACIÓN DE SESIÓN EN LA NUBE ---
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        if (auth && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else if (auth) {
-          await signInAnonymously(auth);
-        }
-      } catch (e) {
-        console.error("Error al iniciar sesión en la Nube:", e);
-      }
-    };
-    initAuth();
-    if (auth) {
-      const unsubscribe = onAuthStateChanged(auth, setUser);
-      return () => unsubscribe();
-    }
-  }, []);
-
   // --- FIX PARA PANTALLA COMPLETA ---
   useEffect(() => {
     const root = document.getElementById('root');
@@ -461,13 +417,25 @@ export default function App() {
 
   // --- ESTADO Y SINCRONIZACIÓN PARA PROYECCIÓN ---
   const [equipoSeleccionado, setEquipoSeleccionado] = useState('Oscar Saravia');
-  const [formProyeccion, setFormProyeccion] = useState({
-    equipo: 'Oscar Saravia',
-    fechaInicio: new Date().toISOString().split('T')[0],
-    objetivoMensual: OBJETIVOS_MENSUALES['Oscar Saravia'],
-    asesores: EQUIPOS_ASESORES['Oscar Saravia'].map(a => ({
-      nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0] 
-    }))
+  
+  const [formProyeccion, setFormProyeccion] = useState(() => {
+    // Inicialización segura
+    try {
+      const savedData = localStorage.getItem(`portalAsesores_proyeccion_Oscar Saravia`);
+      if (savedData) {
+        return JSON.parse(savedData);
+      }
+    } catch (e) {
+      console.warn("Error leyendo localStorage inicial", e);
+    }
+    return {
+      equipo: 'Oscar Saravia',
+      fechaInicio: new Date().toISOString().split('T')[0],
+      objetivoMensual: OBJETIVOS_MENSUALES['Oscar Saravia'],
+      asesores: EQUIPOS_ASESORES['Oscar Saravia'].map(a => ({
+        nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0] 
+      }))
+    };
   });
 
   // Efecto para calcular métricas globales del Dashboard
@@ -480,9 +448,9 @@ export default function App() {
       let teamGoal = OBJETIVOS_MENSUALES[team] || 0;
       let teamAct = 0;
       
-      const teamSaved = localStorage.getItem(`portalAsesores_proyeccion_${team}`);
-      if (teamSaved) {
-        try {
+      try {
+        const teamSaved = localStorage.getItem(`portalAsesores_proyeccion_${team}`);
+        if (teamSaved) {
           const tData = JSON.parse(teamSaved);
           teamGoal = typeof tData.objetivoMensual === 'number' ? tData.objetivoMensual : teamGoal;
           if (Array.isArray(tData.asesores)) {
@@ -491,9 +459,11 @@ export default function App() {
               return sum + (Number(a.colAct) || 0) + sumDias;
             }, 0);
           }
-        } catch(e){}
-      } else if (EQUIPOS_ASESORES[team]) {
-        teamAct = EQUIPOS_ASESORES[team].reduce((sum, a) => sum + (Number(a.colAct) || 0), 0);
+        } else if (EQUIPOS_ASESORES[team]) {
+          teamAct = EQUIPOS_ASESORES[team].reduce((sum, a) => sum + (Number(a.colAct) || 0), 0);
+        }
+      } catch (e) {
+         // Si hay un error parseando, no sumamos nada y evitamos que colapse
       }
 
       tGoal += teamGoal;
@@ -510,53 +480,13 @@ export default function App() {
     setGlobalStats({ goal: tGoal, actual: tAct, teams: tTeams });
   }, [formProyeccion, activeTab]);
 
-  // Efecto para conectarse a Firebase de forma segura
-  useEffect(() => {
-    if (!user || !db) return;
-    
-    // Creamos la referencia con 6 segmentos (par), garantizado por safeAppId
-    const docRef = doc(db, 'artifacts', safeAppId, 'public', 'data', 'proyecciones', equipoSeleccionado);
-    
-    const unsubscribe = onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        if (data && Array.isArray(data.asesores)) {
-          setFormProyeccion(data);
-          localStorage.setItem(`portalAsesores_proyeccion_${equipoSeleccionado}`, JSON.stringify(data));
-        }
-      } else {
-        const defaultData = {
-          equipo: equipoSeleccionado,
-          fechaInicio: new Date().toISOString().split('T')[0],
-          objetivoMensual: OBJETIVOS_MENSUALES[equipoSeleccionado] || 0,
-          asesores: EQUIPOS_ASESORES[equipoSeleccionado] ? EQUIPOS_ASESORES[equipoSeleccionado].map(a => ({
-            nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0] 
-          })) : []
-        };
-        setDoc(docRef, defaultData).catch(e => console.warn("Firebase: Modo lectura activado por permisos."));
-      }
-    }, (error) => {
-      console.warn("Aviso Firebase: Sin permisos suficientes. Trabajando en modo LocalStorage.");
-      // Fallback a local storage
-      const savedData = localStorage.getItem(`portalAsesores_proyeccion_${equipoSeleccionado}`);
-      if (savedData) {
-        try { setFormProyeccion(JSON.parse(savedData)); } catch(e) {}
-      }
-    });
-
-    return () => unsubscribe();
-  }, [user, equipoSeleccionado]);
-
-  // Función para empujar los cambios
-  const saveProyeccionState = async (newState) => {
-    localStorage.setItem(`portalAsesores_proyeccion_${equipoSeleccionado}`, JSON.stringify(newState));
-    if (user && db) {
-      try {
-        const docRef = doc(db, 'artifacts', safeAppId, 'public', 'data', 'proyecciones', equipoSeleccionado);
-        await setDoc(docRef, newState);
-      } catch (error) {
-        console.warn("Aviso Firebase: No se guardó en la nube por permisos de seguridad.");
-      }
+  // Manejador robusto para guardar cambios en LocalStorage (Evita Vercel Crash)
+  const saveProyeccionState = (newState) => {
+    try {
+      localStorage.setItem(`portalAsesores_proyeccion_${newState.equipo}`, JSON.stringify(newState));
+      setFormProyeccion(newState);
+    } catch (e) {
+      console.warn("No se pudo guardar en LocalStorage", e);
     }
   };
 
@@ -731,11 +661,13 @@ export default function App() {
     const newEq = String(e.target.value);
     setEquipoSeleccionado(newEq);
     
-    // Carga síncrona visual rápida
-    const teamSaved = localStorage.getItem(`portalAsesores_proyeccion_${newEq}`);
-    if (teamSaved) {
-        try { setFormProyeccion(JSON.parse(teamSaved)); return; } catch(e) {}
-    }
+    try {
+      const teamSaved = localStorage.getItem(`portalAsesores_proyeccion_${newEq}`);
+      if (teamSaved) {
+        setFormProyeccion(JSON.parse(teamSaved));
+        return; 
+      }
+    } catch(e) {}
     
     setFormProyeccion({
         equipo: newEq,
@@ -751,18 +683,14 @@ export default function App() {
     if (!formProyeccion || !Array.isArray(formProyeccion.asesores)) return;
     const nuevosAsesores = [...formProyeccion.asesores];
     nuevosAsesores[index][field] = parseFloat(valStr) || 0;
-    const newState = { ...formProyeccion, asesores: nuevosAsesores };
-    setFormProyeccion(newState);
-    saveProyeccionState(newState);
+    saveProyeccionState({ ...formProyeccion, asesores: nuevosAsesores });
   };
   
   const updateAsesorArrayProyeccion = (index, type, arrayIndex, valStr) => {
     if (!formProyeccion || !Array.isArray(formProyeccion.asesores)) return;
     const nuevosAsesores = [...formProyeccion.asesores];
     nuevosAsesores[index][type][arrayIndex] = parseFloat(valStr) || 0;
-    const newState = { ...formProyeccion, asesores: nuevosAsesores };
-    setFormProyeccion(newState);
-    saveProyeccionState(newState);
+    saveProyeccionState({ ...formProyeccion, asesores: nuevosAsesores });
   };
 
   // IMPRIMIR PDF DE LA PROYECCIÓN
@@ -1752,7 +1680,7 @@ export default function App() {
                     </table>
                   </div>
                   <div className="p-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 flex items-center justify-between">
-                     <span className="flex items-center"><Info className="w-4 h-4 mr-2 flex-shrink-0" /> Todo lo que se escriba aquí se guardará en la Nube y todos podrán verlo.</span>
+                     <span className="flex items-center"><Info className="w-4 h-4 mr-2 flex-shrink-0" /> Todo lo que se escriba aquí se guardará en tu navegador.</span>
                      <button onClick={handlePrintPDF} className="flex items-center text-indigo-600 hover:text-indigo-800 font-bold bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-200 transition-all"><Download className="w-4 h-4 mr-1.5" /> Exportar PDF</button>
                   </div>
                 </div>
