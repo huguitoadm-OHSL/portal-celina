@@ -31,7 +31,7 @@ import {
 } from 'lucide-react';
 
 // --- INICIALIZACIÓN DE BASE DE DATOS EN LA NUBE (FIREBASE) ---
-let app, auth, db;
+let app, auth, db, safeAppId = 'default_app_id';
 
 try {
   const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
@@ -39,32 +39,15 @@ try {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
+    // Limpieza estricta del ID para evitar el error de "Invalid document reference" (segmentos impares)
+    const rawAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    safeAppId = String(rawAppId).replace(/[^a-zA-Z0-9_-]/g, '_');
   } else {
     console.warn("Firebase config no encontrada. Se usará almacenamiento local.");
   }
 } catch (error) {
   console.error("Error inicializando Firebase:", error);
 }
-
-// Función robusta para asegurar que la ruta a Firebase siempre sea válida y no rompa la App
-const getSafeProyeccionRef = (equipo) => {
-  if (!db) return null;
-  try {
-    const rawAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    let pathStr = `artifacts/${rawAppId}/public/data/proyecciones/${equipo}`;
-    const segments = pathStr.split('/').filter(Boolean);
-    
-    // Firestore requiere estrictamente un número PAR de segmentos para los documentos
-    if (segments.length % 2 !== 0) {
-      pathStr += '/data';
-    }
-    
-    return doc(db, pathStr);
-  } catch (e) {
-    console.error("Error generando ruta segura de Firebase:", e);
-    return null;
-  }
-};
 
 // --- CONFIGURACIÓN DE DATOS MOCK ---
 const PROYECTOS_CONVENIO_1 = ["Los Jardines", "El Renacer"];
@@ -84,7 +67,6 @@ const SUPERVISORES = [
   { id: 'ohsaravia', nombre: 'Oscar Hugo Saravia L.', correo: 'ohsaravia@celina.com.bo', genero: 'M', titulo: 'Lic. Oscar' }
 ];
 
-// --- EQUIPOS DE ASESORES POR SUPERVISOR ---
 const EQUIPOS_ASESORES = {
   "Oscar Saravia": [
     { nombre: "Carlos Enrique Calderon", colAct: 13829.20 },
@@ -354,12 +336,12 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
           <Info className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
           <p className="text-xs text-indigo-800 leading-relaxed">
             <strong>Si usas PC:</strong> Haz clic en <b>"Copiar Formato PC"</b> y pega directo en tu gestor de correo.<br/>
-            <strong>Si usas Celular:</strong> Usa <b>"Copiar y Abrir Correo"</b> y sigue las instrucciones.
+            <strong>Si usas Celular:</strong> Usa <b>"Copiar y Abrir Correo"</b> y sigue las instrucciones para mantener los cuadros.
           </p>
         </div>
       )}
 
-      <div className="bg-[#f8fafc] p-5 rounded-xl border border-slate-200 mb-5 flex-1 overflow-auto shadow-inner w-full min-w-0" id="vista-previa-contenido">
+      <div className="bg-[#f8fafc] p-5 rounded-xl border border-slate-200 mb-5 flex-1 overflow-auto shadow-inner w-full min-w-0">
         {htmlContent ? (
           <div dangerouslySetInnerHTML={{ __html: String(htmlContent) }} />
         ) : (
@@ -462,7 +444,7 @@ export default function App() {
     modoBusqueda: 'manual', 
     m2: '', precioM2: '', categoria: '', asesor: '',
     proyectoManual: '', descuentoManual: '', tipoDescuentoManual: 'porcentaje',
-    descuentoPropiosManual: '23' // Estado para el descuento personalizado de proyectos propios
+    descuentoPropiosManual: '23' 
   });
 
   const [formCuota, setFormCuota] = useState({
@@ -488,37 +470,14 @@ export default function App() {
     }))
   });
 
-  // Efecto para inicializar la proyección desde LocalStorage rápidamente y calcular métricas globales
+  // Efecto para calcular métricas globales del Dashboard
   useEffect(() => {
-    // 1. Cargar equipo seleccionado
-    const savedData = localStorage.getItem(`portalAsesores_proyeccion_${equipoSeleccionado}`);
-    if (savedData) {
-      try {
-        const pData = JSON.parse(savedData);
-        if (pData && Array.isArray(pData.asesores)) {
-          setFormProyeccion(pData);
-        }
-      } catch(e) {
-        console.error("Error cargando proyección de localStorage", e);
-      }
-    } else {
-      setFormProyeccion({
-        equipo: equipoSeleccionado,
-        fechaInicio: new Date().toISOString().split('T')[0],
-        objetivoMensual: OBJETIVOS_MENSUALES[equipoSeleccionado] || 0,
-        asesores: EQUIPOS_ASESORES[equipoSeleccionado] ? EQUIPOS_ASESORES[equipoSeleccionado].map(a => ({
-          nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0] 
-        })) : []
-      });
-    }
-
-    // 2. Calcular estadísticas del Dashboard Global
     let tGoal = 0;
     let tAct = 0;
     let tTeams = [];
 
     Object.keys(OBJETIVOS_MENSUALES).forEach(team => {
-      let teamGoal = OBJETIVOS_MENSUALES[team];
+      let teamGoal = OBJETIVOS_MENSUALES[team] || 0;
       let teamAct = 0;
       
       const teamSaved = localStorage.getItem(`portalAsesores_proyeccion_${team}`);
@@ -549,16 +508,14 @@ export default function App() {
 
     tTeams.sort((a, b) => b.percent - a.percent);
     setGlobalStats({ goal: tGoal, actual: tAct, teams: tTeams });
-
-  }, [equipoSeleccionado, activeTab]);
+  }, [formProyeccion, activeTab]);
 
   // Efecto para conectarse a Firebase de forma segura
   useEffect(() => {
     if (!user || !db) return;
     
-    // Obtenemos la referencia asegurándonos que sea un formato de Documento válido
-    const docRef = getSafeProyeccionRef(equipoSeleccionado);
-    if (!docRef) return; 
+    // Creamos la referencia con 6 segmentos (par), garantizado por safeAppId
+    const docRef = doc(db, 'artifacts', safeAppId, 'public', 'data', 'proyecciones', equipoSeleccionado);
     
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
@@ -576,26 +533,29 @@ export default function App() {
             nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0] 
           })) : []
         };
-        setDoc(docRef, defaultData).catch(e => console.error("Error inicial Firebase:", e));
+        setDoc(docRef, defaultData).catch(e => console.warn("Firebase: Modo lectura activado por permisos."));
       }
     }, (error) => {
       console.warn("Aviso Firebase: Sin permisos suficientes. Trabajando en modo LocalStorage.");
+      // Fallback a local storage
+      const savedData = localStorage.getItem(`portalAsesores_proyeccion_${equipoSeleccionado}`);
+      if (savedData) {
+        try { setFormProyeccion(JSON.parse(savedData)); } catch(e) {}
+      }
     });
 
     return () => unsubscribe();
   }, [user, equipoSeleccionado]);
 
-  // Función para empujar los cambios locales a Firebase
+  // Función para empujar los cambios
   const saveProyeccionState = async (newState) => {
     localStorage.setItem(`portalAsesores_proyeccion_${equipoSeleccionado}`, JSON.stringify(newState));
     if (user && db) {
       try {
-        const docRef = getSafeProyeccionRef(equipoSeleccionado);
-        if (docRef) {
-          await setDoc(docRef, newState);
-        }
+        const docRef = doc(db, 'artifacts', safeAppId, 'public', 'data', 'proyecciones', equipoSeleccionado);
+        await setDoc(docRef, newState);
       } catch (error) {
-        console.warn("Aviso Firebase: No se guardó en la nube.", error.message);
+        console.warn("Aviso Firebase: No se guardó en la nube por permisos de seguridad.");
       }
     }
   };
@@ -768,7 +728,23 @@ export default function App() {
   };
 
   const handleEquipoChange = (e) => {
-    setEquipoSeleccionado(String(e.target.value));
+    const newEq = String(e.target.value);
+    setEquipoSeleccionado(newEq);
+    
+    // Carga síncrona visual rápida
+    const teamSaved = localStorage.getItem(`portalAsesores_proyeccion_${newEq}`);
+    if (teamSaved) {
+        try { setFormProyeccion(JSON.parse(teamSaved)); return; } catch(e) {}
+    }
+    
+    setFormProyeccion({
+        equipo: newEq,
+        fechaInicio: new Date().toISOString().split('T')[0],
+        objetivoMensual: OBJETIVOS_MENSUALES[newEq] || 0,
+        asesores: EQUIPOS_ASESORES[newEq] ? EQUIPOS_ASESORES[newEq].map(a => ({
+          nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0] 
+        })) : []
+    });
   };
   
   const updateAsesorProyeccion = (index, field, valStr) => {
@@ -873,7 +849,6 @@ export default function App() {
       if (modalidad === 'Contado') {
         porcentaje = 30; 
       } else if (modalidad === 'Crédito') {
-        // Lógica Fuerte: Si la cuota es 5% o más (Sin importar la categoría)
         if (porcentajeCuota >= 5) {
           const maxDesc = 23;
           let inputDesc = parseFloat(formDescuento.descuentoPropiosManual);
@@ -1821,4 +1796,273 @@ export default function App() {
           {/* FORM: REENVÍO FIRMA DIGITAL */}
           {activeTab === 'reenvio' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="mb-6"><h2 className="text-2xl font-bold text-slate
+              <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><FileSignature className="w-6 h-6 mr-2 text-blue-600" /> Reenvío Firma Digital</h2></div>
+              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-[1.2fr_1fr] 2xl:grid-cols-[1.5fr_1fr] gap-8 w-full">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 border-b border-slate-100 pb-3 gap-3">
+                    <h3 className="text-lg font-medium text-slate-800">Listado de Contratos</h3>
+                    <div className="w-full sm:w-1/2 md:w-1/3">
+                      <select value={formReenvio.proyecto} onChange={(e) => setFormReenvio({...formReenvio, proyecto: e.target.value})} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+                        {PROYECTOS.map(p => <option key={p} value={p}>{p}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="mb-4"><Input label="Nombre del Asesor" name="asesor" value={formReenvio.asesor} onChange={(e) => setFormReenvio({...formReenvio, asesor: e.target.value})} placeholder="Ej. Oscar Saravia" /></div>
+                  <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 w-full">
+                    {formReenvio.contratos.map((contrato, index) => (
+                      <div key={index} className="p-4 bg-slate-50 border border-slate-200 rounded-xl relative group w-full">
+                        {formReenvio.contratos.length > 1 && (<button onClick={() => eliminarContratoReenvio(index)} className="absolute -top-2 -right-2 bg-red-100 text-red-600 p-1.5 rounded-full z-10"><Trash2 className="w-4 h-4" /></button>)}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3 w-full">
+                          <div className="w-full"><label className="block text-xs font-semibold text-slate-600 mb-1">Nro. Contrato</label><input type="text" value={contrato.nroContrato} onChange={(e) => handleReenvioChange(index, 'nroContrato', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm bg-white" /></div>
+                          <div className="w-full"><label className="block text-xs font-semibold text-slate-600 mb-1">Carnet (CI)</label><input type="text" value={contrato.ci} onChange={(e) => handleReenvioChange(index, 'ci', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm bg-white" /></div>
+                        </div>
+                        <div className="mb-3 w-full"><label className="block text-xs font-semibold text-slate-600 mb-1">Nombre del Cliente</label><input type="text" value={contrato.cliente} onChange={(e) => handleReenvioChange(index, 'cliente', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm uppercase bg-white" /></div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full">
+                          <div className="flex flex-col w-full"><label className="text-xs text-slate-500 mb-1">UV:</label><input type="text" value={contrato.uv} onChange={(e) => handleReenvioChange(index, 'uv', e.target.value)} className="w-full px-2.5 py-1 border rounded text-sm bg-white" /></div>
+                          <div className="flex flex-col w-full"><label className="text-xs text-slate-500 mb-1">Mzn:</label><input type="text" value={contrato.manzano} onChange={(e) => handleReenvioChange(index, 'manzano', e.target.value)} className="w-full px-2.5 py-1 border rounded text-sm bg-white" /></div>
+                          <div className="flex flex-col w-full"><label className="text-xs text-slate-500 mb-1">Lote:</label><input type="text" value={contrato.lote} onChange={(e) => handleReenvioChange(index, 'lote', e.target.value)} className="w-full px-2.5 py-1 border rounded text-sm bg-white" /></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <button onClick={agregarContratoReenvio} className="mt-4 w-full flex items-center justify-center py-3 border-2 border-dashed rounded-xl text-slate-600 hover:text-blue-600 font-medium text-sm transition-colors"><Plus className="w-4 h-4 mr-1" /> Añadir otro contrato</button>
+                </div>
+                <div className="w-full min-w-0"><ResultCard title="Reenvío Firma Digital" text={generarTextoReenvioCelular()} htmlContent={generarHtmlReenvio()} subject={`Solicitud Reenvío de Correo Firma Digital - ${formReenvio.proyecto}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
+              </div>
+            </div>
+          )}
+
+          {/* FORM: DESCUENTO CAMPAÑAS */}
+          {activeTab === 'descuento' && (() => {
+            const { porcentajeCuota, montoCuotaNum } = calcularDescuento();
+            const nomProyectoFinal = formDescuento.proyecto === 'OTRO...' ? (formDescuento.proyectoManual || 'PROYECTO MANUAL') : formDescuento.proyecto;
+            return (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
+                <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
+                  <h2 className="text-2xl font-bold text-slate-800 flex items-center"><Tag className="w-6 h-6 mr-2 text-blue-600" /> Descuentos Campañas</h2>
+                  
+                  {/* BOTÓN TOGGLE BÚSQUEDA INTELIGENTE / MANUAL */}
+                  <div className="bg-slate-200/60 p-1 rounded-full inline-flex self-start sm:self-auto">
+                    <button 
+                      onClick={() => setFormDescuento({...formDescuento, modoBusqueda: 'inteligente'})}
+                      disabled={formDescuento.proyecto === 'OTRO...'}
+                      className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center ${formDescuento.modoBusqueda === 'inteligente' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-500 hover:text-slate-700'} disabled:opacity-40`}
+                    >
+                      <Search className="w-3.5 h-3.5 mr-1.5" /> Automático
+                    </button>
+                    <button 
+                      onClick={() => setFormDescuento({...formDescuento, modoBusqueda: 'manual'})}
+                      className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center ${formDescuento.modoBusqueda === 'manual' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+                    >
+                      <Edit3 className="w-3.5 h-3.5 mr-1.5" /> Manual
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-[1.3fr_1fr] 2xl:grid-cols-[1.5fr_1fr] gap-8 w-full">
+                  <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5 w-full">
+                      <div className="w-full">
+                        <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Proyecto</label>
+                        <select name="proyecto" value={formDescuento.proyecto} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm text-sm">
+                          {PROYECTOS.map(p => <option key={p} value={p}>{String(p).toUpperCase()}</option>)}
+                        </select>
+                      </div>
+                      <div className="w-full">
+                        <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Modalidad</label>
+                        <select name="modalidad" value={formDescuento.modalidad} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm text-sm">
+                          <option value="Contado">Al Contado</option>
+                          <option value="Crédito">A Crédito (Plazos)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {formDescuento.proyecto === 'OTRO...' && (
+                      <div className="mb-5 bg-amber-50/80 p-4 rounded-xl border border-amber-200 shadow-sm w-full">
+                        <h4 className="font-bold text-amber-800 mb-3 text-sm flex items-center"><Edit3 className="w-4 h-4 mr-2" /> Proyecto Manual</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                           <div className="w-full">
+                             <label className="block text-xs font-bold text-slate-700 mb-1.5 ml-0.5">Nombre del Proyecto</label>
+                             <input type="text" name="proyectoManual" value={formDescuento.proyectoManual} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-amber-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none bg-white text-sm" placeholder="Ej. Celina VII"/>
+                           </div>
+                           <div className="w-full">
+                             <label className="block text-xs font-bold text-slate-700 mb-1.5 ml-0.5">Descuento a Aplicar</label>
+                             <div className="flex flex-col sm:flex-row w-full gap-2">
+                               <select name="tipoDescuentoManual" value={formDescuento.tipoDescuentoManual} onChange={handleDescuentoChange} className="w-full sm:w-1/2 px-2 py-2.5 border border-amber-200 rounded-xl bg-white text-sm font-semibold focus:ring-2 focus:ring-amber-500 outline-none">
+                                  <option value="porcentaje">% Desc.</option>
+                                  <option value="monto">$ por m²</option>
+                               </select>
+                               <input type="number" name="descuentoManual" value={formDescuento.descuentoManual} onChange={handleDescuentoChange} className="w-full sm:w-1/2 px-3 py-2.5 border border-amber-200 rounded-xl bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm" placeholder="Ej. 10"/>
+                             </div>
+                           </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {formDescuento.modalidad === 'Crédito' && (
+                      <div className="mb-6 bg-blue-50/50 p-5 rounded-xl border border-blue-100/50 w-full">
+                        <div className="flex flex-col w-full">
+                          <label className="block text-sm font-bold text-slate-700 mb-2 ml-0.5">Ingresar Cuota Inicial</label>
+                          <div className="flex flex-col sm:flex-row w-full gap-3">
+                            <select 
+                              value={formDescuento.modoCuota} 
+                              onChange={(e) => setFormDescuento({...formDescuento, modoCuota: e.target.value, cuota: ''})}
+                              className="flex-1 px-3 py-2.5 border border-blue-200 rounded-xl bg-white text-slate-700 font-semibold focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                            >
+                              <option value="monto">Monto ($)</option>
+                              <option value="porcentaje">Porcentaje (%)</option>
+                            </select>
+                            <input 
+                              type="number" 
+                              name="cuota" 
+                              value={formDescuento.cuota} 
+                              onChange={handleDescuentoChange} 
+                              placeholder={formDescuento.modoCuota === 'monto' ? "Ej. 1000" : "Ej. 5"}
+                              className="flex-1 px-3 py-2.5 border border-blue-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 outline-none shadow-inner text-sm" 
+                            />
+                            <div className="flex-1 flex items-center justify-center bg-blue-600 text-white rounded-xl font-bold text-sm shadow-sm py-2.5 px-2">
+                              {formDescuento.modoCuota === 'monto' 
+                                ? `${formatCurrency(porcentajeCuota)}%` 
+                                : `$ ${formatCurrency(montoCuotaNum)}`}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* NUEVO BLOQUE: DESCUENTO MANUAL PROYECTOS PROPIOS >= 5% */}
+                    {PROYECTOS_PROPIOS_1.includes(formDescuento.proyecto) && formDescuento.modalidad === 'Crédito' && porcentajeCuota >= 5 && (
+                      <div className="mb-6 bg-purple-50/80 p-4 rounded-xl border border-purple-200 shadow-sm w-full flex flex-col sm:flex-row items-center justify-between gap-4">
+                         <div className="flex-1">
+                           <label className="block text-sm font-bold text-purple-900 mb-1">¡Aplica a Descuento Especial!</label>
+                           <p className="text-xs text-purple-700 leading-tight">Puedes ajustar el % manualmente si lo deseas (Máximo 23%).</p>
+                         </div>
+                         <div className="w-full sm:w-auto flex items-center bg-white rounded-lg border border-purple-200 overflow-hidden">
+                           <input
+                             type="number"
+                             name="descuentoPropiosManual"
+                             value={formDescuento.descuentoPropiosManual}
+                             onChange={handleDescuentoChange}
+                             max="23"
+                             min="0"
+                             className="w-20 px-3 py-2 text-center font-bold text-purple-700 focus:outline-none"
+                           />
+                           <span className="pr-3 font-bold text-purple-500">%</span>
+                         </div>
+                      </div>
+                    )}
+                    
+                    {/* MENÚS CASCADA O MANUAL */}
+                    {formDescuento.modoBusqueda === 'inteligente' && formDescuento.proyecto !== 'OTRO...' ? (
+                      <div className="mb-6 p-5 bg-slate-50 border border-slate-100 rounded-xl w-full">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
+                          <div className="w-full">
+                            <label className="block text-xs font-bold text-emerald-700 mb-1.5 ml-0.5 uppercase tracking-wide">Elegir UV</label>
+                            <select name="uv" value={formDescuento.uv} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 font-semibold cursor-pointer text-sm">
+                              <option value="">---</option>
+                              {opcionesUV.map(u => <option key={u} value={u}>{String(u)}</option>)}
+                            </select>
+                          </div>
+                          <div className="w-full">
+                            <label className="block text-xs font-bold text-emerald-700 mb-1.5 ml-0.5 uppercase tracking-wide">Elegir MZN</label>
+                            <select name="manzano" value={formDescuento.manzano} onChange={handleDescuentoChange} disabled={!formDescuento.uv} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 font-semibold cursor-pointer disabled:opacity-50 disabled:bg-slate-100 text-sm">
+                              <option value="">---</option>
+                              {opcionesMZN.map(m => <option key={m} value={m}>{String(m)}</option>)}
+                            </select>
+                          </div>
+                          <div className="w-full">
+                            <label className="block text-xs font-bold text-emerald-700 mb-1.5 ml-0.5 uppercase tracking-wide">Elegir Lote</label>
+                            <select name="lote" value={formDescuento.lote} onChange={handleDescuentoChange} disabled={!formDescuento.manzano} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 font-semibold cursor-pointer disabled:opacity-50 disabled:bg-slate-100 text-sm">
+                              <option value="">---</option>
+                              {opcionesLote.map(lt => <option key={lt} value={lt}>{String(lt)}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                        {lotesBD.length === 0 && !cargandoLotes ? (
+                          <p className="text-xs text-amber-600 mt-4 flex items-center">
+                            <AlertTriangle className="w-4 h-4 mr-1 flex-shrink-0" /> Cargando base de datos o archivo lotes.json no encontrado.
+                          </p>
+                        ) : null}
+                        {cargandoLotes ? (
+                          <p className="text-xs text-slate-500 mt-4 flex items-center">
+                             Cargando base de datos segura...
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-3 w-full">
+                        <Input label="UV" name="uv" value={formDescuento.uv} onChange={handleDescuentoChange} />
+                        <Input label="Manzano" name="manzano" value={formDescuento.manzano} onChange={handleDescuentoChange} />
+                        <Input label="Lote" name="lote" value={formDescuento.lote} onChange={handleDescuentoChange} />
+                      </div>
+                    )}
+
+                    {/* ETIQUETA DE CATEGORÍA (ESTILO DARK) */}
+                    {formDescuento.modoBusqueda === 'inteligente' && formDescuento.categoria ? (
+                      <div className="bg-slate-900 border border-slate-800 text-white p-4 rounded-xl text-xs font-bold mb-5 flex items-center shadow-md uppercase tracking-wider w-full overflow-hidden">
+                        <Tag className="w-4 h-4 mr-2.5 text-cyan-400 flex-shrink-0" />
+                        <span className="text-slate-400 mr-1.5 font-semibold flex-shrink-0">Categoría:</span> 
+                        <span className="truncate">{String(formDescuento.categoria)}</span>
+                      </div>
+                    ) : formDescuento.modoBusqueda === 'manual' ? (
+                      <div className="mb-4 w-full">
+                         <Input label="Categoría (Opcional)" name="categoria" value={formDescuento.categoria} onChange={handleDescuentoChange} placeholder="Ej. AVENIDA PRINCIPAL CON PAVIMENTO" />
+                      </div>
+                    ) : null}
+
+                    {loteAutocompletado && formDescuento.modoBusqueda === 'inteligente' && (
+                      <div className="bg-emerald-50/80 border border-emerald-200 text-emerald-700 p-3 rounded-xl text-xs font-bold mb-5 flex items-center shadow-sm w-full">
+                        <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-500 flex-shrink-0" /> Superficie y Precio autocompletados
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5 w-full">
+                      <Input label="Superficie (M2)" name="m2" value={formDescuento.m2} onChange={handleDescuentoChange} type="number" />
+                      <Input label="Precio Reg. (M2)" name="precioM2" value={formDescuento.precioM2} onChange={handleDescuentoChange} type="number" />
+                    </div>
+                    
+                    <div className="border-t border-slate-100 pt-5 mt-2 w-full"><Input label="Nombre del Asesor" name="asesor" value={formDescuento.asesor} onChange={handleDescuentoChange} /></div>
+                  </div>
+                  <div className="w-full min-w-0"><ResultCard title="Descuento" text={generarTextoDescuentoCelular()} htmlContent={generarHtmlDescuento()} subject={`Solicitud Descuento Campañas - ${nomProyectoFinal} Mz${formDescuento.manzano} Lt${formDescuento.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* FORM: INCREMENTO CUOTA */}
+          {activeTab === 'cuota' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
+              <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><TrendingUp className="w-6 h-6 mr-2 text-blue-600" /> Incremento de Cuota Inicial</h2></div>
+              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
+                    <Input label="Nro. Contrato" name="nroContrato" value={formCuota.nroContrato} onChange={handleCuotaChange} />
+                    <Input label="Carnet (CI)" name="ci" value={formCuota.ci} onChange={handleCuotaChange} />
+                  </div>
+                  <Input label="Nombre del Cliente" name="cliente" value={formCuota.cliente} onChange={handleCuotaChange} />
+                  <div className="mb-5 w-full">
+                    <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Proyecto</label>
+                    <select name="proyecto" value={formCuota.proyecto} onChange={handleCuotaChange} className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm text-sm">{PROYECTOS.map(p => <option key={p} value={p}>{String(p)}</option>)}</select>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full">
+                    <Input label="UV" name="uv" value={formCuota.uv} onChange={handleCuotaChange} />
+                    <Input label="Manzano" name="manzano" value={formCuota.manzano} onChange={handleCuotaChange} />
+                    <Input label="Lote" name="lote" value={formCuota.lote} onChange={handleCuotaChange} />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-2 w-full">
+                    <Input label="Cuota Registrada ($)" name="cuotaInicial" value={formCuota.cuotaInicial} onChange={handleCuotaChange} type="number" />
+                    <Input label="Nueva Cuota ($)" name="nuevaCuota" value={formCuota.nuevaCuota} onChange={handleCuotaChange} type="number" />
+                  </div>
+                  <TextArea label="Motivo del incremento" name="motivo" value={formCuota.motivo} onChange={handleCuotaChange} />
+                  <div className="border-t border-slate-100 pt-5 mt-2 w-full"><Input label="Nombre del Asesor" name="asesorVentas" value={formCuota.asesorVentas} onChange={handleCuotaChange} /></div>
+                </div>
+                <div className="w-full min-w-0"><ResultCard title="Incremento Cuota" text={generarTextoCuotaCelular()} htmlContent={generarHtmlCuota()} subject={`Incremento Cuota Inicial - ${formCuota.proyecto} Mz${formCuota.manzano} Lt${formCuota.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
+              </div>
+            </div>
+          )}
+
+        </div>
+      </div>
+    </div>
+  );
+}
