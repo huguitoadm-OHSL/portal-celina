@@ -1,7 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { 
   FileText, 
   Percent, 
@@ -28,23 +25,6 @@ import {
   Repeat
 } from 'lucide-react';
 
-// --- INICIALIZACIÓN DE BASE DE DATOS EN LA NUBE (FIREBASE) ---
-let app, auth, db;
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-try {
-  const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-  if (firebaseConfig) {
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db = getFirestore(app);
-  } else {
-    console.warn("Base de datos en la nube no detectada. Operando con Memoria Local (Vercel Mode).");
-  }
-} catch (error) {
-  console.error("Error inicializando la Nube:", error);
-}
-
 // --- CONFIGURACIÓN DE DATOS MOCK ---
 const PROYECTOS_CONVENIO_1 = ["Los Jardines", "El Renacer", "Rancho Nuevo", "Santa Fe"];
 const PROYECTOS_CONVENIO_2 = ["Cañaveral"];
@@ -63,7 +43,6 @@ const SUPERVISORES = [
   { id: 'ohsaravia', nombre: 'Oscar Hugo Saravia L.', correo: 'ohsaravia@celina.com.bo', genero: 'M', titulo: 'Lic. Oscar' }
 ];
 
-// --- EQUIPOS DE ASESORES POR SUPERVISOR ---
 const EQUIPOS_ASESORES = {
   "Oscar Saravia": [
     { nombre: "Carlos Enrique Calderon", colAct: 13829.20 },
@@ -370,27 +349,6 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
 };
 
 export default function App() {
-  const [user, setUser] = useState(null);
-
-  // --- INICIALIZACIÓN DE SESIÓN EN LA NUBE ---
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        if (auth && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else if (auth) {
-          await signInAnonymously(auth);
-        }
-      } catch (e) {
-        console.error("Error al iniciar sesión en la Nube:", e);
-      }
-    };
-    initAuth();
-    if (auth) {
-      const unsubscribe = onAuthStateChanged(auth, setUser);
-      return () => unsubscribe();
-    }
-  }, []);
 
   // --- FIX PARA PANTALLA COMPLETA ---
   useEffect(() => {
@@ -541,51 +499,12 @@ export default function App() {
     }
   }, [equipoSeleccionado]);
 
-  // Efecto para conectarse a Firebase de forma segura para sincronización
-  useEffect(() => {
-    if (!user || !db) return;
-    
-    try {
-      // FIX: Limpiamos estrictamente el ID para prevenir errores de ruta en Firebase
-      const rawAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-      const safeId = String(rawAppId).replace(/[^a-zA-Z0-9_-]/g, '_');
-      const docRef = doc(db, 'artifacts', safeId, 'public', 'data', 'proyecciones', equipoSeleccionado);
-      
-      const unsubscribe = onSnapshot(docRef, (docSnap) => {
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data && Array.isArray(data.asesores)) {
-            setFormProyeccion(data);
-            try { localStorage.setItem(`portalAsesores_proyeccion_${equipoSeleccionado}`, JSON.stringify(data)); } catch(e){}
-          }
-        }
-      }, (error) => {
-        console.warn("Aviso Firebase: Lectura en nube no disponible. Usando memoria local.");
-      });
-      return () => unsubscribe();
-    } catch(e) {
-      console.warn("No se pudo conectar a la base de datos.");
-    }
-  }, [user, equipoSeleccionado]);
-
-  // Función para empujar los cambios locales a Storage (y a Firebase si aplica)
+  // Función para empujar los cambios locales a Storage
   const saveProyeccionState = async (newState) => {
     setFormProyeccion(newState);
     try {
       localStorage.setItem(`portalAsesores_proyeccion_${newState.equipo}`, JSON.stringify(newState));
     } catch (e) {}
-
-    if (user && db) {
-      try {
-        // FIX: Reutilizamos el ID limpio para guardar de manera segura
-        const rawAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const safeId = String(rawAppId).replace(/[^a-zA-Z0-9_-]/g, '_');
-        const docRef = doc(db, 'artifacts', safeId, 'public', 'data', 'proyecciones', newState.equipo);
-        await setDoc(docRef, newState);
-      } catch (error) {
-        // Fallback silencioso si no hay nube configurada en el hosting
-      }
-    }
   };
 
   // --- CARGAR DATOS DESDE EL ARCHIVO JSON AL INICIAR ---
@@ -756,7 +675,6 @@ export default function App() {
     });
   };
 
-  // MANEJADOR PRINCIPAL DE EQUIPOS
   const handleEquipoChange = (e) => {
     setEquipoSeleccionado(String(e.target.value));
   };
@@ -1375,7 +1293,7 @@ export default function App() {
       <div className="flex-1 overflow-auto p-6 md:p-10 w-full">
         <div className="max-w-[1600px] mx-auto w-full">
           
-          {/* DASHBOARD VIEW (NUEVO CON GRÁFICOS) */}
+          {/* DASHBOARD VIEW */}
           {activeTab === 'dashboard' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="bg-white/80 backdrop-blur-xl p-8 md:p-10 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60">
