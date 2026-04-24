@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { 
   FileText, 
   Percent, 
@@ -22,8 +25,46 @@ import {
   Edit3,
   PhoneCall,
   Shield,
-  Repeat
+  Repeat,
+  Download,
+  Printer
 } from 'lucide-react';
+
+// --- INICIALIZACIÓN DE BASE DE DATOS EN LA NUBE (FIREBASE) ---
+let app, auth, db;
+
+try {
+  const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+  if (firebaseConfig) {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+  } else {
+    console.warn("Firebase config no encontrada. Se usará almacenamiento local.");
+  }
+} catch (error) {
+  console.error("Error inicializando Firebase:", error);
+}
+
+// Función robusta para asegurar que la ruta a Firebase siempre sea válida y no rompa la App
+const getSafeProyeccionRef = (equipo) => {
+  if (!db) return null;
+  try {
+    const rawAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    let pathStr = `artifacts/${rawAppId}/public/data/proyecciones/${equipo}`;
+    const segments = pathStr.split('/').filter(Boolean);
+    
+    // Firestore requiere estrictamente un número PAR de segmentos para los documentos
+    if (segments.length % 2 !== 0) {
+      pathStr += '/data';
+    }
+    
+    return doc(db, pathStr);
+  } catch (e) {
+    console.error("Error generando ruta segura de Firebase:", e);
+    return null;
+  }
+};
 
 // --- CONFIGURACIÓN DE DATOS MOCK ---
 const PROYECTOS_CONVENIO_1 = ["Los Jardines", "El Renacer"];
@@ -170,7 +211,10 @@ const OBJETIVOS_MENSUALES = {
 const NOMBRES_PROYECTOS_PROYECCION = ["Muyurina", "Renacer", "Santa Fe", "Rancho Nuevo", "Jardines"];
 
 // --- FUNCIONES GLOBALES ---
-const formatCurrency = (val) => new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
+const formatCurrency = (val) => {
+  const numericVal = Number(val) || 0;
+  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numericVal);
+};
 
 const obtenerSaludoTiempo = () => {
   const hora = new Date().getHours();
@@ -181,7 +225,7 @@ const obtenerSaludoTiempo = () => {
 
 const formatDiaMes = (fechaIso, sumarDias = 0) => {
   if (!fechaIso) return `Día ${sumarDias + 1}`;
-  const partes = fechaIso.split('-');
+  const partes = String(fechaIso).split('-');
   if (partes.length !== 3) return `Día ${sumarDias + 1}`;
   const date = new Date(partes[0], partes[1] - 1, partes[2]);
   date.setDate(date.getDate() + sumarDias);
@@ -194,7 +238,7 @@ const formatDiaMes = (fechaIso, sumarDias = 0) => {
 // --- COMPONENTES UI ---
 const Input = ({ label, name, value, onChange, placeholder, type = "text", required = false }) => (
   <div className="mb-4 w-full">
-    <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5 truncate">{label}</label>
+    <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5 truncate">{String(label)}</label>
     <input
       type={type}
       name={name}
@@ -209,7 +253,7 @@ const Input = ({ label, name, value, onChange, placeholder, type = "text", requi
 
 const TextArea = ({ label, name, value, onChange, placeholder }) => (
   <div className="mb-4 w-full">
-    <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5 truncate">{label}</label>
+    <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5 truncate">{String(label)}</label>
     <textarea
       name={name}
       value={value}
@@ -228,7 +272,7 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
     try {
       if (htmlContent) {
         const div = document.createElement('div');
-        div.innerHTML = htmlContent;
+        div.innerHTML = String(htmlContent);
         div.style.position = 'fixed';
         div.style.pointerEvents = 'none';
         div.style.opacity = '0';
@@ -246,7 +290,7 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
         document.body.removeChild(div);
       } else {
         const textArea = document.createElement("textarea");
-        textArea.value = text;
+        textArea.value = String(text);
         textArea.style.position = "fixed";
         textArea.style.top = "-9999px";
         textArea.style.left = "-9999px";
@@ -264,10 +308,8 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
     }
   };
 
-  // --- TRUCO MAGICO PARA CELULARES ---
   const handleOpenEmailApp = () => {
     handleCopy();
-    
     const to = fixedDestinoEmail || supervisorDestino;
     const ccQuery = ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : '';
     const instruccionPega = "(Por favor, borra este texto, mantén presionado aquí y selecciona 'Pegar' para insertar la tabla con su formato oficial)";
@@ -289,7 +331,7 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
         <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Enviar a:</label>
         {fixedDestinoEmail ? (
           <div className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-slate-100/70 text-slate-700 font-semibold shadow-inner truncate text-sm">
-            {fixedDestinoLabel} ({fixedDestinoEmail})
+            {String(fixedDestinoLabel)} ({String(fixedDestinoEmail)})
           </div>
         ) : (
           <select 
@@ -298,12 +340,12 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
             className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 text-slate-800 font-semibold shadow-sm cursor-pointer text-sm"
           >
             {SUPERVISORES.map(s => (
-              <option key={s.id} value={s.correo}>{s.nombre} ({s.correo})</option>
+              <option key={s.id} value={s.correo}>{String(s.nombre)} ({String(s.correo)})</option>
             ))}
           </select>
         )}
         {ccEmails && (
-            <p className="text-xs text-slate-500 mt-2 ml-1"><strong>CC:</strong> {ccEmails}</p>
+            <p className="text-xs text-slate-500 mt-2 ml-1"><strong>CC:</strong> {String(ccEmails)}</p>
         )}
       </div>
 
@@ -311,18 +353,17 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
         <div className="mb-4 p-3.5 bg-indigo-50/50 border border-indigo-100 rounded-xl flex gap-3 items-start shadow-sm w-full">
           <Info className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
           <p className="text-xs text-indigo-800 leading-relaxed">
-            <strong>Modo PC:</strong> Usa <b>"Copiar Formato PC"</b> y pégalo en tu correo.<br/>
-            <strong>Modo Celular:</strong> Usa <b>"Copiar y Abrir Correo"</b> y sigue las instrucciones para mantener los cuadros.
+            <strong>Si usas PC:</strong> Haz clic en <b>"Copiar Formato PC"</b> y pega directo en tu gestor de correo.<br/>
+            <strong>Si usas Celular:</strong> Usa <b>"Copiar y Abrir Correo"</b> y sigue las instrucciones.
           </p>
         </div>
       )}
 
-      {/* AQUÍ ESTÁ EL FIX DE MIN-W-0 PARA QUE LA TABLA NO ROMPA LA PANTALLA EN PC */}
-      <div className="bg-[#f8fafc] p-5 rounded-xl border border-slate-200 mb-5 flex-1 overflow-auto shadow-inner w-full min-w-0">
+      <div className="bg-[#f8fafc] p-5 rounded-xl border border-slate-200 mb-5 flex-1 overflow-auto shadow-inner w-full min-w-0" id="vista-previa-contenido">
         {htmlContent ? (
-          <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+          <div dangerouslySetInnerHTML={{ __html: String(htmlContent) }} />
         ) : (
-          <div className="font-mono text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{text}</div>
+          <div className="font-mono text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{String(text)}</div>
         )}
       </div>
       
@@ -349,8 +390,29 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
 };
 
 export default function App() {
+  const [user, setUser] = useState(null);
 
-  // --- FIX PARA PANTALLA COMPLETA (Elimina las restricciones por defecto de Vite en Desktop) ---
+  // --- INICIALIZACIÓN DE SESIÓN EN LA NUBE ---
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        if (auth && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else if (auth) {
+          await signInAnonymously(auth);
+        }
+      } catch (e) {
+        console.error("Error al iniciar sesión en la Nube:", e);
+      }
+    };
+    initAuth();
+    if (auth) {
+      const unsubscribe = onAuthStateChanged(auth, setUser);
+      return () => unsubscribe();
+    }
+  }, []);
+
+  // --- FIX PARA PANTALLA COMPLETA ---
   useEffect(() => {
     const root = document.getElementById('root');
     if (root) {
@@ -364,8 +426,9 @@ export default function App() {
     document.body.style.display = 'block';
   }, []);
 
-  const [activeTab, setActiveTab] = useState('proyeccion');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [supervisorDestino, setSupervisorDestino] = useState(SUPERVISORES[0].correo);
+  const [globalStats, setGlobalStats] = useState({ goal: 0, actual: 0, teams: [] });
   
   // --- ESTADOS PARA LA BASE DE DATOS DE LOTES DESDE JSON ---
   const [lotesBD, setLotesBD] = useState([]);
@@ -377,7 +440,7 @@ export default function App() {
   });
 
   const [formLlamada, setFormLlamada] = useState({
-    asesor: '', nombreReferido: '', ciReferido: '', horaLlamada: '', nombreBeneficiario: '', ciBeneficiario: ''
+    asesor: '', nombreReferido: '', contratoReferido: '', celularReferido: '', horaLlamada: '', nombreBeneficiario: '', ciBeneficiario: ''
   });
   
   const [formSeguro, setFormSeguro] = useState({
@@ -414,33 +477,128 @@ export default function App() {
     contratos: [{ nroContrato: '', cliente: '', ci: '', uv: '', manzano: '', lote: '' }]
   });
 
-  // --- ESTADO PARA PROYECCIÓN (AHORA CARGA DESDE LOCALSTORAGE SI EXISTE) ---
-  const [formProyeccion, setFormProyeccion] = useState(() => {
-    const savedData = localStorage.getItem('portalAsesores_proyeccion_Oscar Saravia');
+  // --- ESTADO Y SINCRONIZACIÓN PARA PROYECCIÓN ---
+  const [equipoSeleccionado, setEquipoSeleccionado] = useState('Oscar Saravia');
+  const [formProyeccion, setFormProyeccion] = useState({
+    equipo: 'Oscar Saravia',
+    fechaInicio: new Date().toISOString().split('T')[0],
+    objetivoMensual: OBJETIVOS_MENSUALES['Oscar Saravia'],
+    asesores: EQUIPOS_ASESORES['Oscar Saravia'].map(a => ({
+      nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0] 
+    }))
+  });
+
+  // Efecto para inicializar la proyección desde LocalStorage rápidamente y calcular métricas globales
+  useEffect(() => {
+    // 1. Cargar equipo seleccionado
+    const savedData = localStorage.getItem(`portalAsesores_proyeccion_${equipoSeleccionado}`);
     if (savedData) {
       try {
-        return JSON.parse(savedData);
+        const pData = JSON.parse(savedData);
+        if (pData && Array.isArray(pData.asesores)) {
+          setFormProyeccion(pData);
+        }
       } catch(e) {
         console.error("Error cargando proyección de localStorage", e);
       }
+    } else {
+      setFormProyeccion({
+        equipo: equipoSeleccionado,
+        fechaInicio: new Date().toISOString().split('T')[0],
+        objetivoMensual: OBJETIVOS_MENSUALES[equipoSeleccionado] || 0,
+        asesores: EQUIPOS_ASESORES[equipoSeleccionado] ? EQUIPOS_ASESORES[equipoSeleccionado].map(a => ({
+          nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0] 
+        })) : []
+      });
     }
-    // Si no hay nada guardado, carga los datos por defecto
-    return {
-      equipo: 'Oscar Saravia',
-      fechaInicio: new Date().toISOString().split('T')[0], // Hoy
-      objetivoMensual: OBJETIVOS_MENSUALES['Oscar Saravia'],
-      asesores: EQUIPOS_ASESORES["Oscar Saravia"].map(a => ({
-        nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0] 
-      }))
-    };
-  });
 
-  // --- EFECTO PARA GUARDAR PROYECCIÓN EN LOCALSTORAGE CADA VEZ QUE CAMBIA ---
+    // 2. Calcular estadísticas del Dashboard Global
+    let tGoal = 0;
+    let tAct = 0;
+    let tTeams = [];
+
+    Object.keys(OBJETIVOS_MENSUALES).forEach(team => {
+      let teamGoal = OBJETIVOS_MENSUALES[team];
+      let teamAct = 0;
+      
+      const teamSaved = localStorage.getItem(`portalAsesores_proyeccion_${team}`);
+      if (teamSaved) {
+        try {
+          const tData = JSON.parse(teamSaved);
+          teamGoal = typeof tData.objetivoMensual === 'number' ? tData.objetivoMensual : teamGoal;
+          if (Array.isArray(tData.asesores)) {
+            teamAct = tData.asesores.reduce((sum, a) => {
+              const sumDias = Array.isArray(a.dias) ? a.dias.reduce((d1, d2) => d1 + d2, 0) : 0;
+              return sum + (Number(a.colAct) || 0) + sumDias;
+            }, 0);
+          }
+        } catch(e){}
+      } else if (EQUIPOS_ASESORES[team]) {
+        teamAct = EQUIPOS_ASESORES[team].reduce((sum, a) => sum + (Number(a.colAct) || 0), 0);
+      }
+
+      tGoal += teamGoal;
+      tAct += teamAct;
+      tTeams.push({ 
+        name: String(team), 
+        goal: Number(teamGoal) || 0, 
+        actual: Number(teamAct) || 0, 
+        percent: teamGoal > 0 ? (teamAct / teamGoal) * 100 : 0 
+      });
+    });
+
+    tTeams.sort((a, b) => b.percent - a.percent);
+    setGlobalStats({ goal: tGoal, actual: tAct, teams: tTeams });
+
+  }, [equipoSeleccionado, activeTab]);
+
+  // Efecto para conectarse a Firebase de forma segura
   useEffect(() => {
-    if (formProyeccion.equipo) {
-      localStorage.setItem(`portalAsesores_proyeccion_${formProyeccion.equipo}`, JSON.stringify(formProyeccion));
+    if (!user || !db) return;
+    
+    // Obtenemos la referencia asegurándonos que sea un formato de Documento válido
+    const docRef = getSafeProyeccionRef(equipoSeleccionado);
+    if (!docRef) return; 
+    
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data && Array.isArray(data.asesores)) {
+          setFormProyeccion(data);
+          localStorage.setItem(`portalAsesores_proyeccion_${equipoSeleccionado}`, JSON.stringify(data));
+        }
+      } else {
+        const defaultData = {
+          equipo: equipoSeleccionado,
+          fechaInicio: new Date().toISOString().split('T')[0],
+          objetivoMensual: OBJETIVOS_MENSUALES[equipoSeleccionado] || 0,
+          asesores: EQUIPOS_ASESORES[equipoSeleccionado] ? EQUIPOS_ASESORES[equipoSeleccionado].map(a => ({
+            nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0] 
+          })) : []
+        };
+        setDoc(docRef, defaultData).catch(e => console.error("Error inicial Firebase:", e));
+      }
+    }, (error) => {
+      console.warn("Aviso Firebase: Sin permisos suficientes. Trabajando en modo LocalStorage.");
+    });
+
+    return () => unsubscribe();
+  }, [user, equipoSeleccionado]);
+
+  // Función para empujar los cambios locales a Firebase
+  const saveProyeccionState = async (newState) => {
+    localStorage.setItem(`portalAsesores_proyeccion_${equipoSeleccionado}`, JSON.stringify(newState));
+    if (user && db) {
+      try {
+        const docRef = getSafeProyeccionRef(equipoSeleccionado);
+        if (docRef) {
+          await setDoc(docRef, newState);
+        }
+      } catch (error) {
+        console.warn("Aviso Firebase: No se guardó en la nube.", error.message);
+      }
     }
-  }, [formProyeccion]);
+  };
 
   // --- CARGAR DATOS DESDE EL ARCHIVO JSON AL INICIAR ---
   useEffect(() => {
@@ -610,39 +768,65 @@ export default function App() {
   };
 
   const handleEquipoChange = (e) => {
-    const nuevoEquipo = e.target.value;
-    
-    const savedData = localStorage.getItem(`portalAsesores_proyeccion_${nuevoEquipo}`);
-    if (savedData) {
-      try {
-        const parsedData = JSON.parse(savedData);
-        setFormProyeccion(parsedData);
-        return; 
-      } catch(error) {
-        console.error(`Error cargando proyeccion de ${nuevoEquipo}`, error);
-      }
-    }
-    
-    const nuevosAsesores = EQUIPOS_ASESORES[nuevoEquipo].map(a => ({
-      nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0]
-    }));
-    setFormProyeccion({ ...formProyeccion, equipo: nuevoEquipo, asesores: nuevosAsesores, objetivoMensual: OBJETIVOS_MENSUALES[nuevoEquipo] || 0 });
+    setEquipoSeleccionado(String(e.target.value));
   };
   
   const updateAsesorProyeccion = (index, field, valStr) => {
+    if (!formProyeccion || !Array.isArray(formProyeccion.asesores)) return;
     const nuevosAsesores = [...formProyeccion.asesores];
     nuevosAsesores[index][field] = parseFloat(valStr) || 0;
-    setFormProyeccion({ ...formProyeccion, asesores: nuevosAsesores });
+    const newState = { ...formProyeccion, asesores: nuevosAsesores };
+    setFormProyeccion(newState);
+    saveProyeccionState(newState);
   };
+  
   const updateAsesorArrayProyeccion = (index, type, arrayIndex, valStr) => {
+    if (!formProyeccion || !Array.isArray(formProyeccion.asesores)) return;
     const nuevosAsesores = [...formProyeccion.asesores];
     nuevosAsesores[index][type][arrayIndex] = parseFloat(valStr) || 0;
-    setFormProyeccion({ ...formProyeccion, asesores: nuevosAsesores });
+    const newState = { ...formProyeccion, asesores: nuevosAsesores };
+    setFormProyeccion(newState);
+    saveProyeccionState(newState);
+  };
+
+  // IMPRIMIR PDF DE LA PROYECCIÓN
+  const handlePrintPDF = () => {
+    const content = generarHtmlProyeccion();
+    const printWindow = window.open('', '', 'width=1000,height=800');
+    
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Reporte de Proyección - ${String(formProyeccion.equipo)}</title>
+          <style>
+            body { padding: 20px; background-color: #fff; font-family: sans-serif; }
+            @media print {
+              * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+              body { margin: 0; padding: 0; }
+              @page { size: landscape; margin: 10mm; }
+            }
+          </style>
+        </head>
+        <body>
+          <h2 style="color: #002060;">Reporte Oficial de Proyección</h2>
+          ${content}
+          <script>
+            window.onload = function() { 
+              setTimeout(function() {
+                window.print(); 
+                window.close();
+              }, 300);
+            }
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   // --- LÓGICA DE DESCUENTOS CAMPAÑAS ---
   const calcularDescuento = () => {
-    const { proyecto, modalidad, cuota, modoCuota, m2, precioM2, descuentoManual, tipoDescuentoManual, categoria } = formDescuento;
+    const { proyecto, modalidad, cuota, modoCuota, m2, precioM2, descuentoManual, tipoDescuentoManual } = formDescuento;
     const m2Num = parseFloat(m2) || 0;
     const precioM2Num = parseFloat(precioM2) || 0;
     const vc = m2Num * precioM2Num;
@@ -689,6 +873,7 @@ export default function App() {
       if (modalidad === 'Contado') {
         porcentaje = 30; 
       } else if (modalidad === 'Crédito') {
+        // Lógica Fuerte: Si la cuota es 5% o más (Sin importar la categoría)
         if (porcentajeCuota >= 5) {
           const maxDesc = 23;
           let inputDesc = parseFloat(formDescuento.descuentoPropiosManual);
@@ -709,7 +894,7 @@ export default function App() {
   };
 
   const calcularBeneficioRecompra = () => {
-    const p = formRecompra.proyecto.toUpperCase();
+    const p = String(formRecompra.proyecto).toUpperCase();
     if (p.includes('MUYURINA')) return 200;
     if (p.includes('RANCHO NUEVO')) return 50;
     return 100;
@@ -774,7 +959,7 @@ export default function App() {
   };
 
   const generarTextoLlamadaCelular = () => {
-    return `👋 ${obtenerSaludoTiempo()}\nEstimada Olivia,\n\nPor favor su ayuda con la validación de llamada de este cliente referido, solicita que lo llamen a las *${formLlamada.horaLlamada || '[HORA]'}*:\n\n*🗣️ REFERIDO*\n👤 Nombre: ${formLlamada.nombreReferido || '---'}\n🪪 CI: ${formLlamada.ciReferido || '---'}\n\n*🎁 BENEFICIARIA*\n👤 Nombre: ${formLlamada.nombreBeneficiario || '---'}\n🪪 CI: ${formLlamada.ciBeneficiario || '---'}\n\nSaludos cordiales,\n*${formLlamada.asesor || 'Asesor'}*`;
+    return `👋 ${obtenerSaludoTiempo()}\nEstimada Olivia,\n\nPor favor su ayuda con la validación de llamada de este cliente referido, solicita que lo llamen a las *${formLlamada.horaLlamada || '[HORA]'}*:\n\n*🗣️ REFERIDO*\n👤 Nombre: ${formLlamada.nombreReferido || '---'}\n📄 Contrato: ${formLlamada.contratoReferido || '---'}\n📱 Celular: ${formLlamada.celularReferido || '---'}\n\n*🎁 BENEFICIARIA*\n👤 Nombre: ${formLlamada.nombreBeneficiario || '---'}\n🪪 CI: ${formLlamada.ciBeneficiario || '---'}\n\nSaludos cordiales,\n*${formLlamada.asesor || 'Asesor'}*`;
   };
 
   const generarTextoProyeccionCelular = () => {
@@ -784,27 +969,31 @@ export default function App() {
     let sumColAct = 0;
     let sumTotalColMes = 0;
 
-    formProyeccion.asesores.forEach((asesor, i) => {
-      const sumDias = asesor.dias.reduce((a, b) => a + b, 0);
-      const totalColMes = asesor.colAct + sumDias;
-      sumColAct += asesor.colAct;
-      sumTotalColMes += totalColMes;
-      
-      if (asesor.colAct > 0 || sumDias > 0) {
-        texto += `*${i+1}. ${asesor.nombre}*\n`;
-        texto += `   📈 Colocación Actual: $ ${formatCurrency(asesor.colAct)}\n`;
-        texto += `   🎯 Proyección Semanal: $ ${formatCurrency(sumDias)}\n`;
-        texto += `   🏁 Cierre de Mes: $ ${formatCurrency(totalColMes)}\n\n`;
-      }
-    });
+    if (formProyeccion && Array.isArray(formProyeccion.asesores)) {
+      formProyeccion.asesores.forEach((asesor, i) => {
+        const sumDias = Array.isArray(asesor.dias) ? asesor.dias.reduce((a, b) => a + b, 0) : 0;
+        const colActualNum = Number(asesor.colAct) || 0;
+        const totalColMes = colActualNum + sumDias;
+        sumColAct += colActualNum;
+        sumTotalColMes += totalColMes;
+        
+        if (colActualNum > 0 || sumDias > 0) {
+          texto += `*${i+1}. ${asesor.nombre || ''}*\n`;
+          texto += `   📈 Colocación Actual: $ ${formatCurrency(colActualNum)}\n`;
+          texto += `   🎯 Proyección Semanal: $ ${formatCurrency(sumDias)}\n`;
+          texto += `   🏁 Cierre de Mes: $ ${formatCurrency(totalColMes)}\n\n`;
+        }
+      });
+    }
 
     const mesStr = new Date(formProyeccion.fechaInicio || new Date()).toLocaleString('es-ES', { month: 'long' });
     const capMes = mesStr.charAt(0).toUpperCase() + mesStr.slice(1);
-    const porcentajeAvance = formProyeccion.objetivoMensual ? (sumColAct / formProyeccion.objetivoMensual) * 100 : 0;
-    const porcentajeFin = formProyeccion.objetivoMensual ? (sumTotalColMes / formProyeccion.objetivoMensual) * 100 : 0;
+    const objMensual = Number(formProyeccion.objetivoMensual) || 0;
+    const porcentajeAvance = objMensual ? (sumColAct / objMensual) * 100 : 0;
+    const porcentajeFin = objMensual ? (sumTotalColMes / objMensual) * 100 : 0;
 
     texto += `*📊 RESUMEN DEL EQUIPO*\n`;
-    texto += `🎯 Objetivo ${capMes}: $ ${formatCurrency(formProyeccion.objetivoMensual)}\n`;
+    texto += `🎯 Objetivo ${capMes}: $ ${formatCurrency(objMensual)}\n`;
     texto += `📈 Colocación Actual: $ ${formatCurrency(sumColAct)} (${formatCurrency(porcentajeAvance)}%)\n`;
     texto += `🏁 Colocación Fin de Mes: $ ${formatCurrency(sumTotalColMes)} (${formatCurrency(porcentajeFin)}%)\n\n`;
     texto += `Saludos cordiales.`;
@@ -812,7 +1001,8 @@ export default function App() {
     return texto;
   };
 
-  // --- HTML PARA PC ---
+  // --- GENERADORES HTML PARA PC ---
+  
   const generarHtmlRecompra = () => {
     const beneficio = calcularBeneficioRecompra();
     const { saludo, nombrePila } = obtenerDatosSupervisor();
@@ -889,36 +1079,46 @@ export default function App() {
     let sumTotalProySemanal = 0;
     let sumTotalColMes = 0;
 
-    formProyeccion.asesores.forEach((asesor, i) => {
-      const sumDias = asesor.dias.reduce((a, b) => a + b, 0);
-      const totalColMes = asesor.colAct + sumDias;
-      
-      sumColAct += asesor.colAct;
-      asesor.proy.forEach((val, idx) => sumProyA[idx] += val);
-      sumTotalProySemanal += sumDias;
-      sumTotalColMes += totalColMes;
+    if (formProyeccion && Array.isArray(formProyeccion.asesores)) {
+      formProyeccion.asesores.forEach((asesor, i) => {
+        const sumDias = Array.isArray(asesor.dias) ? asesor.dias.reduce((a, b) => a + b, 0) : 0;
+        const colActNum = Number(asesor.colAct) || 0;
+        const totalColMes = colActNum + sumDias;
+        
+        sumColAct += colActNum;
+        if (Array.isArray(asesor.proy)) {
+          asesor.proy.forEach((val, idx) => {
+            if (sumProyA[idx] !== undefined) {
+               sumProyA[idx] += (Number(val) || 0);
+            }
+          });
+        }
+        sumTotalProySemanal += sumDias;
+        sumTotalColMes += totalColMes;
 
-      const formatVacio = (val) => val === 0 ? '-' : formatCurrency(val);
-      const formatDias = (val) => val === 0 ? '-' : val;
+        const formatVacio = (val) => val === 0 ? '-' : formatCurrency(val);
+        const formatDias = (val) => val === 0 ? '-' : val;
 
-      filasAsesoresHtml += `
-        <tr>
-          <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><font color="#000000"><b>${i+1}</b></font></td>
-          <td style="border: 1px solid #cbd5e1; padding: 6px; background-color: #ffffff; white-space: nowrap;"><font color="#000000"><b>${asesor.nombre}</b></font></td>
-          <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap;"><font color="#000000">${formatVacio(asesor.colAct)}</font></td>
-          ${asesor.dias.map(d => `<td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><font color="#000000">${formatDias(d)}</font></td>`).join('')}
-          ${asesor.proy.map(p => `<td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><font color="#000000"><b>${p}</b></font></td>`).join('')}
-          <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap;"><font color="#000000"><b>${formatVacio(sumDias)}</b></font></td>
-          <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap;"><font color="#000000"><b>${formatVacio(totalColMes)}</b></font></td>
-          <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><font color="#000000"></font></td>
-        </tr>
-      `;
-    });
+        filasAsesoresHtml += `
+          <tr>
+            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><font color="#000000"><b>${i+1}</b></font></td>
+            <td style="border: 1px solid #cbd5e1; padding: 6px; background-color: #ffffff; white-space: nowrap;"><font color="#000000"><b>${String(asesor.nombre || '')}</b></font></td>
+            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap;"><font color="#000000">${formatVacio(colActNum)}</font></td>
+            ${Array.isArray(asesor.dias) ? asesor.dias.map(d => `<td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><font color="#000000">${formatDias(Number(d)||0)}</font></td>`).join('') : ''}
+            ${Array.isArray(asesor.proy) ? asesor.proy.map(p => `<td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><font color="#000000"><b>${Number(p)||0}</b></font></td>`).join('') : ''}
+            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap;"><font color="#000000"><b>${formatVacio(sumDias)}</b></font></td>
+            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap;"><font color="#000000"><b>${formatVacio(totalColMes)}</b></font></td>
+            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><font color="#000000"></font></td>
+          </tr>
+        `;
+      });
+    }
 
     const mesStr = new Date(formProyeccion.fechaInicio || new Date()).toLocaleString('es-ES', { month: 'long' });
     const capMes = mesStr.charAt(0).toUpperCase() + mesStr.slice(1);
-    const porcentajeAvance = formProyeccion.objetivoMensual ? (sumColAct / formProyeccion.objetivoMensual) * 100 : 0;
-    const porcentajeFin = formProyeccion.objetivoMensual ? (sumTotalColMes / formProyeccion.objetivoMensual) * 100 : 0;
+    const objMensual = Number(formProyeccion.objetivoMensual) || 0;
+    const porcentajeAvance = objMensual ? (sumColAct / objMensual) * 100 : 0;
+    const porcentajeFin = objMensual ? (sumTotalColMes / objMensual) * 100 : 0;
 
     return `
     <div style="font-family: Arial, sans-serif; font-size: 13px; color: #333333; text-align: left;">
@@ -930,19 +1130,19 @@ export default function App() {
       <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; font-family: Arial, sans-serif; font-size: 11px; margin-top: 15px; width: 100%; min-width: 900px; text-align: left; border-color: #cbd5e1; background-color: #ffffff;">
         <thead>
           <tr>
-            <th colspan="3" style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: left;"><font color="#ffffff"><b>Proyeccion Equipo: ${formProyeccion.equipo}</b></font></th>
-            <th colspan="7" style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center;"><font color="#ffffff"><b>Ventas</b></font></th>
-            <th colspan="5" style="background-color: #92d050; border: 1px solid #ffffff; padding: 6px; text-align: center;"><font color="#000000"><b>Proyectos</b></font></th>
-            <th rowspan="2" style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center; vertical-align: bottom;"><font color="#ffffff"><b>Total<br>Proyeccion<br>semanal</b></font></th>
-            <th rowspan="2" style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center; vertical-align: bottom;"><font color="#ffffff"><b>Total<br>colocacion<br>asesor/mes</b></font></th>
-            <th rowspan="2" style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center; vertical-align: bottom;"><font color="#ffffff"><b>Productivo<br>valor = $25.000</b></font></th>
+            <th colspan="3" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: left;"><font color="#ffffff"><b>Proyeccion Equipo: ${String(formProyeccion.equipo || '')}</b></font></th>
+            <th colspan="7" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center;"><font color="#ffffff"><b>Ventas</b></font></th>
+            <th colspan="5" style="background-color: #92d050; border: 1px solid #92d050; padding: 6px; text-align: center;"><font color="#000000"><b>Proyectos</b></font></th>
+            <th rowspan="2" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; vertical-align: bottom;"><font color="#ffffff"><b>Total<br>Proyeccion<br>semanal</b></font></th>
+            <th rowspan="2" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; vertical-align: bottom;"><font color="#ffffff"><b>Total<br>colocacion<br>asesor/mes</b></font></th>
+            <th rowspan="2" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; vertical-align: bottom;"><font color="#ffffff"><b>Productivo<br>valor = $25.000</b></font></th>
           </tr>
           <tr>
-            <th style="background-color: #002060; border: 1px solid #ffffff; padding: 6px;"></th>
-            <th style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: left; white-space: nowrap;"><font color="#ffffff"><b>Asesor</b></font></th>
-            <th style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center; white-space: nowrap;"><font color="#ffffff"><b>Colocacion<br>actual</b></font></th>
-            ${[0,1,2,3,4,5,6].map(d => `<th style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center; white-space: nowrap;"><font color="#ffffff"><b>${formatDiaMes(formProyeccion.fechaInicio, d)}</b></font></th>`).join('')}
-            ${NOMBRES_PROYECTOS_PROYECCION.map(p => `<th style="background-color: #92d050; border: 1px solid #ffffff; padding: 6px; text-align: center; white-space: nowrap;"><font color="#000000"><b>${p}</b></font></th>`).join('')}
+            <th style="background-color: #002060; border: 1px solid #002060; padding: 6px;"></th>
+            <th style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: left; white-space: nowrap;"><font color="#ffffff"><b>Asesor</b></font></th>
+            <th style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; white-space: nowrap;"><font color="#ffffff"><b>Colocacion<br>actual</b></font></th>
+            ${[0,1,2,3,4,5,6].map(d => `<th style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; white-space: nowrap;"><font color="#ffffff"><b>${formatDiaMes(formProyeccion.fechaInicio, d)}</b></font></th>`).join('')}
+            ${NOMBRES_PROYECTOS_PROYECCION.map(p => `<th style="background-color: #92d050; border: 1px solid #92d050; padding: 6px; text-align: center; white-space: nowrap;"><font color="#000000"><b>${String(p)}</b></font></th>`).join('')}
           </tr>
         </thead>
         <tbody>
@@ -960,24 +1160,24 @@ export default function App() {
 
       <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; font-family: Arial, sans-serif; font-size: 11px; margin-top: 20px; width: 350px; text-align: left; border-color: #cbd5e1; background-color: #ffffff;">
         <tr>
-          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px;"><font color="#ffffff"><b>Proyeccion ${capMes}</b></font></td>
-          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center;"><font color="#ffffff"><b>-</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px;"><font color="#ffffff"><b>Proyeccion ${capMes}</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center;"><font color="#ffffff"><b>-</b></font></td>
           <td style="border: none; background-color: #ffffff;"></td>
         </tr>
         <tr>
-          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px;"><font color="#ffffff"><b>Colocacion actual</b></font></td>
-          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: right; white-space: nowrap;"><font color="#ffffff"><b>${formatCurrency(sumColAct)}</b></font></td>
-          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center;"><font color="#ffffff"><b>${formatCurrency(porcentajeAvance)}%</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px;"><font color="#ffffff"><b>Colocacion actual</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: right; white-space: nowrap;"><font color="#ffffff"><b>${formatCurrency(sumColAct)}</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center;"><font color="#ffffff"><b>${formatCurrency(porcentajeAvance)}%</b></font></td>
         </tr>
         <tr>
-          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px;"><font color="#ffffff"><b>Objetivo ${capMes} ${new Date().getFullYear()}</b></font></td>
-          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: right; white-space: nowrap;"><font color="#ffffff"><b>${formatCurrency(formProyeccion.objetivoMensual)}</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px;"><font color="#ffffff"><b>Objetivo ${capMes} ${new Date().getFullYear()}</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: right; white-space: nowrap;"><font color="#ffffff"><b>${formatCurrency(objMensual)}</b></font></td>
           <td style="border: none; background-color: #ffffff;"></td>
         </tr>
         <tr>
-          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px;"><font color="#ffffff"><b>Colocacion fin de mes</b></font></td>
-          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: right; white-space: nowrap;"><font color="#ffffff"><b>${formatCurrency(sumTotalColMes)}</b></font></td>
-          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center;"><font color="#ffffff"><b>${formatCurrency(porcentajeFin)}%</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px;"><font color="#ffffff"><b>Colocacion fin de mes</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: right; white-space: nowrap;"><font color="#ffffff"><b>${formatCurrency(sumTotalColMes)}</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center;"><font color="#ffffff"><b>${formatCurrency(porcentajeFin)}%</b></font></td>
         </tr>
       </table>
       <p style="margin-top: 25px; margin-bottom: 2px;">Saludos cordiales.</p>
@@ -992,7 +1192,7 @@ export default function App() {
       <p style="margin-bottom: 20px;">Por favor su ayuda con la validaci&oacute;n de llamada de este cliente referido, el cliente menciona que tendr&aacute; tiempo de contestar hoy a las <strong>${formLlamada.horaLlamada || '[HORA]'}</strong>, por favor pido la ayuda de tu equipo para que la puedan llamar a esa hora:</p>
       
       <p style="margin-bottom: 5px; color: #555555;">Cliente referido:</p>
-      <p style="margin-top: 0; margin-bottom: 15px; font-weight: bold; font-size: 15px; color: #000000;">${formLlamada.nombreReferido || '[NOMBRE REFERIDO]'}, ${formLlamada.ciReferido || '[CI REFERIDO]'}</p>
+      <p style="margin-top: 0; margin-bottom: 15px; font-weight: bold; font-size: 15px; color: #000000;">${formLlamada.nombreReferido || '[NOMBRE REFERIDO]'} - Contrato: ${formLlamada.contratoReferido || '[CONTRATO]'} - Celular: ${formLlamada.celularReferido || '[CELULAR]'}</p>
       
       <p style="margin-bottom: 5px; color: #555555;">Cliente beneficiaria:</p>
       <p style="margin-top: 0; margin-bottom: 25px; font-weight: bold; font-size: 15px; color: #000000;">${formLlamada.nombreBeneficiario || '[NOMBRE BENEFICIARIA]'}, ${formLlamada.ciBeneficiario || '[CI BENEFICIARIA]'}</p>
@@ -1224,19 +1424,65 @@ export default function App() {
       <div className="flex-1 overflow-auto p-6 md:p-10 w-full">
         <div className="max-w-[1600px] mx-auto w-full">
           
-          {/* DASHBOARD VIEW */}
+          {/* DASHBOARD VIEW (NUEVO CON GRÁFICOS) */}
           {activeTab === 'dashboard' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="bg-white/80 backdrop-blur-xl p-10 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60">
-                <div className="inline-flex items-center justify-center px-3 py-1 mb-4 text-xs font-bold tracking-wide text-indigo-600 bg-indigo-100 rounded-full">PORTAL V2.0</div>
-                <h2 className="text-4xl font-extrabold text-slate-800 mb-3 tracking-tight">Bienvenido al Portal de Solicitudes</h2>
-                <p className="text-slate-600 mb-10 text-lg leading-relaxed max-w-3xl">Esta herramienta está diseñada para estandarizar nuestras solicitudes y ahorrar tiempo. Selecciona el trámite a realizar en el menú lateral.</p>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <div className="p-6 bg-gradient-to-br from-blue-50 to-white rounded-2xl border border-blue-100/50 shadow-sm flex flex-col items-center text-center transition-transform hover:-translate-y-1"><div className="p-3 bg-blue-100 rounded-xl mb-4"><FileText className="w-8 h-8 text-blue-600" /></div><h3 className="font-bold text-slate-800">Cero Errores</h3></div>
-                  <div className="p-6 bg-gradient-to-br from-emerald-50 to-white rounded-2xl border border-emerald-100/50 shadow-sm flex flex-col items-center text-center transition-transform hover:-translate-y-1"><div className="p-3 bg-emerald-100 rounded-xl mb-4"><TrendingUp className="w-8 h-8 text-emerald-600" /></div><h3 className="font-bold text-slate-800">Más Rápido</h3></div>
-                  <div className="p-6 bg-gradient-to-br from-amber-50 to-white rounded-2xl border border-amber-100/50 shadow-sm flex flex-col items-center text-center transition-transform hover:-translate-y-1"><div className="p-3 bg-amber-100 rounded-xl mb-4"><Calculator className="w-8 h-8 text-amber-600" /></div><h3 className="font-bold text-slate-800">Cálculos Exactos</h3></div>
-                  <div className="p-6 bg-gradient-to-br from-purple-50 to-white rounded-2xl border border-purple-100/50 shadow-sm flex flex-col items-center text-center transition-transform hover:-translate-y-1"><div className="p-3 bg-purple-100 rounded-xl mb-4"><Database className="w-8 h-8 text-purple-600" /></div><h3 className="font-bold text-slate-800">Conectado a BD</h3></div>
+              <div className="bg-white/80 backdrop-blur-xl p-8 md:p-10 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                  <div>
+                    <div className="inline-flex items-center justify-center px-3 py-1 mb-3 text-xs font-bold tracking-wide text-indigo-600 bg-indigo-100 rounded-full">PORTAL V2.0</div>
+                    <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 tracking-tight">Panel de Control Global</h2>
+                    <p className="text-slate-500 mt-2">Visión en tiempo real de la proyección de ventas de todos los equipos.</p>
+                  </div>
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 shadow-sm min-w-[200px]">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Avance Global</p>
+                    <div className="flex items-end gap-2">
+                      <span className="text-3xl font-black text-indigo-600">{globalStats.goal > 0 ? (globalStats.actual / globalStats.goal * 100).toFixed(1) : 0}%</span>
+                    </div>
+                  </div>
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                  <div className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
+                    <p className="text-sm font-bold text-slate-500 mb-1">Meta Global</p>
+                    <p className="text-2xl font-black text-slate-800">${formatCurrency(globalStats.goal)}</p>
+                  </div>
+                  <div className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center border-l-4 border-l-emerald-500">
+                    <p className="text-sm font-bold text-slate-500 mb-1">Colocación Actual</p>
+                    <p className="text-2xl font-black text-emerald-600">${formatCurrency(globalStats.actual)}</p>
+                  </div>
+                  <div className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center border-l-4 border-l-amber-500">
+                    <p className="text-sm font-bold text-slate-500 mb-1">Brecha (Falta)</p>
+                    <p className="text-2xl font-black text-amber-600">${formatCurrency(Math.max(0, globalStats.goal - globalStats.actual))}</p>
+                  </div>
+                  <div className="p-6 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl shadow-md shadow-indigo-200 flex flex-col justify-center text-white">
+                    <p className="text-sm font-bold text-indigo-200 mb-1">Total Equipos</p>
+                    <p className="text-2xl font-black">{String(globalStats.teams.length)}</p>
+                  </div>
+                </div>
+
+                <h3 className="text-lg font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">Rendimiento por Equipo</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[400px] overflow-y-auto pr-2 pb-4">
+                  {globalStats.teams.map((t, idx) => (
+                    <div key={t.name} className="bg-slate-50 p-5 rounded-xl border border-slate-100">
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="font-bold text-slate-700 flex items-center">
+                          <span className="w-6 h-6 rounded bg-slate-200 text-slate-500 flex items-center justify-center text-xs mr-2">{idx + 1}</span>
+                          {String(t.name)}
+                        </span>
+                        <span className="text-xs font-bold bg-white px-2 py-1 rounded text-slate-600 shadow-sm">{t.percent.toFixed(1)}%</span>
+                      </div>
+                      <div className="w-full bg-slate-200 rounded-full h-2 mb-3 overflow-hidden">
+                        <div className="bg-indigo-500 h-2 rounded-full transition-all duration-1000" style={{ width: `${Math.min(t.percent, 100)}%` }}></div>
+                      </div>
+                      <div className="flex justify-between text-xs font-semibold text-slate-500">
+                        <span>Actual: ${formatCurrency(t.actual)}</span>
+                        <span>Meta: ${formatCurrency(t.goal)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
               </div>
             </div>
           )}
@@ -1254,9 +1500,12 @@ export default function App() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
                     <Input label="Nombre del Referido" name="nombreReferido" value={formLlamada.nombreReferido} onChange={handleLlamadaChange} placeholder="Ej. Maria Fernanda Ramos Escobar" />
-                    <Input label="Carnet (CI) Referido" name="ciReferido" value={formLlamada.ciReferido} onChange={handleLlamadaChange} placeholder="Ej. C2604002026" />
+                    <Input label="Número de Contrato" name="contratoReferido" value={formLlamada.contratoReferido} onChange={handleLlamadaChange} placeholder="Ej. C2604002026" />
                   </div>
-                  <Input label="Hora para la llamada" name="horaLlamada" value={formLlamada.horaLlamada} onChange={handleLlamadaChange} placeholder="Ej. 16:00 PM" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
+                    <Input label="Celular del Referido" name="celularReferido" value={formLlamada.celularReferido} onChange={handleLlamadaChange} placeholder="Ej. 77712345" />
+                    <Input label="Hora para la llamada" name="horaLlamada" value={formLlamada.horaLlamada} onChange={handleLlamadaChange} placeholder="Ej. 16:00 PM" />
+                  </div>
 
                   <div className="mt-6 mb-4 pb-2 border-b border-slate-100">
                     <h3 className="text-sm font-bold text-slate-800">Datos del Cliente Beneficiaria</h3>
@@ -1271,7 +1520,7 @@ export default function App() {
                     title="Validación Llamada" 
                     text={generarTextoLlamadaCelular()} 
                     htmlContent={generarHtmlLlamada()} 
-                    subject={`Solicitud de validación llamada Cliente referido: ${formLlamada.nombreReferido || 'NOMBRE'}, ${formLlamada.ciReferido || 'CI'}`} 
+                    subject={`Solicitud de validación llamada Cliente referido: ${formLlamada.nombreReferido || 'NOMBRE'}, ${formLlamada.contratoReferido || 'CONTRATO'}`} 
                     fixedDestinoLabel="Olivia Mendoza Duran"
                     fixedDestinoEmail="omendoza@celina.com.bo"
                     ccEmails="elizarraga@celina.com.bo, aperez@celina.com.bo"
@@ -1469,17 +1718,25 @@ export default function App() {
                         className="w-full px-3 py-1.5 mt-1 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 bg-white font-medium"
                       >
                         {Object.keys(EQUIPOS_ASESORES).map(equipo => (
-                          <option key={equipo} value={equipo}>{equipo}</option>
+                          <option key={equipo} value={equipo}>{String(equipo)}</option>
                         ))}
                       </select>
                     </div>
                     <div className="w-full sm:w-40">
                       <label className="block text-xs font-bold text-slate-500 uppercase">Semana del (Lunes)</label>
-                      <input type="date" value={formProyeccion.fechaInicio} onChange={(e) => setFormProyeccion({...formProyeccion, fechaInicio: e.target.value})} className="w-full px-3 py-1.5 mt-1 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 bg-white" />
+                      <input type="date" value={formProyeccion.fechaInicio} onChange={(e) => {
+                        const newState = {...formProyeccion, fechaInicio: e.target.value};
+                        setFormProyeccion(newState);
+                        saveProyeccionState(newState);
+                      }} className="w-full px-3 py-1.5 mt-1 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 bg-white" />
                     </div>
                     <div className="w-full sm:w-40">
                       <label className="block text-xs font-bold text-slate-500 uppercase">Objetivo Mes</label>
-                      <input type="number" value={formProyeccion.objetivoMensual} onChange={(e) => setFormProyeccion({...formProyeccion, objetivoMensual: parseFloat(e.target.value) || 0})} className="w-full px-3 py-1.5 mt-1 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 bg-white" />
+                      <input type="number" value={formProyeccion.objetivoMensual} onChange={(e) => {
+                        const newState = {...formProyeccion, objetivoMensual: parseFloat(e.target.value) || 0};
+                        setFormProyeccion(newState);
+                        saveProyeccionState(newState);
+                      }} className="w-full px-3 py-1.5 mt-1 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 bg-white" />
                     </div>
                   </div>
 
@@ -1493,23 +1750,23 @@ export default function App() {
                           <th colSpan="5" className="bg-[#92d050] text-black p-2 border border-slate-400 text-center">Proyectos</th>
                         </tr>
                         <tr>
-                          {[0,1,2,3,4,5,6].map(d => <th key={d} className="bg-[#002060] text-white p-2 border border-slate-400 text-center font-normal">{formatDiaMes(formProyeccion.fechaInicio, d)}</th>)}
-                          {NOMBRES_PROYECTOS_PROYECCION.map(p => <th key={p} className="bg-[#92d050] text-black p-2 border border-slate-400 text-center font-normal">{p}</th>)}
+                          {[0,1,2,3,4,5,6].map(d => <th key={d} className="bg-[#002060] text-white p-2 border border-slate-400 text-center font-normal">{String(formatDiaMes(formProyeccion.fechaInicio, d))}</th>)}
+                          {NOMBRES_PROYECTOS_PROYECCION.map(p => <th key={p} className="bg-[#92d050] text-black p-2 border border-slate-400 text-center font-normal">{String(p)}</th>)}
                         </tr>
                       </thead>
                       <tbody>
-                        {formProyeccion.asesores.map((asesor, i) => (
+                        {Array.isArray(formProyeccion.asesores) && formProyeccion.asesores.map((asesor, i) => (
                           <tr key={i} className="hover:bg-blue-50/50">
-                            <td className="p-2 border border-slate-300 font-medium text-slate-800">{i+1}. {asesor.nombre}</td>
+                            <td className="p-2 border border-slate-300 font-medium text-slate-800">{i+1}. {String(asesor.nombre || '')}</td>
                             <td className="p-1 border border-slate-300">
                               <input type="number" value={asesor.colAct === 0 ? '' : asesor.colAct} onChange={(e) => updateAsesorProyeccion(i, 'colAct', e.target.value)} className="w-full min-w-[60px] p-1 text-right text-xs bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded" placeholder="0" />
                             </td>
-                            {asesor.dias.map((diaVal, dIdx) => (
+                            {Array.isArray(asesor.dias) && asesor.dias.map((diaVal, dIdx) => (
                               <td key={dIdx} className="p-1 border border-slate-300">
                                 <input type="number" value={diaVal === 0 ? '' : diaVal} onChange={(e) => updateAsesorArrayProyeccion(i, 'dias', dIdx, e.target.value)} className="w-full min-w-[40px] p-1 text-center text-xs bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded" placeholder="-" />
                               </td>
                             ))}
-                            {asesor.proy.map((proyVal, pIdx) => (
+                            {Array.isArray(asesor.proy) && asesor.proy.map((proyVal, pIdx) => (
                               <td key={pIdx} className="p-1 border border-slate-300 bg-green-50/30">
                                 <input type="number" value={proyVal === 0 ? '' : proyVal} onChange={(e) => updateAsesorArrayProyeccion(i, 'proy', pIdx, e.target.value)} className="w-full min-w-[40px] p-1 text-center text-xs font-bold text-slate-700 bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded" placeholder="0" />
                               </td>
@@ -1519,21 +1776,24 @@ export default function App() {
                       </tbody>
                     </table>
                   </div>
-                  <div className="p-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 flex items-center">
-                     <Info className="w-4 h-4 mr-2 flex-shrink-0" /> Los totales por semana, por mes y promedios se calculan solos en la vista previa a la derecha.
+                  <div className="p-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 flex items-center justify-between">
+                     <span className="flex items-center"><Info className="w-4 h-4 mr-2 flex-shrink-0" /> Todo lo que se escriba aquí se guardará en la Nube y todos podrán verlo.</span>
+                     <button onClick={handlePrintPDF} className="flex items-center text-indigo-600 hover:text-indigo-800 font-bold bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-200 transition-all"><Download className="w-4 h-4 mr-1.5" /> Exportar PDF</button>
                   </div>
                 </div>
 
-                <div className="w-full min-w-0">
-                  <ResultCard 
-                    title="Proyección Semanal" 
-                    text={generarTextoProyeccionCelular()} 
-                    htmlContent={generarHtmlProyeccion()}
-                    subject={`Proyección Semanal Equipo ${formProyeccion.equipo} - ${formatDiaMes(formProyeccion.fechaInicio, 0)}`} 
-                    supervisorDestino={supervisorDestino}
-                    setSupervisorDestino={setSupervisorDestino}
-                    showTextPlain={true}
-                  />
+                <div className="w-full min-w-0 flex flex-col h-full">
+                  <div className="flex-1">
+                    <ResultCard 
+                      title="Proyección Semanal" 
+                      text={String(generarTextoProyeccionCelular())} 
+                      htmlContent={String(generarHtmlProyeccion())}
+                      subject={`Proyección Semanal Equipo ${String(formProyeccion.equipo)} - ${String(formatDiaMes(formProyeccion.fechaInicio, 0))}`} 
+                      supervisorDestino={supervisorDestino}
+                      setSupervisorDestino={setSupervisorDestino}
+                      showTextPlain={true}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -1561,273 +1821,4 @@ export default function App() {
           {/* FORM: REENVÍO FIRMA DIGITAL */}
           {activeTab === 'reenvio' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><FileSignature className="w-6 h-6 mr-2 text-blue-600" /> Reenvío Firma Digital</h2></div>
-              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-[1.2fr_1fr] 2xl:grid-cols-[1.5fr_1fr] gap-8 w-full">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 border-b border-slate-100 pb-3 gap-3">
-                    <h3 className="text-lg font-medium text-slate-800">Listado de Contratos</h3>
-                    <div className="w-full sm:w-1/2 md:w-1/3">
-                      <select value={formReenvio.proyecto} onChange={(e) => setFormReenvio({...formReenvio, proyecto: e.target.value})} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
-                        {PROYECTOS.map(p => <option key={p} value={p}>{p}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                  <div className="mb-4"><Input label="Nombre del Asesor" name="asesor" value={formReenvio.asesor} onChange={(e) => setFormReenvio({...formReenvio, asesor: e.target.value})} placeholder="Ej. Oscar Saravia" /></div>
-                  <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 w-full">
-                    {formReenvio.contratos.map((contrato, index) => (
-                      <div key={index} className="p-4 bg-slate-50 border border-slate-200 rounded-xl relative group w-full">
-                        {formReenvio.contratos.length > 1 && (<button onClick={() => eliminarContratoReenvio(index)} className="absolute -top-2 -right-2 bg-red-100 text-red-600 p-1.5 rounded-full z-10"><Trash2 className="w-4 h-4" /></button>)}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3 w-full">
-                          <div className="w-full"><label className="block text-xs font-semibold text-slate-600 mb-1">Nro. Contrato</label><input type="text" value={contrato.nroContrato} onChange={(e) => handleReenvioChange(index, 'nroContrato', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm bg-white" /></div>
-                          <div className="w-full"><label className="block text-xs font-semibold text-slate-600 mb-1">Carnet (CI)</label><input type="text" value={contrato.ci} onChange={(e) => handleReenvioChange(index, 'ci', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm bg-white" /></div>
-                        </div>
-                        <div className="mb-3 w-full"><label className="block text-xs font-semibold text-slate-600 mb-1">Nombre del Cliente</label><input type="text" value={contrato.cliente} onChange={(e) => handleReenvioChange(index, 'cliente', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm uppercase bg-white" /></div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full">
-                          <div className="flex flex-col w-full"><label className="text-xs text-slate-500 mb-1">UV:</label><input type="text" value={contrato.uv} onChange={(e) => handleReenvioChange(index, 'uv', e.target.value)} className="w-full px-2.5 py-1 border rounded text-sm bg-white" /></div>
-                          <div className="flex flex-col w-full"><label className="text-xs text-slate-500 mb-1">Mzn:</label><input type="text" value={contrato.manzano} onChange={(e) => handleReenvioChange(index, 'manzano', e.target.value)} className="w-full px-2.5 py-1 border rounded text-sm bg-white" /></div>
-                          <div className="flex flex-col w-full"><label className="text-xs text-slate-500 mb-1">Lote:</label><input type="text" value={contrato.lote} onChange={(e) => handleReenvioChange(index, 'lote', e.target.value)} className="w-full px-2.5 py-1 border rounded text-sm bg-white" /></div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <button onClick={agregarContratoReenvio} className="mt-4 w-full flex items-center justify-center py-3 border-2 border-dashed rounded-xl text-slate-600 hover:text-blue-600 font-medium text-sm transition-colors"><Plus className="w-4 h-4 mr-1" /> Añadir otro contrato</button>
-                </div>
-                <div className="w-full min-w-0"><ResultCard title="Reenvío Firma Digital" text={generarTextoReenvioCelular()} htmlContent={generarHtmlReenvio()} subject={`Solicitud Reenvío de Correo Firma Digital - ${formReenvio.proyecto}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
-              </div>
-            </div>
-          )}
-
-          {/* FORM: DESCUENTO CAMPAÑAS */}
-          {activeTab === 'descuento' && (() => {
-            const { porcentajeCuota, montoCuotaNum } = calcularDescuento();
-            const nomProyectoFinal = formDescuento.proyecto === 'OTRO...' ? (formDescuento.proyectoManual || 'PROYECTO MANUAL') : formDescuento.proyecto;
-            return (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
-                <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
-                  <h2 className="text-2xl font-bold text-slate-800 flex items-center"><Tag className="w-6 h-6 mr-2 text-blue-600" /> Descuentos Campañas</h2>
-                  
-                  {/* BOTÓN TOGGLE BÚSQUEDA INTELIGENTE / MANUAL */}
-                  <div className="bg-slate-200/60 p-1 rounded-full inline-flex self-start sm:self-auto">
-                    <button 
-                      onClick={() => setFormDescuento({...formDescuento, modoBusqueda: 'inteligente'})}
-                      disabled={formDescuento.proyecto === 'OTRO...'}
-                      className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center ${formDescuento.modoBusqueda === 'inteligente' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-500 hover:text-slate-700'} disabled:opacity-40`}
-                    >
-                      <Search className="w-3.5 h-3.5 mr-1.5" /> Automático
-                    </button>
-                    <button 
-                      onClick={() => setFormDescuento({...formDescuento, modoBusqueda: 'manual'})}
-                      className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center ${formDescuento.modoBusqueda === 'manual' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
-                    >
-                      <Edit3 className="w-3.5 h-3.5 mr-1.5" /> Manual
-                    </button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-[1.3fr_1fr] 2xl:grid-cols-[1.5fr_1fr] gap-8 w-full">
-                  <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5 w-full">
-                      <div className="w-full">
-                        <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Proyecto</label>
-                        <select name="proyecto" value={formDescuento.proyecto} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm text-sm">
-                          {PROYECTOS.map(p => <option key={p} value={p}>{p.toUpperCase()}</option>)}
-                        </select>
-                      </div>
-                      <div className="w-full">
-                        <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Modalidad</label>
-                        <select name="modalidad" value={formDescuento.modalidad} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm text-sm">
-                          <option value="Contado">Al Contado</option>
-                          <option value="Crédito">A Crédito (Plazos)</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {formDescuento.proyecto === 'OTRO...' && (
-                      <div className="mb-5 bg-amber-50/80 p-4 rounded-xl border border-amber-200 shadow-sm w-full">
-                        <h4 className="font-bold text-amber-800 mb-3 text-sm flex items-center"><Edit3 className="w-4 h-4 mr-2" /> Proyecto Manual</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                           <div className="w-full">
-                             <label className="block text-xs font-bold text-slate-700 mb-1.5 ml-0.5">Nombre del Proyecto</label>
-                             <input type="text" name="proyectoManual" value={formDescuento.proyectoManual} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-amber-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none bg-white text-sm" placeholder="Ej. Celina VII"/>
-                           </div>
-                           <div className="w-full">
-                             <label className="block text-xs font-bold text-slate-700 mb-1.5 ml-0.5">Descuento a Aplicar</label>
-                             <div className="flex flex-col sm:flex-row w-full gap-2">
-                               <select name="tipoDescuentoManual" value={formDescuento.tipoDescuentoManual} onChange={handleDescuentoChange} className="w-full sm:w-1/2 px-2 py-2.5 border border-amber-200 rounded-xl bg-white text-sm font-semibold focus:ring-2 focus:ring-amber-500 outline-none">
-                                  <option value="porcentaje">% Desc.</option>
-                                  <option value="monto">$ por m²</option>
-                               </select>
-                               <input type="number" name="descuentoManual" value={formDescuento.descuentoManual} onChange={handleDescuentoChange} className="w-full sm:w-1/2 px-3 py-2.5 border border-amber-200 rounded-xl bg-white focus:ring-2 focus:ring-amber-500 outline-none text-sm" placeholder="Ej. 10"/>
-                             </div>
-                           </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {formDescuento.modalidad === 'Crédito' && (
-                      <div className="mb-6 bg-blue-50/50 p-5 rounded-xl border border-blue-100/50 w-full">
-                        <div className="flex flex-col w-full">
-                          <label className="block text-sm font-bold text-slate-700 mb-2 ml-0.5">Ingresar Cuota Inicial</label>
-                          <div className="flex flex-col sm:flex-row w-full gap-3">
-                            <select 
-                              value={formDescuento.modoCuota} 
-                              onChange={(e) => setFormDescuento({...formDescuento, modoCuota: e.target.value, cuota: ''})}
-                              className="flex-1 px-3 py-2.5 border border-blue-200 rounded-xl bg-white text-slate-700 font-semibold focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-                            >
-                              <option value="monto">Monto ($)</option>
-                              <option value="porcentaje">Porcentaje (%)</option>
-                            </select>
-                            <input 
-                              type="number" 
-                              name="cuota" 
-                              value={formDescuento.cuota} 
-                              onChange={handleDescuentoChange} 
-                              placeholder={formDescuento.modoCuota === 'monto' ? "Ej. 1000" : "Ej. 5"}
-                              className="flex-1 px-3 py-2.5 border border-blue-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 outline-none shadow-inner text-sm" 
-                            />
-                            <div className="flex-1 flex items-center justify-center bg-blue-600 text-white rounded-xl font-bold text-sm shadow-sm py-2.5 px-2">
-                              {formDescuento.modoCuota === 'monto' 
-                                ? `${formatCurrency(porcentajeCuota)}%` 
-                                : `$ ${formatCurrency(montoCuotaNum)}`}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* NUEVO BLOQUE: DESCUENTO MANUAL PROYECTOS PROPIOS >= 5% */}
-                    {PROYECTOS_PROPIOS_1.includes(formDescuento.proyecto) && formDescuento.modalidad === 'Crédito' && porcentajeCuota >= 5 && (
-                      <div className="mb-6 bg-purple-50/80 p-4 rounded-xl border border-purple-200 shadow-sm w-full flex flex-col sm:flex-row items-center justify-between gap-4">
-                         <div className="flex-1">
-                           <label className="block text-sm font-bold text-purple-900 mb-1">¡Aplica a Descuento Especial!</label>
-                           <p className="text-xs text-purple-700 leading-tight">Puedes ajustar el % manualmente si lo deseas (Máximo 23%).</p>
-                         </div>
-                         <div className="w-full sm:w-auto flex items-center bg-white rounded-lg border border-purple-200 overflow-hidden">
-                           <input
-                             type="number"
-                             name="descuentoPropiosManual"
-                             value={formDescuento.descuentoPropiosManual}
-                             onChange={handleDescuentoChange}
-                             max="23"
-                             min="0"
-                             className="w-20 px-3 py-2 text-center font-bold text-purple-700 focus:outline-none"
-                           />
-                           <span className="pr-3 font-bold text-purple-500">%</span>
-                         </div>
-                      </div>
-                    )}
-                    
-                    {/* MENÚS CASCADA O MANUAL */}
-                    {formDescuento.modoBusqueda === 'inteligente' && formDescuento.proyecto !== 'OTRO...' ? (
-                      <div className="mb-6 p-5 bg-slate-50 border border-slate-100 rounded-xl w-full">
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
-                          <div className="w-full">
-                            <label className="block text-xs font-bold text-emerald-700 mb-1.5 ml-0.5 uppercase tracking-wide">Elegir UV</label>
-                            <select name="uv" value={formDescuento.uv} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 font-semibold cursor-pointer text-sm">
-                              <option value="">---</option>
-                              {opcionesUV.map(u => <option key={u} value={u}>{u}</option>)}
-                            </select>
-                          </div>
-                          <div className="w-full">
-                            <label className="block text-xs font-bold text-emerald-700 mb-1.5 ml-0.5 uppercase tracking-wide">Elegir MZN</label>
-                            <select name="manzano" value={formDescuento.manzano} onChange={handleDescuentoChange} disabled={!formDescuento.uv} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 font-semibold cursor-pointer disabled:opacity-50 disabled:bg-slate-100 text-sm">
-                              <option value="">---</option>
-                              {opcionesMZN.map(m => <option key={m} value={m}>{m}</option>)}
-                            </select>
-                          </div>
-                          <div className="w-full">
-                            <label className="block text-xs font-bold text-emerald-700 mb-1.5 ml-0.5 uppercase tracking-wide">Elegir Lote</label>
-                            <select name="lote" value={formDescuento.lote} onChange={handleDescuentoChange} disabled={!formDescuento.manzano} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 font-semibold cursor-pointer disabled:opacity-50 disabled:bg-slate-100 text-sm">
-                              <option value="">---</option>
-                              {opcionesLote.map(lt => <option key={lt} value={lt}>{lt}</option>)}
-                            </select>
-                          </div>
-                        </div>
-                        {lotesBD.length === 0 && !cargandoLotes ? (
-                          <p className="text-xs text-amber-600 mt-4 flex items-center">
-                            <AlertTriangle className="w-4 h-4 mr-1 flex-shrink-0" /> Cargando base de datos o archivo lotes.json no encontrado.
-                          </p>
-                        ) : null}
-                        {cargandoLotes ? (
-                          <p className="text-xs text-slate-500 mt-4 flex items-center">
-                             Cargando base de datos segura...
-                          </p>
-                        ) : null}
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-3 w-full">
-                        <Input label="UV" name="uv" value={formDescuento.uv} onChange={handleDescuentoChange} />
-                        <Input label="Manzano" name="manzano" value={formDescuento.manzano} onChange={handleDescuentoChange} />
-                        <Input label="Lote" name="lote" value={formDescuento.lote} onChange={handleDescuentoChange} />
-                      </div>
-                    )}
-
-                    {/* ETIQUETA DE CATEGORÍA (ESTILO DARK) */}
-                    {formDescuento.modoBusqueda === 'inteligente' && formDescuento.categoria ? (
-                      <div className="bg-slate-900 border border-slate-800 text-white p-4 rounded-xl text-xs font-bold mb-5 flex items-center shadow-md uppercase tracking-wider w-full overflow-hidden">
-                        <Tag className="w-4 h-4 mr-2.5 text-cyan-400 flex-shrink-0" />
-                        <span className="text-slate-400 mr-1.5 font-semibold flex-shrink-0">Categoría:</span> 
-                        <span className="truncate">{formDescuento.categoria}</span>
-                      </div>
-                    ) : formDescuento.modoBusqueda === 'manual' ? (
-                      <div className="mb-4 w-full">
-                         <Input label="Categoría (Opcional)" name="categoria" value={formDescuento.categoria} onChange={handleDescuentoChange} placeholder="Ej. AVENIDA PRINCIPAL CON PAVIMENTO" />
-                      </div>
-                    ) : null}
-
-                    {loteAutocompletado && formDescuento.modoBusqueda === 'inteligente' && (
-                      <div className="bg-emerald-50/80 border border-emerald-200 text-emerald-700 p-3 rounded-xl text-xs font-bold mb-5 flex items-center shadow-sm w-full">
-                        <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-500 flex-shrink-0" /> Superficie y Precio autocompletados
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5 w-full">
-                      <Input label="Superficie (M2)" name="m2" value={formDescuento.m2} onChange={handleDescuentoChange} type="number" />
-                      <Input label="Precio Reg. (M2)" name="precioM2" value={formDescuento.precioM2} onChange={handleDescuentoChange} type="number" />
-                    </div>
-                    
-                    <div className="border-t border-slate-100 pt-5 mt-2 w-full"><Input label="Nombre del Asesor" name="asesor" value={formDescuento.asesor} onChange={handleDescuentoChange} /></div>
-                  </div>
-                  <div className="w-full min-w-0"><ResultCard title="Descuento" text={generarTextoDescuentoCelular()} htmlContent={generarHtmlDescuento()} subject={`Solicitud Descuento Campañas - ${nomProyectoFinal} Mz${formDescuento.manzano} Lt${formDescuento.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* FORM: INCREMENTO CUOTA */}
-          {activeTab === 'cuota' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
-              <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><TrendingUp className="w-6 h-6 mr-2 text-blue-600" /> Incremento de Cuota Inicial</h2></div>
-              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
-                    <Input label="Nro. Contrato" name="nroContrato" value={formCuota.nroContrato} onChange={handleCuotaChange} />
-                    <Input label="Carnet (CI)" name="ci" value={formCuota.ci} onChange={handleCuotaChange} />
-                  </div>
-                  <Input label="Nombre del Cliente" name="cliente" value={formCuota.cliente} onChange={handleCuotaChange} />
-                  <div className="mb-5 w-full">
-                    <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Proyecto</label>
-                    <select name="proyecto" value={formCuota.proyecto} onChange={handleCuotaChange} className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm text-sm">{PROYECTOS.map(p => <option key={p} value={p}>{p}</option>)}</select>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full">
-                    <Input label="UV" name="uv" value={formCuota.uv} onChange={handleCuotaChange} />
-                    <Input label="Manzano" name="manzano" value={formCuota.manzano} onChange={handleCuotaChange} />
-                    <Input label="Lote" name="lote" value={formCuota.lote} onChange={handleCuotaChange} />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-2 w-full">
-                    <Input label="Cuota Registrada ($)" name="cuotaInicial" value={formCuota.cuotaInicial} onChange={handleCuotaChange} type="number" />
-                    <Input label="Nueva Cuota ($)" name="nuevaCuota" value={formCuota.nuevaCuota} onChange={handleCuotaChange} type="number" />
-                  </div>
-                  <TextArea label="Motivo del incremento" name="motivo" value={formCuota.motivo} onChange={handleCuotaChange} />
-                  <div className="border-t border-slate-100 pt-5 mt-2 w-full"><Input label="Nombre del Asesor" name="asesorVentas" value={formCuota.asesorVentas} onChange={handleCuotaChange} /></div>
-                </div>
-                <div className="w-full min-w-0"><ResultCard title="Incremento Cuota" text={generarTextoCuotaCelular()} htmlContent={generarHtmlCuota()} subject={`Incremento Cuota Inicial - ${formCuota.proyecto} Mz${formCuota.manzano} Lt${formCuota.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
-              </div>
-            </div>
-          )}
-
-        </div>
-      </div>
-    </div>
-  );
-}
+              <div className="mb-6"><h2 className="text-2xl font-bold text-slate
