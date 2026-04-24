@@ -28,10 +28,10 @@ import {
 } from 'lucide-react';
 
 // --- CONFIGURACIÓN DE DATOS MOCK ---
-const PROYECTOS_CONVENIO_1 = ["Los Jardines", "El Renacer"];
+const PROYECTOS_CONVENIO_1 = ["Los Jardines", "El Renacer", "Rancho Nuevo"];
 const PROYECTOS_CONVENIO_2 = ["Cañaveral"];
 const PROYECTOS_PROPIOS_1 = ["Muyurina", "Santa Fe"];
-const PROYECTOS = ["Cañaveral", "El Renacer", "Los Jardines", "Muyurina", "Santa Fe", "OTRO..."];
+const PROYECTOS = ["Cañaveral", "El Renacer", "Los Jardines", "Muyurina", "Rancho Nuevo", "Santa Fe", "OTRO..."];
 
 const SUPERVISORES = [
   { id: 'mreyes', nombre: 'Mauricio Reyes Suarez', correo: 'mreyes@celina.com.bo', genero: 'M', titulo: 'Lic. Mauricio' },
@@ -59,42 +59,41 @@ const EQUIPOS_ASESORES = {
     { nombre: "Yocelin Salvatierra", colAct: 7500.00 }
   ],
   "Ana Karen Parada Vaca": [
-    { nombre: "Maria Julieta Ortuste", colAct: 106980 },
+    { nombre: "Maria Julieta Ortuste", colAct: 116180 },
     { nombre: "Joan Junior Falon", colAct: 52560 },
+    { nombre: "Jheraldine Endara", colAct: 49301 },
+    { nombre: "Jose Gabriel Padilla", colAct: 47124 },
+    { nombre: "Carla Tatiana Ribera", colAct: 34840 },
     { nombre: "Claudia Alejandra Balcazar", colAct: 27068 },
     { nombre: "Ana Lucia Rivero", colAct: 23164 },
-    { nombre: "Jose Gabriel Padilla", colAct: 17424 },
     { nombre: "Roberto Aguilar", colAct: 7500 },
     { nombre: "Adrian Pedraza", colAct: 0 },
-    { nombre: "Carla Tatiana Ribera", colAct: 0 },
     { nombre: "Helen Jimena Cruz", colAct: 0 },
-    { nombre: "Jheraldine Endara", colAct: 0 },
     { nombre: "Karmiña Alejandra Orrego", colAct: 0 },
     { nombre: "Mary Selva Castro", colAct: 0 },
-    { nombre: "Milenka Ortiz", colAct: 0 },
     { nombre: "Waldo Gomez", colAct: 0 }
   ],
   "Angelica Pinto Sosa": [
+    { nombre: "Miguel Angel Gomez", colAct: 35871 },
+    { nombre: "Emar Leandro Rivas", colAct: 32530 },
+    { nombre: "Widen Barba", colAct: 27660 },
     { nombre: "Jimmy Gonzales", colAct: 24789 },
-    { nombre: "Widen Barba", colAct: 20160 },
-    { nombre: "Miguel Angel Gomez", colAct: 17781 },
     { nombre: "Carla Yessenia Carumetty", colAct: 17214 },
-    { nombre: "Emar Leandro Rivas", colAct: 12850 },
+    { nombre: "Lucy Milena Gomez", colAct: 14471 },
+    { nombre: "Yohana Avila", colAct: 13150 },
+    { nombre: "Herman Jessmany Michel", colAct: 10500 },
     { nombre: "Rocio Peredo", colAct: 9100 },
-    { nombre: "Yohana Avila", colAct: 6900 },
     { nombre: "Maria Gabriela Porcel", colAct: 6900 },
-    { nombre: "Diana Mojica", colAct: 0 },
-    { nombre: "Herman Jessmany Michel", colAct: 0 },
-    { nombre: "Ivana Mendez", colAct: 0 },
-    { nombre: "Javier Uriona", colAct: 0 },
-    { nombre: "Lucy Milena Gomez", colAct: 0 },
+    { nombre: "Javier Uriona", colAct: 6180 },
+    { nombre: "Diana Mojica", colAct: 5799 },
+    { nombre: "Ivana Mendez", colAct: 2850 },
     { nombre: "Paula Alejandra Escalante", colAct: 0 },
     { nombre: "Victoria Roman", colAct: 0 }
   ],
   "Cristhiand Baldiviezo Balcazar": [
-    { nombre: "Miguel Rene Rivero", colAct: 17712 },
-    { nombre: "Sheila Rubi Sheidl", colAct: 16500 },
-    { nombre: "Gabriela Vidal", colAct: 10850 },
+    { nombre: "Miguel Rene Rivero", colAct: 116309 },
+    { nombre: "Sheila Rubi Sheidl", colAct: 58260 },
+    { nombre: "Gabriela Vidal", colAct: 17150 },
     { nombre: "Daniel Mauricio Chipunavi", colAct: 7700 },
     { nombre: "Jimena Mayta", colAct: 7500 },
     { nombre: "Nahely Gonzales", colAct: 6400 },
@@ -106,54 +105,56 @@ const EQUIPOS_ASESORES = {
     { nombre: "Wilson Saucedo", colAct: 0 }
   ],
   "Fernando Jose Almanza Urquiza": [
+    { nombre: "Blanca Merving Cuellar", colAct: 40861 },
     { nombre: "Laura Ximena Vallejos", colAct: 30240 },
     { nombre: "Karina Mercedes Molina", colAct: 22409 },
+    { nombre: "Hilda Mendoza", colAct: 19008 },
     { nombre: "Diana Perez", colAct: 13709 },
-    { nombre: "Hilda Mendoza", colAct: 10368 },
-    { nombre: "Blanca Merving Cuellar", colAct: 0 },
-    { nombre: "Renata Veronica Guzman", colAct: 0 }
+    { nombre: "Renata Veronica Guzman", colAct: 8064 }
   ],
   "Jorge Justiniano Senseve": [
-    { nombre: "Marvin Negrette", colAct: 36770 },
-    { nombre: "Juan Pablo Vaca", colAct: 30841 },
-    { nombre: "Lino Flores", colAct: 19600 },
-    { nombre: "Freddy Fernando Delgadillo", colAct: 15550 },
+    { nombre: "German Suarez", colAct: 74160 },
+    { nombre: "Lino Flores", colAct: 68780 },
+    { nombre: "Marvin Negrette", colAct: 47331 },
+    { nombre: "Juan Pablo Vaca", colAct: 37591 },
+    { nombre: "Luis Gustavo Huarachi", colAct: 33608 },
+    { nombre: "Daniela Eguez", colAct: 32802 },
+    { nombre: "Freddy Fernando Delgadillo", colAct: 21550 },
+    { nombre: "Ariel Justiniano", colAct: 19680 },
+    { nombre: "Juan Carlos Choque", colAct: 10150 },
     { nombre: "Carlos Alberto Chavez", colAct: 7800 },
-    { nombre: "German Suarez", colAct: 6000 },
     { nombre: "Alejandra Montero", colAct: 0 },
-    { nombre: "Ariel Justiniano", colAct: 0 },
-    { nombre: "Daniela Eguez", colAct: 0 },
     { nombre: "Gustavo Adolfo Mendez", colAct: 0 },
     { nombre: "Jose Fernando Ortiz", colAct: 0 },
-    { nombre: "Juan Carlos Choque", colAct: 0 },
-    { nombre: "Luis Gustavo Huarachi", colAct: 0 },
     { nombre: "Melissa Padilla", colAct: 0 }
   ],
   "Rene Valverde Duran": [
-    { nombre: "Luis Enrique Choque", colAct: 221883 },
-    { nombre: "Rodrigo Lara", colAct: 53061 },
+    { nombre: "Luis Enrique Choque", colAct: 309966 },
+    { nombre: "Katherine Albitre", colAct: 86395 },
+    { nombre: "Rodrigo Lara", colAct: 80129 },
+    { nombre: "Andrea Garcia", colAct: 26965 },
     { nombre: "Rosa Maria Hurtado", colAct: 25345 },
-    { nombre: "Katherine Albitre", colAct: 12600 },
-    { nombre: "Andrea Garcia", colAct: 8250 },
     { nombre: "Ghigliola Moreno", colAct: 7200 },
+    { nombre: "Andres Salvatierra", colAct: 0 },
     { nombre: "Carlos Rodas", colAct: 0 },
     { nombre: "Cristian Erick Rocha", colAct: 0 },
     { nombre: "Rodrigo Roca", colAct: 0 },
     { nombre: "Sarah Desiree Cespedes", colAct: 0 }
   ],
   "Roberto Paz Paz": [
-    { nombre: "Wilma Limpias", colAct: 49319 },
+    { nombre: "Anahi Velasco", colAct: 194501 },
+    { nombre: "Wilma Limpias", colAct: 72599 },
+    { nombre: "Yaeli Alvarez", colAct: 66936 },
+    { nombre: "Samuel Rivero", colAct: 46381 },
+    { nombre: "Maria Sendy Quispe", colAct: 27200 },
+    { nombre: "Heydy Laura Gutierrez", colAct: 21314 },
     { nombre: "Ericka Alejandra Fernandez", colAct: 19680 },
     { nombre: "Nancy Rojas", colAct: 19349 },
+    { nombre: "Mariel Becerra", colAct: 18360 },
     { nombre: "Georgina Alexandra Sejas", colAct: 12600 },
-    { nombre: "Yaeli Alvarez", colAct: 9450 },
-    { nombre: "Anahi Velasco", colAct: 0 },
-    { nombre: "Freimi Maely Subirana", colAct: 0 },
-    { nombre: "Heydy Laura Gutierrez", colAct: 0 },
-    { nombre: "Madeline Carballo", colAct: 0 },
-    { nombre: "Maria Sendy Quispe", colAct: 0 },
-    { nombre: "Mariel Becerra", colAct: 0 },
-    { nombre: "Samuel Rivero", colAct: 0 }
+    { nombre: "Freimi Maely Subirana", colAct: 7000 },
+    { nombre: "Armando Nelson Fernandez", colAct: 0 },
+    { nombre: "Luis Fernando Vaca", colAct: 0 }
   ]
 };
 
@@ -506,6 +507,7 @@ export default function App() {
               else if (rawProy.includes("MUYURINA")) proyLimpio = "Muyurina";
               else if (rawProy.includes("SANTA FE")) proyLimpio = "Santa Fe";
               else if (rawProy.includes("CAÑAVERAL") || rawProy.includes("CANAVERAL")) proyLimpio = "Cañaveral";
+              else if (rawProy.includes("RANCHO NUEVO")) proyLimpio = "Rancho Nuevo";
 
               const rawM2 = String(item.superficie || item.SUPERFICIE || item.m2 || '0').replace(/[^0-9.,]/g, '').replace(',', '.');
               const rawPrecio = String(item.precio || item.PRECIO || item.precioM2 || '0').replace(/[^0-9.,]/g, '').replace(',', '.');
@@ -765,7 +767,7 @@ export default function App() {
       if (modalidad === 'Contado') {
         descuentoPorM2 = PROYECTOS_CONVENIO_1.includes(proyecto) ? 3 : 4; 
       } else if (modalidad === 'Crédito') {
-        if (porcentajeCuota >= 3) descuentoPorM2 = 2; 
+        if (porcentajeCuota >= 5) descuentoPorM2 = 2; 
         else if (porcentajeCuota >= 1.5) descuentoPorM2 = 1; 
       }
       descuentoTotal = descuentoPorM2 * m2Num;
@@ -1267,8 +1269,8 @@ export default function App() {
       {/* SIDEBAR */}
       <div className="w-full md:w-72 bg-gradient-to-b from-slate-950 via-slate-900 to-indigo-950 text-white flex flex-col shadow-2xl z-20 shrink-0 border-r border-slate-800/50">
         <div className="p-7">
-          <h1 className="text-2xl font-extrabold tracking-tight flex items-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-300">
-            <Building2 className="w-7 h-7 mr-2 text-blue-400" />
+          <h1 className="text-2xl font-extrabold tracking-tight flex items-center text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.8)]">
+            <Building2 className="w-7 h-7 mr-2 text-white" />
             Portal Asesores
           </h1>
           <p className="text-slate-400 text-xs mt-1.5 font-medium tracking-wide">Herramientas de Gestión</p>
