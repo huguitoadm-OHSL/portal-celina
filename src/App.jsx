@@ -26,8 +26,7 @@ import {
 } from 'lucide-react';
 
 // --- CONTROL DE VERSIÓN DE DATOS ---
-// Cambiar este número fuerza a borrar la caché local antigua y cargar los datos nuevos
-const DATA_VERSION = "v1.1"; 
+const DATA_VERSION = "v1.2"; 
 
 // --- CONFIGURACIÓN DE DATOS MOCK ---
 const PROYECTOS_CONVENIO_1 = ["Los Jardines", "El Renacer", "Rancho Nuevo", "Santa Fe"];
@@ -44,131 +43,35 @@ const SUPERVISORES = [
   { id: 'ropaz', nombre: 'Roberto Paz Paz', correo: 'ropaz@celina.com.bo', genero: 'M', titulo: 'Lic. Roberto' },
   { id: 'rvalverded', nombre: 'Rene Valverde Duran', correo: 'rvalverded@celina.com.bo', genero: 'M', titulo: 'Lic. Rene' },
   { id: 'cbaldiviezo', nombre: 'Cristhiand Baldiviezo Balcazar', correo: 'cbaldiviezo@celina.com.bo', genero: 'M', titulo: 'Lic. Cristhiand' },
-  { id: 'ohsaravia', nombre: 'Oscar Hugo Saravia L.', correo: 'ohsaravia@celina.com.bo', genero: 'M', titulo: 'Lic. Oscar' }
+  { id: 'ohsaravia', nombre: 'Oscar Hugo Saravia L.', correo: 'ohsaravia@celina.com.bo', genero: 'M', titulo: 'Lic. Oscar' },
+  // NUEVOS CORREOS AÑADIDOS
+  { id: 'rvaca', nombre: 'Robert Vaca', correo: 'rvaca@grupopaz.com.bo', genero: 'M', titulo: 'Lic. Robert' },
+  { id: 'cbarretto', nombre: 'Charles Barretto', correo: 'cbarretto@celina.com.bo', genero: 'M', titulo: 'Lic. Charles' },
+  { id: 'uklein', nombre: 'Ulrich Klein Montano', correo: 'uklein@grupopaz.com.bo', genero: 'M', titulo: 'Lic. Ulrich' },
+  { id: 'mfroca', nombre: 'Maria Fernanda Roca Miranda', correo: 'mfroca@celina.com.bo', genero: 'F', titulo: 'Lic. Maria Fernanda' },
+  { id: 'lbakovic', nombre: 'Lucio Bakovic', correo: 'lbakovic@grupopaz.com.bo', genero: 'M', titulo: 'Lic. Lucio' },
+  { id: 'maguilar', nombre: 'Miguel Angel Aguilar A.', correo: 'maguilar@celina.com.bo', genero: 'M', titulo: 'Lic. Miguel Angel' },
+  { id: 'madett', nombre: 'Mario Adett Zamora', correo: 'madett@grupopaz.com.bo', genero: 'M', titulo: 'Lic. Mario' },
+  { id: 'ccastedo', nombre: 'Cristian Daniel Castedo Castedo', correo: 'ccastedo@celina.com.bo', genero: 'M', titulo: 'Lic. Cristian' },
+  { id: 'vchoque', nombre: 'Verenice Choque', correo: 'vchoque@celina.com.bo', genero: 'F', titulo: 'Lic. Verenice' }
 ];
 
 const EQUIPOS_ASESORES = {
   "Oscar Saravia": [
-    { nombre: "Carlos Enrique Calderon", colAct: 13829.20 },
-    { nombre: "Daniel Angulo Maldonado", colAct: 62640.00 },
-    { nombre: "Ely Gonzales Garcia", colAct: 9100.00 },
-    { nombre: "Gloriana Silva Almenda", colAct: 12899.99 },
-    { nombre: "Jaime F. Rios Castro", colAct: 17280.00 },
-    { nombre: "Marioly Viñolas", colAct: 0 },
-    { nombre: "Marisol Urgel Pizarro", colAct: 58146.00 },
-    { nombre: "Merly Mendez Hurtado", colAct: 7750.00 },
-    { nombre: "Rodrigo Rojas Siles", colAct: 0 },
-    { nombre: "Yocelin Salvatierra", colAct: 7500.00 }
-  ],
-  "Ana Karen Parada Vaca": [
-    { nombre: "Maria Julieta Ortuste", colAct: 116180 },
-    { nombre: "Joan Junior Falon", colAct: 52560 },
-    { nombre: "Jheraldine Endara", colAct: 49301 },
-    { nombre: "Jose Gabriel Padilla", colAct: 47124 },
-    { nombre: "Carla Tatiana Ribera", colAct: 34840 },
-    { nombre: "Claudia Alejandra Balcazar", colAct: 27068 },
-    { nombre: "Ana Lucia Rivero", colAct: 23164 },
-    { nombre: "Roberto Aguilar", colAct: 7500 },
-    { nombre: "Adrian Pedraza", colAct: 0 },
-    { nombre: "Helen Jimena Cruz", colAct: 0 },
-    { nombre: "Karmiña Alejandra Orrego", colAct: 0 },
-    { nombre: "Mary Selva Castro", colAct: 0 },
-    { nombre: "Waldo Gomez", colAct: 0 }
-  ],
-  "Angelica Pinto Sosa": [
-    { nombre: "Widen Barba", colAct: 82860 },
-    { nombre: "Miguel Angel Gomez", colAct: 35871 },
-    { nombre: "Emar Leandro Rivas", colAct: 32530 },
-    { nombre: "Jimmy Gonzales", colAct: 24789 },
-    { nombre: "Carla Yessenia Carumetty", colAct: 17214 },
-    { nombre: "Lucy Milena Gomez", colAct: 14471 },
-    { nombre: "Yohana Avila", colAct: 13150 },
-    { nombre: "Herman Jessmany Michel", colAct: 10500 },
-    { nombre: "Rocio Peredo", colAct: 9100 },
-    { nombre: "Maria Gabriela Porcel", colAct: 6900 },
-    { nombre: "Javier Uriona", colAct: 6180 },
-    { nombre: "Diana Mojica", colAct: 5799 },
-    { nombre: "Ivana Mendez", colAct: 2850 },
-    { nombre: "Paula Alejandra Escalante", colAct: 0 },
-    { nombre: "Victoria Roman", colAct: 0 }
-  ],
-  "Cristhiand Baldiviezo Balcazar": [
-    { nombre: "Miguel Rene Rivero", colAct: 116309 },
-    { nombre: "Sheila Rubi Sheidl", colAct: 58260 },
-    { nombre: "Wilson Saucedo", colAct: 27840 },
-    { nombre: "Gabriela Vidal", colAct: 17150 },
-    { nombre: "Daniel Mauricio Chipunavi", colAct: 7700 },
-    { nombre: "Jimena Mayta", colAct: 7500 },
-    { nombre: "Nahely Gonzales", colAct: 6400 },
-    { nombre: "Lider Cabral", colAct: 5750 },
-    { nombre: "Ana Karla Castro", colAct: 0 },
-    { nombre: "Carlos Gaston Camacho", colAct: 0 },
-    { nombre: "Delfy Rios", colAct: 0 },
-    { nombre: "Oscar Andres Cupary", colAct: 0 }
-  ],
-  "Fernando Jose Almanza Urquiza": [
-    { nombre: "Blanca Merving Cuellar", colAct: 40861 },
-    { nombre: "Laura Ximena Vallejos", colAct: 30240 },
-    { nombre: "Karina Mercedes Molina", colAct: 22409 },
-    { nombre: "Hilda Mendoza", colAct: 19008 },
-    { nombre: "Diana Perez", colAct: 13709 },
-    { nombre: "Renata Veronica Guzman", colAct: 8064 }
-  ],
-  "Jorge Justiniano Senseve": [
-    { nombre: "German Suarez", colAct: 74160 },
-    { nombre: "Lino Flores", colAct: 68780 },
-    { nombre: "Marvin Negrette", colAct: 47331 },
-    { nombre: "Juan Pablo Vaca", colAct: 37591 },
-    { nombre: "Luis Gustavo Huarachi", colAct: 33608 },
-    { nombre: "Daniela Eguez", colAct: 32802 },
-    { nombre: "Freddy Fernando Delgadillo", colAct: 21550 },
-    { nombre: "Ariel Justiniano", colAct: 19680 },
-    { nombre: "Juan Carlos Choque", colAct: 10150 },
-    { nombre: "Carlos Alberto Chavez", colAct: 7800 },
-    { nombre: "Alejandra Montero", colAct: 0 },
-    { nombre: "Gustavo Adolfo Mendez", colAct: 0 },
-    { nombre: "Jose Fernando Ortiz", colAct: 0 },
-    { nombre: "Melissa Padilla", colAct: 0 }
-  ],
-  "Rene Valverde Duran": [
-    { nombre: "Luis Enrique Choque", colAct: 309966 },
-    { nombre: "Katherine Albitre", colAct: 86395 },
-    { nombre: "Rodrigo Lara", colAct: 80129 },
-    { nombre: "Andrea Garcia", colAct: 26965 },
-    { nombre: "Rosa Maria Hurtado", colAct: 25345 },
-    { nombre: "Ghigliola Moreno", colAct: 7200 },
-    { nombre: "Andres Salvatierra", colAct: 0 },
-    { nombre: "Carlos Rodas", colAct: 0 },
-    { nombre: "Cristian Erick Rocha", colAct: 0 },
-    { nombre: "Rodrigo Roca", colAct: 0 },
-    { nombre: "Sarah Desiree Cespedes", colAct: 0 }
-  ],
-  "Roberto Paz Paz": [
-    { nombre: "Anahi Velasco", colAct: 194501 },
-    { nombre: "Wilma Limpias", colAct: 72599 },
-    { nombre: "Yaeli Alvarez", colAct: 66936 },
-    { nombre: "Samuel Rivero", colAct: 46381 },
-    { nombre: "Maria Sendy Quispe", colAct: 27200 },
-    { nombre: "Heydy Laura Gutierrez", colAct: 21314 },
-    { nombre: "Ericka Alejandra Fernandez", colAct: 19680 },
-    { nombre: "Nancy Rojas", colAct: 19349 },
-    { nombre: "Mariel Becerra", colAct: 18360 },
-    { nombre: "Georgina Alexandra Sejas", colAct: 12600 },
-    { nombre: "Freimi Maely Subirana", colAct: 7000 },
-    { nombre: "Armando Nelson Fernandez", colAct: 0 },
-    { nombre: "Luis Fernando Vaca", colAct: 0 }
+    { nombre: "Carlos Enrique Calderon", colAct: 6899.99 },
+    { nombre: "Daniel Angulo Maldonado", colAct: 0 },
+    { nombre: "Ely Gonzales Garcia", colAct: 0 },
+    { nombre: "Gloriana Silva Almenda", colAct: 13200.00 }, // 6600 + 6600
+    { nombre: "Jaime F. Rios Castro", colAct: 0 },
+    { nombre: "Marisol Urgel Pizarro", colAct: 10200.00 },
+    { nombre: "Merly Mendez Hurtado", colAct: 0 },
+    { nombre: "Rodrigo Rojas Siles", colAct: 9668.66 },
+    { nombre: "Yocelin Salvatierra", colAct: 0 }
   ]
 };
 
 const OBJETIVOS_MENSUALES = {
-  "Oscar Saravia": 250000,
-  "Ana Karen Parada Vaca": 515000,
-  "Angelica Pinto Sosa": 515000,
-  "Cristhiand Baldiviezo Balcazar": 515000,
-  "Fernando Jose Almanza Urquiza": 160000,
-  "Jorge Justiniano Senseve": 515000,
-  "Rene Valverde Duran": 515000,
-  "Roberto Paz Paz": 515000
+  "Oscar Saravia": 350000
 };
 
 const NOMBRES_PROYECTOS_PROYECCION = ["Muyurina", "Renacer", "Santa Fe", "Rancho Nuevo", "Jardines"];
@@ -178,6 +81,9 @@ const formatCurrency = (val) => {
   const numericVal = Number(val) || 0;
   return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numericVal);
 };
+
+const formatVacio = (val) => val === 0 ? '-' : formatCurrency(val);
+const formatDias = (val) => val === 0 ? '-' : val;
 
 const obtenerSaludoTiempo = () => {
   const hora = new Date().getHours();
@@ -239,6 +145,8 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
         div.style.position = 'fixed';
         div.style.pointerEvents = 'none';
         div.style.opacity = '0';
+        div.style.backgroundColor = '#ffffff';
+        div.style.color = '#000000';
         document.body.appendChild(div);
 
         const range = document.createRange();
@@ -280,6 +188,30 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
     
     setTimeout(() => {
       window.location.href = mailtoLink;
+    }, 400);
+  };
+
+  const handleOpenGmail = () => {
+    handleCopy();
+    const to = fixedDestinoEmail || supervisorDestino;
+    const ccQuery = ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : '';
+    const instruccionPega = "(Por favor, borra este texto, mantén presionado aquí y selecciona 'Pegar' para insertar la tabla con su formato oficial)";
+    const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${encodeURIComponent(subject)}${ccQuery}&body=${encodeURIComponent(instruccionPega)}`;
+    
+    setTimeout(() => {
+      window.open(gmailLink, '_blank');
+    }, 400);
+  };
+
+  const handleOpenOutlook = () => {
+    handleCopy();
+    const to = fixedDestinoEmail || supervisorDestino;
+    const ccQuery = ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : '';
+    const instruccionPega = "(Por favor, borra este texto, mantén presionado aquí y selecciona 'Pegar' para insertar la tabla con su formato oficial)";
+    const outlookLink = `https://outlook.office.com/mail/deeplink/compose?to=${to}&subject=${encodeURIComponent(subject)}${ccQuery}&body=${encodeURIComponent(instruccionPega)}`;
+    
+    setTimeout(() => {
+      window.open(outlookLink, '_blank');
     }, 400);
   };
 
@@ -339,13 +271,30 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
           {copied ? '¡Copiado Exitosamente!' : 'Copiar Formato PC'}
         </button>
         {showTextPlain && (
-          <button
-            onClick={handleOpenEmailApp}
-            className="flex-1 flex items-center justify-center py-3 px-4 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-900 hover:to-black text-white rounded-xl font-bold transition-all shadow-md shadow-slate-900/20 whitespace-nowrap"
-          >
-            <Mail className="w-4 h-4 mr-2" />
-            Copiar y Abrir Correo
-          </button>
+          <div className="flex-1 flex flex-col gap-2">
+            <button
+              onClick={handleOpenEmailApp}
+              className="w-full flex items-center justify-center py-2 px-4 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-900 hover:to-black text-white rounded-xl font-bold transition-all shadow-md shadow-slate-900/20 whitespace-nowrap text-sm"
+              title="Abrir en la aplicación de correo predeterminada del sistema"
+            >
+              <Mail className="w-4 h-4 mr-2" />
+              App de Correo (Por defecto)
+            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={handleOpenGmail}
+                className="flex-1 flex items-center justify-center py-2 px-2 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transition-all shadow-md text-xs whitespace-nowrap"
+              >
+                Abrir en Gmail
+              </button>
+              <button
+                onClick={handleOpenOutlook}
+                className="flex-1 flex items-center justify-center py-2 px-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all shadow-md text-xs whitespace-nowrap"
+              >
+                Abrir en Outlook
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>
@@ -769,14 +718,17 @@ export default function App() {
       if (modalidad === 'Contado') {
         porcentaje = 30; 
       } else if (modalidad === 'Crédito') {
-        // Lógica Fuerte: Si la cuota es 5% o más (Sin importar la categoría)
+        // Lógica Fuerte: Si la cuota es 1.5% o más, permite edición (máximos ajustables)
         if (porcentajeCuota >= 5) {
           const maxDesc = 23;
           let inputDesc = parseFloat(formDescuento.descuentoPropiosManual);
           if (isNaN(inputDesc)) inputDesc = maxDesc;
           porcentaje = Math.max(0, Math.min(inputDesc, maxDesc));
         } else if (porcentajeCuota >= 1.5) {
-          porcentaje = 20; 
+          const maxDesc = 20;
+          let inputDesc = parseFloat(formDescuento.descuentoPropiosManual);
+          if (isNaN(inputDesc)) inputDesc = maxDesc;
+          porcentaje = Math.max(0, Math.min(inputDesc, maxDesc));
         }
       }
       descuentoTotal = vc * (porcentaje / 100);
@@ -903,7 +855,7 @@ export default function App() {
     const beneficio = calcularBeneficioRecompra();
     const { saludo, nombrePila } = obtenerDatosSupervisor();
     return `
-    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 1200px; line-height: 1.5; text-align: left;">
+    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 1200px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()},</p>
       <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${nombrePila} por favor su ayuda con el c&oacute;digo de pago por recompra de este cliente, le toca pagar su cuota el <strong>${formRecompra.fechaPago || '[FECHA PAGO]'}</strong> muchas gracias de antemano:</p>
       
@@ -992,8 +944,10 @@ export default function App() {
         sumTotalProySemanal += sumDias;
         sumTotalColMes += totalColMes;
 
-        const formatVacio = (val) => val === 0 ? '-' : formatCurrency(val);
-        const formatDias = (val) => val === 0 ? '-' : val;
+        // EVALUACIÓN DE PRODUCTIVIDAD (>= 25,000)
+        const isProductivo = totalColMes >= 25000;
+        const rowBgStyle = isProductivo ? 'background-color: #d1fae5;' : 'background-color: #ffffff;';
+        const textColor = isProductivo ? '#065f46' : '#000000';
 
         filasAsesoresHtml += `
           <tr>
@@ -1003,7 +957,7 @@ export default function App() {
             ${Array.isArray(asesor.dias) ? asesor.dias.map(d => `<td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><font color="#000000">${formatDias(Number(d)||0)}</font></td>`).join('') : ''}
             ${Array.isArray(asesor.proy) ? asesor.proy.map(p => `<td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><font color="#000000"><b>${Number(p)||0}</b></font></td>`).join('') : ''}
             <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap;"><font color="#000000"><b>${formatVacio(sumDias)}</b></font></td>
-            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap;"><font color="#000000"><b>${formatVacio(totalColMes)}</b></font></td>
+            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; ${rowBgStyle} white-space: nowrap;"><font color="${textColor}"><b>${formatVacio(totalColMes)}</b></font></td>
             <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><font color="#000000"></font></td>
           </tr>
         `;
@@ -1017,7 +971,7 @@ export default function App() {
     const porcentajeFin = objMensual ? (sumTotalColMes / objMensual) * 100 : 0;
 
     return `
-    <div style="font-family: Arial, sans-serif; font-size: 13px; color: #333333; text-align: left;">
+    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 13px; color: #333333; text-align: left;">
       <p>${obtenerSaludoTiempo()}</p>
       <p>${saludo} ${nombrePila},</p>
       <p>Adjunto el consolidado de proyecci&oacute;n de ventas semanal del equipo correspondiente a la semana actual.</p>
@@ -1082,7 +1036,7 @@ export default function App() {
 
   const generarHtmlLlamada = () => {
     return `
-    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
       <p style="margin-top: 0; margin-bottom: 25px;">Estimada Olivia,</p>
       <p style="margin-bottom: 20px;">Por favor su ayuda con la validaci&oacute;n de llamada de este cliente referido, el cliente menciona que tendr&aacute; tiempo de contestar hoy a las <strong>${formLlamada.horaLlamada || '[HORA]'}</strong>, por favor pido la ayuda de tu equipo para que la puedan llamar a esa hora:</p>
@@ -1107,7 +1061,7 @@ export default function App() {
     });
 
     return `
-    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
       <p style="margin-top: 0; margin-bottom: 20px;">${saludo} ${nombrePila},</p>
       <p style="margin-bottom: 20px;">Por favor tu ayuda adicionando a estos ${cant} beneficiarios al seguro de vida de esta venta, detallo todo a continuaci&oacute;n:</p>
@@ -1131,7 +1085,7 @@ export default function App() {
   const generarHtmlFisico = () => {
     const { saludo, titulo } = obtenerDatosSupervisor();
     return `
-    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
       <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${titulo},</p>
       <p style="margin-bottom: 20px;">Por medio de la presente, solicito el cambio de contrato digital a f&iacute;sico para el siguiente cliente:</p>
@@ -1155,14 +1109,14 @@ export default function App() {
     let condicionTexto = formDescuento.modalidad === 'Crédito' ? `con cuota inicial del ${formatCurrency(porcentajeCuota)}% venta a plazos` : `venta al contado`;
 
     return `
-    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #1e293b; max-width: 650px; line-height: 1.5; text-align: left;">
+    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #1e293b; max-width: 650px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
       <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${titulo},</p>
       <p style="margin-bottom: 20px;">Por favor le solicito mediante el presente correo, la aplicaci&oacute;n del descuento correspondiente a la campa&ntilde;a vigente del proyecto ${nomProyecto}: ${descuentoTexto} ${condicionTexto}:</p>
 
       <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-family: Arial, sans-serif; overflow: hidden; text-align: left;">
         <tr><td style="padding: 15px; border-bottom: 1px solid #e2e8f0; background-color: #f8fafc;">
-             <table width="100%" cellpadding="0" cellspacing="0"><tr><td style="color: #334155; font-size: 13px; font-weight: bold; letter-spacing: 1px;">&#128195; RESUMEN DE DESCUENTOS</td><td align="right"><span style="background-color: #d1fae5; color: #047857; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">ACTIVO</span></td></tr></table>
+              <table width="100%" cellpadding="0" cellspacing="0"><tr><td style="color: #334155; font-size: 13px; font-weight: bold; letter-spacing: 1px;">&#128195; RESUMEN DE DESCUENTOS</td><td align="right"><span style="background-color: #d1fae5; color: #047857; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">ACTIVO</span></td></tr></table>
           </td></tr>
         <tr><td style="padding: 15px;">
             <table width="100%" cellpadding="0" cellspacing="0"><tr>
@@ -1214,7 +1168,7 @@ export default function App() {
   const generarHtmlCuota = () => {
     const { saludo, titulo } = obtenerDatosSupervisor();
     return `
-    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
       <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${titulo},</p>
       <p style="margin-bottom: 20px;">Por favor su autorizaci&oacute;n para proceder con la anulaci&oacute;n del contrato actual del cliente <strong>${formCuota.cliente || '[Nombre del Cliente]'}</strong> y realizar un reingreso. El motivo de esta gesti&oacute;n es que el cliente desea incrementar significativamente su cuota inicial para reducir sus pagos mensuales.</p>
@@ -1240,7 +1194,7 @@ export default function App() {
     });
     const esMultiple = formReenvio.contratos.length > 1;
     return `
-    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
       <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${nombrePila},</p>
       <p style="margin-bottom: 20px;">Te escribo para solicitar tu apoyo habilitando nuevamente el env&iacute;o del correo para la firma digital de ${esMultiple ? "los siguientes contratos" : "el siguiente contrato"}. Debido a un error involuntario por parte de ${esMultiple ? "los clientes" : "el cliente"}, el proceso no se pudo completar en la primera instancia.</p>
@@ -1649,8 +1603,12 @@ export default function App() {
                         </tr>
                       </thead>
                       <tbody>
-                        {Array.isArray(formProyeccion.asesores) && formProyeccion.asesores.map((asesor, i) => (
-                          <tr key={i} className="hover:bg-blue-50/50">
+                        {Array.isArray(formProyeccion.asesores) && formProyeccion.asesores.map((asesor, i) => {
+                          const totalColMes = (Number(asesor.colAct) || 0) + (Array.isArray(asesor.dias) ? asesor.dias.reduce((a,b)=>a+b,0) : 0);
+                          const isProductivo = totalColMes >= 25000;
+                          
+                          return (
+                          <tr key={i} className={`hover:bg-blue-50/50 ${isProductivo ? 'bg-emerald-50/30' : ''}`}>
                             <td className="p-2 border border-slate-300 font-medium text-slate-800">{i+1}. {String(asesor.nombre || '')}</td>
                             <td className="p-1 border border-slate-300">
                               <input type="number" value={asesor.colAct === 0 ? '' : asesor.colAct} onChange={(e) => updateAsesorProyeccion(i, 'colAct', e.target.value)} className="w-full min-w-[60px] p-1 text-right text-xs bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded" placeholder="0" />
@@ -1666,12 +1624,12 @@ export default function App() {
                               </td>
                             ))}
                           </tr>
-                        ))}
+                        )})}
                       </tbody>
                     </table>
                   </div>
                   <div className="p-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 flex items-center justify-between">
-                     <span className="flex items-center"><Info className="w-4 h-4 mr-2 flex-shrink-0" /> Los datos se guardan de forma local en tu navegador.</span>
+                     <span className="flex items-center"><Info className="w-4 h-4 mr-2 flex-shrink-0" /> Los datos se guardan de forma local en tu navegador. Si el asesor supera los $25,000 en el correo aparecerá en color verde.</span>
                   </div>
                 </div>
 
@@ -1848,12 +1806,12 @@ export default function App() {
                       </div>
                     )}
 
-                    {/* NUEVO BLOQUE: DESCUENTO MANUAL PROYECTOS PROPIOS >= 5% */}
-                    {PROYECTOS_PROPIOS_1.includes(formDescuento.proyecto) && formDescuento.modalidad === 'Crédito' && porcentajeCuota >= 5 && (
+                    {/* NUEVO BLOQUE: DESCUENTO MANUAL PROYECTOS PROPIOS >= 1.5% */}
+                    {PROYECTOS_PROPIOS_1.includes(formDescuento.proyecto) && formDescuento.modalidad === 'Crédito' && porcentajeCuota >= 1.5 && (
                       <div className="mb-6 bg-purple-50/80 p-4 rounded-xl border border-purple-200 shadow-sm w-full flex flex-col sm:flex-row items-center justify-between gap-4">
                          <div className="flex-1">
                            <label className="block text-sm font-bold text-purple-900 mb-1">¡Aplica a Descuento Especial!</label>
-                           <p className="text-xs text-purple-700 leading-tight">Puedes ajustar el % manualmente si lo deseas (Máximo 23%).</p>
+                           <p className="text-xs text-purple-700 leading-tight">Puedes ajustar el % manualmente si lo deseas (Máximo {porcentajeCuota >= 5 ? '23' : '20'}%).</p>
                          </div>
                          <div className="w-full sm:w-auto flex items-center bg-white rounded-lg border border-purple-200 overflow-hidden">
                            <input
@@ -1861,7 +1819,7 @@ export default function App() {
                              name="descuentoPropiosManual"
                              value={formDescuento.descuentoPropiosManual}
                              onChange={handleDescuentoChange}
-                             max="23"
+                             max={porcentajeCuota >= 5 ? "23" : "20"}
                              min="0"
                              className="w-20 px-3 py-2 text-center font-bold text-purple-700 focus:outline-none"
                            />
