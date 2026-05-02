@@ -221,8 +221,10 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       
       if (isMobile) {
-        // En celular: Abre obligatoriamente la aplicación nativa de Microsoft Outlook
-        window.location.href = `ms-outlook://compose?to=${to}&subject=${subjectEnc}${ccQuery}&body=${bodyEnc}`;
+        // En celular: Usamos el enlace oficial web de Office 365. Es 100% seguro, no da "error de dirección",
+        // y el mismo navegador detecta si tienes la app de Outlook instalada para redirigirte a ella.
+        const outlookWebLink = `https://outlook.office.com/mail/deeplink/compose?to=${to}&subject=${subjectEnc}${ccQuery}&body=${bodyEnc}`;
+        window.open(outlookWebLink, '_blank');
       } else {
         // En PC: Abre el programa de Outlook de escritorio (vía mailto)
         window.location.href = `mailto:${to}?subject=${subjectEnc}${ccQuery}&body=${bodyEnc}`;
