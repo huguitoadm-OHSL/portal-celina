@@ -295,16 +295,16 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
               <Mail className="w-4 h-4 mr-2" />
               App de Correo (Por defecto)
             </button>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={handleOpenGmail}
-                className="flex-1 flex items-center justify-center py-2 px-2 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transition-all shadow-md text-xs whitespace-nowrap"
+                className="flex items-center justify-center py-2 px-2 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transition-all shadow-md text-xs whitespace-nowrap"
               >
                 Abrir en Gmail
               </button>
               <button
                 onClick={handleOpenOutlook}
-                className="flex-1 flex items-center justify-center py-2 px-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all shadow-md text-xs whitespace-nowrap"
+                className="flex items-center justify-center py-2 px-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all shadow-md text-xs whitespace-nowrap"
               >
                 App Outlook
               </button>
@@ -821,8 +821,11 @@ export default function App() {
     const nomProyecto = formDescuento.proyecto === 'OTRO...' ? (formDescuento.proyectoManual || 'PROYECTO MANUAL') : formDescuento.proyecto;
     let condicionTexto = formDescuento.modalidad === 'Crédito' ? `con cuota inicial del ${formatCurrency(porcentajeCuota)}% venta a plazos` : `venta al contado`;
     const catStr = formDescuento.categoria ? String(formDescuento.categoria).toUpperCase() : '';
+    
+    const requiereAutorizacion = formDescuento.modalidad === 'Crédito' && porcentajeCuota >= 1.5 && porcentajeCuota < 5;
+    const badgeText = requiereAutorizacion ? `\n🚨 *REQUIERE AUTORIZACIÓN: Bajada de Cuota Inicial al 1.5% (Categoría Calle)*\n` : '';
 
-    return `👋 ${obtenerSaludoTiempo()}\n${saludo} ${titulo},\n\nPor favor le solicito la aplicación del descuento de la campaña vigente del proyecto *${nomProyecto}*:\n\n*📌 DATOS DEL LOTE*\n📐 Superficie: ${formDescuento.m2 || '0'} m²\n💵 Precio M2 Normal: $ ${formatCurrency(formDescuento.precioM2 || 0)}\n💰 *Precio Original: $ ${formatCurrency(vc)}*\n\n*🏷️ APLICACIÓN DE CAMPAÑA*\n✅ Condición: ${descuentoTexto} ${condicionTexto}\n🔥 *Descuento Total: -$ ${formatCurrency(descuentoTotal)}*\n\n*✨ PRECIO FINAL PROMOCIÓN ✨*\n➡️ *Precio Final: $ ${formatCurrency(nuevoPrecioTotal)}*\n➡️ *Precio M2 Final: $ ${formatCurrency(nuevoPrecioM2)}*\n\n*📍 UBICACIÓN*\nUV: ${formDescuento.uv || 'SN'} | MZN: ${formDescuento.manzano || '---'} | LT: ${formDescuento.lote || '---'}\n${catStr ? `🏢 Categoría: ${catStr}\n` : ''}\nQuedo atento a su aprobación para continuar con el proceso de venta.\n\nSaludos cordiales,\n*${formDescuento.asesor || 'Nombre del Asesor'}*`;
+    return `👋 ${obtenerSaludoTiempo()}\n${saludo} ${titulo},${badgeText}\nPor favor le solicito la aplicación del descuento de la campaña vigente del proyecto *${nomProyecto}*:\n\n*📌 DATOS DEL LOTE*\n📐 Superficie: ${formDescuento.m2 || '0'} m²\n💵 Precio M2 Normal: $ ${formatCurrency(formDescuento.precioM2 || 0)}\n💰 *Precio Original: $ ${formatCurrency(vc)}*\n\n*🏷️ APLICACIÓN DE CAMPAÑA*\n✅ Condición: ${descuentoTexto} ${condicionTexto}\n🔥 *Descuento Total: -$ ${formatCurrency(descuentoTotal)}*\n\n*✨ PRECIO FINAL PROMOCIÓN ✨*\n➡️ *Precio Final: $ ${formatCurrency(nuevoPrecioTotal)}*\n➡️ *Precio M2 Final: $ ${formatCurrency(nuevoPrecioM2)}*\n\n*📍 UBICACIÓN*\nUV: ${formDescuento.uv || 'SN'} | MZN: ${formDescuento.manzano || '---'} | LT: ${formDescuento.lote || '---'}\n${catStr ? `🏢 Categoría: ${catStr}\n` : ''}\nQuedo atento a su aprobación para continuar con el proceso de venta.\n\nSaludos cordiales,\n*${formDescuento.asesor || 'Nombre del Asesor'}*`;
   };
 
   const generarTextoCuotaCelular = () => {
@@ -1175,10 +1178,16 @@ export default function App() {
     const nomProyecto = formDescuento.proyecto === 'OTRO...' ? (formDescuento.proyectoManual || 'PROYECTO MANUAL') : formDescuento.proyecto;
     let condicionTexto = formDescuento.modalidad === 'Crédito' ? `con cuota inicial del ${formatCurrency(porcentajeCuota)}% venta a plazos` : `venta al contado`;
 
+    const requiereAutorizacion = formDescuento.modalidad === 'Crédito' && porcentajeCuota >= 1.5 && porcentajeCuota < 5;
+    const badgeHtml = requiereAutorizacion 
+       ? `<div style="background-color: #fee2e2; color: #991b1b; padding: 10px 14px; border-radius: 6px; font-size: 13px; font-weight: bold; margin-bottom: 15px; border: 1px solid #f87171;">&#9888; REQUIERE AUTORIZACI&Oacute;N: Bajada de Cuota Inicial al 1.5% (Categor&iacute;a Calle)</div>` 
+       : '';
+
     return `
     <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #1e293b; max-width: 650px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
-      <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${titulo},</p>
+      <p style="margin-top: 0; margin-bottom: 20px;">${saludo} ${titulo},</p>
+      ${badgeHtml}
       <p style="margin-bottom: 20px;">Por favor le solicito mediante el presente correo, la aplicaci&oacute;n del descuento correspondiente a la campa&ntilde;a vigente del proyecto ${nomProyecto}: ${descuentoTexto} ${condicionTexto}:</p>
 
       <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-family: Arial, sans-serif; overflow: hidden; text-align: left;">
@@ -1891,6 +1900,13 @@ export default function App() {
           {activeTab === 'descuento' && (() => {
             const { porcentajeCuota, montoCuotaNum } = calcularDescuento();
             const nomProyectoFinal = formDescuento.proyecto === 'OTRO...' ? (formDescuento.proyectoManual || 'PROYECTO MANUAL') : formDescuento.proyecto;
+            
+            // Lógica inteligente para el asunto del correo
+            let asuntoDescuento = `Solicitud Descuento Campañas - ${nomProyectoFinal} UV:${formDescuento.uv} Mz:${formDescuento.manzano} Lt:${formDescuento.lote}`;
+            if (formDescuento.modalidad === 'Crédito' && porcentajeCuota >= 1.5 && porcentajeCuota < 5) {
+              asuntoDescuento += ` - AUTORIZACIÓN PARA BAJAR LA CUOTA INICIAL AL 1.5% CATEGORÍA CALLE`;
+            }
+
             return (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
                 <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
@@ -2078,7 +2094,7 @@ export default function App() {
                     
                     <div className="border-t border-slate-100 pt-5 mt-2 w-full"><Input label="Nombre del Asesor" name="asesor" value={formDescuento.asesor} onChange={handleDescuentoChange} /></div>
                   </div>
-                  <div className="w-full min-w-0"><ResultCard title="Descuento" text={generarTextoDescuentoCelular()} htmlContent={generarHtmlDescuento()} subject={`Solicitud Descuento Campañas - ${nomProyectoFinal} UV:${formDescuento.uv} Mz:${formDescuento.manzano} Lt:${formDescuento.lote} - AUTORIZACIÓN PARA BAJAR LA CUOTA INICIAL AL 1.5% CATEGORÍA CALLE`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
+                  <div className="w-full min-w-0"><ResultCard title="Descuento" text={generarTextoDescuentoCelular()} htmlContent={generarHtmlDescuento()} subject={asuntoDescuento} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
                 </div>
               </div>
             );
