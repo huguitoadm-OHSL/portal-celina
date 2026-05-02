@@ -22,7 +22,12 @@ import {
   Edit3,
   PhoneCall,
   Shield,
-  Repeat
+  Repeat,
+  UserMinus,
+  UserPlus,
+  ClipboardCheck,
+  UserCheck,
+  Users
 } from 'lucide-react';
 
 // --- CONTROL DE VERSIÓN DE DATOS ---
@@ -53,7 +58,8 @@ const SUPERVISORES = [
   { id: 'maguilar', nombre: 'Miguel Angel Aguilar A.', correo: 'maguilar@celina.com.bo', genero: 'M', titulo: 'Lic. Miguel Angel' },
   { id: 'madett', nombre: 'Mario Adett Zamora', correo: 'madett@grupopaz.com.bo', genero: 'M', titulo: 'Lic. Mario' },
   { id: 'ccastedo', nombre: 'Cristian Daniel Castedo Castedo', correo: 'ccastedo@celina.com.bo', genero: 'M', titulo: 'Lic. Cristian' },
-  { id: 'vchoque', nombre: 'Verenice Choque', correo: 'vchoque@celina.com.bo', genero: 'F', titulo: 'Lic. Verenice' }
+  { id: 'vchoque', nombre: 'Verenice Choque', correo: 'vchoque@celina.com.bo', genero: 'F', titulo: 'Lic. Verenice' },
+  { id: 'cmontero', nombre: 'Carolina Montero Araujo', correo: 'cmontero@celina.com.bo', genero: 'F', titulo: 'Lic. Carolina' }
 ];
 
 const EQUIPOS_ASESORES = {
@@ -207,11 +213,20 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
     handleCopy();
     const to = fixedDestinoEmail || supervisorDestino;
     const ccQuery = ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : '';
-    const instruccionPega = "(Por favor, borra este texto, mantén presionado aquí y selecciona 'Pegar' para insertar la tabla con su formato oficial)";
-    const outlookLink = `https://outlook.office.com/mail/deeplink/compose?to=${to}&subject=${encodeURIComponent(subject)}${ccQuery}&body=${encodeURIComponent(instruccionPega)}`;
+    const subjectEnc = encodeURIComponent(subject);
+    const bodyEnc = encodeURIComponent("(Por favor, borra este texto, mantén presionado aquí y selecciona 'Pegar' para insertar la tabla con su formato oficial)");
     
     setTimeout(() => {
-      window.open(outlookLink, '_blank');
+      // Detección inteligente para forzar la App correcta según el dispositivo
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        // En celular: Abre obligatoriamente la aplicación nativa de Microsoft Outlook
+        window.location.href = `ms-outlook://compose?to=${to}&subject=${subjectEnc}${ccQuery}&body=${bodyEnc}`;
+      } else {
+        // En PC: Abre el programa de Outlook de escritorio (vía mailto)
+        window.location.href = `mailto:${to}?subject=${subjectEnc}${ccQuery}&body=${bodyEnc}`;
+      }
     }, 400);
   };
 
@@ -291,7 +306,7 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
                 onClick={handleOpenOutlook}
                 className="flex-1 flex items-center justify-center py-2 px-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all shadow-md text-xs whitespace-nowrap"
               >
-                Abrir en Outlook
+                App Outlook
               </button>
             </div>
           </div>
@@ -367,6 +382,26 @@ export default function App() {
     proyecto: 'Los Jardines', asesor: '',
     contratos: [{ nroContrato: '', cliente: '', ci: '', uv: '', manzano: '', lote: '' }]
   });
+
+  // --- NUEVOS ESTADOS RRHH ---
+  const [formRenuncia, setFormRenuncia] = useState({
+    asesor: '', nombre: '', cargo: 'Asesor de Ventas', fechaIngreso: '', fechaRenuncia: '', motivo: ''
+  });
+
+  const [formAltaCRM, setFormAltaCRM] = useState({
+    asesor: '', nombre: '', apPaterno: '', apMaterno: '', ci: '', fechaNacimiento: '', correo: ''
+  });
+
+  const [formEvaluacion, setFormEvaluacion] = useState({
+    asesor: '', nombre: '', punteo: '', calificacion: 'Muy Bueno', lotes: '', monto: '', leads: '', visitas: '', observaciones: ''
+  });
+
+  const [formPostulante, setFormPostulante] = useState({
+    asesor: '', nombre: '', referidor: ''
+  });
+
+  // --- NUEVO ESTADO PARA MODAL SUMAR VENTA ---
+  const [sumaVentaModal, setSumaVentaModal] = useState({ show: false, index: null, nombre: '', monto: '' });
 
   // --- ESTADO Y SINCRONIZACIÓN PARA PROYECCIÓN ---
   const [equipoSeleccionado, setEquipoSeleccionado] = useState('Oscar Saravia');
@@ -629,6 +664,11 @@ export default function App() {
     }
   };
 
+  const handleRenunciaChange = (e) => setFormRenuncia({ ...formRenuncia, [e.target.name]: e.target.value });
+  const handleAltaCRMChange = (e) => setFormAltaCRM({ ...formAltaCRM, [e.target.name]: e.target.value });
+  const handleEvaluacionChange = (e) => setFormEvaluacion({ ...formEvaluacion, [e.target.name]: e.target.value });
+  const handlePostulanteChange = (e) => setFormPostulante({ ...formPostulante, [e.target.name]: e.target.value });
+
   const handleDescuentoChange = (e) => {
     const { name, value } = e.target;
     setFormDescuento(prev => {
@@ -667,6 +707,16 @@ export default function App() {
     const nuevosAsesores = [...formProyeccion.asesores];
     nuevosAsesores[index][type][arrayIndex] = parseFloat(valStr) || 0;
     saveProyeccionState({ ...formProyeccion, asesores: nuevosAsesores });
+  };
+
+  const confirmarSumaVenta = () => {
+    const montoASumar = parseFloat(sumaVentaModal.monto);
+    if (!isNaN(montoASumar) && montoASumar > 0) {
+      const nuevosAsesores = [...formProyeccion.asesores];
+      nuevosAsesores[sumaVentaModal.index].colAct = (Number(nuevosAsesores[sumaVentaModal.index].colAct) || 0) + montoASumar;
+      saveProyeccionState({ ...formProyeccion, asesores: nuevosAsesores });
+    }
+    setSumaVentaModal({ show: false, index: null, nombre: '', monto: '' });
   };
 
   // --- LÓGICA DE DESCUENTOS CAMPAÑAS ---
@@ -847,6 +897,23 @@ export default function App() {
     texto += `Saludos cordiales.`;
 
     return texto;
+  };
+
+  // --- NUEVOS GENERADORES RRHH (CELULAR) ---
+  const generarTextoRenunciaCelular = () => {
+    return `👋 ${obtenerSaludoTiempo()} estimada Carolina,\n\nPor medio del presente, te hago entrega formal de la carta de renuncia de la Sra./Sr. *${formRenuncia.nombre || '[Nombre]'}*, quien se desempeñaba como *${formRenuncia.cargo || 'Asesor de Ventas'}* desde el pasado ${formRenuncia.fechaIngreso || '[Fecha]'}.\n\nEn su nota, con fecha ${formRenuncia.fechaRenuncia || '[Fecha]'}, la/el asesor/a comunica que su retiro se debe a ${formRenuncia.motivo || '[motivos...]'}. Adjunto el documento escaneado para que se proceda con el trámite correspondiente en el departamento de Recursos Humanos.\n\nQuedo atento a cualquier requerimiento adicional para cerrar este proceso.\n\nSaludos cordiales,\n*${formRenuncia.asesor || 'Oscar Saravia'}*`;
+  };
+
+  const generarTextoAltaCRMCelular = () => {
+    return `👋 ${obtenerSaludoTiempo()}\nEstimada Carolina,\n\nPor medio de la presente, solicito por favor la gestión para la creación del usuario de acceso a los sistemas *CRM y CESI* para el nuevo asesor comercial que se están integrando a mi equipo.\n\nA continuación, detallo los datos personales requeridos de cada uno, basados en sus fichas de ingreso:\n\n*Nombre:* ${formAltaCRM.nombre || '-'}\n*Apellido Paterno:* ${formAltaCRM.apPaterno || '-'}\n*Apellido Materno:* ${formAltaCRM.apMaterno || '-'}\n*Carnet de Identidad:* ${formAltaCRM.ci || '-'}\n*Fecha de Nacimiento:* ${formAltaCRM.fechaNacimiento || '-'}\n*Correo Electrónico:* ${formAltaCRM.correo || '-'}\n\nQuedo atento a la confirmación de las credenciales para poder facilitarle el acceso y que inicie sus gestiones lo antes posible.\nDe antemano, muchas gracias por tu colaboración.\n\nSaludos cordiales,\n*${formAltaCRM.asesor || 'Oscar Saravia'}*`;
+  };
+
+  const generarTextoEvaluacionCelular = () => {
+    return `👋 ${obtenerSaludoTiempo()}.\nEstimada María Fernanda,\n\nEn respuesta a tu correo, adjunto el formulario de evaluación de desempeño debidamente completado del asesor de la sucursal Montero que acaba de finalizar su programa de aprendizaje.\n\nA continuación, comparto un resumen detallado de las observaciones y mis recomendaciones:\n\n*1. ${formEvaluacion.nombre || '[Nombre]'}*\n- *Punteo Total:* ${formEvaluacion.punteo || '0'} (${formEvaluacion.calificacion || 'Muy Bueno'})\n- *Resultados:* ${formEvaluacion.lotes || '0'} lotes vendidos ($${formatCurrency(formEvaluacion.monto)}), ${formEvaluacion.leads || '0'} leads y ${formEvaluacion.visitas || '0'} visitas.\n- *Observaciones y recomendación:* ${formEvaluacion.observaciones || '[Detalles]'}\n\nQuedo a su disposición ante cualquier consulta.\n\nSaludos cordiales,\n*${formEvaluacion.asesor || 'Oscar Hugo Saravia'}*`;
+  };
+
+  const generarTextoPostulanteCelular = () => {
+    return `👋 ${obtenerSaludoTiempo()}\nEstimado Ulrich,\n\nTe adjunto el formulario de entrevista de *${formPostulante.nombre || '[Nombre]'}* para el puesto de Asesor de Ventas. Él llega a nosotros como referido de la asesora ${formPostulante.referidor || '[Nombre]'}.\n\nDespués de realizarle la entrevista y evaluar su perfil, mi recomendación es que proceda. Me gustaría que lo puedan tomar en cuenta para pasarlo a la etapa de capacitación y así poder ir preparándolo para que se integre a la Máquina de Ventas aquí en la sucursal de Montero.\n\nEn el documento adjunto podrás ver el detalle completo de su experiencia, evaluación de competencias y el role play.\n\nCualquier consulta me avisas.\n\nSaludos cordiales,\n*${formPostulante.asesor || 'Oscar Saravia'}*`;
   };
 
   // --- GENERADORES HTML PARA PC ---
@@ -1208,6 +1275,74 @@ export default function App() {
     </div>`;
   };
 
+  // --- NUEVOS GENERADORES RRHH (HTML PC) ---
+  const generarHtmlRenuncia = () => {
+    return `
+    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+      <p style="margin-bottom: 20px;">${obtenerSaludoTiempo()} estimada Carolina,</p>
+      <p style="margin-bottom: 20px;">Por medio del presente, te hago entrega formal de la carta de renuncia de la Sra./Sr. <strong>${formRenuncia.nombre || '[Nombre]'}</strong>, quien se desempe&ntilde;aba como <strong>${formRenuncia.cargo || 'Asesor de Ventas'}</strong> desde el pasado ${formRenuncia.fechaIngreso || '[Fecha]'}.</p>
+      <p style="margin-bottom: 20px;">En su nota, con fecha ${formRenuncia.fechaRenuncia || '[Fecha]'}, la/el asesor/a comunica que su retiro se debe a ${formRenuncia.motivo || '[motivos que le impiden continuar cumpliendo con sus funciones de manera &oacute;ptima]'}. Adjunto el documento escaneado para que se proceda con el tr&aacute;mite correspondiente en el departamento de Recursos Humanos.</p>
+      <p style="margin-bottom: 20px;">Quedo atento a cualquier requerimiento adicional para cerrar este proceso.</p>
+      <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
+      <p style="margin-top: 0; font-weight: bold; color: #333333;">${formRenuncia.asesor || 'Oscar Saravia'}</p>
+    </div>`;
+  };
+
+  const generarHtmlAltaCRM = () => {
+    return `
+    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+      <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
+      <p style="margin-top: 0; margin-bottom: 20px;">Estimada Carolina,</p>
+      <p style="margin-bottom: 20px;">Por medio de la presente, solicito por favor la gesti&oacute;n para la creaci&oacute;n del usuario de acceso a los sistemas <strong>CRM y CESI</strong> para el nuevo asesor comercial que se est&aacute;n integrando a mi equipo.</p>
+      <p style="margin-bottom: 15px;">A continuaci&oacute;n, detallo los datos personales requeridos de cada uno, basados en sus fichas de ingreso:</p>
+      <ul style="margin-bottom: 20px; list-style-type: none; padding-left: 0;">
+        <li style="margin-bottom: 5px;">Nombre: ${formAltaCRM.nombre || '---'}</li>
+        <li style="margin-bottom: 5px;">Apellido Paterno: ${formAltaCRM.apPaterno || '---'}</li>
+        <li style="margin-bottom: 5px;">Apellido Materno: ${formAltaCRM.apMaterno || '---'}</li>
+        <li style="margin-bottom: 5px;">Carnet de Identidad: ${formAltaCRM.ci || '---'}</li>
+        <li style="margin-bottom: 5px;">Fecha de Nacimiento: ${formAltaCRM.fechaNacimiento || '---'}</li>
+        <li style="margin-bottom: 5px;">Correo Electr&oacute;nico: ${formAltaCRM.correo || '---'}</li>
+      </ul>
+      <p style="margin-bottom: 5px;">Quedo atento a la confirmaci&oacute;n de las credenciales para poder facilitarle el acceso y que inicie sus gestiones lo antes posible.</p>
+      <p style="margin-bottom: 20px;">De antemano, muchas gracias por tu colaboraci&oacute;n.</p>
+      <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
+      <p style="margin-top: 0; font-weight: bold; color: #333333;">${formAltaCRM.asesor || 'Oscar Saravia'}</p>
+    </div>`;
+  };
+
+  const generarHtmlEvaluacion = () => {
+    return `
+    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+      <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}.</p>
+      <p style="margin-top: 0; margin-bottom: 20px;">Estimada Mar&iacute;a Fernanda,</p>
+      <p style="margin-bottom: 20px;">En respuesta a tu correo, adjunto el formulario de evaluaci&oacute;n de desempe&ntilde;o debidamente completado del asesor de la sucursal Montero que acaba de finalizar su programa de aprendizaje.</p>
+      <p style="margin-bottom: 15px;">A continuaci&oacute;n, comparto un resumen detallado de las observaciones y mis recomendaciones:</p>
+      <p style="margin-bottom: 10px;"><strong>1. ${formEvaluacion.nombre || '[Nombre Completo]'}</strong></p>
+      <ul style="margin-bottom: 20px; padding-left: 20px;">
+        <li style="margin-bottom: 10px;"><strong>Punteo Total:</strong> ${formEvaluacion.punteo || '0'} (${formEvaluacion.calificacion || 'Muy Bueno'})</li>
+        <li style="margin-bottom: 10px;"><strong>Resultados:</strong> ${formEvaluacion.lotes || '0'} lotes vendidos ($${formatCurrency(formEvaluacion.monto)}), ${formEvaluacion.leads || '0'} leads y ${formEvaluacion.visitas || '0'} visitas.</li>
+        <li style="margin-bottom: 10px;"><strong>Observaciones y recomendaci&oacute;n:</strong> ${formEvaluacion.observaciones || '[Texto de observaciones...]'}</li>
+      </ul>
+      <p style="margin-bottom: 20px;">Quedo a su disposici&oacute;n ante cualquier consulta.</p>
+      <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
+      <p style="margin-top: 0; font-weight: bold; color: #333333;">${formEvaluacion.asesor || 'Oscar Hugo Saravia'}</p>
+    </div>`;
+  };
+
+  const generarHtmlPostulante = () => {
+    return `
+    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+      <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
+      <p style="margin-top: 0; margin-bottom: 25px;">Estimado Ulrich,</p>
+      <p style="margin-bottom: 20px;">Te adjunto el formulario de entrevista de <strong>${formPostulante.nombre || '[Nombre Postulante]'}</strong> para el puesto de Asesor de Ventas. &Eacute;l llega a nosotros como referido de la asesora ${formPostulante.referidor || '[Nombre Referidor]'}.</p>
+      <p style="margin-bottom: 20px;">Despu&eacute;s de realizarle la entrevista y evaluar su perfil, mi recomendaci&oacute;n es que proceda. Me gustar&iacute;a que lo puedan tomar en cuenta para pasarlo a la etapa de capacitaci&oacute;n y as&iacute; poder ir prepar&aacute;ndolo para que se integre a la M&aacute;quina de Ventas aqu&iacute; en la sucursal de Montero.</p>
+      <p style="margin-bottom: 20px;">En el documento adjunto podr&aacute;s ver el detalle completo de su experiencia, evaluaci&oacute;n de competencias y el role play.</p>
+      <p style="margin-bottom: 25px;">Cualquier consulta me avisas.</p>
+      <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
+      <p style="margin-top: 0; font-weight: bold; color: #333333;">${formPostulante.asesor || 'Oscar Saravia'}</p>
+    </div>`;
+  };
+
   return (
     <div className="min-h-screen bg-[#f8fafc] bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] flex flex-col md:flex-row font-sans selection:bg-indigo-100 selection:text-indigo-900">
       
@@ -1244,6 +1379,20 @@ export default function App() {
           </button>
           <button onClick={() => setActiveTab('seguro')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'seguro' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <Shield className="w-5 h-5 mr-3" /> Seguro de Vida
+          </button>
+
+          <div className="pt-5 pb-2"><p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Recursos Humanos (RRHH)</p></div>
+          <button onClick={() => setActiveTab('renuncia')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'renuncia' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+            <UserMinus className="w-5 h-5 mr-3" /> Carta de Renuncia
+          </button>
+          <button onClick={() => setActiveTab('altaCrm')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'altaCrm' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+            <UserPlus className="w-5 h-5 mr-3" /> Alta Usuarios CRM
+          </button>
+          <button onClick={() => setActiveTab('evaluacion')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'evaluacion' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+            <ClipboardCheck className="w-5 h-5 mr-3" /> Evaluación Fin de Mes
+          </button>
+          <button onClick={() => setActiveTab('postulante')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'postulante' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+            <UserCheck className="w-5 h-5 mr-3" /> Postulante Nuevo
           </button>
 
           <div className="pt-5 pb-2"><p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Cotizaciones y Recompras</p></div>
@@ -1611,7 +1760,10 @@ export default function App() {
                           <tr key={i} className={`hover:bg-blue-50/50 ${isProductivo ? 'bg-emerald-50/30' : ''}`}>
                             <td className="p-2 border border-slate-300 font-medium text-slate-800">{i+1}. {String(asesor.nombre || '')}</td>
                             <td className="p-1 border border-slate-300">
-                              <input type="number" value={asesor.colAct === 0 ? '' : asesor.colAct} onChange={(e) => updateAsesorProyeccion(i, 'colAct', e.target.value)} className="w-full min-w-[60px] p-1 text-right text-xs bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded" placeholder="0" />
+                              <div className="flex items-center gap-1">
+                                <input type="number" value={asesor.colAct === 0 ? '' : asesor.colAct} onChange={(e) => updateAsesorProyeccion(i, 'colAct', e.target.value)} className="w-full min-w-[50px] p-1 text-right text-xs bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded" placeholder="0" />
+                                <button onClick={() => setSumaVentaModal({show: true, index: i, nombre: asesor.nombre, monto: ''})} className="p-1.5 bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200 transition-colors shadow-sm" title="Sumar Nueva Venta"><Plus className="w-3.5 h-3.5" /></button>
+                              </div>
                             </td>
                             {Array.isArray(asesor.dias) && asesor.dias.map((diaVal, dIdx) => (
                               <td key={dIdx} className="p-1 border border-slate-300">
@@ -1647,6 +1799,33 @@ export default function App() {
                   </div>
                 </div>
               </div>
+
+              {/* MODAL SUMAR VENTA */}
+              {sumaVentaModal.show && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm px-4">
+                  <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 animate-in zoom-in-95 duration-200">
+                    <h3 className="text-lg font-bold text-slate-800 mb-2">Añadir Nueva Venta</h3>
+                    <p className="text-sm text-slate-500 mb-4">Sumar al acumulado de <strong className="text-slate-700">{sumaVentaModal.nombre}</strong></p>
+                    <div className="mb-5">
+                       <label className="block text-xs font-bold text-slate-700 mb-1.5">Monto de la Venta ($)</label>
+                       <input
+                         type="number"
+                         autoFocus
+                         value={sumaVentaModal.monto}
+                         onChange={(e) => setSumaVentaModal({...sumaVentaModal, monto: e.target.value})}
+                         className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 text-lg font-bold outline-none"
+                         placeholder="Ej. 6600"
+                         onKeyDown={(e) => e.key === 'Enter' && confirmarSumaVenta()}
+                       />
+                    </div>
+                    <div className="flex gap-3">
+                       <button onClick={() => setSumaVentaModal({show: false, index: null, nombre: '', monto: ''})} className="flex-1 px-4 py-2.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Cancelar</button>
+                       <button onClick={confirmarSumaVenta} className="flex-1 px-4 py-2.5 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/30 transition-colors">Sumar Venta</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
             </div>
           )}
 
@@ -1899,7 +2078,7 @@ export default function App() {
                     
                     <div className="border-t border-slate-100 pt-5 mt-2 w-full"><Input label="Nombre del Asesor" name="asesor" value={formDescuento.asesor} onChange={handleDescuentoChange} /></div>
                   </div>
-                  <div className="w-full min-w-0"><ResultCard title="Descuento" text={generarTextoDescuentoCelular()} htmlContent={generarHtmlDescuento()} subject={`Solicitud Descuento Campañas - ${nomProyectoFinal} Mz${formDescuento.manzano} Lt${formDescuento.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
+                  <div className="w-full min-w-0"><ResultCard title="Descuento" text={generarTextoDescuentoCelular()} htmlContent={generarHtmlDescuento()} subject={`Solicitud Descuento Campañas - ${nomProyectoFinal} UV:${formDescuento.uv} Mz:${formDescuento.manzano} Lt:${formDescuento.lote} - AUTORIZACIÓN PARA BAJAR LA CUOTA INICIAL AL 1.5% CATEGORÍA CALLE`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
                 </div>
               </div>
             );
@@ -1933,6 +2112,133 @@ export default function App() {
                   <div className="border-t border-slate-100 pt-5 mt-2 w-full"><Input label="Nombre del Asesor" name="asesorVentas" value={formCuota.asesorVentas} onChange={handleCuotaChange} /></div>
                 </div>
                 <div className="w-full min-w-0"><ResultCard title="Incremento Cuota" text={generarTextoCuotaCelular()} htmlContent={generarHtmlCuota()} subject={`Incremento Cuota Inicial - ${formCuota.proyecto} Mz${formCuota.manzano} Lt${formCuota.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
+              </div>
+            </div>
+          )}
+
+          {/* FORM: RRHH - RENUNCIA */}
+          {activeTab === 'renuncia' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
+              <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><UserMinus className="w-6 h-6 mr-2 text-blue-600" /> Entrega de Carta de Renuncia</h2></div>
+              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
+                  <Input label="Tu Nombre (Remitente)" name="asesor" value={formRenuncia.asesor} onChange={handleRenunciaChange} placeholder="Ej. Oscar Saravia" />
+                  <div className="mt-4 mb-4 pb-2 border-b border-slate-100"><h3 className="text-sm font-bold text-slate-800">Datos de la Renuncia</h3></div>
+                  <Input label="Nombre del Asesor que renuncia" name="nombre" value={formRenuncia.nombre} onChange={handleRenunciaChange} placeholder="Ej. Nataly Heredia B." />
+                  <Input label="Cargo" name="cargo" value={formRenuncia.cargo} onChange={handleRenunciaChange} placeholder="Ej. Asesor de Ventas" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mb-2">
+                    <Input label="Fecha de Ingreso" name="fechaIngreso" value={formRenuncia.fechaIngreso} onChange={handleRenunciaChange} placeholder="Ej. 24 de marzo de 2026" />
+                    <Input label="Fecha de la Nota/Renuncia" name="fechaRenuncia" value={formRenuncia.fechaRenuncia} onChange={handleRenunciaChange} placeholder="Ej. 17 de abril de 2026" />
+                  </div>
+                  <TextArea label="Motivo de la renuncia" name="motivo" value={formRenuncia.motivo} onChange={handleRenunciaChange} placeholder="Ej. Motivos de salud que le impiden continuar..." />
+                </div>
+                <div className="w-full min-w-0">
+                  <ResultCard 
+                    title="Carta de Renuncia" 
+                    text={generarTextoRenunciaCelular()} 
+                    htmlContent={generarHtmlRenuncia()} 
+                    subject={`Entrega de carta de renuncia - ${formRenuncia.nombre || 'Asesor'}`} 
+                    fixedDestinoLabel="Carolina Montero Araujo"
+                    fixedDestinoEmail="cmontero@celina.com.bo"
+                    ccEmails="mfroca@celina.com.bo, mreyes@celina.com.bo, rvaca@grupopaz.com.bo"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* FORM: RRHH - ALTA CRM */}
+          {activeTab === 'altaCrm' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
+              <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><UserPlus className="w-6 h-6 mr-2 text-blue-600" /> Solicitud de Alta de Usuarios CRM y CESI</h2></div>
+              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
+                  <Input label="Tu Nombre (Remitente)" name="asesor" value={formAltaCRM.asesor} onChange={handleAltaCRMChange} placeholder="Ej. Oscar Saravia" />
+                  <div className="mt-4 mb-4 pb-2 border-b border-slate-100"><h3 className="text-sm font-bold text-slate-800">Datos del Nuevo Asesor</h3></div>
+                  <Input label="Nombre(s)" name="nombre" value={formAltaCRM.nombre} onChange={handleAltaCRMChange} placeholder="Ej. DANIEL" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mb-2">
+                    <Input label="Apellido Paterno" name="apPaterno" value={formAltaCRM.apPaterno} onChange={handleAltaCRMChange} placeholder="Ej. ANGULO" />
+                    <Input label="Apellido Materno" name="apMaterno" value={formAltaCRM.apMaterno} onChange={handleAltaCRMChange} placeholder="Ej. MALDONADO" />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mb-2">
+                    <Input label="Carnet de Identidad" name="ci" value={formAltaCRM.ci} onChange={handleAltaCRMChange} placeholder="Ej. 6237199 S/E" />
+                    <Input label="Fecha de Nacimiento" name="fechaNacimiento" value={formAltaCRM.fechaNacimiento} onChange={handleAltaCRMChange} placeholder="Ej. 07 abr 1985" />
+                  </div>
+                  <Input label="Correo Electrónico" name="correo" value={formAltaCRM.correo} onChange={handleAltaCRMChange} placeholder="Ej. danielangulom7@gmail.com" />
+                </div>
+                <div className="w-full min-w-0">
+                  <ResultCard 
+                    title="Alta Usuarios CRM" 
+                    text={generarTextoAltaCRMCelular()} 
+                    htmlContent={generarHtmlAltaCRM()} 
+                    subject={`Solicitud de Alta de Usuarios CRM y CESI – ${formAltaCRM.nombre} ${formAltaCRM.apPaterno} ${formAltaCRM.apMaterno}`.trim()} 
+                    fixedDestinoLabel="Carolina Montero Araujo"
+                    fixedDestinoEmail="cmontero@celina.com.bo"
+                    ccEmails="mfroca@celina.com.bo"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* FORM: RRHH - EVALUACION */}
+          {activeTab === 'evaluacion' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
+              <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><ClipboardCheck className="w-6 h-6 mr-2 text-blue-600" /> Reporte de Finalización (Aprendizaje)</h2></div>
+              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
+                  <Input label="Tu Nombre (Remitente)" name="asesor" value={formEvaluacion.asesor} onChange={handleEvaluacionChange} placeholder="Ej. Oscar Hugo Saravia" />
+                  <div className="mt-4 mb-4 pb-2 border-b border-slate-100"><h3 className="text-sm font-bold text-slate-800">Resultados de la Evaluación</h3></div>
+                  <Input label="Nombre del Asesor Evaluado" name="nombre" value={formEvaluacion.nombre} onChange={handleEvaluacionChange} placeholder="Ej. Jaime Fabricio Rios Castro" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mb-2">
+                    <Input label="Punteo Total" name="punteo" value={formEvaluacion.punteo} onChange={handleEvaluacionChange} placeholder="Ej. 41" type="number" />
+                    <Input label="Calificación (Texto)" name="calificacion" value={formEvaluacion.calificacion} onChange={handleEvaluacionChange} placeholder="Ej. Muy Bueno" />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full mb-2">
+                    <Input label="Lotes Vendidos" name="lotes" value={formEvaluacion.lotes} onChange={handleEvaluacionChange} placeholder="Ej. 9" type="number" />
+                    <Input label="Monto Vendido ($)" name="monto" value={formEvaluacion.monto} onChange={handleEvaluacionChange} placeholder="Ej. 91110" type="number" />
+                    <Input label="Leads" name="leads" value={formEvaluacion.leads} onChange={handleEvaluacionChange} placeholder="Ej. 153" type="number" />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full mb-2">
+                    <Input label="Visitas" name="visitas" value={formEvaluacion.visitas} onChange={handleEvaluacionChange} placeholder="Ej. 7" type="number" />
+                  </div>
+                  <TextArea label="Observaciones y Recomendación" name="observaciones" value={formEvaluacion.observaciones} onChange={handleEvaluacionChange} placeholder={`Ej. Su desempeño ha sido sobresaliente... Solicito su ratificación y la firma de su contrato...`} />
+                </div>
+                <div className="w-full min-w-0">
+                  <ResultCard 
+                    title="Reporte de Evaluación" 
+                    text={generarTextoEvaluacionCelular()} 
+                    htmlContent={generarHtmlEvaluacion()} 
+                    subject={`RE: REPORTE DE FINALIZACION DEL PROGRAMA DE APRENDIZAJE - ${formEvaluacion.nombre || 'Asesor'}`.toUpperCase()} 
+                    fixedDestinoLabel="Maria Fernanda Roca Miranda"
+                    fixedDestinoEmail="mfroca@celina.com.bo"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* FORM: RRHH - POSTULANTE */}
+          {activeTab === 'postulante' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
+              <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><UserCheck className="w-6 h-6 mr-2 text-blue-600" /> Postulante para Capacitación</h2></div>
+              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
+                  <Input label="Tu Nombre (Remitente)" name="asesor" value={formPostulante.asesor} onChange={handlePostulanteChange} placeholder="Ej. Oscar Saravia" />
+                  <div className="mt-4 mb-4 pb-2 border-b border-slate-100"><h3 className="text-sm font-bold text-slate-800">Datos del Postulante</h3></div>
+                  <Input label="Nombre del Postulante" name="nombre" value={formPostulante.nombre} onChange={handlePostulanteChange} placeholder="Ej. Daniel Angulo Maldonado" />
+                  <Input label="Referido por (Nombre Asesor)" name="referidor" value={formPostulante.referidor} onChange={handlePostulanteChange} placeholder="Ej. Marisol Urgel" />
+                </div>
+                <div className="w-full min-w-0">
+                  <ResultCard 
+                    title="Postulante Capacitación" 
+                    text={generarTextoPostulanteCelular()} 
+                    htmlContent={generarHtmlPostulante()} 
+                    subject={`Postulante para capacitación: ${formPostulante.nombre} (Referido de ${formPostulante.referidor})`} 
+                    fixedDestinoLabel="Ulrich Klein Montano"
+                    fixedDestinoEmail="uklein@grupopaz.com.bo"
+                  />
+                </div>
               </div>
             </div>
           )}
