@@ -318,7 +318,6 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
 
 export default function App() {
 
-  // --- FIX PARA PANTALLA COMPLETA ---
   useEffect(() => {
     const root = document.getElementById('root');
     if (root) {
@@ -336,7 +335,6 @@ export default function App() {
   const [supervisorDestino, setSupervisorDestino] = useState(SUPERVISORES[0].correo);
   const [globalStats, setGlobalStats] = useState({ goal: 0, actual: 0, teams: [] });
   
-  // --- ESTADOS PARA LA BASE DE DATOS DE LOTES DESDE JSON ---
   const [lotesBD, setLotesBD] = useState([]);
   const [cargandoLotes, setCargandoLotes] = useState(true);
   const [loteAutocompletado, setLoteAutocompletado] = useState(false);
@@ -383,7 +381,6 @@ export default function App() {
     contratos: [{ nroContrato: '', cliente: '', ci: '', uv: '', manzano: '', lote: '' }]
   });
 
-  // --- NUEVOS ESTADOS RRHH ---
   const [formRenuncia, setFormRenuncia] = useState({
     asesor: '', nombre: '', cargo: 'Asesor de Ventas', fechaIngreso: '', fechaRenuncia: '', motivo: ''
   });
@@ -400,22 +397,16 @@ export default function App() {
     asesor: '', nombre: '', referidor: ''
   });
 
-  // --- NUEVO ESTADO PARA MODAL SUMAR VENTA ---
   const [sumaVentaModal, setSumaVentaModal] = useState({ show: false, index: null, nombre: '', monto: '' });
-
-  // --- ESTADO Y SINCRONIZACIÓN PARA PROYECCIÓN ---
   const [equipoSeleccionado, setEquipoSeleccionado] = useState('Oscar Saravia');
   
-  // VERIFICAR VERSIÓN DE DATOS AL CARGAR
   useEffect(() => {
     const currentVersion = localStorage.getItem('portalAsesores_dataVersion');
     if (currentVersion !== DATA_VERSION) {
-      // Si la versión es antigua o no existe, limpiamos la caché de proyecciones
       Object.keys(EQUIPOS_ASESORES).forEach(team => {
         localStorage.removeItem(`portalAsesores_proyeccion_${team}`);
       });
       localStorage.setItem('portalAsesores_dataVersion', DATA_VERSION);
-      // Forzar recarga de los datos correctos a formProyeccion
       setFormProyeccion({
         equipo: 'Oscar Saravia',
         fechaInicio: new Date().toISOString().split('T')[0],
@@ -448,7 +439,6 @@ export default function App() {
     };
   });
 
-  // Efecto para calcular métricas globales del Dashboard
   useEffect(() => {
     let tGoal = 0;
     let tAct = 0;
@@ -488,7 +478,6 @@ export default function App() {
     setGlobalStats({ goal: tGoal, actual: tAct, teams: tTeams });
   }, [formProyeccion, activeTab]);
 
-  // Efecto para cargar equipo al seleccionarlo
   useEffect(() => {
     const savedData = localStorage.getItem(`portalAsesores_proyeccion_${equipoSeleccionado}`);
     if (savedData && localStorage.getItem('portalAsesores_dataVersion') === DATA_VERSION) {
@@ -510,7 +499,6 @@ export default function App() {
     }
   }, [equipoSeleccionado]);
 
-  // Función para empujar los cambios locales a Storage
   const saveProyeccionState = async (newState) => {
     setFormProyeccion(newState);
     try {
@@ -518,7 +506,6 @@ export default function App() {
     } catch (e) {}
   };
 
-  // --- CARGAR DATOS DESDE EL ARCHIVO JSON AL INICIAR ---
   useEffect(() => {
     const fetchLotes = async () => {
       try {
@@ -567,7 +554,6 @@ export default function App() {
     fetchLotes();
   }, []);
 
-  // --- OBTENER OPCIONES CASCADA (BÚSQUEDA INTELIGENTE) PROTEGIDAS ---
   const safeToLower = (val) => (val === null || val === undefined) ? '' : String(val).toLowerCase();
   
   const pL_filtro = safeToLower(formDescuento.proyecto);
@@ -589,7 +575,6 @@ export default function App() {
     .map(l => l.lote)
   )].filter(val => val !== null && val !== undefined && val !== '').sort((a,b) => String(a).localeCompare(String(b), undefined, {numeric: true}));
 
-  // --- EFECTO DE AUTOCOMPLETADO DE LOTES ---
   useEffect(() => {
     const { proyecto, uv, manzano, lote } = formDescuento;
     if (proyecto && uv && manzano && lote && lotesBD.length > 0) {
@@ -622,8 +607,6 @@ export default function App() {
     }
   }, [formDescuento.proyecto, formDescuento.uv, formDescuento.manzano, formDescuento.lote, lotesBD]);
 
-
-  // --- HANDLERS COMUNES ---
   const handleFisicoChange = (e) => setFormFisico({ ...formFisico, [e.target.name]: e.target.value });
   const handleCuotaChange = (e) => setFormCuota({ ...formCuota, [e.target.name]: e.target.value });
   const handleLlamadaChange = (e) => setFormLlamada({ ...formLlamada, [e.target.name]: e.target.value });
@@ -718,7 +701,6 @@ export default function App() {
     setSumaVentaModal({ show: false, index: null, nombre: '', monto: '' });
   };
 
-  // --- LÓGICA DE DESCUENTOS CAMPAÑAS ---
   const calcularDescuento = () => {
     const { proyecto, modalidad, cuota, modoCuota, m2, precioM2, descuentoManual, tipoDescuentoManual } = formDescuento;
     const m2Num = parseFloat(m2) || 0;
@@ -750,7 +732,6 @@ export default function App() {
          descuentoTexto = descManualNum > 0 ? `$${descManualNum} por m²` : '0';
       }
     } else if (PROYECTOS_CONVENIO_1.includes(proyecto) || PROYECTOS_CONVENIO_2.includes(proyecto)) {
-      // Convenios
       let descuentoPorM2 = 0;
       if (modalidad === 'Contado') {
         descuentoPorM2 = PROYECTOS_CONVENIO_1.includes(proyecto) ? 3 : 4; 
@@ -762,12 +743,10 @@ export default function App() {
       descuentoTexto = descuentoPorM2 > 0 ? `$${descuentoPorM2} por m²` : '0';
 
     } else if (PROYECTOS_PROPIOS_1.includes(proyecto)) {
-      // Propios
       let porcentaje = 0;
       if (modalidad === 'Contado') {
         porcentaje = 30; 
       } else if (modalidad === 'Crédito') {
-        // Lógica Fuerte: Si la cuota es 1.5% o más, permite edición (máximos ajustables)
         if (porcentajeCuota >= 5) {
           const maxDesc = 23;
           let inputDesc = parseFloat(formDescuento.descuentoPropiosManual);
@@ -806,8 +785,6 @@ export default function App() {
     };
   };
 
-  // --- GENERADORES DE TEXTOS PLANOS PARA CELULAR ---
-  
   const generarTextoRecompraCelular = () => {
     const beneficio = calcularBeneficioRecompra();
     const { saludo, nombrePila } = obtenerDatosSupervisor();
@@ -901,7 +878,6 @@ export default function App() {
     return texto;
   };
 
-  // --- NUEVOS GENERADORES RRHH (CELULAR) ---
   const generarTextoRenunciaCelular = () => {
     return `👋 ${obtenerSaludoTiempo()} estimada Carolina,\n\nPor medio del presente, te hago entrega formal de la carta de renuncia de la Sra./Sr. *${formRenuncia.nombre || '[Nombre]'}*, quien se desempeñaba como *${formRenuncia.cargo || 'Asesor de Ventas'}* desde el pasado ${formRenuncia.fechaIngreso || '[Fecha]'}.\n\nEn su nota, con fecha ${formRenuncia.fechaRenuncia || '[Fecha]'}, la/el asesor/a comunica que su retiro se debe a ${formRenuncia.motivo || '[motivos...]'}. Adjunto el documento escaneado para que se proceda con el trámite correspondiente en el departamento de Recursos Humanos.\n\nQuedo atento a cualquier requerimiento adicional para cerrar este proceso.\n\nSaludos cordiales,\n*${formRenuncia.asesor || 'Oscar Saravia'}*`;
   };
@@ -918,8 +894,6 @@ export default function App() {
     return `👋 ${obtenerSaludoTiempo()}\nEstimado Ulrich,\n\nTe adjunto el formulario de entrevista de *${formPostulante.nombre || '[Nombre]'}* para el puesto de Asesor de Ventas. Él llega a nosotros como referido de la asesora ${formPostulante.referidor || '[Nombre]'}.\n\nDespués de realizarle la entrevista y evaluar su perfil, mi recomendación es que proceda. Me gustaría que lo puedan tomar en cuenta para pasarlo a la etapa de capacitación y así poder ir preparándolo para que se integre a la Máquina de Ventas aquí en la sucursal de Montero.\n\nEn el documento adjunto podrás ver el detalle completo de su experiencia, evaluación de competencias y el role play.\n\nCualquier consulta me avisas.\n\nSaludos cordiales,\n*${formPostulante.asesor || 'Oscar Saravia'}*`;
   };
 
-  // --- GENERADORES HTML PARA PC ---
-  
   const generarHtmlRecompra = () => {
     const beneficio = calcularBeneficioRecompra();
     const { saludo, nombrePila } = obtenerDatosSupervisor();
@@ -1013,7 +987,6 @@ export default function App() {
         sumTotalProySemanal += sumDias;
         sumTotalColMes += totalColMes;
 
-        // EVALUACIÓN DE PRODUCTIVIDAD (>= 25,000)
         const isProductivo = totalColMes >= 25000;
         const rowBgStyle = isProductivo ? 'background-color: #d1fae5;' : 'background-color: #ffffff;';
         const textColor = isProductivo ? '#065f46' : '#000000';
@@ -1283,7 +1256,6 @@ export default function App() {
     </div>`;
   };
 
-  // --- NUEVOS GENERADORES RRHH (HTML PC) ---
   const generarHtmlRenuncia = () => {
     return `
     <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
@@ -2263,4 +2235,3 @@ export default function App() {
     </div>
   );
 }
-```eof
