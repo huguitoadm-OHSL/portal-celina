@@ -49,7 +49,6 @@ const SUPERVISORES = [
   { id: 'rvalverded', nombre: 'Rene Valverde Duran', correo: 'rvalverded@celina.com.bo', genero: 'M', titulo: 'Lic. Rene' },
   { id: 'cbaldiviezo', nombre: 'Cristhiand Baldiviezo Balcazar', correo: 'cbaldiviezo@celina.com.bo', genero: 'M', titulo: 'Lic. Cristhiand' },
   { id: 'ohsaravia', nombre: 'Oscar Hugo Saravia L.', correo: 'ohsaravia@celina.com.bo', genero: 'M', titulo: 'Lic. Oscar' },
-  // NUEVOS CORREOS AÑADIDOS
   { id: 'rvaca', nombre: 'Robert Vaca', correo: 'rvaca@grupopaz.com.bo', genero: 'M', titulo: 'Lic. Robert' },
   { id: 'cbarretto', nombre: 'Charles Barretto', correo: 'cbarretto@celina.com.bo', genero: 'M', titulo: 'Lic. Charles' },
   { id: 'uklein', nombre: 'Ulrich Klein Montano', correo: 'uklein@grupopaz.com.bo', genero: 'M', titulo: 'Lic. Ulrich' },
@@ -67,7 +66,7 @@ const EQUIPOS_ASESORES = {
     { nombre: "Carlos Enrique Calderon", colAct: 6899.99 },
     { nombre: "Daniel Angulo Maldonado", colAct: 0 },
     { nombre: "Ely Gonzales Garcia", colAct: 0 },
-    { nombre: "Gloriana Silva Almenda", colAct: 13200.00 }, // 6600 + 6600
+    { nombre: "Gloriana Silva Almenda", colAct: 13200.00 },
     { nombre: "Jaime F. Rios Castro", colAct: 0 },
     { nombre: "Marisol Urgel Pizarro", colAct: 10200.00 },
     { nombre: "Merly Mendez Hurtado", colAct: 0 },
@@ -217,16 +216,19 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
     const bodyEnc = encodeURIComponent("(Por favor, borra este texto, mantén presionado aquí y selecciona 'Pegar' para insertar la tabla con su formato oficial)");
     
     setTimeout(() => {
-      // Detección inteligente para forzar la App correcta según el dispositivo
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      // Detección inteligente de plataforma
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
       
-      if (isMobile) {
-        // En celular: Usamos el enlace oficial web de Office 365. Es 100% seguro, no da "error de dirección",
-        // y el mismo navegador detecta si tienes la app de Outlook instalada para redirigirte a ella.
-        const outlookWebLink = `https://outlook.office.com/mail/deeplink/compose?to=${to}&subject=${subjectEnc}${ccQuery}&body=${bodyEnc}`;
-        window.open(outlookWebLink, '_blank');
+      if (isAndroid) {
+        // En Android: Usa un 'Intent' profundo para forzar la apertura del paquete oficial de Outlook
+        const intentUrl = `intent:${to}?subject=${subjectEnc}${ccQuery}&body=${bodyEnc}#Intent;scheme=mailto;package=com.microsoft.office.outlook;end;`;
+        window.location.href = intentUrl;
+      } else if (isIOS) {
+        // En iOS: Comando directo para iPhone/iPad
+        window.location.href = `ms-outlook://compose?to=${to}&subject=${subjectEnc}${ccQuery}&body=${bodyEnc}`;
       } else {
-        // En PC: Abre el programa de Outlook de escritorio (vía mailto)
+        // En PC: Abre el programa de Outlook de escritorio
         window.location.href = `mailto:${to}?subject=${subjectEnc}${ccQuery}&body=${bodyEnc}`;
       }
     }, 400);
@@ -266,7 +268,7 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
           <Info className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
           <p className="text-xs text-indigo-800 leading-relaxed">
             <strong>Si usas PC:</strong> Haz clic en <b>"Copiar Formato PC"</b> y pega directo en tu gestor de correo.<br/>
-            <strong>Si usas Celular:</strong> Usa <b>"Copiar y Abrir Correo"</b> y sigue las instrucciones.
+            <strong>Si usas Celular:</strong> Usa los botones inferiores para abrir la App con el diseño copiado en memoria.
           </p>
         </div>
       )}
@@ -630,6 +632,10 @@ export default function App() {
   const handleCuotaChange = (e) => setFormCuota({ ...formCuota, [e.target.name]: e.target.value });
   const handleLlamadaChange = (e) => setFormLlamada({ ...formLlamada, [e.target.name]: e.target.value });
   const handleSeguroChange = (e) => setFormSeguro({ ...formSeguro, [e.target.name]: e.target.value });
+  const handleRenunciaChange = (e) => setFormRenuncia({ ...formRenuncia, [e.target.name]: e.target.value });
+  const handleAltaCRMChange = (e) => setFormAltaCRM({ ...formAltaCRM, [e.target.name]: e.target.value });
+  const handleEvaluacionChange = (e) => setFormEvaluacion({ ...formEvaluacion, [e.target.name]: e.target.value });
+  const handlePostulanteChange = (e) => setFormPostulante({ ...formPostulante, [e.target.name]: e.target.value });
   
   const handleRecompraChange = (e) => {
     const { name, value } = e.target;
@@ -665,11 +671,6 @@ export default function App() {
       setFormReenvio({ ...formReenvio, contratos: formReenvio.contratos.filter((_, i) => i !== index) });
     }
   };
-
-  const handleRenunciaChange = (e) => setFormRenuncia({ ...formRenuncia, [e.target.name]: e.target.value });
-  const handleAltaCRMChange = (e) => setFormAltaCRM({ ...formAltaCRM, [e.target.name]: e.target.value });
-  const handleEvaluacionChange = (e) => setFormEvaluacion({ ...formEvaluacion, [e.target.name]: e.target.value });
-  const handlePostulanteChange = (e) => setFormPostulante({ ...formPostulante, [e.target.name]: e.target.value });
 
   const handleDescuentoChange = (e) => {
     const { name, value } = e.target;
