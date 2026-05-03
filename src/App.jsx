@@ -894,6 +894,8 @@ export default function App() {
     return `👋 ${obtenerSaludoTiempo()}\nEstimado Ulrich,\n\nTe adjunto el formulario de entrevista de *${formPostulante.nombre || '[Nombre]'}* para el puesto de Asesor de Ventas. Él llega a nosotros como referido de la asesora ${formPostulante.referidor || '[Nombre]'}.\n\nDespués de realizarle la entrevista y evaluar su perfil, mi recomendación es que proceda. Me gustaría que lo puedan tomar en cuenta para pasarlo a la etapa de capacitación y así poder ir preparándolo para que se integre a la Máquina de Ventas aquí en la sucursal de Montero.\n\nEn el documento adjunto podrás ver el detalle completo de su experiencia, evaluación de competencias y el role play.\n\nCualquier consulta me avisas.\n\nSaludos cordiales,\n*${formPostulante.asesor || 'Oscar Saravia'}*`;
   };
 
+  // --- GENERADORES HTML PARA PC ---
+  
   const generarHtmlRecompra = () => {
     const beneficio = calcularBeneficioRecompra();
     const { saludo, nombrePila } = obtenerDatosSupervisor();
@@ -988,19 +990,18 @@ export default function App() {
         sumTotalColMes += totalColMes;
 
         const isProductivo = totalColMes >= 25000;
-        const rowBgStyle = isProductivo ? 'background-color: #d1fae5;' : 'background-color: #ffffff;';
-        const textColor = isProductivo ? '#065f46' : '#000000';
+        const rowBgStyle = isProductivo ? 'background-color: #ecfdf5;' : 'background-color: #ffffff;';
+        const textColor = isProductivo ? '#059669' : '#0f172a';
 
         filasAsesoresHtml += `
-          <tr>
-            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><span style="color: #000000;"><font color="#000000"><b>${i+1}</b></font></span></td>
-            <td style="border: 1px solid #cbd5e1; padding: 6px; background-color: #ffffff; white-space: nowrap;"><span style="color: #000000;"><font color="#000000"><b>${String(asesor.nombre || '')}</b></font></span></td>
-            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap;"><span style="color: #000000;"><font color="#000000">${formatVacio(colActNum)}</font></span></td>
-            ${Array.isArray(asesor.dias) ? asesor.dias.map(d => `<td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><span style="color: #000000;"><font color="#000000">${formatDias(Number(d)||0)}</font></span></td>`).join('') : ''}
-            ${Array.isArray(asesor.proy) ? asesor.proy.map(p => `<td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><span style="color: #000000;"><font color="#000000"><b>${Number(p)||0}</b></font></span></td>`).join('') : ''}
-            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap;"><span style="color: #000000;"><font color="#000000"><b>${formatVacio(sumDias)}</b></font></span></td>
-            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; ${rowBgStyle} white-space: nowrap;"><span style="color: ${textColor};"><font color="${textColor}"><b>${formatVacio(totalColMes)}</b></font></span></td>
-            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><span style="color: #000000;"><font color="#000000"></font></span></td>
+          <tr style="${rowBgStyle}">
+            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center; color: #64748b;">${i+1}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: left; color: #0f172a; font-weight: bold; white-space: nowrap;">${String(asesor.nombre || '')}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: right; color: #334155;">${formatVacio(colActNum)}</td>
+            ${Array.isArray(asesor.dias) ? asesor.dias.map(d => `<td style="padding: 8px; border-bottom: 1px solid #e2e8f0; border-left: 1px solid #f1f5f9; text-align: center; color: #475569;">${formatDias(Number(d)||0)}</td>`).join('') : ''}
+            ${Array.isArray(asesor.proy) ? asesor.proy.map(p => `<td style="padding: 8px; border-bottom: 1px solid #e2e8f0; border-left: 1px solid #f0f9ff; text-align: center; color: #0369a1; font-weight: bold;">${formatDias(Number(p)||0)}</td>`).join('') : ''}
+            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; border-left: 1px solid #e2e8f0; text-align: right; color: #334155; font-weight: bold;">${formatVacio(sumDias)}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; border-left: 1px solid #e2e8f0; text-align: right; font-weight: bold; color: ${textColor};">${formatVacio(totalColMes)}${isProductivo ? ' &#10004;' : ''}</td>
           </tr>
         `;
       });
@@ -1013,66 +1014,67 @@ export default function App() {
     const porcentajeFin = objMensual ? (sumTotalColMes / objMensual) * 100 : 0;
 
     return `
-    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 13px; color: #333333; text-align: left;">
-      <p style="color: #333333;">${obtenerSaludoTiempo()}</p>
-      <p style="color: #333333;">${saludo} ${nombrePila},</p>
-      <p style="color: #333333;">Adjunto el consolidado de proyecci&oacute;n de ventas semanal del equipo correspondiente a la semana actual.</p>
+    <div style="background-color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 14px; color: #334155; line-height: 1.6; max-width: 1200px; text-align: left;">
+      <p style="color: #0f172a; font-size: 16px;"><b>${obtenerSaludoTiempo()} ${saludo} ${nombrePila},</b></p>
+      <p style="color: #334155;">Adjunto el consolidado de proyecci&oacute;n de ventas semanal del equipo. A continuaci&oacute;n el detalle actualizado:</p>
       
       <div style="overflow-x: auto; width: 100%; max-width: 100%;">
-      <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; font-family: Arial, sans-serif; font-size: 11px; margin-top: 15px; width: 100%; min-width: 900px; text-align: left; border-color: #cbd5e1; background-color: #ffffff;">
+      <table border="0" cellpadding="8" cellspacing="0" style="border-collapse: collapse; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 12px; margin-top: 15px; width: 100%; min-width: 900px; text-align: left; background-color: #ffffff; border: 1px solid #e2e8f0;">
         <thead>
           <tr>
-            <th colspan="3" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: left;"><span style="color: #ffffff;"><font color="#ffffff"><b>Proyeccion Equipo: ${String(formProyeccion.equipo || '')}</b></font></span></th>
-            <th colspan="7" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center;"><span style="color: #ffffff;"><font color="#ffffff"><b>Ventas</b></font></span></th>
-            <th colspan="5" style="background-color: #92d050; border: 1px solid #92d050; padding: 6px; text-align: center;"><span style="color: #000000;"><font color="#000000"><b>Proyectos</b></font></span></th>
-            <th rowspan="2" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; vertical-align: bottom;"><span style="color: #ffffff;"><font color="#ffffff"><b>Total<br>Proyeccion<br>semanal</b></font></span></th>
-            <th rowspan="2" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; vertical-align: bottom;"><span style="color: #ffffff;"><font color="#ffffff"><b>Total<br>colocacion<br>asesor/mes</b></font></span></th>
-            <th rowspan="2" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; vertical-align: bottom;"><span style="color: #ffffff;"><font color="#ffffff"><b>Productivo<br>valor = $25.000</b></font></span></th>
+            <th colspan="3" style="background-color: #f8fafc; border-bottom: 2px solid #cbd5e1; padding: 10px; text-align: left; color: #0f172a; font-size: 13px;"><b>Equipo: ${String(formProyeccion.equipo || '')}</b></th>
+            <th colspan="7" style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1; border-left: 1px solid #e2e8f0; padding: 10px; text-align: center; color: #334155; text-transform: uppercase; font-size: 11px; letter-spacing: 1px;"><b>Ventas Diarias</b></th>
+            <th colspan="5" style="background-color: #eff6ff; border-bottom: 2px solid #bae6fd; border-left: 1px solid #e2e8f0; padding: 10px; text-align: center; color: #0369a1; text-transform: uppercase; font-size: 11px; letter-spacing: 1px;"><b>Proyectos</b></th>
+            <th rowspan="2" style="background-color: #f8fafc; border-bottom: 2px solid #cbd5e1; border-left: 1px solid #e2e8f0; padding: 10px; text-align: right; color: #334155; vertical-align: bottom;"><b>Total<br>Proy. Semanal</b></th>
+            <th rowspan="2" style="background-color: #f0fdf4; border-bottom: 2px solid #6ee7b7; border-left: 1px solid #e2e8f0; padding: 10px; text-align: right; color: #065f46; vertical-align: bottom;"><b>Cierre Mes<br>(Meta $25k)</b></th>
           </tr>
           <tr>
-            <th style="background-color: #002060; border: 1px solid #002060; padding: 6px;"></th>
-            <th style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: left; white-space: nowrap;"><span style="color: #ffffff;"><font color="#ffffff"><b>Asesor</b></font></span></th>
-            <th style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; white-space: nowrap;"><span style="color: #ffffff;"><font color="#ffffff"><b>Colocacion<br>actual</b></font></span></th>
-            ${[0,1,2,3,4,5,6].map(d => `<th style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; white-space: nowrap;"><span style="color: #ffffff;"><font color="#ffffff"><b>${formatDiaMes(formProyeccion.fechaInicio, d)}</b></font></span></th>`).join('')}
-            ${NOMBRES_PROYECTOS_PROYECCION.map(p => `<th style="background-color: #92d050; border: 1px solid #92d050; padding: 6px; text-align: center; white-space: nowrap;"><span style="color: #000000;"><font color="#000000"><b>${String(p)}</b></font></span></th>`).join('')}
+            <th style="background-color: #f8fafc; border-bottom: 2px solid #cbd5e1; padding: 8px; color: #64748b; width: 30px; text-align: center;">#</th>
+            <th style="background-color: #f8fafc; border-bottom: 2px solid #cbd5e1; padding: 8px; text-align: left; color: #475569; white-space: nowrap;"><b>Asesor</b></th>
+            <th style="background-color: #f8fafc; border-bottom: 2px solid #cbd5e1; padding: 8px; text-align: right; color: #475569; white-space: nowrap;"><b>Coloc. Actual</b></th>
+            ${[0,1,2,3,4,5,6].map(d => `<th style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1; border-left: 1px solid #e2e8f0; padding: 8px; text-align: center; color: #64748b; white-space: nowrap;">${formatDiaMes(formProyeccion.fechaInicio, d)}</th>`).join('')}
+            ${NOMBRES_PROYECTOS_PROYECCION.map(p => `<th style="background-color: #eff6ff; border-bottom: 2px solid #bae6fd; border-left: 1px solid #e2e8f0; padding: 8px; text-align: center; color: #0284c7; white-space: nowrap;">${String(p)}</th>`).join('')}
           </tr>
         </thead>
         <tbody>
           ${filasAsesoresHtml}
-          <tr>
-            <td colspan="10" style="border: none; background-color: #ffffff;"></td>
-            ${sumProyA.map(p => `<td style="background-color: #8faadc; border: 1px solid #cbd5e1; text-align: center; padding: 6px;"><span style="color: #000000;"><font color="#000000"><b>${p}</b></font></span></td>`).join('')}
-            <td style="border: none; background-color: #ffffff;"></td>
-            <td style="background-color: #f8fafc; border: 1px solid #cbd5e1; text-align: right; padding: 6px; white-space: nowrap;"><span style="color: #000000;"><font color="#000000"><b>${formatCurrency(sumTotalColMes)}</b></font></span></td>
-            <td style="border: 1px solid #cbd5e1; text-align: center; padding: 6px; background-color: #ffffff;"><span style="color: #ff0000;"><font color="#ff0000"><b>0%</b></font></span></td>
+          <tr style="background-color: #f8fafc;">
+            <td colspan="3" style="padding: 10px 8px; text-align: right; color: #0f172a; border-top: 2px solid #cbd5e1;"><b>TOTALES GLOBALES</b></td>
+            <td colspan="7" style="padding: 10px 8px; border-top: 2px solid #cbd5e1;"></td>
+            ${sumProyA.map(p => `<td style="padding: 10px 8px; text-align: center; color: #0284c7; border-top: 2px solid #bae6fd; font-weight: bold;">${p === 0 ? '-' : p}</td>`).join('')}
+            <td style="padding: 10px 8px; text-align: right; color: #0f172a; border-top: 2px solid #cbd5e1;"><b>${formatCurrency(sumTotalProySemanal)}</b></td>
+            <td style="padding: 10px 8px; text-align: right; color: #059669; border-top: 2px solid #6ee7b7; background-color: #d1fae5; font-size: 14px;"><b>$${formatCurrency(sumTotalColMes)}</b></td>
           </tr>
         </tbody>
       </table>
       </div>
 
-      <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; font-family: Arial, sans-serif; font-size: 11px; margin-top: 20px; width: 350px; text-align: left; border-color: #cbd5e1; background-color: #ffffff;">
+      <table border="0" cellpadding="0" cellspacing="0" style="margin-top: 25px; width: 100%; max-width: 450px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
         <tr>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px;"><span style="color: #ffffff;"><font color="#ffffff"><b>Proyeccion ${capMes}</b></font></span></td>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center;"><span style="color: #ffffff;"><font color="#ffffff"><b>-</b></font></span></td>
-          <td style="border: none; background-color: #ffffff;"></td>
+          <td colspan="2" style="background-color: #0f172a; color: #ffffff; padding: 12px 16px; font-size: 14px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">
+            <span style="color: #ffffff;"><font color="#ffffff">Resumen General - ${capMes} ${new Date().getFullYear()}</font></span>
+          </td>
         </tr>
         <tr>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px;"><span style="color: #ffffff;"><font color="#ffffff"><b>Colocacion actual</b></font></span></td>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: right; white-space: nowrap;"><span style="color: #ffffff;"><font color="#ffffff"><b>${formatCurrency(sumColAct)}</b></font></span></td>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center;"><span style="color: #ffffff;"><font color="#ffffff"><b>${formatCurrency(porcentajeAvance)}%</b></font></span></td>
+          <td style="padding: 12px 16px; color: #475569; font-size: 13px; border-bottom: 1px solid #f1f5f9;"><b>Objetivo del Mes</b></td>
+          <td style="padding: 12px 16px; text-align: right; color: #0f172a; font-size: 14px; font-weight: bold; border-bottom: 1px solid #f1f5f9;">$${formatCurrency(objMensual)}</td>
         </tr>
         <tr>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px;"><span style="color: #ffffff;"><font color="#ffffff"><b>Objetivo ${capMes} ${new Date().getFullYear()}</b></font></span></td>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: right; white-space: nowrap;"><span style="color: #ffffff;"><font color="#ffffff"><b>${formatCurrency(objMensual)}</b></font></span></td>
-          <td style="border: none; background-color: #ffffff;"></td>
+          <td style="padding: 12px 16px; color: #475569; font-size: 13px; border-bottom: 1px solid #f1f5f9;"><b>Colocaci&oacute;n Actual</b></td>
+          <td style="padding: 12px 16px; text-align: right; border-bottom: 1px solid #f1f5f9;">
+            <span style="color: #0f172a; font-size: 14px; font-weight: bold;">$${formatCurrency(sumColAct)}</span>
+            <span style="display: inline-block; background-color: #f1f5f9; color: #334155; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 8px; font-weight: bold;">${formatCurrency(porcentajeAvance)}%</span>
+          </td>
         </tr>
         <tr>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px;"><span style="color: #ffffff;"><font color="#ffffff"><b>Colocacion fin de mes</b></font></span></td>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: right; white-space: nowrap;"><span style="color: #ffffff;"><font color="#ffffff"><b>${formatCurrency(sumTotalColMes)}</b></font></span></td>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center;"><span style="color: #ffffff;"><font color="#ffffff"><b>${formatCurrency(porcentajeFin)}%</b></font></span></td>
+          <td style="padding: 14px 16px; color: #0f172a; font-size: 14px;"><b>Proyecci&oacute;n Cierre de Mes</b></td>
+          <td style="padding: 14px 16px; text-align: right;">
+            <span style="color: #059669; font-size: 16px; font-weight: bold;">$${formatCurrency(sumTotalColMes)}</span>
+            <span style="display: inline-block; background-color: #d1fae5; color: #065f46; padding: 3px 8px; border-radius: 4px; font-size: 12px; margin-left: 8px; font-weight: bold;">${formatCurrency(porcentajeFin)}%</span>
+          </td>
         </tr>
       </table>
-      <p style="margin-top: 25px; margin-bottom: 2px; color: #333333;">Saludos cordiales.</p>
+      <p style="margin-top: 25px; margin-bottom: 2px; color: #475569;">Saludos cordiales.</p>
     </div>`;
   };
 
@@ -1721,14 +1723,14 @@ export default function App() {
                     <table className="w-full text-left border-collapse text-[11px] whitespace-nowrap">
                       <thead>
                         <tr>
-                          <th rowSpan="2" className="bg-[#002060] text-white p-2 border border-slate-400">Asesor</th>
-                          <th rowSpan="2" className="bg-[#002060] text-white p-2 border border-slate-400 text-center leading-tight">Colocación<br/>Actual</th>
-                          <th colSpan="7" className="bg-[#002060] text-white p-2 border border-slate-400 text-center">Ventas / Proyección Diaria</th>
-                          <th colSpan="5" className="bg-[#92d050] text-black p-2 border border-slate-400 text-center">Proyectos</th>
+                          <th rowSpan="2" className="bg-[#f8fafc] text-slate-800 p-2 border border-slate-300">Asesor</th>
+                          <th rowSpan="2" className="bg-[#f8fafc] text-slate-800 p-2 border border-slate-300 text-center leading-tight">Colocación<br/>Actual</th>
+                          <th colSpan="7" className="bg-[#f1f5f9] text-slate-700 p-2 border border-slate-300 text-center uppercase tracking-wider text-[10px]">Ventas / Proyección Diaria</th>
+                          <th colSpan="5" className="bg-[#eff6ff] text-sky-800 p-2 border border-slate-300 text-center uppercase tracking-wider text-[10px]">Proyectos</th>
                         </tr>
                         <tr>
-                          {[0,1,2,3,4,5,6].map(d => <th key={d} className="bg-[#002060] text-white p-2 border border-slate-400 text-center font-normal">{String(formatDiaMes(formProyeccion.fechaInicio, d))}</th>)}
-                          {NOMBRES_PROYECTOS_PROYECCION.map(p => <th key={p} className="bg-[#92d050] text-black p-2 border border-slate-400 text-center font-normal">{String(p)}</th>)}
+                          {[0,1,2,3,4,5,6].map(d => <th key={d} className="bg-[#f8fafc] text-slate-600 p-2 border border-slate-300 text-center font-semibold">{String(formatDiaMes(formProyeccion.fechaInicio, d))}</th>)}
+                          {NOMBRES_PROYECTOS_PROYECCION.map(p => <th key={p} className="bg-[#eff6ff] text-sky-700 p-2 border border-slate-300 text-center font-semibold">{String(p)}</th>)}
                         </tr>
                       </thead>
                       <tbody>
@@ -1738,21 +1740,21 @@ export default function App() {
                           
                           return (
                           <tr key={i} className={`hover:bg-blue-50/50 ${isProductivo ? 'bg-emerald-50/30' : ''}`}>
-                            <td className="p-2 border border-slate-300 font-medium text-slate-800">{i+1}. {String(asesor.nombre || '')}</td>
-                            <td className="p-1 border border-slate-300">
+                            <td className="p-2 border border-slate-300 font-bold text-slate-800">{i+1}. {String(asesor.nombre || '')}</td>
+                            <td className="p-1 border border-slate-300 bg-slate-50/50">
                               <div className="flex items-center gap-1">
-                                <input type="number" value={asesor.colAct === 0 ? '' : asesor.colAct} onChange={(e) => updateAsesorProyeccion(i, 'colAct', e.target.value)} className="w-full min-w-[50px] p-1 text-right text-xs bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded" placeholder="0" />
+                                <input type="number" value={asesor.colAct === 0 ? '' : asesor.colAct} onChange={(e) => updateAsesorProyeccion(i, 'colAct', e.target.value)} className="w-full min-w-[50px] p-1 text-right text-xs bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded text-slate-700 font-semibold" placeholder="0" />
                                 <button onClick={() => setSumaVentaModal({show: true, index: i, nombre: asesor.nombre, monto: ''})} className="p-1.5 bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200 transition-colors shadow-sm" title="Sumar Nueva Venta"><Plus className="w-3.5 h-3.5" /></button>
                               </div>
                             </td>
                             {Array.isArray(asesor.dias) && asesor.dias.map((diaVal, dIdx) => (
                               <td key={dIdx} className="p-1 border border-slate-300">
-                                <input type="number" value={diaVal === 0 ? '' : diaVal} onChange={(e) => updateAsesorArrayProyeccion(i, 'dias', dIdx, e.target.value)} className="w-full min-w-[40px] p-1 text-center text-xs bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded" placeholder="-" />
+                                <input type="number" value={diaVal === 0 ? '' : diaVal} onChange={(e) => updateAsesorArrayProyeccion(i, 'dias', dIdx, e.target.value)} className="w-full min-w-[40px] p-1 text-center text-xs bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded text-slate-600" placeholder="-" />
                               </td>
                             ))}
                             {Array.isArray(asesor.proy) && asesor.proy.map((proyVal, pIdx) => (
-                              <td key={pIdx} className="p-1 border border-slate-300 bg-green-50/30">
-                                <input type="number" value={proyVal === 0 ? '' : proyVal} onChange={(e) => updateAsesorArrayProyeccion(i, 'proy', pIdx, e.target.value)} className="w-full min-w-[40px] p-1 text-center text-xs font-bold text-slate-700 bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded" placeholder="0" />
+                              <td key={pIdx} className="p-1 border border-slate-300 bg-sky-50/30">
+                                <input type="number" value={proyVal === 0 ? '' : proyVal} onChange={(e) => updateAsesorArrayProyeccion(i, 'proy', pIdx, e.target.value)} className="w-full min-w-[40px] p-1 text-center text-xs font-bold text-sky-700 bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded" placeholder="0" />
                               </td>
                             ))}
                           </tr>
