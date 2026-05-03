@@ -899,58 +899,58 @@ export default function App() {
     const { saludo, nombrePila } = obtenerDatosSupervisor();
     return `
     <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 1200px; line-height: 1.5; text-align: left;">
-      <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()},</p>
-      <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${nombrePila} por favor su ayuda con el c&oacute;digo de pago por recompra de este cliente, le toca pagar su cuota el <strong>${formRecompra.fechaPago || '[FECHA PAGO]'}</strong> muchas gracias de antemano:</p>
+      <p style="margin-bottom: 5px; color: #333333;">${obtenerSaludoTiempo()},</p>
+      <p style="margin-top: 0; margin-bottom: 25px; color: #333333;">${saludo} ${nombrePila} por favor su ayuda con el c&oacute;digo de pago por recompra de este cliente, le toca pagar su cuota el <strong>${formRecompra.fechaPago || '[FECHA PAGO]'}</strong> muchas gracias de antemano:</p>
       
       <div style="overflow-x: auto; padding-bottom: 10px; width: 100%; max-width: 100%;">
-        <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; font-family: Arial, sans-serif; font-size: 11px; text-align: center; width: 100%; min-width: 1200px; border: 1px solid #000000; color: #000000;">
+        <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; font-family: Arial, sans-serif; font-size: 11px; text-align: center; width: 100%; min-width: 1200px; border: 1px solid #000000; background-color: #ffffff;">
           <thead>
             <tr>
-              <th colspan="8" style="background-color: #ffc000; border: 1px solid #000000; padding: 6px; color: #000000;"><b>CONTRATO NUEVO</b></th>
-              <th colspan="7" style="background-color: #ed7d31; border: 1px solid #000000; padding: 6px; color: #000000;"><b>CONTRATO ANTIGUO</b></th>
-              <th rowspan="2" style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; color: #000000;"><b>VALOR DE<br>CUOTA $</b></th>
-              <th rowspan="2" style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; color: #000000;"><b>BENEFICIO $</b></th>
+              <th colspan="8" style="background-color: #ffc000; border: 1px solid #000000; padding: 6px;"><span style="color: #000000;"><font color="#000000"><b>CONTRATO NUEVO</b></font></span></th>
+              <th colspan="7" style="background-color: #ed7d31; border: 1px solid #000000; padding: 6px;"><span style="color: #000000;"><font color="#000000"><b>CONTRATO ANTIGUO</b></font></span></th>
+              <th rowspan="2" style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px;"><span style="color: #000000;"><font color="#000000"><b>VALOR DE<br>CUOTA $</b></font></span></th>
+              <th rowspan="2" style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px;"><span style="color: #000000;"><font color="#000000"><b>BENEFICIO $</b></font></span></th>
             </tr>
             <tr>
-              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; color: #000000;"><b>Agencia</b></th>
-              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>Fecha de<br>venta</b></th>
-              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; min-width: 150px; color: #000000;"><b>Nombre</b></th>
-              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>Contrato</b></th>
-              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>Se aplico<br>descuento<br>por metro ?</b></th>
-              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>Cant. De<br>cuotas ya<br>pagadas</b></th>
-              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>¿Procesado?</b></th>
-              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>¿Vigente?</b></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px;"><span style="color: #000000;"><font color="#000000"><b>Agencia</b></font></span></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><span style="color: #000000;"><font color="#000000"><b>Fecha de<br>venta</b></font></span></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; min-width: 150px;"><span style="color: #000000;"><font color="#000000"><b>Nombre</b></font></span></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><span style="color: #000000;"><font color="#000000"><b>Contrato</b></font></span></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><span style="color: #000000;"><font color="#000000"><b>Se aplico<br>descuento<br>por metro ?</b></font></span></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><span style="color: #000000;"><font color="#000000"><b>Cant. De<br>cuotas ya<br>pagadas</b></font></span></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><span style="color: #000000;"><font color="#000000"><b>¿Procesado?</b></font></span></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><span style="color: #000000;"><font color="#000000"><b>¿Vigente?</b></font></span></th>
 
-              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; min-width: 150px; color: #000000;"><b>Nombre</b></th>
-              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>Contrato</b></th>
-              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>Fecha de<br>venta</b></th>
-              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>Fecha Pago</b></th>
-              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>¿Procesado?</b></th>
-              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>¿Vigente?</b></th>
-              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; min-width: 120px; color: #000000;"><b>Patrocinador</b></th>
+              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; min-width: 150px;"><span style="color: #000000;"><font color="#000000"><b>Nombre</b></font></span></th>
+              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><span style="color: #000000;"><font color="#000000"><b>Contrato</b></font></span></th>
+              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><span style="color: #000000;"><font color="#000000"><b>Fecha de<br>venta</b></font></span></th>
+              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><span style="color: #000000;"><font color="#000000"><b>Fecha Pago</b></font></span></th>
+              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><span style="color: #000000;"><font color="#000000"><b>¿Procesado?</b></font></span></th>
+              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><span style="color: #000000;"><font color="#000000"><b>¿Vigente?</b></font></span></th>
+              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; min-width: 120px;"><span style="color: #000000;"><font color="#000000"><b>Patrocinador</b></font></span></th>
             </tr>
           </thead>
           <tbody>
             <tr style="background-color: #ffffff;">
-              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase; color: #000000;">${formRecompra.sucursal || ''}</td>
-              <td style="border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;">${formRecompra.fechaVentaNuevo || ''}</td>
-              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase; color: #000000;">${formRecompra.nombreNuevo || ''}</td>
-              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase; white-space: nowrap; color: #000000;">${formRecompra.contratoNuevo || ''}</td>
-              <td style="border: 1px solid #000000; padding: 6px; color: #000000;">${formRecompra.aplicoDescuento || 'NO'}</td>
-              <td style="border: 1px solid #000000; padding: 6px; color: #000000;">${formRecompra.cuotasPagadas || '0'}</td>
-              <td style="border: 1px solid #000000; padding: 6px; color: #000000;">${formRecompra.procesadoNuevo || 'SI'}</td>
-              <td style="border: 1px solid #000000; padding: 6px; color: #000000;">${formRecompra.vigenteNuevo || 'SI'}</td>
+              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase;"><span style="color: #000000;"><font color="#000000">${formRecompra.sucursal || ''}</font></span></td>
+              <td style="border: 1px solid #000000; padding: 6px; white-space: nowrap;"><span style="color: #000000;"><font color="#000000">${formRecompra.fechaVentaNuevo || ''}</font></span></td>
+              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase;"><span style="color: #000000;"><font color="#000000">${formRecompra.nombreNuevo || ''}</font></span></td>
+              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase; white-space: nowrap;"><span style="color: #000000;"><font color="#000000">${formRecompra.contratoNuevo || ''}</font></span></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><span style="color: #000000;"><font color="#000000">${formRecompra.aplicoDescuento || 'NO'}</font></span></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><span style="color: #000000;"><font color="#000000">${formRecompra.cuotasPagadas || '0'}</font></span></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><span style="color: #000000;"><font color="#000000">${formRecompra.procesadoNuevo || 'SI'}</font></span></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><span style="color: #000000;"><font color="#000000">${formRecompra.vigenteNuevo || 'SI'}</font></span></td>
               
-              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase; color: #000000;">${formRecompra.nombreAntiguo || ''}</td>
-              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase; white-space: nowrap; color: #000000;">${formRecompra.contratoAntiguo || ''}</td>
-              <td style="border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;">${formRecompra.fechaVentaAntiguo || ''}</td>
-              <td style="border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;">${formRecompra.fechaPago || ''}</td>
-              <td style="border: 1px solid #000000; padding: 6px; color: #000000;">${formRecompra.procesadoAntiguo || 'SI'}</td>
-              <td style="border: 1px solid #000000; padding: 6px; color: #000000;">${formRecompra.vigenteAntiguo || 'SI'}</td>
-              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase; color: #000000;">${formRecompra.patrocinador || ''}</td>
+              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase;"><span style="color: #000000;"><font color="#000000">${formRecompra.nombreAntiguo || ''}</font></span></td>
+              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase; white-space: nowrap;"><span style="color: #000000;"><font color="#000000">${formRecompra.contratoAntiguo || ''}</font></span></td>
+              <td style="border: 1px solid #000000; padding: 6px; white-space: nowrap;"><span style="color: #000000;"><font color="#000000">${formRecompra.fechaVentaAntiguo || ''}</font></span></td>
+              <td style="border: 1px solid #000000; padding: 6px; white-space: nowrap;"><span style="color: #000000;"><font color="#000000">${formRecompra.fechaPago || ''}</font></span></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><span style="color: #000000;"><font color="#000000">${formRecompra.procesadoAntiguo || 'SI'}</font></span></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><span style="color: #000000;"><font color="#000000">${formRecompra.vigenteAntiguo || 'SI'}</font></span></td>
+              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase;"><span style="color: #000000;"><font color="#000000">${formRecompra.patrocinador || ''}</font></span></td>
               
-              <td style="border: 1px solid #000000; padding: 6px; color: #000000;">${formRecompra.valorCuota || ''}</td>
-              <td style="border: 1px solid #000000; padding: 6px; color: #000000;"><b>${beneficio}</b></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><span style="color: #000000;"><font color="#000000">${formRecompra.valorCuota || ''}</font></span></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><span style="color: #000000;"><font color="#000000"><b>${beneficio}</b></font></span></td>
             </tr>
           </tbody>
         </table>
@@ -993,14 +993,14 @@ export default function App() {
 
         filasAsesoresHtml += `
           <tr>
-            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff; color: #000000;"><b>${i+1}</b></td>
-            <td style="border: 1px solid #cbd5e1; padding: 6px; background-color: #ffffff; white-space: nowrap; color: #000000;"><b>${String(asesor.nombre || '')}</b></td>
-            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap; color: #000000;">${formatVacio(colActNum)}</td>
-            ${Array.isArray(asesor.dias) ? asesor.dias.map(d => `<td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff; color: #000000;">${formatDias(Number(d)||0)}</td>`).join('') : ''}
-            ${Array.isArray(asesor.proy) ? asesor.proy.map(p => `<td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff; color: #000000;"><b>${Number(p)||0}</b></td>`).join('') : ''}
-            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap; color: #000000;"><b>${formatVacio(sumDias)}</b></td>
-            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; ${rowBgStyle} white-space: nowrap; color: ${textColor};"><b>${formatVacio(totalColMes)}</b></td>
-            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff; color: #000000;"></td>
+            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><span style="color: #000000;"><font color="#000000"><b>${i+1}</b></font></span></td>
+            <td style="border: 1px solid #cbd5e1; padding: 6px; background-color: #ffffff; white-space: nowrap;"><span style="color: #000000;"><font color="#000000"><b>${String(asesor.nombre || '')}</b></font></span></td>
+            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap;"><span style="color: #000000;"><font color="#000000">${formatVacio(colActNum)}</font></span></td>
+            ${Array.isArray(asesor.dias) ? asesor.dias.map(d => `<td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><span style="color: #000000;"><font color="#000000">${formatDias(Number(d)||0)}</font></span></td>`).join('') : ''}
+            ${Array.isArray(asesor.proy) ? asesor.proy.map(p => `<td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><span style="color: #000000;"><font color="#000000"><b>${Number(p)||0}</b></font></span></td>`).join('') : ''}
+            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap;"><span style="color: #000000;"><font color="#000000"><b>${formatVacio(sumDias)}</b></font></span></td>
+            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; ${rowBgStyle} white-space: nowrap;"><span style="color: ${textColor};"><font color="${textColor}"><b>${formatVacio(totalColMes)}</b></font></span></td>
+            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><span style="color: #000000;"><font color="#000000"></font></span></td>
           </tr>
         `;
       });
@@ -1022,29 +1022,29 @@ export default function App() {
       <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; font-family: Arial, sans-serif; font-size: 11px; margin-top: 15px; width: 100%; min-width: 900px; text-align: left; border-color: #cbd5e1; background-color: #ffffff;">
         <thead>
           <tr>
-            <th colspan="3" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: left; color: #ffffff;"><b>Proyeccion Equipo: ${String(formProyeccion.equipo || '')}</b></th>
-            <th colspan="7" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; color: #ffffff;"><b>Ventas</b></th>
-            <th colspan="5" style="background-color: #92d050; border: 1px solid #92d050; padding: 6px; text-align: center; color: #000000;"><b>Proyectos</b></th>
-            <th rowspan="2" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; vertical-align: bottom; color: #ffffff;"><b>Total<br>Proyeccion<br>semanal</b></th>
-            <th rowspan="2" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; vertical-align: bottom; color: #ffffff;"><b>Total<br>colocacion<br>asesor/mes</b></th>
-            <th rowspan="2" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; vertical-align: bottom; color: #ffffff;"><b>Productivo<br>valor = $25.000</b></th>
+            <th colspan="3" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: left;"><span style="color: #ffffff;"><font color="#ffffff"><b>Proyeccion Equipo: ${String(formProyeccion.equipo || '')}</b></font></span></th>
+            <th colspan="7" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center;"><span style="color: #ffffff;"><font color="#ffffff"><b>Ventas</b></font></span></th>
+            <th colspan="5" style="background-color: #92d050; border: 1px solid #92d050; padding: 6px; text-align: center;"><span style="color: #000000;"><font color="#000000"><b>Proyectos</b></font></span></th>
+            <th rowspan="2" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; vertical-align: bottom;"><span style="color: #ffffff;"><font color="#ffffff"><b>Total<br>Proyeccion<br>semanal</b></font></span></th>
+            <th rowspan="2" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; vertical-align: bottom;"><span style="color: #ffffff;"><font color="#ffffff"><b>Total<br>colocacion<br>asesor/mes</b></font></span></th>
+            <th rowspan="2" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; vertical-align: bottom;"><span style="color: #ffffff;"><font color="#ffffff"><b>Productivo<br>valor = $25.000</b></font></span></th>
           </tr>
           <tr>
             <th style="background-color: #002060; border: 1px solid #002060; padding: 6px;"></th>
-            <th style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: left; white-space: nowrap; color: #ffffff;"><b>Asesor</b></th>
-            <th style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; white-space: nowrap; color: #ffffff;"><b>Colocacion<br>actual</b></th>
-            ${[0,1,2,3,4,5,6].map(d => `<th style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; white-space: nowrap; color: #ffffff;"><b>${formatDiaMes(formProyeccion.fechaInicio, d)}</b></th>`).join('')}
-            ${NOMBRES_PROYECTOS_PROYECCION.map(p => `<th style="background-color: #92d050; border: 1px solid #92d050; padding: 6px; text-align: center; white-space: nowrap; color: #000000;"><b>${String(p)}</b></th>`).join('')}
+            <th style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: left; white-space: nowrap;"><span style="color: #ffffff;"><font color="#ffffff"><b>Asesor</b></font></span></th>
+            <th style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; white-space: nowrap;"><span style="color: #ffffff;"><font color="#ffffff"><b>Colocacion<br>actual</b></font></span></th>
+            ${[0,1,2,3,4,5,6].map(d => `<th style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; white-space: nowrap;"><span style="color: #ffffff;"><font color="#ffffff"><b>${formatDiaMes(formProyeccion.fechaInicio, d)}</b></font></span></th>`).join('')}
+            ${NOMBRES_PROYECTOS_PROYECCION.map(p => `<th style="background-color: #92d050; border: 1px solid #92d050; padding: 6px; text-align: center; white-space: nowrap;"><span style="color: #000000;"><font color="#000000"><b>${String(p)}</b></font></span></th>`).join('')}
           </tr>
         </thead>
         <tbody>
           ${filasAsesoresHtml}
           <tr>
             <td colspan="10" style="border: none; background-color: #ffffff;"></td>
-            ${sumProyA.map(p => `<td style="background-color: #8faadc; border: 1px solid #cbd5e1; text-align: center; padding: 6px; color: #000000;"><b>${p}</b></td>`).join('')}
+            ${sumProyA.map(p => `<td style="background-color: #8faadc; border: 1px solid #cbd5e1; text-align: center; padding: 6px;"><span style="color: #000000;"><font color="#000000"><b>${p}</b></font></span></td>`).join('')}
             <td style="border: none; background-color: #ffffff;"></td>
-            <td style="background-color: #f8fafc; border: 1px solid #cbd5e1; text-align: right; padding: 6px; white-space: nowrap; color: #000000;"><b>${formatCurrency(sumTotalColMes)}</b></td>
-            <td style="border: 1px solid #cbd5e1; text-align: center; padding: 6px; background-color: #ffffff; color: #ff0000;"><b>0%</b></td>
+            <td style="background-color: #f8fafc; border: 1px solid #cbd5e1; text-align: right; padding: 6px; white-space: nowrap;"><span style="color: #000000;"><font color="#000000"><b>${formatCurrency(sumTotalColMes)}</b></font></span></td>
+            <td style="border: 1px solid #cbd5e1; text-align: center; padding: 6px; background-color: #ffffff;"><span style="color: #ff0000;"><font color="#ff0000"><b>0%</b></font></span></td>
           </tr>
         </tbody>
       </table>
@@ -1052,24 +1052,24 @@ export default function App() {
 
       <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; font-family: Arial, sans-serif; font-size: 11px; margin-top: 20px; width: 350px; text-align: left; border-color: #cbd5e1; background-color: #ffffff;">
         <tr>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; color: #ffffff;"><b>Proyeccion ${capMes}</b></td>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; color: #ffffff;"><b>-</b></td>
+          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px;"><span style="color: #ffffff;"><font color="#ffffff"><b>Proyeccion ${capMes}</b></font></span></td>
+          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center;"><span style="color: #ffffff;"><font color="#ffffff"><b>-</b></font></span></td>
           <td style="border: none; background-color: #ffffff;"></td>
         </tr>
         <tr>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; color: #ffffff;"><b>Colocacion actual</b></td>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: right; white-space: nowrap; color: #ffffff;"><b>${formatCurrency(sumColAct)}</b></td>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; color: #ffffff;"><b>${formatCurrency(porcentajeAvance)}%</b></td>
+          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px;"><span style="color: #ffffff;"><font color="#ffffff"><b>Colocacion actual</b></font></span></td>
+          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: right; white-space: nowrap;"><span style="color: #ffffff;"><font color="#ffffff"><b>${formatCurrency(sumColAct)}</b></font></span></td>
+          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center;"><span style="color: #ffffff;"><font color="#ffffff"><b>${formatCurrency(porcentajeAvance)}%</b></font></span></td>
         </tr>
         <tr>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; color: #ffffff;"><b>Objetivo ${capMes} ${new Date().getFullYear()}</b></td>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: right; white-space: nowrap; color: #ffffff;"><b>${formatCurrency(objMensual)}</b></td>
+          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px;"><span style="color: #ffffff;"><font color="#ffffff"><b>Objetivo ${capMes} ${new Date().getFullYear()}</b></font></span></td>
+          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: right; white-space: nowrap;"><span style="color: #ffffff;"><font color="#ffffff"><b>${formatCurrency(objMensual)}</b></font></span></td>
           <td style="border: none; background-color: #ffffff;"></td>
         </tr>
         <tr>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; color: #ffffff;"><b>Colocacion fin de mes</b></td>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: right; white-space: nowrap; color: #ffffff;"><b>${formatCurrency(sumTotalColMes)}</b></td>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; color: #ffffff;"><b>${formatCurrency(porcentajeFin)}%</b></td>
+          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px;"><span style="color: #ffffff;"><font color="#ffffff"><b>Colocacion fin de mes</b></font></span></td>
+          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: right; white-space: nowrap;"><span style="color: #ffffff;"><font color="#ffffff"><b>${formatCurrency(sumTotalColMes)}</b></font></span></td>
+          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center;"><span style="color: #ffffff;"><font color="#ffffff"><b>${formatCurrency(porcentajeFin)}%</b></font></span></td>
         </tr>
       </table>
       <p style="margin-top: 25px; margin-bottom: 2px; color: #333333;">Saludos cordiales.</p>
@@ -1079,9 +1079,9 @@ export default function App() {
   const generarHtmlLlamada = () => {
     return `
     <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
-      <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
-      <p style="margin-top: 0; margin-bottom: 25px;">Estimada Olivia,</p>
-      <p style="margin-bottom: 20px;">Por favor su ayuda con la validaci&oacute;n de llamada de este cliente referido, el cliente menciona que tendr&aacute; tiempo de contestar hoy a las <strong>${formLlamada.horaLlamada || '[HORA]'}</strong>, por favor pido la ayuda de tu equipo para que la puedan llamar a esa hora:</p>
+      <p style="margin-bottom: 5px; color: #333333;">${obtenerSaludoTiempo()}</p>
+      <p style="margin-top: 0; margin-bottom: 25px; color: #333333;">Estimada Olivia,</p>
+      <p style="margin-bottom: 20px; color: #333333;">Por favor su ayuda con la validaci&oacute;n de llamada de este cliente referido, el cliente menciona que tendr&aacute; tiempo de contestar hoy a las <strong>${formLlamada.horaLlamada || '[HORA]'}</strong>, por favor pido la ayuda de tu equipo para que la puedan llamar a esa hora:</p>
       
       <p style="margin-bottom: 5px; color: #555555;">Cliente referido:</p>
       <p style="margin-top: 0; margin-bottom: 15px; font-weight: bold; font-size: 15px; color: #000000;">${formLlamada.nombreReferido || '[NOMBRE REFERIDO]'} - Contrato: ${formLlamada.contratoReferido || '[CONTRATO]'} - Celular: ${formLlamada.celularReferido || '[CELULAR]'}</p>
@@ -1089,7 +1089,7 @@ export default function App() {
       <p style="margin-bottom: 5px; color: #555555;">Cliente beneficiaria:</p>
       <p style="margin-top: 0; margin-bottom: 25px; font-weight: bold; font-size: 15px; color: #000000;">${formLlamada.nombreBeneficiario || '[NOMBRE BENEFICIARIA]'}, ${formLlamada.ciBeneficiario || '[CI BENEFICIARIA]'}</p>
       
-      <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
+      <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
       <p style="margin-top: 0; font-weight: bold; color: #333333;">${formLlamada.asesor || '[Nombre del Asesor]'}</p>
     </div>`;
   };
@@ -1099,27 +1099,27 @@ export default function App() {
     const cant = formSeguro.beneficiarios.length;
     let filas = "";
     formSeguro.beneficiarios.forEach(b => {
-      filas += `<tr style="background-color: #ffffff;"><td style="border: 1px solid #cbd5e1; padding: 8px 12px; font-weight: bold; color: #000000;">${b.nombre || '---'}</td><td style="border: 1px solid #cbd5e1; padding: 8px 12px; color: #000000;">${b.parentesco || '---'}</td><td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; color: #000000;">${b.porcentaje ? b.porcentaje + '%' : '---'}</td><td style="border: 1px solid #cbd5e1; padding: 8px 12px; color: #000000;">${b.ci || '---'}</td></tr>`;
+      filas += `<tr style="background-color: #ffffff;"><td style="border: 1px solid #cbd5e1; padding: 8px 12px; font-weight: bold;"><span style="color: #000000;"><font color="#000000">${b.nombre || '---'}</font></span></td><td style="border: 1px solid #cbd5e1; padding: 8px 12px;"><span style="color: #000000;"><font color="#000000">${b.parentesco || '---'}</font></span></td><td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center;"><span style="color: #000000;"><font color="#000000">${b.porcentaje ? b.porcentaje + '%' : '---'}</font></span></td><td style="border: 1px solid #cbd5e1; padding: 8px 12px;"><span style="color: #000000;"><font color="#000000">${b.ci || '---'}</font></span></td></tr>`;
     });
 
     return `
     <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
-      <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
-      <p style="margin-top: 0; margin-bottom: 20px;">${saludo} ${nombrePila},</p>
-      <p style="margin-bottom: 20px;">Por favor tu ayuda adicionando a estos ${cant} beneficiarios al seguro de vida de esta venta, detallo todo a continuaci&oacute;n:</p>
+      <p style="margin-bottom: 5px; color: #333333;">${obtenerSaludoTiempo()}</p>
+      <p style="margin-top: 0; margin-bottom: 20px; color: #333333;">${saludo} ${nombrePila},</p>
+      <p style="margin-bottom: 20px; color: #333333;">Por favor tu ayuda adicionando a estos ${cant} beneficiarios al seguro de vida de esta venta, detallo todo a continuaci&oacute;n:</p>
       
-      <p style="margin-bottom: 5px;"><strong>Cliente(s):</strong> ${formSeguro.cliente || '[Nombre del Cliente]'}</p>
-      <p style="margin-bottom: 5px; margin-top: 0;"><strong>Nro. Contrato:</strong> ${formSeguro.nroContrato || '[Nro]'}</p>
-      <p style="margin-bottom: 20px; margin-top: 0;"><strong>UV:</strong> ${formSeguro.uv || 'SN'} &nbsp;&nbsp;&nbsp;<strong>MZN:</strong> ${formSeguro.manzano || 'SN'} &nbsp;&nbsp;&nbsp;<strong>LOTE:</strong> ${formSeguro.lote || 'SN'}</p>
+      <p style="margin-bottom: 5px; color: #333333;"><strong>Cliente(s):</strong> ${formSeguro.cliente || '[Nombre del Cliente]'}</p>
+      <p style="margin-bottom: 5px; margin-top: 0; color: #333333;"><strong>Nro. Contrato:</strong> ${formSeguro.nroContrato || '[Nro]'}</p>
+      <p style="margin-bottom: 20px; margin-top: 0; color: #333333;"><strong>UV:</strong> ${formSeguro.uv || 'SN'} &nbsp;&nbsp;&nbsp;<strong>MZN:</strong> ${formSeguro.manzano || 'SN'} &nbsp;&nbsp;&nbsp;<strong>LOTE:</strong> ${formSeguro.lote || 'SN'}</p>
 
-      <p style="margin-bottom: 10px; font-weight: bold;">Beneficiarios del seguro ${cant} personas:</p>
+      <p style="margin-bottom: 10px; font-weight: bold; color: #333333;">Beneficiarios del seguro ${cant} personas:</p>
       <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; border: 1px solid #cbd5e1; font-family: Arial, sans-serif; font-size: 13px; margin-bottom: 25px; width: 100%; text-align: left; background-color: #ffffff;">
-        <thead><tr style="background-color: #f8fafc;"><th style="border: 1px solid #cbd5e1; padding: 8px 12px; color: #0f172a;"><b>NOMBRE</b></th><th style="border: 1px solid #cbd5e1; padding: 8px 12px; color: #0f172a;"><b>PARENTESCO</b></th><th style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; color: #0f172a;"><b>%</b></th><th style="border: 1px solid #cbd5e1; padding: 8px 12px; color: #0f172a;"><b>CI.</b></th></tr></thead>
+        <thead><tr style="background-color: #f8fafc;"><th style="border: 1px solid #cbd5e1; padding: 8px 12px;"><span style="color: #0f172a;"><font color="#0f172a"><b>NOMBRE</b></font></span></th><th style="border: 1px solid #cbd5e1; padding: 8px 12px;"><span style="color: #0f172a;"><font color="#0f172a"><b>PARENTESCO</b></font></span></th><th style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center;"><span style="color: #0f172a;"><font color="#0f172a"><b>%</b></font></span></th><th style="border: 1px solid #cbd5e1; padding: 8px 12px;"><span style="color: #0f172a;"><font color="#0f172a"><b>CI.</b></font></span></th></tr></thead>
         <tbody>${filas}</tbody>
       </table>
       
-      <p style="margin-bottom: 25px;">Much&iacute;simas gracias de antemano.</p>
-      <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
+      <p style="margin-bottom: 25px; color: #333333;">Much&iacute;simas gracias de antemano.</p>
+      <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
       <p style="margin-top: 0; font-weight: bold; color: #333333;">${formSeguro.asesor || '[Nombre del Asesor]'}</p>
     </div>`;
   };
@@ -1128,18 +1128,18 @@ export default function App() {
     const { saludo, titulo } = obtenerDatosSupervisor();
     return `
     <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
-      <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
-      <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${titulo},</p>
-      <p style="margin-bottom: 20px;">Por medio de la presente, solicito el cambio de contrato digital a f&iacute;sico para el siguiente cliente:</p>
-      <ul style="margin-bottom: 20px; list-style-type: none; padding-left: 0;">
+      <p style="margin-bottom: 5px; color: #333333;">${obtenerSaludoTiempo()}</p>
+      <p style="margin-top: 0; margin-bottom: 25px; color: #333333;">${saludo} ${titulo},</p>
+      <p style="margin-bottom: 20px; color: #333333;">Por medio de la presente, solicito el cambio de contrato digital a f&iacute;sico para el siguiente cliente:</p>
+      <ul style="margin-bottom: 20px; list-style-type: none; padding-left: 0; color: #333333;">
         <li style="margin-bottom: 5px;">- <strong>Nombre del Cliente:</strong> ${formFisico.nombre || '[Nombre]'}</li>
         <li style="margin-bottom: 5px;">- <strong>N&uacute;mero de Carnet (CI):</strong> ${formFisico.ci || '[CI]'}</li>
         <li style="margin-bottom: 5px;">- <strong>N&uacute;mero de Contrato:</strong> ${formFisico.contrato || '[Nro Contrato]'}</li>
       </ul>
-      <p style="margin-bottom: 5px;"><strong>Motivo de la solicitud:</strong></p>
-      <p style="margin-bottom: 20px;">${formFisico.motivo || '[Describa el motivo...]'}</p>
-      <p style="margin-bottom: 25px;">Quedo atento a la confirmaci&oacute;n.</p>
-      <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
+      <p style="margin-bottom: 5px; color: #333333;"><strong>Motivo de la solicitud:</strong></p>
+      <p style="margin-bottom: 20px; color: #333333;">${formFisico.motivo || '[Describa el motivo...]'}</p>
+      <p style="margin-bottom: 25px; color: #333333;">Quedo atento a la confirmaci&oacute;n.</p>
+      <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
       <p style="margin-top: 0; font-weight: bold; color: #333333;">${formFisico.asesor || '[Nombre del Asesor]'}</p>
     </div>`;
   };
@@ -1157,10 +1157,10 @@ export default function App() {
 
     return `
     <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #1e293b; max-width: 650px; line-height: 1.5; text-align: left;">
-      <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
-      <p style="margin-top: 0; margin-bottom: 20px;">${saludo} ${titulo},</p>
+      <p style="margin-bottom: 5px; color: #1e293b;">${obtenerSaludoTiempo()}</p>
+      <p style="margin-top: 0; margin-bottom: 20px; color: #1e293b;">${saludo} ${titulo},</p>
       ${badgeHtml}
-      <p style="margin-bottom: 20px;">Por favor le solicito mediante el presente correo, la aplicaci&oacute;n del descuento correspondiente a la campa&ntilde;a vigente del proyecto ${nomProyecto}: ${descuentoTexto} ${condicionTexto}:</p>
+      <p style="margin-bottom: 20px; color: #1e293b;">Por favor le solicito mediante el presente correo, la aplicaci&oacute;n del descuento correspondiente a la campa&ntilde;a vigente del proyecto ${nomProyecto}: ${descuentoTexto} ${condicionTexto}:</p>
 
       <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-family: Arial, sans-serif; overflow: hidden; text-align: left;">
         <tr><td style="padding: 15px; border-bottom: 1px solid #e2e8f0; background-color: #f8fafc;">
@@ -1196,8 +1196,8 @@ export default function App() {
           </td></tr>
         <tr><td style="padding: 0 15px 15px 15px;">
              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #0f172a; border-radius: 8px;">
-                <tr><td style="padding: 20px 20px 10px 20px; font-size: 12px; font-weight: bold; color: #cbd5e1; text-transform: uppercase;">Precio M2 a Aplicar</td>
-                   <td align="right" style="padding: 20px 20px 10px 20px; font-size: 26px; font-weight: bold; color: #34d399;">$${formatCurrency(nuevoPrecioM2)}</td></tr>
+                <tr><td style="padding: 20px 20px 10px 20px; font-size: 12px; font-weight: bold; text-transform: uppercase;"><span style="color: #cbd5e1;"><font color="#cbd5e1">Precio M2 a Aplicar</font></span></td>
+                   <td align="right" style="padding: 20px 20px 10px 20px; font-size: 26px; font-weight: bold;"><span style="color: #34d399;"><font color="#34d399">$${formatCurrency(nuevoPrecioM2)}</font></span></td></tr>
                 <tr><td colspan="2" style="padding: 0 20px 20px 20px;">
                       <div style="background-color: #1e293b; padding: 10px; border-radius: 6px; text-align: center; font-size: 11px; font-family: monospace; color: #94a3b8; letter-spacing: 1px;">
                          UV <strong style="color: #ffffff;">${formDescuento.uv || 'SN'}</strong> &nbsp;&bull;&nbsp; MZN <strong style="color: #ffffff;">${formDescuento.manzano || '-'}</strong> &nbsp;&bull;&nbsp; LT <strong style="color: #ffffff;">${formDescuento.lote || '-'}</strong>
@@ -1207,8 +1207,8 @@ export default function App() {
              </table>
           </td></tr>
       </table>
-      <p style="margin-top: 25px; margin-bottom: 5px;">Quedo atento a su aprobaci&oacute;n para continuar con el proceso del cierre de la venta.</p>
-      <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
+      <p style="margin-top: 25px; margin-bottom: 5px; color: #1e293b;">Quedo atento a su aprobaci&oacute;n para continuar con el proceso del cierre de la venta.</p>
+      <p style="margin-top: 0; margin-bottom: 2px; color: #1e293b;">Saludos cordiales,</p>
       <p style="margin-top: 0; font-weight: bold; color: #0f172a;">${formDescuento.asesor || '[Nombre del Asesor]'}</p>
     </div>`;
   };
@@ -1217,19 +1217,19 @@ export default function App() {
     const { saludo, titulo } = obtenerDatosSupervisor();
     return `
     <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
-      <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
-      <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${titulo},</p>
-      <p style="margin-bottom: 20px;">Por favor su autorizaci&oacute;n para proceder con la anulaci&oacute;n del contrato actual del cliente <strong>${formCuota.cliente || '[Nombre del Cliente]'}</strong> y realizar un reingreso. El motivo de esta gesti&oacute;n es que el cliente desea incrementar significativamente su cuota inicial para reducir sus pagos mensuales.</p>
-      <p style="margin-bottom: 10px;">A continuaci&oacute;n, detallo los datos de la operaci&oacute;n actual en sistema:</p>
-      <ul style="margin-bottom: 20px; list-style-type: none; padding-left: 0;">
+      <p style="margin-bottom: 5px; color: #333333;">${obtenerSaludoTiempo()}</p>
+      <p style="margin-top: 0; margin-bottom: 25px; color: #333333;">${saludo} ${titulo},</p>
+      <p style="margin-bottom: 20px; color: #333333;">Por favor su autorizaci&oacute;n para proceder con la anulaci&oacute;n del contrato actual del cliente <strong>${formCuota.cliente || '[Nombre del Cliente]'}</strong> y realizar un reingreso. El motivo de esta gesti&oacute;n es que el cliente desea incrementar significativamente su cuota inicial para reducir sus pagos mensuales.</p>
+      <p style="margin-bottom: 10px; color: #333333;">A continuaci&oacute;n, detallo los datos de la operaci&oacute;n actual en sistema:</p>
+      <ul style="margin-bottom: 20px; list-style-type: none; padding-left: 0; color: #333333;">
         <li style="margin-bottom: 5px;">- <strong>Nro. Contrato:</strong> ${formCuota.nroContrato || '[Nro]'}</li>
         <li style="margin-bottom: 5px;">- <strong>Carnet (CI):</strong> ${formCuota.ci || '[CI]'}</li>
         <li style="margin-bottom: 5px;">- <strong>Ubicaci&oacute;n:</strong> Proyecto ${formCuota.proyecto} | UV ${formCuota.uv || '[X]'} | MZN ${formCuota.manzano || '[X]'} | LOTE ${formCuota.lote || '[X]'}</li>
       </ul>
-      <p style="margin-bottom: 5px;"><strong>Motivos del Reingreso / Observaciones:</strong></p>
-      <p style="margin-bottom: 20px;">${formCuota.motivo || '[Detalle el motivo del incremento...]'}</p>
-      <p style="margin-bottom: 25px;">Quedo atento a su aprobaci&oacute;n para proceder.</p>
-      <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
+      <p style="margin-bottom: 5px; color: #333333;"><strong>Motivos del Reingreso / Observaciones:</strong></p>
+      <p style="margin-bottom: 20px; color: #333333;">${formCuota.motivo || '[Detalle el motivo del incremento...]'}</p>
+      <p style="margin-bottom: 25px; color: #333333;">Quedo atento a su aprobaci&oacute;n para proceder.</p>
+      <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
       <p style="margin-top: 0; font-weight: bold; color: #333333;">${formCuota.asesorVentas || '[Nombre del Asesor]'}</p>
     </div>`;
   };
@@ -1238,20 +1238,20 @@ export default function App() {
     const { saludo, nombrePila } = obtenerDatosSupervisor();
     let filas = "";
     formReenvio.contratos.forEach(c => {
-      filas += `<tr style="background-color: #ffffff;"><td style="border: 1px solid #333333; padding: 6px 8px; font-weight: bold; color: #000000;">${c.nroContrato || '---'}</td><td style="border: 1px solid #333333; padding: 6px 8px; color: #000000;">${c.cliente || '---'}</td><td style="border: 1px solid #333333; padding: 6px 8px; color: #000000;">${c.ci || '---'}</td><td style="border: 1px solid #333333; padding: 6px 8px; color: #000000;">UV: ${c.uv || 'SN'} - Mzn: ${c.manzano || '-'} - Lote: ${c.lote || '-'}</td></tr>`;
+      filas += `<tr style="background-color: #ffffff;"><td style="border: 1px solid #333333; padding: 6px 8px; font-weight: bold;"><span style="color: #000000;"><font color="#000000">${c.nroContrato || '---'}</font></span></td><td style="border: 1px solid #333333; padding: 6px 8px;"><span style="color: #000000;"><font color="#000000">${c.cliente || '---'}</font></span></td><td style="border: 1px solid #333333; padding: 6px 8px;"><span style="color: #000000;"><font color="#000000">${c.ci || '---'}</font></span></td><td style="border: 1px solid #333333; padding: 6px 8px;"><span style="color: #000000;"><font color="#000000">UV: ${c.uv || 'SN'} - Mzn: ${c.manzano || '-'} - Lote: ${c.lote || '-'}</font></span></td></tr>`;
     });
     const esMultiple = formReenvio.contratos.length > 1;
     return `
     <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
-      <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
-      <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${nombrePila},</p>
-      <p style="margin-bottom: 20px;">Te escribo para solicitar tu apoyo habilitando nuevamente el env&iacute;o del correo para la firma digital de ${esMultiple ? "los siguientes contratos" : "el siguiente contrato"}. Debido a un error involuntario por parte de ${esMultiple ? "los clientes" : "el cliente"}, el proceso no se pudo completar en la primera instancia.</p>
+      <p style="margin-bottom: 5px; color: #333333;">${obtenerSaludoTiempo()}</p>
+      <p style="margin-top: 0; margin-bottom: 25px; color: #333333;">${saludo} ${nombrePila},</p>
+      <p style="margin-bottom: 20px; color: #333333;">Te escribo para solicitar tu apoyo habilitando nuevamente el env&iacute;o del correo para la firma digital de ${esMultiple ? "los siguientes contratos" : "el siguiente contrato"}. Debido a un error involuntario por parte de ${esMultiple ? "los clientes" : "el cliente"}, el proceso no se pudo completar en la primera instancia.</p>
       <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; border: 1px solid #333333; font-family: Arial, sans-serif; font-size: 13px; margin-bottom: 25px; width: 100%; text-align: left; background-color: #ffffff;">
-        <thead><tr style="background-color: #f2f2f2;"><th style="border: 1px solid #333333; padding: 6px 8px; color: #000000;"><b>Nro. Contrato</b></th><th style="border: 1px solid #333333; padding: 6px 8px; color: #000000;"><b>Cliente</b></th><th style="border: 1px solid #333333; padding: 6px 8px; color: #000000;"><b>Carnet (CI)</b></th><th style="border: 1px solid #333333; padding: 6px 8px; color: #000000;"><b>Ubicaci&oacute;n</b></th></tr></thead>
+        <thead><tr style="background-color: #f2f2f2;"><th style="border: 1px solid #333333; padding: 6px 8px;"><span style="color: #000000;"><font color="#000000"><b>Nro. Contrato</b></font></span></th><th style="border: 1px solid #333333; padding: 6px 8px;"><span style="color: #000000;"><font color="#000000"><b>Cliente</b></font></span></th><th style="border: 1px solid #333333; padding: 6px 8px;"><span style="color: #000000;"><font color="#000000"><b>Carnet (CI)</b></font></span></th><th style="border: 1px solid #333333; padding: 6px 8px;"><span style="color: #000000;"><font color="#000000"><b>Ubicaci&oacute;n</b></font></span></th></tr></thead>
         <tbody>${filas}</tbody>
       </table>
-      <p style="margin-bottom: 25px;">Quedo atento a tu confirmaci&oacute;n para proceder con la regularizaci&oacute;n.</p>
-      <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
+      <p style="margin-bottom: 25px; color: #333333;">Quedo atento a tu confirmaci&oacute;n para proceder con la regularizaci&oacute;n.</p>
+      <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
       <p style="margin-top: 0; font-weight: bold; color: #333333;">${formReenvio.asesor || '[Nombre del Asesor]'}</p>
     </div>`;
   };
@@ -1259,11 +1259,11 @@ export default function App() {
   const generarHtmlRenuncia = () => {
     return `
     <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
-      <p style="margin-bottom: 20px;">${obtenerSaludoTiempo()} estimada Carolina,</p>
-      <p style="margin-bottom: 20px;">Por medio del presente, te hago entrega formal de la carta de renuncia de la Sra./Sr. <strong>${formRenuncia.nombre || '[Nombre]'}</strong>, quien se desempe&ntilde;aba como <strong>${formRenuncia.cargo || 'Asesor de Ventas'}</strong> desde el pasado ${formRenuncia.fechaIngreso || '[Fecha]'}.</p>
-      <p style="margin-bottom: 20px;">En su nota, con fecha ${formRenuncia.fechaRenuncia || '[Fecha]'}, la/el asesor/a comunica que su retiro se debe a ${formRenuncia.motivo || '[motivos que le impiden continuar cumpliendo con sus funciones de manera &oacute;ptima]'}. Adjunto el documento escaneado para que se proceda con el tr&aacute;mite correspondiente en el departamento de Recursos Humanos.</p>
-      <p style="margin-bottom: 20px;">Quedo atento a cualquier requerimiento adicional para cerrar este proceso.</p>
-      <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
+      <p style="margin-bottom: 20px; color: #333333;">${obtenerSaludoTiempo()} estimada Carolina,</p>
+      <p style="margin-bottom: 20px; color: #333333;">Por medio del presente, te hago entrega formal de la carta de renuncia de la Sra./Sr. <strong>${formRenuncia.nombre || '[Nombre]'}</strong>, quien se desempe&ntilde;aba como <strong>${formRenuncia.cargo || 'Asesor de Ventas'}</strong> desde el pasado ${formRenuncia.fechaIngreso || '[Fecha]'}.</p>
+      <p style="margin-bottom: 20px; color: #333333;">En su nota, con fecha ${formRenuncia.fechaRenuncia || '[Fecha]'}, la/el asesor/a comunica que su retiro se debe a ${formRenuncia.motivo || '[motivos que le impiden continuar cumpliendo con sus funciones de manera &oacute;ptima]'}. Adjunto el documento escaneado para que se proceda con el tr&aacute;mite correspondiente en el departamento de Recursos Humanos.</p>
+      <p style="margin-bottom: 20px; color: #333333;">Quedo atento a cualquier requerimiento adicional para cerrar este proceso.</p>
+      <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
       <p style="margin-top: 0; font-weight: bold; color: #333333;">${formRenuncia.asesor || 'Oscar Saravia'}</p>
     </div>`;
   };
@@ -1271,11 +1271,11 @@ export default function App() {
   const generarHtmlAltaCRM = () => {
     return `
     <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
-      <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
-      <p style="margin-top: 0; margin-bottom: 20px;">Estimada Carolina,</p>
-      <p style="margin-bottom: 20px;">Por medio de la presente, solicito por favor la gesti&oacute;n para la creaci&oacute;n del usuario de acceso a los sistemas <strong>CRM y CESI</strong> para el nuevo asesor comercial que se est&aacute;n integrando a mi equipo.</p>
-      <p style="margin-bottom: 15px;">A continuaci&oacute;n, detallo los datos personales requeridos de cada uno, basados en sus fichas de ingreso:</p>
-      <ul style="margin-bottom: 20px; list-style-type: none; padding-left: 0;">
+      <p style="margin-bottom: 5px; color: #333333;">${obtenerSaludoTiempo()}</p>
+      <p style="margin-top: 0; margin-bottom: 20px; color: #333333;">Estimada Carolina,</p>
+      <p style="margin-bottom: 20px; color: #333333;">Por medio de la presente, solicito por favor la gesti&oacute;n para la creaci&oacute;n del usuario de acceso a los sistemas <strong>CRM y CESI</strong> para el nuevo asesor comercial que se est&aacute;n integrando a mi equipo.</p>
+      <p style="margin-bottom: 15px; color: #333333;">A continuaci&oacute;n, detallo los datos personales requeridos de cada uno, basados en sus fichas de ingreso:</p>
+      <ul style="margin-bottom: 20px; list-style-type: none; padding-left: 0; color: #333333;">
         <li style="margin-bottom: 5px;">Nombre: ${formAltaCRM.nombre || '---'}</li>
         <li style="margin-bottom: 5px;">Apellido Paterno: ${formAltaCRM.apPaterno || '---'}</li>
         <li style="margin-bottom: 5px;">Apellido Materno: ${formAltaCRM.apMaterno || '---'}</li>
@@ -1283,9 +1283,9 @@ export default function App() {
         <li style="margin-bottom: 5px;">Fecha de Nacimiento: ${formAltaCRM.fechaNacimiento || '---'}</li>
         <li style="margin-bottom: 5px;">Correo Electr&oacute;nico: ${formAltaCRM.correo || '---'}</li>
       </ul>
-      <p style="margin-bottom: 5px;">Quedo atento a la confirmaci&oacute;n de las credenciales para poder facilitarle el acceso y que inicie sus gestiones lo antes posible.</p>
-      <p style="margin-bottom: 20px;">De antemano, muchas gracias por tu colaboraci&oacute;n.</p>
-      <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
+      <p style="margin-bottom: 5px; color: #333333;">Quedo atento a la confirmaci&oacute;n de las credenciales para poder facilitarle el acceso y que inicie sus gestiones lo antes posible.</p>
+      <p style="margin-bottom: 20px; color: #333333;">De antemano, muchas gracias por tu colaboraci&oacute;n.</p>
+      <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
       <p style="margin-top: 0; font-weight: bold; color: #333333;">${formAltaCRM.asesor || 'Oscar Saravia'}</p>
     </div>`;
   };
@@ -1293,18 +1293,18 @@ export default function App() {
   const generarHtmlEvaluacion = () => {
     return `
     <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
-      <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}.</p>
-      <p style="margin-top: 0; margin-bottom: 20px;">Estimada Mar&iacute;a Fernanda,</p>
-      <p style="margin-bottom: 20px;">En respuesta a tu correo, adjunto el formulario de evaluaci&oacute;n de desempe&ntilde;o debidamente completado del asesor de la sucursal Montero que acaba de finalizar su programa de aprendizaje.</p>
-      <p style="margin-bottom: 15px;">A continuaci&oacute;n, comparto un resumen detallado de las observaciones y mis recomendaciones:</p>
-      <p style="margin-bottom: 10px;"><strong>1. ${formEvaluacion.nombre || '[Nombre Completo]'}</strong></p>
-      <ul style="margin-bottom: 20px; padding-left: 20px;">
+      <p style="margin-bottom: 5px; color: #333333;">${obtenerSaludoTiempo()}.</p>
+      <p style="margin-top: 0; margin-bottom: 20px; color: #333333;">Estimada Mar&iacute;a Fernanda,</p>
+      <p style="margin-bottom: 20px; color: #333333;">En respuesta a tu correo, adjunto el formulario de evaluaci&oacute;n de desempe&ntilde;o debidamente completado del asesor de la sucursal Montero que acaba de finalizar su programa de aprendizaje.</p>
+      <p style="margin-bottom: 15px; color: #333333;">A continuaci&oacute;n, comparto un resumen detallado de las observaciones y mis recomendaciones:</p>
+      <p style="margin-bottom: 10px; color: #333333;"><strong>1. ${formEvaluacion.nombre || '[Nombre Completo]'}</strong></p>
+      <ul style="margin-bottom: 20px; padding-left: 20px; color: #333333;">
         <li style="margin-bottom: 10px;"><strong>Punteo Total:</strong> ${formEvaluacion.punteo || '0'} (${formEvaluacion.calificacion || 'Muy Bueno'})</li>
         <li style="margin-bottom: 10px;"><strong>Resultados:</strong> ${formEvaluacion.lotes || '0'} lotes vendidos ($${formatCurrency(formEvaluacion.monto)}), ${formEvaluacion.leads || '0'} leads y ${formEvaluacion.visitas || '0'} visitas.</li>
         <li style="margin-bottom: 10px;"><strong>Observaciones y recomendaci&oacute;n:</strong> ${formEvaluacion.observaciones || '[Texto de observaciones...]'}</li>
       </ul>
-      <p style="margin-bottom: 20px;">Quedo a su disposici&oacute;n ante cualquier consulta.</p>
-      <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
+      <p style="margin-bottom: 20px; color: #333333;">Quedo a su disposici&oacute;n ante cualquier consulta.</p>
+      <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
       <p style="margin-top: 0; font-weight: bold; color: #333333;">${formEvaluacion.asesor || 'Oscar Hugo Saravia'}</p>
     </div>`;
   };
@@ -1312,13 +1312,13 @@ export default function App() {
   const generarHtmlPostulante = () => {
     return `
     <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
-      <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
-      <p style="margin-top: 0; margin-bottom: 25px;">Estimado Ulrich,</p>
-      <p style="margin-bottom: 20px;">Te adjunto el formulario de entrevista de <strong>${formPostulante.nombre || '[Nombre Postulante]'}</strong> para el puesto de Asesor de Ventas. &Eacute;l llega a nosotros como referido de la asesora ${formPostulante.referidor || '[Nombre Referidor]'}.</p>
-      <p style="margin-bottom: 20px;">Despu&eacute;s de realizarle la entrevista y evaluar su perfil, mi recomendaci&oacute;n es que proceda. Me gustar&iacute;a que lo puedan tomar en cuenta para pasarlo a la etapa de capacitaci&oacute;n y as&iacute; poder ir prepar&aacute;ndolo para que se integre a la M&aacute;quina de Ventas aqu&iacute; en la sucursal de Montero.</p>
-      <p style="margin-bottom: 20px;">En el documento adjunto podr&aacute;s ver el detalle completo de su experiencia, evaluaci&oacute;n de competencias y el role play.</p>
-      <p style="margin-bottom: 25px;">Cualquier consulta me avisas.</p>
-      <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
+      <p style="margin-bottom: 5px; color: #333333;">${obtenerSaludoTiempo()}</p>
+      <p style="margin-top: 0; margin-bottom: 25px; color: #333333;">Estimado Ulrich,</p>
+      <p style="margin-bottom: 20px; color: #333333;">Te adjunto el formulario de entrevista de <strong>${formPostulante.nombre || '[Nombre Postulante]'}</strong> para el puesto de Asesor de Ventas. &Eacute;l llega a nosotros como referido de la asesora ${formPostulante.referidor || '[Nombre Referidor]'}.</p>
+      <p style="margin-bottom: 20px; color: #333333;">Despu&eacute;s de realizarle la entrevista y evaluar su perfil, mi recomendaci&oacute;n es que proceda. Me gustar&iacute;a que lo puedan tomar en cuenta para pasarlo a la etapa de capacitaci&oacute;n y as&iacute; poder ir prepar&aacute;ndolo para que se integre a la M&aacute;quina de Ventas aqu&iacute; en la sucursal de Montero.</p>
+      <p style="margin-bottom: 20px; color: #333333;">En el documento adjunto podr&aacute;s ver el detalle completo de su experiencia, evaluaci&oacute;n de competencias y el role play.</p>
+      <p style="margin-bottom: 25px; color: #333333;">Cualquier consulta me avisas.</p>
+      <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
       <p style="margin-top: 0; font-weight: bold; color: #333333;">${formPostulante.asesor || 'Oscar Saravia'}</p>
     </div>`;
   };
