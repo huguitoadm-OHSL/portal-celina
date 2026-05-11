@@ -139,7 +139,7 @@ const TextArea = ({ label, name, value, onChange, placeholder }) => (
   </div>
 );
 
-const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setSupervisorDestino, showTextPlain = true, fixedDestinoLabel, fixedDestinoEmail, ccEmails }) => {
+const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setSupervisorDestino, showTextPlain = true, fixedDestinoLabel, fixedDestinoEmail, ccEmails, hideDestino = false }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -186,7 +186,7 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
 
   const handleOpenEmailApp = () => {
     handleCopy();
-    const to = fixedDestinoEmail || supervisorDestino;
+    const to = fixedDestinoEmail || supervisorDestino || '';
     const ccQuery = ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : '';
     const instruccionPega = "(Por favor, borra este texto, mantén presionado aquí y selecciona 'Pegar' para insertar la tabla con su formato oficial)";
     const mailtoLink = `mailto:${to}?subject=${encodeURIComponent(subject)}${ccQuery}&body=${encodeURIComponent(instruccionPega)}`;
@@ -198,7 +198,7 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
 
   const handleOpenGmail = () => {
     handleCopy();
-    const to = fixedDestinoEmail || supervisorDestino;
+    const to = fixedDestinoEmail || supervisorDestino || '';
     const ccQuery = ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : '';
     const instruccionPega = "(Por favor, borra este texto, mantén presionado aquí y selecciona 'Pegar' para insertar la tabla con su formato oficial)";
     const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${encodeURIComponent(subject)}${ccQuery}&body=${encodeURIComponent(instruccionPega)}`;
@@ -210,7 +210,7 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
 
   const handleOpenOutlook = () => {
     handleCopy();
-    const to = fixedDestinoEmail || supervisorDestino;
+    const to = fixedDestinoEmail || supervisorDestino || '';
     const ccQuery = ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : '';
     const subjectEnc = encodeURIComponent(subject);
     const bodyEnc = encodeURIComponent("(Por favor, borra este texto, mantén presionado aquí y selecciona 'Pegar' para insertar la tabla con su formato oficial)");
@@ -234,30 +234,32 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
     <div className="bg-white/90 backdrop-blur-xl border border-slate-200/80 rounded-2xl p-6 sticky top-8 shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex flex-col h-full max-h-[85vh] min-w-0 w-full">
       <h3 className="text-xl font-extrabold text-slate-800 mb-4 flex items-center tracking-tight">
         <CheckCircle2 className="w-6 h-6 text-emerald-500 mr-2" />
-        Vista Previa del Correo
+        Vista Previa del Mensaje
       </h3>
 
-      <div className="mb-5 w-full">
-        <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Enviar a:</label>
-        {fixedDestinoEmail ? (
-          <div className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-slate-100/70 text-slate-700 font-semibold shadow-inner truncate text-sm">
-            {String(fixedDestinoLabel)} ({String(fixedDestinoEmail)})
-          </div>
-        ) : (
-          <select 
-            value={supervisorDestino}
-            onChange={(e) => setSupervisorDestino && setSupervisorDestino(e.target.value)}
-            className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 text-slate-800 font-semibold shadow-sm cursor-pointer text-sm"
-          >
-            {SUPERVISORES.map(s => (
-              <option key={s.id} value={s.correo}>{String(s.nombre)} ({String(s.correo)})</option>
-            ))}
-          </select>
-        )}
-        {ccEmails && (
-            <p className="text-xs text-slate-500 mt-2 ml-1"><strong>CC:</strong> {String(ccEmails)}</p>
-        )}
-      </div>
+      {!hideDestino && (
+        <div className="mb-5 w-full">
+          <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Enviar a:</label>
+          {fixedDestinoEmail ? (
+            <div className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-slate-100/70 text-slate-700 font-semibold shadow-inner truncate text-sm">
+              {String(fixedDestinoLabel)} {fixedDestinoEmail ? `(${String(fixedDestinoEmail)})` : ''}
+            </div>
+          ) : (
+            <select 
+              value={supervisorDestino}
+              onChange={(e) => setSupervisorDestino && setSupervisorDestino(e.target.value)}
+              className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 text-slate-800 font-semibold shadow-sm cursor-pointer text-sm"
+            >
+              {SUPERVISORES.map(s => (
+                <option key={s.id} value={s.correo}>{String(s.nombre)} ({String(s.correo)})</option>
+              ))}
+            </select>
+          )}
+          {ccEmails && (
+              <p className="text-xs text-slate-500 mt-2 ml-1"><strong>CC:</strong> {String(ccEmails)}</p>
+          )}
+        </div>
+      )}
 
       {htmlContent && (
         <div className="mb-4 p-3.5 bg-indigo-50/50 border border-indigo-100 rounded-xl flex gap-3 items-start shadow-sm w-full">
@@ -283,9 +285,9 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
           className="flex-1 flex items-center justify-center py-3 px-4 bg-white border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 hover:border-slate-300 font-bold transition-all shadow-sm whitespace-nowrap"
         >
           {copied ? <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-500" /> : <Copy className="w-4 h-4 mr-2 text-slate-400" />}
-          {copied ? '¡Copiado Exitosamente!' : 'Copiar Formato PC'}
+          {copied ? '¡Copiado Exitosamente!' : (htmlContent ? 'Copiar Formato PC' : 'Copiar Texto para WhatsApp')}
         </button>
-        {showTextPlain && (
+        {showTextPlain && !hideDestino && (
           <div className="flex-1 flex flex-col gap-2">
             <button
               onClick={handleOpenEmailApp}
@@ -395,6 +397,10 @@ export default function App() {
 
   const [formPostulante, setFormPostulante] = useState({
     asesor: '', nombre: '', referidor: ''
+  });
+
+  const [formAmortizacion, setFormAmortizacion] = useState({
+    cliente: '', saldoActual: '', cuotaMensual: '', tasaAnual: '12', montoAmortizacion: ''
   });
 
   const [sumaVentaModal, setSumaVentaModal] = useState({ show: false, index: null, nombre: '', monto: '' });
@@ -615,6 +621,7 @@ export default function App() {
   const handleAltaCRMChange = (e) => setFormAltaCRM({ ...formAltaCRM, [e.target.name]: e.target.value });
   const handleEvaluacionChange = (e) => setFormEvaluacion({ ...formEvaluacion, [e.target.name]: e.target.value });
   const handlePostulanteChange = (e) => setFormPostulante({ ...formPostulante, [e.target.name]: e.target.value });
+  const handleAmortizacionChange = (e) => setFormAmortizacion({ ...formAmortizacion, [e.target.name]: e.target.value });
   
   const handleRecompraChange = (e) => {
     const { name, value } = e.target;
@@ -776,6 +783,48 @@ export default function App() {
     return 100;
   };
 
+  const calcularSimulacionAmortizacion = () => {
+    const p = parseFloat(formAmortizacion.saldoActual) || 0;
+    const amort = parseFloat(formAmortizacion.montoAmortizacion) || 0;
+    const pmt = parseFloat(formAmortizacion.cuotaMensual) || 0;
+    const rateAnual = parseFloat(formAmortizacion.tasaAnual) || 0;
+    const r = rateAnual / 100 / 12;
+
+    let nOld = 0, nNew = 0, totalIntOld = 0, totalIntNew = 0, error = "";
+
+    if (p > 0 && pmt > 0) {
+      if (r === 0) {
+        nOld = p / pmt;
+        nNew = Math.max(0, (p - amort) / pmt);
+      } else {
+        if (pmt <= p * r) {
+          error = "La cuota es muy baja para cubrir el interés. Revise los montos.";
+        } else {
+           nOld = -Math.log(1 - (p * r) / pmt) / Math.log(1 + r);
+           totalIntOld = (nOld * pmt) - p;
+           
+           const pNew = Math.max(0, p - amort);
+           if (pNew === 0) {
+             nNew = 0;
+           } else if (pmt > pNew * r) {
+             nNew = -Math.log(1 - (pNew * r) / pmt) / Math.log(1 + r);
+             totalIntNew = (nNew * pmt) - pNew;
+           } else {
+             error = "La amortización no es suficiente para reducir el capital efectivamente.";
+           }
+        }
+      }
+    }
+
+    return { 
+      nOld: Math.ceil(nOld), 
+      nNew: Math.ceil(nNew), 
+      ahorrado: Math.max(0, totalIntOld - totalIntNew), 
+      saldoNuevo: Math.max(0, p - amort),
+      error
+    };
+  };
+
   const obtenerDatosSupervisor = () => {
     const supervisorSeleccionado = SUPERVISORES.find(s => s.correo === supervisorDestino) || SUPERVISORES[0];
     return {
@@ -785,6 +834,8 @@ export default function App() {
     };
   };
 
+  // --- GENERADORES DE TEXTOS PLANOS PARA CELULAR ---
+  
   const generarTextoRecompraCelular = () => {
     const beneficio = calcularBeneficioRecompra();
     const { saludo, nombrePila } = obtenerDatosSupervisor();
@@ -892,6 +943,14 @@ export default function App() {
 
   const generarTextoPostulanteCelular = () => {
     return `👋 ${obtenerSaludoTiempo()}\nEstimado Ulrich,\n\nTe adjunto el formulario de entrevista de *${formPostulante.nombre || '[Nombre]'}* para el puesto de Asesor de Ventas. Él llega a nosotros como referido de la asesora ${formPostulante.referidor || '[Nombre]'}.\n\nDespués de realizarle la entrevista y evaluar su perfil, mi recomendación es que proceda. Me gustaría que lo puedan tomar en cuenta para pasarlo a la etapa de capacitación y así poder ir preparándolo para que se integre a la Máquina de Ventas aquí en la sucursal de Montero.\n\nEn el documento adjunto podrás ver el detalle completo de su experiencia, evaluación de competencias y el role play.\n\nCualquier consulta me avisas.\n\nSaludos cordiales,\n*${formPostulante.asesor || 'Oscar Saravia'}*`;
+  };
+
+  const generarTextoAmortizacionCelular = () => {
+    const { nOld, nNew, ahorrado, saldoNuevo, error } = calcularSimulacionAmortizacion();
+    if (error) return `⚠️ Error en simulación: ${error}`;
+    
+    const clienteStr = formAmortizacion.cliente ? `Estimado/a ${formAmortizacion.cliente},\n\n` : `Estimado/a cliente,\n\n`;
+    return `👋 ${obtenerSaludoTiempo()},\n\n${clienteStr}Te presento la simulación de tu abono extraordinario a capital:\n\n*📊 DATOS ACTUALES*\n💰 Saldo Capital: $ ${formatCurrency(formAmortizacion.saldoActual)}\n💵 Cuota Mensual: $ ${formatCurrency(formAmortizacion.cuotaMensual)}\n🗓️ Cuotas Restantes: ${nOld} meses\n\n*🚀 CON TU ABONO DE $ ${formatCurrency(formAmortizacion.montoAmortizacion)}*\n⬇️ Nuevo Saldo Capital: $ ${formatCurrency(saldoNuevo)}\n📉 *Nuevas Cuotas Restantes: ${nNew} meses*\n\n*🎁 BENEFICIOS DEL ABONO*\n✅ Te ahorras de pagar: ${nOld - nNew} cuotas\n💸 Ahorro estimado en intereses: $ ${formatCurrency(ahorrado)}\n\nSi deseas proceder con este pago o tienes alguna duda, quedo a tu disposición.\n\nSaludos cordiales.`;
   };
 
   // --- GENERADORES HTML PARA PC ---
@@ -1325,6 +1384,66 @@ export default function App() {
     </div>`;
   };
 
+  const generarHtmlAmortizacion = () => {
+    const { nOld, nNew, ahorrado, saldoNuevo, error } = calcularSimulacionAmortizacion();
+    if (error) return `<div>Error: ${error}</div>`;
+
+    return `
+    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 600px; line-height: 1.5; text-align: left;">
+      <p style="margin-bottom: 5px; color: #333333;">👋 ${obtenerSaludoTiempo()},</p>
+      <p style="margin-top: 0; margin-bottom: 20px; color: #333333;">${formAmortizacion.cliente ? `Estimado/a <strong>${formAmortizacion.cliente}</strong>` : 'Estimado/a cliente'}, te presento la simulaci&oacute;n de tu abono extraordinario a capital:</p>
+      
+      <table width="100%" cellpadding="12" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px;">
+        <tr>
+          <td colspan="2" style="background-color: #e2e8f0; color: #1e293b; font-weight: bold; font-size: 13px; text-transform: uppercase;">📊 DATOS ACTUALES</td>
+        </tr>
+        <tr>
+          <td width="50%" style="border-bottom: 1px solid #e2e8f0; color: #475569;">Saldo Capital Actual</td>
+          <td width="50%" align="right" style="border-bottom: 1px solid #e2e8f0; color: #0f172a; font-weight: bold;">$ ${formatCurrency(formAmortizacion.saldoActual)}</td>
+        </tr>
+        <tr>
+          <td style="border-bottom: 1px solid #e2e8f0; color: #475569;">Cuota Mensual</td>
+          <td align="right" style="border-bottom: 1px solid #e2e8f0; color: #0f172a; font-weight: bold;">$ ${formatCurrency(formAmortizacion.cuotaMensual)}</td>
+        </tr>
+        <tr>
+          <td style="color: #475569;">Cuotas Restantes</td>
+          <td align="right" style="color: #0f172a; font-weight: bold;">${nOld} meses</td>
+        </tr>
+      </table>
+
+      <table width="100%" cellpadding="12" cellspacing="0" style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; margin-bottom: 20px;">
+        <tr>
+          <td colspan="2" style="background-color: #d1fae5; color: #065f46; font-weight: bold; font-size: 13px; text-transform: uppercase;">🚀 CON TU ABONO DE $ ${formatCurrency(formAmortizacion.montoAmortizacion)}</td>
+        </tr>
+        <tr>
+          <td width="50%" style="border-bottom: 1px solid #bbf7d0; color: #166534;">Nuevo Saldo Capital</td>
+          <td width="50%" align="right" style="border-bottom: 1px solid #bbf7d0; color: #065f46; font-weight: bold; font-size: 15px;">$ ${formatCurrency(saldoNuevo)}</td>
+        </tr>
+        <tr>
+          <td style="color: #166534; font-weight: bold;">Nuevas Cuotas Restantes</td>
+          <td align="right" style="color: #065f46; font-weight: bold; font-size: 18px;">${nNew} meses</td>
+        </tr>
+      </table>
+
+      <table width="100%" cellpadding="12" cellspacing="0" style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; margin-bottom: 20px;">
+        <tr>
+          <td colspan="2" style="background-color: #fef3c7; color: #92400e; font-weight: bold; font-size: 13px; text-transform: uppercase;">🎁 BENEFICIOS DE TU ABONO</td>
+        </tr>
+        <tr>
+          <td width="50%" style="border-bottom: 1px solid #fde68a; color: #92400e;">Te ahorras de pagar</td>
+          <td width="50%" align="right" style="border-bottom: 1px solid #fde68a; color: #b45309; font-weight: bold; font-size: 15px;">${nOld - nNew} cuotas</td>
+        </tr>
+        <tr>
+          <td style="color: #92400e;">Ahorro en intereses</td>
+          <td align="right" style="color: #15803d; font-weight: bold; font-size: 16px;">$ ${formatCurrency(ahorrado)}</td>
+        </tr>
+      </table>
+
+      <p style="margin-bottom: 20px; color: #333333;">Si deseas proceder con este pago o tienes alguna duda, quedo a tu disposici&oacute;n.</p>
+      <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales.</p>
+    </div>`;
+  };
+
   return (
     <div className="min-h-screen bg-[#f8fafc] bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] flex flex-col md:flex-row font-sans selection:bg-indigo-100 selection:text-indigo-900">
       
@@ -1378,6 +1497,9 @@ export default function App() {
           </button>
 
           <div className="pt-5 pb-2"><p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Cotizaciones y Recompras</p></div>
+          <button onClick={() => setActiveTab('amortizacion')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'amortizacion' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+            <Calculator className="w-5 h-5 mr-3" /> Amortización a Capital
+          </button>
           <button onClick={() => setActiveTab('recompra')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'recompra' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <Repeat className="w-5 h-5 mr-3" /> Recompra
           </button>
@@ -1565,6 +1687,77 @@ export default function App() {
               </div>
             </div>
           )}
+
+          {/* FORM: SIMULADOR AMORTIZACIÓN */}
+          {activeTab === 'amortizacion' && (() => {
+            const { nOld, nNew, ahorrado, saldoNuevo, error } = calcularSimulacionAmortizacion();
+            return (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
+              <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><Calculator className="w-6 h-6 mr-2 text-blue-600" /> Simulador de Amortización a Capital</h2></div>
+              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0 flex flex-col">
+                  
+                  <div className="mb-4">
+                    <Input label="Nombre del Cliente (Opcional)" name="cliente" value={formAmortizacion.cliente} onChange={handleAmortizacionChange} placeholder="Ej. Juan Pérez" />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mb-2">
+                    <Input label="Saldo Capital Actual ($)" name="saldoActual" value={formAmortizacion.saldoActual} onChange={handleAmortizacionChange} placeholder="Ej. 15000" type="number" />
+                    <Input label="Cuota Mensual Actual ($)" name="cuotaMensual" value={formAmortizacion.cuotaMensual} onChange={handleAmortizacionChange} placeholder="Ej. 250" type="number" />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mb-4">
+                    <Input label="Monto a Amortizar ($)" name="montoAmortizacion" value={formAmortizacion.montoAmortizacion} onChange={handleAmortizacionChange} placeholder="Ej. 5000" type="number" />
+                    <div className="w-full">
+                      <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Tasa de Interés Anual (%)</label>
+                      <input type="number" name="tasaAnual" value={formAmortizacion.tasaAnual} onChange={handleAmortizacionChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 bg-slate-50/50 text-slate-800 shadow-sm text-sm" />
+                    </div>
+                  </div>
+
+                  {error ? (
+                    <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 font-bold text-sm flex items-center">
+                      <AlertCircle className="w-5 h-5 mr-2" /> {error}
+                    </div>
+                  ) : (
+                    <div className="mt-4 p-5 bg-gradient-to-br from-indigo-900 to-slate-900 rounded-2xl text-white shadow-lg shadow-indigo-900/20">
+                      <h3 className="text-sm font-bold text-indigo-200 mb-4 flex items-center"><TrendingUp className="w-4 h-4 mr-2" /> Impacto de tu Amortización</h3>
+                      <div className="grid grid-cols-2 gap-4 mb-5">
+                        <div className="bg-white/10 p-4 rounded-xl border border-white/5">
+                          <p className="text-xs text-slate-300 mb-1 font-semibold uppercase tracking-wider">Cuotas Restantes</p>
+                          <p className="text-3xl font-black text-white">{nOld} <span className="text-sm font-normal text-slate-400">meses</span></p>
+                        </div>
+                        <div className="bg-emerald-500/20 border border-emerald-500/30 p-4 rounded-xl">
+                          <p className="text-xs text-emerald-200 mb-1 font-semibold uppercase tracking-wider">Nuevas Cuotas</p>
+                          <p className="text-3xl font-black text-emerald-400">{nNew} <span className="text-sm font-normal text-emerald-600/50">meses</span></p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="border-t border-white/10 pt-3">
+                          <p className="text-xs text-slate-400 mb-1 uppercase tracking-wider">Tiempo Ahorrado</p>
+                          <p className="text-lg font-bold text-white">{Math.max(0, nOld - nNew)} meses</p>
+                        </div>
+                        <div className="border-t border-white/10 pt-3">
+                          <p className="text-xs text-slate-400 mb-1 uppercase tracking-wider">Interés Ahorrado</p>
+                          <p className="text-lg font-bold text-emerald-400">$ {formatCurrency(ahorrado)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+                <div className="w-full min-w-0">
+                  <ResultCard 
+                    title="Resumen para el Cliente" 
+                    text={generarTextoAmortizacionCelular()} 
+                    htmlContent={generarHtmlAmortizacion()} 
+                    subject={`Simulación de Abono a Capital`} 
+                    hideDestino={true}
+                  />
+                </div>
+              </div>
+            </div>
+            );
+          })()}
 
           {/* FORM: RECOMPRA */}
           {activeTab === 'recompra' && (
