@@ -31,7 +31,7 @@ import {
 } from 'lucide-react';
 
 // --- CONTROL DE VERSIÓN DE DATOS ---
-const DATA_VERSION = "v1.2"; 
+const DATA_VERSION = "v1.4"; 
 
 // --- CONFIGURACIÓN DE DATOS MOCK ---
 const PROYECTOS_CONVENIO_1 = ["Los Jardines", "El Renacer", "Rancho Nuevo", "Santa Fe"];
@@ -399,8 +399,9 @@ export default function App() {
     asesor: '', nombre: '', referidor: ''
   });
 
+  // ESTADO PARA AMORTIZACIÓN (Sistema Francés, 12.1733% defecto)
   const [formAmortizacion, setFormAmortizacion] = useState({
-    cliente: '', saldoActual: '', cuotaMensual: '', tasaAnual: '12', montoAmortizacion: ''
+    cliente: '', precioContado: '', cuotaInicial: '', plazoAnios: '', cuotasPagadas: '', seguroMensual: '', tasaAnual: '12.1733', montoAmortizacion: ''
   });
 
   const [sumaVentaModal, setSumaVentaModal] = useState({ show: false, index: null, nombre: '', monto: '' });
@@ -784,43 +785,69 @@ export default function App() {
   };
 
   const calcularSimulacionAmortizacion = () => {
-    const p = parseFloat(formAmortizacion.saldoActual) || 0;
-    const amort = parseFloat(formAmortizacion.montoAmortizacion) || 0;
-    const pmt = parseFloat(formAmortizacion.cuotaMensual) || 0;
+    const C = parseFloat(formAmortizacion.precioContado) || 0;
+    const CI = parseFloat(formAmortizacion.cuotaInicial) || 0;
+    const plazo = parseInt(formAmortizacion.plazoAnios) || 0;
+    const k = parseInt(formAmortizacion.cuotasPagadas) || 0;
     const rateAnual = parseFloat(formAmortizacion.tasaAnual) || 0;
-    const r = rateAnual / 100 / 12;
+    const amort = parseFloat(formAmortizacion.montoAmortizacion) || 0;
+    const seguro = parseFloat(formAmortizacion.seguroMensual) || 0;
 
-    let nOld = 0, nNew = 0, totalIntOld = 0, totalIntNew = 0, error = "";
+    let error = "";
+    let P = C - CI;
+    let n = plazo * 12;
+    let r = rateAnual / 100 / 12;
+    
+    let PMT = 0;
+    let Bk = 0;
+    let B_new = 0;
+    let nNewExact = 0;
+    let nNew = 0;
+    let ahorradoInt = 0;
+    let ahorradoSeguro = 0;
 
-    if (p > 0 && pmt > 0) {
-      if (r === 0) {
-        nOld = p / pmt;
-        nNew = Math.max(0, (p - amort) / pmt);
+    if (P > 0 && n > 0 && r > 0) {
+      PMT = (P * r) / (1 - Math.pow(1 + r, -n));
+      
+      if (k > n) {
+        error = "Las cuotas pagadas no pueden ser mayores al plazo total.";
       } else {
-        if (pmt <= p * r) {
-          error = "La cuota es muy baja para cubrir el interés. Revise los montos.";
+        Bk = PMT * (1 - Math.pow(1 + r, -(n - k))) / r;
+        
+        if (amort >= Bk) {
+          B_new = 0;
+          nNew = 0;
+          ahorradoInt = ((n - k) * PMT - Bk); 
+        } else if (amort > 0) {
+          B_new = Bk - amort;
+          nNewExact = -Math.log(1 - (B_new * r) / PMT) / Math.log(1 + r);
+          nNew = Math.ceil(nNewExact);
+          
+          const intOld = (n - k) * PMT - Bk;
+          const intNew = nNewExact * PMT - B_new;
+          ahorradoInt = intOld - intNew;
         } else {
-           nOld = -Math.log(1 - (p * r) / pmt) / Math.log(1 + r);
-           totalIntOld = (nOld * pmt) - p;
-           
-           const pNew = Math.max(0, p - amort);
-           if (pNew === 0) {
-             nNew = 0;
-           } else if (pmt > pNew * r) {
-             nNew = -Math.log(1 - (pNew * r) / pmt) / Math.log(1 + r);
-             totalIntNew = (nNew * pmt) - pNew;
-           } else {
-             error = "La amortización no es suficiente para reducir el capital efectivamente.";
-           }
+           B_new = Bk;
+           nNew = n - k;
+           ahorradoInt = 0;
         }
       }
+    } else if (P < 0) {
+      error = "La cuota inicial no puede ser mayor al precio de contado.";
     }
 
-    return { 
-      nOld: Math.ceil(nOld), 
-      nNew: Math.ceil(nNew), 
-      ahorrado: Math.max(0, totalIntOld - totalIntNew), 
-      saldoNuevo: Math.max(0, p - amort),
+    ahorradoSeguro = Math.max(0, (n - k - nNew) * seguro);
+
+    return {
+      P: P > 0 ? P : 0,
+      PMT: PMT > 0 ? PMT : 0,
+      cuotaTotal: (PMT > 0 ? PMT : 0) + seguro,
+      Bk: Bk > 0 ? Bk : 0,
+      B_new: B_new > 0 ? B_new : 0,
+      nOldRestantes: n - k > 0 ? n - k : 0,
+      nNew,
+      ahorrado: Math.max(0, ahorradoInt + ahorradoSeguro),
+      precioFinal: P > 0 && PMT > 0 ? (CI + ((PMT + seguro) * n)) : 0,
       error
     };
   };
@@ -834,8 +861,6 @@ export default function App() {
     };
   };
 
-  // --- GENERADORES DE TEXTOS PLANOS PARA CELULAR ---
-  
   const generarTextoRecompraCelular = () => {
     const beneficio = calcularBeneficioRecompra();
     const { saludo, nombrePila } = obtenerDatosSupervisor();
@@ -946,11 +971,11 @@ export default function App() {
   };
 
   const generarTextoAmortizacionCelular = () => {
-    const { nOld, nNew, ahorrado, saldoNuevo, error } = calcularSimulacionAmortizacion();
+    const { P, PMT, Bk, B_new, nOldRestantes, nNew, ahorrado, error, precioFinal } = calcularSimulacionAmortizacion();
     if (error) return `⚠️ Error en simulación: ${error}`;
     
     const clienteStr = formAmortizacion.cliente ? `Estimado/a ${formAmortizacion.cliente},\n\n` : `Estimado/a cliente,\n\n`;
-    return `👋 ${obtenerSaludoTiempo()},\n\n${clienteStr}Te presento la simulación de tu abono extraordinario a capital:\n\n*📊 DATOS ACTUALES*\n💰 Saldo Capital: $ ${formatCurrency(formAmortizacion.saldoActual)}\n💵 Cuota Mensual: $ ${formatCurrency(formAmortizacion.cuotaMensual)}\n🗓️ Cuotas Restantes: ${nOld} meses\n\n*🚀 CON TU ABONO DE $ ${formatCurrency(formAmortizacion.montoAmortizacion)}*\n⬇️ Nuevo Saldo Capital: $ ${formatCurrency(saldoNuevo)}\n📉 *Nuevas Cuotas Restantes: ${nNew} meses*\n\n*🎁 BENEFICIOS DEL ABONO*\n✅ Te ahorras de pagar: ${nOld - nNew} cuotas\n💸 Ahorro estimado en intereses: $ ${formatCurrency(ahorrado)}\n\nSi deseas proceder con este pago o tienes alguna duda, quedo a tu disposición.\n\nSaludos cordiales.`;
+    return `👋 ${obtenerSaludoTiempo()},\n\n${clienteStr}Te presento la simulación de tu abono extraordinario a capital (Sistema Francés):\n\n*📝 DATOS DEL CRÉDITO ORIGINAL*\n💰 Precio al Contado: $ ${formatCurrency(formAmortizacion.precioContado)}\n💵 Cuota Inicial: $ ${formatCurrency(formAmortizacion.cuotaInicial)}\n🤝 Capital Financiado: $ ${formatCurrency(P)}\n⏱️ Plazo Original: ${formAmortizacion.plazoAnios} años\n🏷️ Precio Final a Plazos: $ ${formatCurrency(precioFinal)}\n📊 Cuota Mensual Fija (Pura): $ ${formatCurrency(PMT)}\n\n*📊 SITUACIÓN ACTUAL*\n🗓️ Cuotas Pagadas: ${formAmortizacion.cuotasPagadas}\n⏳ Cuotas Restantes: ${nOldRestantes} meses\n📉 *Saldo Capital Actual: $ ${formatCurrency(Bk)}*\n\n*🚀 CON TU ABONO EXTRAORDINARIO DE $ ${formatCurrency(formAmortizacion.montoAmortizacion)}*\n⬇️ Nuevo Saldo Capital: $ ${formatCurrency(B_new)}\n⚡ *Nuevas Cuotas Restantes: ${nNew} meses*\n\n*🎁 BENEFICIOS DE TU ABONO*\n✅ Te ahorras de pagar: ${nOldRestantes - nNew} cuotas\n💸 Ahorro real en intereses y seguros: $ ${formatCurrency(ahorrado)}\n\nSi deseas proceder con este pago o tienes alguna duda, quedo a tu entera disposición.\n\nSaludos cordiales.`;
   };
 
   // --- GENERADORES HTML PARA PC ---
@@ -1385,39 +1410,69 @@ export default function App() {
   };
 
   const generarHtmlAmortizacion = () => {
-    const { nOld, nNew, ahorrado, saldoNuevo, error } = calcularSimulacionAmortizacion();
+    const { P, PMT, Bk, B_new, nOldRestantes, nNew, ahorrado, error, precioFinal } = calcularSimulacionAmortizacion();
     if (error) return `<div>Error: ${error}</div>`;
 
     return `
     <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 600px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px; color: #333333;">👋 ${obtenerSaludoTiempo()},</p>
-      <p style="margin-top: 0; margin-bottom: 20px; color: #333333;">${formAmortizacion.cliente ? `Estimado/a <strong>${formAmortizacion.cliente}</strong>` : 'Estimado/a cliente'}, te presento la simulaci&oacute;n de tu abono extraordinario a capital:</p>
+      <p style="margin-top: 0; margin-bottom: 20px; color: #333333;">${formAmortizacion.cliente ? `Estimado/a <strong>${formAmortizacion.cliente}</strong>` : 'Estimado/a cliente'}, te presento la simulaci&oacute;n de tu abono extraordinario a capital (Sistema Franc&eacute;s):</p>
       
+      <table width="100%" cellpadding="12" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 15px;">
+        <tr>
+          <td colspan="2" style="background-color: #e2e8f0; color: #1e293b; font-weight: bold; font-size: 13px; text-transform: uppercase;">📝 DATOS DEL CR&Eacute;DITO ORIGINAL</td>
+        </tr>
+        <tr>
+          <td width="50%" style="border-bottom: 1px solid #e2e8f0; color: #475569;">Precio al Contado</td>
+          <td width="50%" align="right" style="border-bottom: 1px solid #e2e8f0; color: #0f172a; font-weight: bold;">$ ${formatCurrency(formAmortizacion.precioContado)}</td>
+        </tr>
+        <tr>
+          <td style="border-bottom: 1px solid #e2e8f0; color: #475569;">Cuota Inicial</td>
+          <td align="right" style="border-bottom: 1px solid #e2e8f0; color: #0f172a; font-weight: bold;">$ ${formatCurrency(formAmortizacion.cuotaInicial)}</td>
+        </tr>
+        <tr>
+          <td style="border-bottom: 1px solid #e2e8f0; color: #475569;">Capital Financiado</td>
+          <td align="right" style="border-bottom: 1px solid #e2e8f0; color: #0f172a; font-weight: bold;">$ ${formatCurrency(P)}</td>
+        </tr>
+        <tr>
+          <td style="border-bottom: 1px solid #e2e8f0; color: #475569;">Plazo Original</td>
+          <td align="right" style="border-bottom: 1px solid #e2e8f0; color: #0f172a; font-weight: bold;">${formAmortizacion.plazoAnios} a&ntilde;os (${parseInt(formAmortizacion.plazoAnios) * 12} meses)</td>
+        </tr>
+        <tr>
+          <td style="border-bottom: 1px solid #e2e8f0; color: #475569;">Precio Final a Plazos</td>
+          <td align="right" style="border-bottom: 1px solid #e2e8f0; color: #0f172a; font-weight: bold;">$ ${formatCurrency(precioFinal)}</td>
+        </tr>
+        <tr>
+          <td style="color: #475569;">Cuota Mensual Fija (Pura)</td>
+          <td align="right" style="color: #0f172a; font-weight: bold;">$ ${formatCurrency(PMT)}</td>
+        </tr>
+      </table>
+
       <table width="100%" cellpadding="12" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px;">
         <tr>
-          <td colspan="2" style="background-color: #e2e8f0; color: #1e293b; font-weight: bold; font-size: 13px; text-transform: uppercase;">📊 DATOS ACTUALES</td>
+          <td colspan="2" style="background-color: #e2e8f0; color: #1e293b; font-weight: bold; font-size: 13px; text-transform: uppercase;">📊 SITUACI&Oacute;N ACTUAL</td>
         </tr>
         <tr>
-          <td width="50%" style="border-bottom: 1px solid #e2e8f0; color: #475569;">Saldo Capital Actual</td>
-          <td width="50%" align="right" style="border-bottom: 1px solid #e2e8f0; color: #0f172a; font-weight: bold;">$ ${formatCurrency(formAmortizacion.saldoActual)}</td>
+          <td width="50%" style="border-bottom: 1px solid #e2e8f0; color: #475569;">Cuotas Pagadas</td>
+          <td width="50%" align="right" style="border-bottom: 1px solid #e2e8f0; color: #0f172a; font-weight: bold;">${formAmortizacion.cuotasPagadas}</td>
         </tr>
         <tr>
-          <td style="border-bottom: 1px solid #e2e8f0; color: #475569;">Cuota Mensual</td>
-          <td align="right" style="border-bottom: 1px solid #e2e8f0; color: #0f172a; font-weight: bold;">$ ${formatCurrency(formAmortizacion.cuotaMensual)}</td>
+          <td style="border-bottom: 1px solid #e2e8f0; color: #475569;">Cuotas Restantes</td>
+          <td align="right" style="border-bottom: 1px solid #e2e8f0; color: #0f172a; font-weight: bold;">${nOldRestantes} meses</td>
         </tr>
         <tr>
-          <td style="color: #475569;">Cuotas Restantes</td>
-          <td align="right" style="color: #0f172a; font-weight: bold;">${nOld} meses</td>
+          <td style="color: #475569;">Saldo Capital Actual</td>
+          <td align="right" style="color: #2563eb; font-weight: bold;">$ ${formatCurrency(Bk)}</td>
         </tr>
       </table>
 
       <table width="100%" cellpadding="12" cellspacing="0" style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; margin-bottom: 20px;">
         <tr>
-          <td colspan="2" style="background-color: #d1fae5; color: #065f46; font-weight: bold; font-size: 13px; text-transform: uppercase;">🚀 CON TU ABONO DE $ ${formatCurrency(formAmortizacion.montoAmortizacion)}</td>
+          <td colspan="2" style="background-color: #d1fae5; color: #065f46; font-weight: bold; font-size: 13px; text-transform: uppercase;">🚀 CON TU ABONO EXTRAORDINARIO DE $ ${formatCurrency(formAmortizacion.montoAmortizacion)}</td>
         </tr>
         <tr>
           <td width="50%" style="border-bottom: 1px solid #bbf7d0; color: #166534;">Nuevo Saldo Capital</td>
-          <td width="50%" align="right" style="border-bottom: 1px solid #bbf7d0; color: #065f46; font-weight: bold; font-size: 15px;">$ ${formatCurrency(saldoNuevo)}</td>
+          <td width="50%" align="right" style="border-bottom: 1px solid #bbf7d0; color: #065f46; font-weight: bold; font-size: 15px;">$ ${formatCurrency(B_new)}</td>
         </tr>
         <tr>
           <td style="color: #166534; font-weight: bold;">Nuevas Cuotas Restantes</td>
@@ -1431,15 +1486,15 @@ export default function App() {
         </tr>
         <tr>
           <td width="50%" style="border-bottom: 1px solid #fde68a; color: #92400e;">Te ahorras de pagar</td>
-          <td width="50%" align="right" style="border-bottom: 1px solid #fde68a; color: #b45309; font-weight: bold; font-size: 15px;">${nOld - nNew} cuotas</td>
+          <td width="50%" align="right" style="border-bottom: 1px solid #fde68a; color: #b45309; font-weight: bold; font-size: 15px;">${nOldRestantes - nNew} cuotas</td>
         </tr>
         <tr>
-          <td style="color: #92400e;">Ahorro en intereses</td>
+          <td style="color: #92400e;">Ahorro real en intereses y seguro</td>
           <td align="right" style="color: #15803d; font-weight: bold; font-size: 16px;">$ ${formatCurrency(ahorrado)}</td>
         </tr>
       </table>
 
-      <p style="margin-bottom: 20px; color: #333333;">Si deseas proceder con este pago o tienes alguna duda, quedo a tu disposici&oacute;n.</p>
+      <p style="margin-bottom: 20px; color: #333333;">Si deseas proceder con este pago o tienes alguna duda, quedo a tu entera disposici&oacute;n.</p>
       <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales.</p>
     </div>`;
   };
@@ -1496,7 +1551,7 @@ export default function App() {
             <UserCheck className="w-5 h-5 mr-3" /> Postulante Nuevo
           </button>
 
-          <div className="pt-5 pb-2"><p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Cotizaciones y Recompras</p></div>
+          <div className="pt-5 pb-2"><p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Simuladores y Recompras</p></div>
           <button onClick={() => setActiveTab('amortizacion')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'amortizacion' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <Calculator className="w-5 h-5 mr-3" /> Amortización a Capital
           </button>
@@ -1690,41 +1745,61 @@ export default function App() {
 
           {/* FORM: SIMULADOR AMORTIZACIÓN */}
           {activeTab === 'amortizacion' && (() => {
-            const { nOld, nNew, ahorrado, saldoNuevo, error } = calcularSimulacionAmortizacion();
+            const { P, PMT, Bk, B_new, nOldRestantes, nNew, ahorrado, error, precioFinal, cuotaTotal } = calcularSimulacionAmortizacion();
             return (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
               <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><Calculator className="w-6 h-6 mr-2 text-blue-600" /> Simulador de Amortización a Capital</h2></div>
-              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
+              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-[1.2fr_1fr] gap-8 w-full">
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0 flex flex-col">
                   
                   <div className="mb-4">
                     <Input label="Nombre del Cliente (Opcional)" name="cliente" value={formAmortizacion.cliente} onChange={handleAmortizacionChange} placeholder="Ej. Juan Pérez" />
                   </div>
-
+                  
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mb-2">
-                    <Input label="Saldo Capital Actual ($)" name="saldoActual" value={formAmortizacion.saldoActual} onChange={handleAmortizacionChange} placeholder="Ej. 15000" type="number" />
-                    <Input label="Cuota Mensual Actual ($)" name="cuotaMensual" value={formAmortizacion.cuotaMensual} onChange={handleAmortizacionChange} placeholder="Ej. 250" type="number" />
+                    <Input label="Precio de Contrato ($)" name="precioContado" value={formAmortizacion.precioContado} onChange={handleAmortizacionChange} placeholder="Ej. 24384.14" type="number" />
+                    <Input label="Cuota Inicial ($)" name="cuotaInicial" value={formAmortizacion.cuotaInicial} onChange={handleAmortizacionChange} placeholder="Ej. 366.00" type="number" />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full mb-2">
+                    <Input label="Plazo Original (Años)" name="plazoAnios" value={formAmortizacion.plazoAnios} onChange={handleAmortizacionChange} placeholder="Ej. 10" type="number" />
+                    <Input label="Cuotas Pagadas (Meses)" name="cuotasPagadas" value={formAmortizacion.cuotasPagadas} onChange={handleAmortizacionChange} placeholder="Ej. 12" type="number" />
+                    <Input label="Seguro Mensual ($)" name="seguroMensual" value={formAmortizacion.seguroMensual} onChange={handleAmortizacionChange} placeholder="Ej. 18.48" type="number" />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mb-4">
-                    <Input label="Monto a Amortizar ($)" name="montoAmortizacion" value={formAmortizacion.montoAmortizacion} onChange={handleAmortizacionChange} placeholder="Ej. 5000" type="number" />
                     <div className="w-full">
-                      <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Tasa de Interés Anual (%)</label>
+                      <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Tasa Anual (%)</label>
                       <input type="number" name="tasaAnual" value={formAmortizacion.tasaAnual} onChange={handleAmortizacionChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 bg-slate-50/50 text-slate-800 shadow-sm text-sm" />
+                    </div>
+                    <div className="w-full">
+                      <label className="block text-sm font-bold text-emerald-700 mb-1.5 ml-0.5">Monto a Amortizar ($)</label>
+                      <input type="number" name="montoAmortizacion" value={formAmortizacion.montoAmortizacion} onChange={handleAmortizacionChange} placeholder="Ej. 5000" className="w-full px-3 py-2.5 border border-emerald-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 bg-emerald-50 text-emerald-900 font-bold shadow-sm text-sm" />
                     </div>
                   </div>
 
+                  {/* Panel de Datos Calculados */}
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4">
+                     <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Detalle del Sistema (Francés)</h4>
+                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-sm">
+                       <div className="flex justify-between border-b border-slate-200 pb-1"><span className="text-slate-500 font-medium">Capital Financiado:</span> <span className="font-bold text-slate-800">${formatCurrency(P)}</span></div>
+                       <div className="flex justify-between border-b border-slate-200 pb-1"><span className="text-slate-500 font-medium">Cuota Total (C+I+S):</span> <span className="font-bold text-slate-800">${formatCurrency(cuotaTotal)}</span></div>
+                       <div className="flex justify-between border-b border-slate-200 pb-1"><span className="text-slate-500 font-medium">Precio Final a Plazos:</span> <span className="font-bold text-slate-800">${formatCurrency(precioFinal)}</span></div>
+                       <div className="flex justify-between border-b border-slate-200 pb-1"><span className="text-slate-500 font-medium">Saldo Capital Actual:</span> <span className="font-bold text-blue-600">${formatCurrency(Bk)}</span></div>
+                     </div>
+                  </div>
+
                   {error ? (
-                    <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 font-bold text-sm flex items-center">
+                    <div className="mt-2 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 font-bold text-sm flex items-center">
                       <AlertCircle className="w-5 h-5 mr-2" /> {error}
                     </div>
                   ) : (
-                    <div className="mt-4 p-5 bg-gradient-to-br from-indigo-900 to-slate-900 rounded-2xl text-white shadow-lg shadow-indigo-900/20">
-                      <h3 className="text-sm font-bold text-indigo-200 mb-4 flex items-center"><TrendingUp className="w-4 h-4 mr-2" /> Impacto de tu Amortización</h3>
+                    <div className="mt-2 p-5 bg-gradient-to-br from-indigo-900 to-slate-900 rounded-2xl text-white shadow-lg shadow-indigo-900/20">
+                      <h3 className="text-sm font-bold text-indigo-200 mb-4 flex items-center"><TrendingUp className="w-4 h-4 mr-2" /> Impacto de la Amortización</h3>
                       <div className="grid grid-cols-2 gap-4 mb-5">
                         <div className="bg-white/10 p-4 rounded-xl border border-white/5">
                           <p className="text-xs text-slate-300 mb-1 font-semibold uppercase tracking-wider">Cuotas Restantes</p>
-                          <p className="text-3xl font-black text-white">{nOld} <span className="text-sm font-normal text-slate-400">meses</span></p>
+                          <p className="text-3xl font-black text-white">{nOldRestantes} <span className="text-sm font-normal text-slate-400">meses</span></p>
                         </div>
                         <div className="bg-emerald-500/20 border border-emerald-500/30 p-4 rounded-xl">
                           <p className="text-xs text-emerald-200 mb-1 font-semibold uppercase tracking-wider">Nuevas Cuotas</p>
@@ -1734,10 +1809,10 @@ export default function App() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="border-t border-white/10 pt-3">
                           <p className="text-xs text-slate-400 mb-1 uppercase tracking-wider">Tiempo Ahorrado</p>
-                          <p className="text-lg font-bold text-white">{Math.max(0, nOld - nNew)} meses</p>
+                          <p className="text-lg font-bold text-white">{Math.max(0, nOldRestantes - nNew)} meses</p>
                         </div>
                         <div className="border-t border-white/10 pt-3">
-                          <p className="text-xs text-slate-400 mb-1 uppercase tracking-wider">Interés Ahorrado</p>
+                          <p className="text-xs text-slate-400 mb-1 uppercase tracking-wider">Ahorro ($ Estimado)</p>
                           <p className="text-lg font-bold text-emerald-400">$ {formatCurrency(ahorrado)}</p>
                         </div>
                       </div>
