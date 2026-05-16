@@ -31,7 +31,7 @@ import {
 } from 'lucide-react';
 
 // --- CONTROL DE VERSIÓN DE DATOS ---
-const DATA_VERSION = "v1.4"; 
+const DATA_VERSION = "v1.5"; 
 
 // --- CONFIGURACIÓN DE DATOS MOCK ---
 const PROYECTOS_CONVENIO_1 = ["Los Jardines", "El Renacer", "Rancho Nuevo", "Santa Fe"];
@@ -70,8 +70,7 @@ const EQUIPOS_ASESORES = {
     { nombre: "Jaime F. Rios Castro", colAct: 0 },
     { nombre: "Marisol Urgel Pizarro", colAct: 10200.00 },
     { nombre: "Merly Mendez Hurtado", colAct: 0 },
-    { nombre: "Rodrigo Rojas Siles", colAct: 9668.66 },
-    { nombre: "Yocelin Salvatierra", colAct: 0 }
+    { nombre: "Rodrigo Rojas Siles", colAct: 9668.66 }
   ]
 };
 
@@ -622,7 +621,26 @@ export default function App() {
   const handleAltaCRMChange = (e) => setFormAltaCRM({ ...formAltaCRM, [e.target.name]: e.target.value });
   const handleEvaluacionChange = (e) => setFormEvaluacion({ ...formEvaluacion, [e.target.name]: e.target.value });
   const handlePostulanteChange = (e) => setFormPostulante({ ...formPostulante, [e.target.name]: e.target.value });
-  const handleAmortizacionChange = (e) => setFormAmortizacion({ ...formAmortizacion, [e.target.name]: e.target.value });
+  
+  const handleAmortizacionChange = (e) => {
+    const { name, value } = e.target;
+    setFormAmortizacion(prev => {
+      const newState = { ...prev, [name]: value };
+      
+      // Autocalcular el Seguro Mensual en base al Precio Contado (Fórmula Celina ~0.0758%)
+      if (name === 'precioContado') {
+        const precio = parseFloat(value) || 0;
+        if (precio > 0) {
+          const seguroCalculado = precio * 0.000758; 
+          newState.seguroMensual = seguroCalculado.toFixed(2);
+        } else {
+          newState.seguroMensual = '';
+        }
+      }
+      
+      return newState;
+    });
+  };
   
   const handleRecompraChange = (e) => {
     const { name, value } = e.target;
