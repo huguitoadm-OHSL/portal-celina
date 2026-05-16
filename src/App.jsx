@@ -27,11 +27,12 @@ import {
   UserPlus,
   ClipboardCheck,
   UserCheck,
-  Users
+  Users,
+  Lock
 } from 'lucide-react';
 
 // --- CONTROL DE VERSIÓN DE DATOS ---
-const DATA_VERSION = "v1.5"; 
+const DATA_VERSION = "v1.6"; 
 
 // --- CONFIGURACIÓN DE DATOS MOCK ---
 const PROYECTOS_CONVENIO_1 = ["Los Jardines", "El Renacer", "Rancho Nuevo", "Santa Fe"];
@@ -41,13 +42,6 @@ const PROYECTOS = ["Cañaveral", "El Renacer", "Los Jardines", "Muyurina", "Ranc
 
 const SUPERVISORES = [
   { id: 'mreyes', nombre: 'Mauricio Reyes Suarez', correo: 'mreyes@celina.com.bo', genero: 'M', titulo: 'Lic. Mauricio' },
-  { id: 'akparada', nombre: 'Ana Karen Parada Vaca', correo: 'akparada@celina.com.bo', genero: 'F', titulo: 'Lic. Ana Karen' },
-  { id: 'apinto', nombre: 'Angelica Pinto Sosa', correo: 'apinto@celina.com.bo', genero: 'F', titulo: 'Lic. Angelica' },
-  { id: 'falmanza', nombre: 'Fernando Jose Almanza Urquiza', correo: 'falmanza@celina.com.bo', genero: 'M', titulo: 'Lic. Fernando' },
-  { id: 'jjsenseve', nombre: 'Jorge Justiniano Senseve', correo: 'jjsenseve@celina.com.bo', genero: 'M', titulo: 'Lic. Jorge' },
-  { id: 'ropaz', nombre: 'Roberto Paz Paz', correo: 'ropaz@celina.com.bo', genero: 'M', titulo: 'Lic. Roberto' },
-  { id: 'rvalverded', nombre: 'Rene Valverde Duran', correo: 'rvalverded@celina.com.bo', genero: 'M', titulo: 'Lic. Rene' },
-  { id: 'cbaldiviezo', nombre: 'Cristhiand Baldiviezo Balcazar', correo: 'cbaldiviezo@celina.com.bo', genero: 'M', titulo: 'Lic. Cristhiand' },
   { id: 'ohsaravia', nombre: 'Oscar Hugo Saravia L.', correo: 'ohsaravia@celina.com.bo', genero: 'M', titulo: 'Lic. Oscar' },
   { id: 'rvaca', nombre: 'Robert Vaca', correo: 'rvaca@grupopaz.com.bo', genero: 'M', titulo: 'Lic. Robert' },
   { id: 'cbarretto', nombre: 'Charles Barretto', correo: 'cbarretto@celina.com.bo', genero: 'M', titulo: 'Lic. Charles' },
@@ -57,19 +51,18 @@ const SUPERVISORES = [
   { id: 'maguilar', nombre: 'Miguel Angel Aguilar A.', correo: 'maguilar@celina.com.bo', genero: 'M', titulo: 'Lic. Miguel Angel' },
   { id: 'madett', nombre: 'Mario Adett Zamora', correo: 'madett@grupopaz.com.bo', genero: 'M', titulo: 'Lic. Mario' },
   { id: 'ccastedo', nombre: 'Cristian Daniel Castedo Castedo', correo: 'ccastedo@celina.com.bo', genero: 'M', titulo: 'Lic. Cristian' },
-  { id: 'vchoque', nombre: 'Verenice Choque', correo: 'vchoque@celina.com.bo', genero: 'F', titulo: 'Lic. Verenice' },
-  { id: 'cmontero', nombre: 'Carolina Montero Araujo', correo: 'cmontero@celina.com.bo', genero: 'F', titulo: 'Lic. Carolina' }
+  { id: 'vchoque', nombre: 'Verenice Choque', correo: 'vchoque@celina.com.bo', genero: 'F', titulo: 'Lic. Verenice' }
 ];
 
 const EQUIPOS_ASESORES = {
   "Oscar Saravia": [
-    { nombre: "Carlos Enrique Calderon", colAct: 6899.99 },
-    { nombre: "Daniel Angulo Maldonado", colAct: 0 },
+    { nombre: "Carlos Enrique Calderon", colAct: 16099.99 },
+    { nombre: "Daniel Angulo Maldonado", colAct: 24384.00 },
     { nombre: "Ely Gonzales Garcia", colAct: 0 },
     { nombre: "Gloriana Silva Almenda", colAct: 13200.00 },
-    { nombre: "Jaime F. Rios Castro", colAct: 0 },
+    { nombre: "Jaime F. Rios Castro", colAct: 6300.00 },
     { nombre: "Marisol Urgel Pizarro", colAct: 10200.00 },
-    { nombre: "Merly Mendez Hurtado", colAct: 0 },
+    { nombre: "Merly Mendez Hurtado", colAct: 7750.00 },
     { nombre: "Rodrigo Rojas Siles", colAct: 9668.66 }
   ]
 };
@@ -398,6 +391,10 @@ export default function App() {
     asesor: '', nombre: '', referidor: ''
   });
 
+  const [formBloqueo, setFormBloqueo] = useState({
+    asesor: '', proyecto: 'Los Jardines', uv: '', manzano: '', lote: '', superficie: '', categoria: '', horaVenta: '12:00 pm'
+  });
+
   // ESTADO PARA AMORTIZACIÓN (Sistema Francés, 12.1733% defecto)
   const [formAmortizacion, setFormAmortizacion] = useState({
     cliente: '', precioContado: '', cuotaInicial: '', plazoAnios: '', cuotasPagadas: '', seguroMensual: '', tasaAnual: '12.1733', montoAmortizacion: ''
@@ -621,6 +618,7 @@ export default function App() {
   const handleAltaCRMChange = (e) => setFormAltaCRM({ ...formAltaCRM, [e.target.name]: e.target.value });
   const handleEvaluacionChange = (e) => setFormEvaluacion({ ...formEvaluacion, [e.target.name]: e.target.value });
   const handlePostulanteChange = (e) => setFormPostulante({ ...formPostulante, [e.target.name]: e.target.value });
+  const handleBloqueoChange = (e) => setFormBloqueo({ ...formBloqueo, [e.target.name]: e.target.value });
   
   const handleAmortizacionChange = (e) => {
     const { name, value } = e.target;
@@ -970,6 +968,10 @@ export default function App() {
     texto += `Saludos cordiales.`;
 
     return texto;
+  };
+
+  const generarTextoBloqueoCelular = () => {
+    return `👋 ${obtenerSaludoTiempo()},\nEstimado jefe por favor su ayuda con el bloqueo de este lote para venta el día de mañana Hrs. ${formBloqueo.horaVenta || '12:00 pm'}.\n\n* Proyecto: CELINA - ${String(formBloqueo.proyecto).toUpperCase()}\n* Lote: UV: ${formBloqueo.uv || 'SN'}, MZN: ${formBloqueo.manzano || '-'}, LOTE: ${formBloqueo.lote || '-'}\n* Superficie: ${formBloqueo.superficie || '0'} m2\n* Categoría: ${String(formBloqueo.categoria).toUpperCase() || 'LOTE S/CALLE'}.\n\nMuchas gracias de antemano.\n\nSaludos cordiales\n*${formBloqueo.asesor || 'Oscar Saravia.'}*`;
   };
 
   const generarTextoRenunciaCelular = () => {
@@ -1427,6 +1429,23 @@ export default function App() {
     </div>`;
   };
 
+  const generarHtmlBloqueo = () => {
+    return `
+    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+      <p style="margin-bottom: 5px; color: #333333;">${obtenerSaludoTiempo()},</p>
+      <p style="margin-bottom: 20px; color: #333333;">Estimado jefe por favor su ayuda con el bloqueo de este lote para venta el d&iacute;a de ma&ntilde;ana Hrs. ${formBloqueo.horaVenta || '12:00 pm'}.</p>
+      <ul style="margin-bottom: 20px; padding-left: 20px; color: #333333;">
+        <li style="margin-bottom: 10px;"><strong>Proyecto:</strong> CELINA - ${String(formBloqueo.proyecto).toUpperCase()}</li>
+        <li style="margin-bottom: 10px;"><strong>Lote:</strong> UV: ${formBloqueo.uv || 'SN'}, MZN: ${formBloqueo.manzano || '-'}, LOTE: ${formBloqueo.lote || '-'}</li>
+        <li style="margin-bottom: 10px;"><strong>Superficie:</strong> ${formBloqueo.superficie || '0'} m2</li>
+        <li style="margin-bottom: 10px;"><strong>Categor&iacute;a:</strong> ${String(formBloqueo.categoria).toUpperCase() || 'LOTE S/CALLE.'}</li>
+      </ul>
+      <p style="margin-bottom: 20px; color: #333333;">Muchas gracias de antemano.</p>
+      <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
+      <p style="margin-top: 0; font-weight: bold; color: #333333;">${formBloqueo.asesor || 'Oscar Saravia.'}</p>
+    </div>`;
+  };
+
   const generarHtmlAmortizacion = () => {
     const { P, PMT, Bk, B_new, nOldRestantes, nNew, ahorrado, error, precioFinal } = calcularSimulacionAmortizacion();
     if (error) return `<div>Error: ${error}</div>`;
@@ -1544,6 +1563,9 @@ export default function App() {
           <div className="pt-5 pb-2"><p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Trámites Generales</p></div>
           <button onClick={() => setActiveTab('llamada')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'llamada' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <PhoneCall className="w-5 h-5 mr-3" /> Validación Llamada
+          </button>
+          <button onClick={() => setActiveTab('bloqueo')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'bloqueo' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+            <Lock className="w-5 h-5 mr-3" /> Bloqueo de Lote
           </button>
           <button onClick={() => setActiveTab('fisico')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'fisico' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <FileText className="w-5 h-5 mr-3" /> Contrato Físico
@@ -1700,6 +1722,47 @@ export default function App() {
                     fixedDestinoLabel="Olivia Mendoza Duran"
                     fixedDestinoEmail="omendoza@celina.com.bo"
                     ccEmails="elizarraga@celina.com.bo, aperez@celina.com.bo"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* FORM: BLOQUEO DE LOTE */}
+          {activeTab === 'bloqueo' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
+              <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><Lock className="w-6 h-6 mr-2 text-blue-600" /> Solicitud de Bloqueo de Lote</h2></div>
+              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
+                  <div className="mb-4">
+                    <Input label="Tu Nombre (Remitente)" name="asesor" value={formBloqueo.asesor} onChange={handleBloqueoChange} placeholder="Ej. Oscar Saravia" />
+                  </div>
+                  <div className="mb-5 w-full">
+                    <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Proyecto</label>
+                    <select name="proyecto" value={formBloqueo.proyecto} onChange={handleBloqueoChange} className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm text-sm">
+                      {PROYECTOS.map(p => <option key={p} value={p}>{String(p)}</option>)}
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full mb-2">
+                    <Input label="UV" name="uv" value={formBloqueo.uv} onChange={handleBloqueoChange} placeholder="Ej. SN" />
+                    <Input label="Manzano" name="manzano" value={formBloqueo.manzano} onChange={handleBloqueoChange} placeholder="Ej. 14" />
+                    <Input label="Lote" name="lote" value={formBloqueo.lote} onChange={handleBloqueoChange} placeholder="Ej. 39" />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mb-2">
+                    <Input label="Superficie (m2)" name="superficie" value={formBloqueo.superficie} onChange={handleBloqueoChange} placeholder="Ej. 250.0" type="number" />
+                    <Input label="Categoría" name="categoria" value={formBloqueo.categoria} onChange={handleBloqueoChange} placeholder="Ej. LOTE S/CALLE" />
+                  </div>
+                  <Input label="Hora para la venta (Mañana)" name="horaVenta" value={formBloqueo.horaVenta} onChange={handleBloqueoChange} placeholder="Ej. 12:00 pm" />
+                </div>
+                <div className="w-full min-w-0">
+                  <ResultCard 
+                    title="Bloqueo de Lote" 
+                    text={generarTextoBloqueoCelular()} 
+                    htmlContent={generarHtmlBloqueo()} 
+                    subject={`Solicitud de bloqueo de lote - Venta segura (Celina - ${formBloqueo.proyecto})`} 
+                    fixedDestinoLabel="Robert Vaca"
+                    fixedDestinoEmail="rvaca@grupopaz.com.bo"
+                    ccEmails="vchoque@celina.com.bo, mreyes@celina.com.bo"
                   />
                 </div>
               </div>
