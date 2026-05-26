@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 
 // --- CONTROL DE VERSIÓN DE DATOS ---
-const DATA_VERSION = "v1.6"; 
+const DATA_VERSION = "v1.7"; 
 
 // --- CONFIGURACIÓN DE DATOS MOCK ---
 const PROYECTOS_CONVENIO_1 = ["Los Jardines", "El Renacer", "Rancho Nuevo", "Santa Fe"];
@@ -43,6 +43,7 @@ const PROYECTOS = ["Cañaveral", "El Renacer", "Los Jardines", "Muyurina", "Ranc
 const SUPERVISORES = [
   { id: 'mreyes', nombre: 'Mauricio Reyes Suarez', correo: 'mreyes@celina.com.bo', genero: 'M', titulo: 'Lic. Mauricio' },
   { id: 'ohsaravia', nombre: 'Oscar Hugo Saravia L.', correo: 'ohsaravia@celina.com.bo', genero: 'M', titulo: 'Lic. Oscar' },
+  { id: 'cbaldiviezo', nombre: 'Cristhiand Baldiviezo Balcazar', correo: 'cbaldiviezo@celina.com.bo', genero: 'M', titulo: 'Lic. Cristhiand' },
   { id: 'rvaca', nombre: 'Robert Vaca', correo: 'rvaca@grupopaz.com.bo', genero: 'M', titulo: 'Lic. Robert' },
   { id: 'cbarretto', nombre: 'Charles Barretto', correo: 'cbarretto@celina.com.bo', genero: 'M', titulo: 'Lic. Charles' },
   { id: 'uklein', nombre: 'Ulrich Klein Montano', correo: 'uklein@grupopaz.com.bo', genero: 'M', titulo: 'Lic. Ulrich' },
@@ -64,11 +65,27 @@ const EQUIPOS_ASESORES = {
     { nombre: "Marisol Urgel Pizarro", colAct: 10200.00 },
     { nombre: "Merly Mendez Hurtado", colAct: 7750.00 },
     { nombre: "Rodrigo Rojas Siles", colAct: 9668.66 }
+  ],
+  "Cristhiand Baldiviezo Balcazar": [
+    { nombre: "Wilson Saucedo", colAct: 83775.00 },
+    { nombre: "Oscar Andres Cupary", colAct: 75600.00 },
+    { nombre: "Miguel Rene Rivero", colAct: 63970.00 },
+    { nombre: "Nahely Gonzales", colAct: 58313.00 },
+    { nombre: "Ana Karla Castro", colAct: 38077.00 },
+    { nombre: "Sheila Rubi Sheidl", colAct: 34568.00 },
+    { nombre: "Delfy Rios", colAct: 7200.00 },
+    { nombre: "Carlos Gaston Camacho", colAct: 7000.00 },
+    { nombre: "Daniel Mauricio Chipunavi", colAct: 0 },
+    { nombre: "Gabriela Vidal", colAct: 0 },
+    { nombre: "Jimena Mayta", colAct: 0 },
+    { nombre: "Lider Cabral", colAct: 0 },
+    { nombre: "Marianela Marquina", colAct: 0 }
   ]
 };
 
 const OBJETIVOS_MENSUALES = {
-  "Oscar Saravia": 350000
+  "Oscar Saravia": 350000,
+  "Cristhiand Baldiviezo Balcazar": 515000
 };
 
 const NOMBRES_PROYECTOS_PROYECCION = ["Muyurina", "Renacer", "Santa Fe", "Rancho Nuevo", "Jardines"];
