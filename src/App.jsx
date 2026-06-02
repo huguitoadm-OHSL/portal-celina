@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 
 // --- CONTROL DE VERSIÓN DE DATOS ---
-const DATA_VERSION = "v1.8"; 
+const DATA_VERSION = "v1.9"; 
 
 // --- CONFIGURACIÓN DE DATOS MOCK ---
 const PROYECTOS_CONVENIO_1 = ["Los Jardines", "El Renacer", "Rancho Nuevo", "Santa Fe"];
@@ -1015,6 +1015,8 @@ export default function App() {
     return `👋 ${obtenerSaludoTiempo()},\n\n${clienteStr}Te presento la simulación de tu abono extraordinario a capital (Sistema Francés):\n\n*📝 DATOS DEL CRÉDITO ORIGINAL*\n💰 Precio al Contado: $ ${formatCurrency(formAmortizacion.precioContado)}\n💵 Cuota Inicial: $ ${formatCurrency(formAmortizacion.cuotaInicial)}\n🤝 Capital Financiado: $ ${formatCurrency(P)}\n⏱️ Plazo Original: ${formAmortizacion.plazoAnios} años\n🏷️ Precio Final a Plazos: $ ${formatCurrency(precioFinal)}\n📊 Cuota Mensual Fija (Pura): $ ${formatCurrency(PMT)}\n\n*📊 SITUACIÓN ACTUAL*\n🗓️ Cuotas Pagadas: ${formAmortizacion.cuotasPagadas}\n⏳ Cuotas Restantes: ${nOldRestantes} meses\n📉 *Saldo Capital Actual: $ ${formatCurrency(Bk)}*\n\n*🚀 CON TU ABONO EXTRAORDINARIO DE $ ${formatCurrency(formAmortizacion.montoAmortizacion)}*\n⬇️ Nuevo Saldo Capital: $ ${formatCurrency(B_new)}\n⚡ *Nuevas Cuotas Restantes: ${nNew} meses*\n\n*🎁 BENEFICIOS DE TU ABONO*\n✅ Te ahorras de pagar: ${nOldRestantes - nNew} cuotas\n💸 Ahorro real en intereses y seguros: $ ${formatCurrency(ahorrado)}\n\nSi deseas proceder con este pago o tienes alguna duda, quedo a tu entera disposición.\n\nSaludos cordiales.`;
   };
 
+  // --- GENERADORES HTML PARA PC ---
+  
   const generarHtmlRecompra = () => {
     const beneficio = calcularBeneficioRecompra();
     const { saludo, nombrePila } = obtenerDatosSupervisor();
@@ -1109,8 +1111,8 @@ export default function App() {
         sumTotalColMes += totalColMes;
 
         const isProductivo = totalColMes >= 25000;
-        const rowBgStyle = isProductivo ? 'background-color: #ecfdf5;' : 'background-color: #ffffff;';
-        const textColor = isProductivo ? '#059669' : '#0f172a';
+        const rowBgStyle = isProductivo ? 'background-color: #d1fae5;' : 'background-color: #ffffff;';
+        const textColor = isProductivo ? '#065f46' : '#000000';
 
         filasAsesoresHtml += `
           <tr style="${rowBgStyle}">
@@ -1170,30 +1172,30 @@ export default function App() {
 
       <table border="0" cellpadding="0" cellspacing="0" style="margin-top: 25px; width: 100%; max-width: 450px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
         <tr>
-          <td colspan="2" style="background-color: #0f172a; padding: 12px 16px; font-size: 14px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">
+          <td colspan="2" style="background-color: #0f172a; color: #ffffff; padding: 12px 16px; font-size: 14px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">
             <span style="color: #ffffff;"><font color="#ffffff">Resumen General - ${capMes} ${new Date().getFullYear()}</font></span>
           </td>
         </tr>
         <tr>
-          <td style="padding: 12px 16px; font-size: 13px; border-bottom: 1px solid #f1f5f9;"><span style="color: #475569;"><font color="#475569"><b>Objetivo del Mes</b></font></span></td>
-          <td style="padding: 12px 16px; text-align: right; font-size: 14px; font-weight: bold; border-bottom: 1px solid #f1f5f9;"><span style="color: #0f172a;"><font color="#0f172a">$${formatCurrency(objMensual)}</font></span></td>
+          <td style="padding: 12px 16px; color: #475569; font-size: 13px; border-bottom: 1px solid #f1f5f9;"><b>Objetivo del Mes</b></td>
+          <td style="padding: 12px 16px; text-align: right; color: #0f172a; font-size: 14px; font-weight: bold; border-bottom: 1px solid #f1f5f9;">$${formatCurrency(objMensual)}</td>
         </tr>
         <tr>
-          <td style="padding: 12px 16px; font-size: 13px; border-bottom: 1px solid #f1f5f9;"><span style="color: #475569;"><font color="#475569"><b>Colocaci&oacute;n Actual</b></font></span></td>
+          <td style="padding: 12px 16px; color: #475569; font-size: 13px; border-bottom: 1px solid #f1f5f9;"><b>Colocaci&oacute;n Actual</b></td>
           <td style="padding: 12px 16px; text-align: right; border-bottom: 1px solid #f1f5f9;">
-            <span style="color: #0f172a; font-size: 14px; font-weight: bold;"><font color="#0f172a">$${formatCurrency(sumColAct)}</font></span>
-            <span style="display: inline-block; background-color: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 8px; font-weight: bold;"><span style="color: #334155;"><font color="#334155">${formatCurrency(porcentajeAvance)}%</font></span></span>
+            <span style="color: #0f172a; font-size: 14px; font-weight: bold;">$${formatCurrency(sumColAct)}</span>
+            <span style="display: inline-block; background-color: #f1f5f9; color: #334155; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 8px; font-weight: bold;">${formatCurrency(porcentajeAvance)}%</span>
           </td>
         </tr>
         <tr>
-          <td style="padding: 14px 16px; font-size: 14px;"><span style="color: #0f172a;"><font color="#0f172a"><b>Proyecci&oacute;n Cierre de Mes</b></font></span></td>
+          <td style="padding: 14px 16px; color: #0f172a; font-size: 14px;"><b>Proyecci&oacute;n Cierre de Mes</b></td>
           <td style="padding: 14px 16px; text-align: right;">
-            <span style="color: #059669; font-size: 16px; font-weight: bold;"><font color="#059669">$${formatCurrency(sumTotalColMes)}</font></span>
-            <span style="display: inline-block; background-color: #d1fae5; padding: 3px 8px; border-radius: 4px; font-size: 12px; margin-left: 8px; font-weight: bold;"><span style="color: #065f46;"><font color="#065f46">${formatCurrency(porcentajeFin)}%</font></span></span>
+            <span style="color: #059669; font-size: 16px; font-weight: bold;">$${formatCurrency(sumTotalColMes)}</span>
+            <span style="display: inline-block; background-color: #d1fae5; color: #065f46; padding: 3px 8px; border-radius: 4px; font-size: 12px; margin-left: 8px; font-weight: bold;">${formatCurrency(porcentajeFin)}%</span>
           </td>
         </tr>
       </table>
-      <p style="margin-top: 25px; margin-bottom: 2px;"><span style="color: #475569;"><font color="#475569">Saludos cordiales.</font></span></p>
+      <p style="margin-top: 25px; margin-bottom: 2px; color: #475569;">Saludos cordiales.</p>
     </div>`;
   };
 
@@ -1854,7 +1856,7 @@ export default function App() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mb-2">
                     <Input label="Precio al Contado ($)" name="precioContado" value={formAmortizacion.precioContado} onChange={handleAmortizacionChange} placeholder="Ej. 24384.14" type="number" />
-                    <Input label="Cuota Inicial ($)" name="cuotaInicial" value={formAmortizacion.cuotaInicial} onChange={handleAmortizacionChange} placeholder="Ej. 366.00" type="number" />
+                    <Input label="Cuota Inicial Pagada ($)" name="cuotaInicial" value={formAmortizacion.cuotaInicial} onChange={handleAmortizacionChange} placeholder="Ej. 366.00" type="number" />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full mb-2">
