@@ -1637,7 +1637,6 @@ export default function App() {
       <div className="flex-1 overflow-auto p-6 md:p-10 w-full">
         <div className="max-w-[1600px] mx-auto w-full">
           
-          {}
           {/* DASHBOARD VIEW */}
           {activeTab === 'dashboard' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
