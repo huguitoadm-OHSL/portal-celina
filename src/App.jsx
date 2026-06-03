@@ -6,22 +6,21 @@ import {
   UserMinus, UserPlus, ClipboardCheck, UserCheck, Lock
 } from 'lucide-react';
 
-const DATA_VERSION = "v3.0_PRO"; 
-
+const DATA_VERSION = "v3.1_FIX"; 
 const PROYECTOS = ["Cañaveral", "El Renacer", "Los Jardines", "Muyurina", "Rancho Nuevo", "Santa Fe", "OTRO..."];
 
 const SUPERVISORES = [
-  { id: 'mreyes', nombre: 'Mauricio Reyes Suarez', correo: 'mreyes@celina.com.bo', genero: 'M', titulo: 'Lic. Mauricio' },
-  { id: 'ohsaravia', nombre: 'Oscar Hugo Saravia L.', correo: 'ohsaravia@celina.com.bo', genero: 'M', titulo: 'Lic. Oscar' },
-  { id: 'rvaca', nombre: 'Robert Vaca', correo: 'rvaca@grupopaz.com.bo', genero: 'M', titulo: 'Lic. Robert' },
-  { id: 'uklein', nombre: 'Ulrich Klein Montano', correo: 'uklein@grupopaz.com.bo', genero: 'M', titulo: 'Lic. Ulrich' },
-  { id: 'mfroca', nombre: 'Maria Fernanda Roca Miranda', correo: 'mfroca@celina.com.bo', genero: 'F', titulo: 'Lic. Maria Fernanda' },
-  { id: 'vchoque', nombre: 'Verenice Choque', correo: 'vchoque@celina.com.bo', genero: 'F', titulo: 'Lic. Verenice' },
-  { id: 'cmontero', nombre: 'Carolina Montero Araujo', correo: 'cmontero@celina.com.bo', genero: 'F', titulo: 'Lic. Carolina' },
-  { id: 'omendoza', nombre: 'Olivia Mendoza Duran', correo: 'omendoza@celina.com.bo', genero: 'F', titulo: 'Lic. Olivia' }
+  { id: 'mreyes', nombre: 'Mauricio Reyes Suarez', correo: 'mreyes@celina.com.bo' },
+  { id: 'ohsaravia', nombre: 'Oscar Hugo Saravia L.', correo: 'ohsaravia@celina.com.bo' },
+  { id: 'rvaca', nombre: 'Robert Vaca', correo: 'rvaca@grupopaz.com.bo' },
+  { id: 'uklein', nombre: 'Ulrich Klein Montano', correo: 'uklein@grupopaz.com.bo' },
+  { id: 'mfroca', nombre: 'Maria Fernanda Roca Miranda', correo: 'mfroca@celina.com.bo' },
+  { id: 'vchoque', nombre: 'Verenice Choque', correo: 'vchoque@celina.com.bo' },
+  { id: 'cmontero', nombre: 'Carolina Montero Araujo', correo: 'cmontero@celina.com.bo' },
+  { id: 'omendoza', nombre: 'Olivia Mendoza Duran', correo: 'omendoza@celina.com.bo' }
 ];
 
-// DATA BASE OFICINA - JUNIO 2026
+// DATA BASE OFICINA - JUNIO 2026 (ACTUALIZADO SEGÚN IMAGEN)
 const ASESORES_INICIALES = [
   { nombre: "Marisol Urgel", contrato: "Interno", obj: 50000, col: 24384, ventas: 1 },
   { nombre: "Enrique Calderon", contrato: "Interno", obj: 50000, col: 0, ventas: 0 },
@@ -42,13 +41,11 @@ const obtenerSaludoTiempo = () => {
   const h = new Date().getHours();
   return h >= 5 && h < 12 ? 'Buenos días' : h >= 12 && h < 19 ? 'Buenas tardes' : 'Buenas noches';
 };
-
 const formatDiaMes = (fechaIso, sumarDias = 0) => {
   if (!fechaIso) return `Día ${sumarDias + 1}`;
   const p = String(fechaIso).split('-');
   if (p.length !== 3) return `Día ${sumarDias + 1}`;
-  const d = new Date(p[0], p[1] - 1, p[2]);
-  d.setDate(d.getDate() + sumarDias);
+  const d = new Date(p[0], p[1] - 1, p[2]); d.setDate(d.getDate() + sumarDias);
   const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
   return `${d.getDate()}-${meses[d.getMonth()]}`;
 };
@@ -56,29 +53,26 @@ const formatDiaMes = (fechaIso, sumarDias = 0) => {
 // COMPONENTES UI REUTILIZABLES
 const Input = ({ label, name, value, onChange, placeholder, type = "text" }) => (
   <div className="mb-4 w-full">
-    <label className="block text-xs font-bold text-slate-600 mb-1.5 ml-1 uppercase tracking-wide">{label}</label>
-    <input type={type} name={name} value={value} onChange={onChange} placeholder={placeholder} className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 text-slate-800 text-sm shadow-sm transition-all" />
+    <label className="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wide">{label}</label>
+    <input type={type} name={name} value={value} onChange={onChange} placeholder={placeholder} className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50 text-sm shadow-sm transition-all" />
   </div>
 );
 
 const TextArea = ({ label, name, value, onChange, placeholder }) => (
   <div className="mb-4 w-full">
-    <label className="block text-xs font-bold text-slate-600 mb-1.5 ml-1 uppercase tracking-wide">{label}</label>
-    <textarea name={name} value={value} onChange={onChange} placeholder={placeholder} rows="3" className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 text-slate-800 text-sm shadow-sm resize-none transition-all" />
+    <label className="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wide">{label}</label>
+    <textarea name={name} value={value} onChange={onChange} placeholder={placeholder} rows="3" className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50 text-sm shadow-sm resize-none transition-all" />
   </div>
 );
 
 const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setSupervisorDestino, showDestino = true, fixedEmail, fixedLabel, ccEmails }) => {
   const [copied, setCopied] = useState(false);
   const handleCopy = () => {
-    const div = document.createElement('div');
-    div.innerHTML = htmlContent || text;
-    div.style.position = 'fixed'; div.style.opacity = '0';
-    document.body.appendChild(div);
+    const div = document.createElement('div'); div.innerHTML = htmlContent || text;
+    div.style.position = 'fixed'; div.style.opacity = '0'; document.body.appendChild(div);
     const range = document.createRange(); range.selectNode(div);
     window.getSelection().removeAllRanges(); window.getSelection().addRange(range);
-    document.execCommand('copy');
-    window.getSelection().removeAllRanges(); document.body.removeChild(div);
+    document.execCommand('copy'); window.getSelection().removeAllRanges(); document.body.removeChild(div);
     setCopied(true); setTimeout(() => setCopied(false), 2000);
   };
 
@@ -88,21 +82,15 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
     const cc = ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : '';
     const subj = encodeURIComponent(subject);
     const body = encodeURIComponent("(Mantén presionado aquí y selecciona 'Pegar' para insertar el formato corporativo)");
-    
     setTimeout(() => {
       if(app === 'gmail') window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${subj}${cc}&body=${body}`, '_blank');
-      else if(app === 'outlook') {
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        window.location.href = isMobile ? `ms-outlook://compose?to=${to}&subject=${subj}${cc}&body=${body}` : `mailto:${to}?subject=${subj}${cc}&body=${body}`;
-      }
       else window.location.href = `mailto:${to}?subject=${subj}${cc}&body=${body}`;
     }, 400);
   };
 
   return (
-    <div className="bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-6 shadow-xl flex flex-col h-full max-h-[85vh]">
-      <h3 className="text-lg font-black text-slate-800 mb-4 flex items-center tracking-tight"><CheckCircle2 className="w-5 h-5 text-emerald-500 mr-2" /> {title || 'Vista Previa'}</h3>
-      
+    <div className="bg-white/90 backdrop-blur-xl border border-slate-200 rounded-3xl p-6 shadow-xl flex flex-col h-full max-h-[85vh]">
+      <h3 className="text-lg font-black text-slate-800 mb-4 flex items-center"><CheckCircle2 className="w-5 h-5 text-emerald-500 mr-2" /> {title || 'Vista Previa'}</h3>
       {showDestino && (
         <div className="mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
           <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Enviar a:</label>
@@ -111,26 +99,17 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
           {ccEmails && <p className="text-[10px] text-slate-400 mt-1"><b>CC:</b> {ccEmails}</p>}
         </div>
       )}
-
-      {htmlContent && (
-        <div className="mb-4 p-3 bg-indigo-50/50 border border-indigo-100 rounded-xl flex gap-2 items-start text-[11px] text-indigo-800">
-          <Info className="w-4 h-4 text-indigo-600 shrink-0" />
-          <p>Al hacer clic en los botones, el formato se copiará automáticamente a tu portapapeles. Solo debes "Pegar" en el correo.</p>
-        </div>
-      )}
-
       <div className="bg-white p-4 rounded-xl border border-slate-200 overflow-auto flex-1 text-xs mb-5 shadow-inner" style={{color: '#000'}}>
         {htmlContent ? <div dangerouslySetInnerHTML={{ __html: htmlContent }} /> : <pre className="font-mono whitespace-pre-wrap">{text}</pre>}
       </div>
-      
       <div className="flex flex-col gap-2 w-full mt-auto">
-        <button onClick={handleCopy} className={`w-full py-3 font-bold rounded-xl text-sm transition-all shadow-sm flex items-center justify-center ${copied ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
-          {copied ? <CheckCircle2 className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />} {copied ? '¡Copiado Exitosamente!' : 'Solo Copiar Formato'}
+        <button onClick={handleCopy} className={`w-full py-3 font-bold rounded-xl text-sm transition-all shadow-sm flex items-center justify-center ${copied ? 'bg-emerald-500 text-white' : 'bg-slate-900 text-white hover:bg-black'}`}>
+          {copied ? <CheckCircle2 className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />} {copied ? '¡Copiado Exitosamente!' : 'Solo Copiar Formato PC'}
         </button>
         {htmlContent && (
           <div className="grid grid-cols-2 gap-2">
-             <button onClick={() => openApp('gmail')} className="py-2.5 bg-[#EA4335] hover:bg-[#d33c30] text-white font-bold rounded-xl text-xs flex items-center justify-center shadow-md"><Mail className="w-3.5 h-3.5 mr-1.5"/> Gmail</button>
-             <button onClick={() => openApp('outlook')} className="py-2.5 bg-[#0078D4] hover:bg-[#006abc] text-white font-bold rounded-xl text-xs flex items-center justify-center shadow-md"><Mail className="w-3.5 h-3.5 mr-1.5"/> Outlook</button>
+             <button onClick={() => openApp('gmail')} className="py-2.5 bg-[#EA4335] hover:bg-[#d33c30] text-white font-bold rounded-xl text-xs flex items-center justify-center shadow-md"><Mail className="w-3.5 h-3.5 mr-1.5"/> Abrir en Gmail</button>
+             <button onClick={() => openApp('outlook')} className="py-2.5 bg-[#0078D4] hover:bg-[#006abc] text-white font-bold rounded-xl text-xs flex items-center justify-center shadow-md"><Mail className="w-3.5 h-3.5 mr-1.5"/> Abrir App Correo</button>
           </div>
         )}
       </div>
@@ -143,9 +122,8 @@ export default function App() {
   const [supervisorDestino, setSupervisorDestino] = useState('mreyes@celina.com.bo');
   const [diaControl, setDiaControl] = useState(3);
   const [lotesBD, setLotesBD] = useState([]);
-  const [cargandoLotes, setCargandoLotes] = useState(true);
 
-  // Estados Formularios
+  // ESTADOS FORMULARIOS
   const [formLlamada, setFormLlamada] = useState({ asesor: 'Oscar Saravia', nombreReferido: '', contratoReferido: '', celularReferido: '', horaLlamada: '', nombreBeneficiario: '', ciBeneficiario: '' });
   const [formBloqueo, setFormBloqueo] = useState({ asesor: 'Oscar Saravia', proyecto: 'Los Jardines', uv: '', manzano: '', lote: '', superficie: '', categoria: '', horaVenta: '12:00 pm' });
   const [formFisico, setFormFisico] = useState({ asesor: 'Oscar Saravia', nombre: '', ci: '', contrato: '', motivo: '' });
@@ -159,8 +137,9 @@ export default function App() {
   const [formRecompra, setFormRecompra] = useState({ asesor: 'Oscar Saravia', proyecto: 'Muyurina', sucursal: 'MONTERO', fechaVentaNuevo: '', nombreNuevo: '', contratoNuevo: '', aplicoDescuento: 'NO', cuotasPagadas: '0', procesadoNuevo: 'SI', vigenteNuevo: 'SI', nombreAntiguo: '', contratoAntiguo: '', fechaVentaAntiguo: '', fechaPago: '', procesadoAntiguo: 'SI', vigenteAntiguo: 'SI', patrocinador: '', valorCuota: '' });
   const [formDescuento, setFormDescuento] = useState({ proyecto: 'El Renacer', uv: '', manzano: '', lote: '', modalidad: 'Crédito', cuota: '', modoCuota: 'monto', modoBusqueda: 'manual', m2: '', precioM2: '', categoria: '', asesor: 'Oscar Saravia', proyectoManual: '', descuentoManual: '', tipoDescuentoManual: 'porcentaje', descuentoPropiosManual: '20' });
   const [formCuota, setFormCuota] = useState({ nroContrato: '', ci: '', cliente: '', proyecto: 'El Renacer', uv: '', manzano: '', lote: '', cuotaInicial: '', nuevaCuota: '', motivo: '', asesorVentas: 'Oscar Saravia' });
+  const [sumaVentaModal, setSumaVentaModal] = useState({ show: false, index: null, nombre: '', monto: '' });
 
-  // Estado Proyección Semanal (Local Storage)
+  // ESTADO PROYECCIÓN
   const [formProyeccion, setFormProyeccion] = useState(() => {
     try {
       if (localStorage.getItem('portalAsesores_dataVersion') === DATA_VERSION) {
@@ -169,35 +148,32 @@ export default function App() {
       } else { localStorage.setItem('portalAsesores_dataVersion', DATA_VERSION); }
     } catch(e) {}
     return { 
-      fechaInicio: new Date().toISOString().split('T')[0], 
+      fechaInicio: '2026-06-01', 
       objetivoMensual: 450000, 
       asesores: ASESORES_INICIALES.map(a => ({ nombre: a.nombre, colAct: a.col, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0] }))
     };
   });
 
-  const [sumaVentaModal, setSumaVentaModal] = useState({ show: false, index: null, nombre: '', monto: '' });
-
-  // Guardado Automático Proyección
   useEffect(() => { localStorage.setItem('portalAsesores_proy', JSON.stringify(formProyeccion)); }, [formProyeccion]);
 
-  // Carga Base Lotes JSON
-  useEffect(() => {
-    fetch('./lotes.json').then(r => r.json()).then(data => {
-      if(Array.isArray(data)){
-        const limpios = data.map(item => ({
-          proyecto: String(item.proyecto || item.PROYECTO || '').toUpperCase().replace('RENACER','El Renacer').replace('JARDINES','Los Jardines').replace('MUYURINA','Muyurina').replace('SANTA FE','Santa Fe').replace('CAÑAVERAL','Cañaveral').replace('RANCHO NUEVO','Rancho Nuevo'),
-          uv: String(item.uv || item.UV || ''), manzano: String(item.mzn || item.MZN || item.manzano || item.MANZANO || ''), lote: String(item.lote || item.LOTE || ''),
-          m2: parseFloat(String(item.superficie || item.SUPERFICIE || item.m2 || '0').replace(/[^0-9.,]/g, '').replace(',', '.')) || 0,
-          precioM2: parseFloat(String(item.precio || item.PRECIO || item.precioM2 || '0').replace(/[^0-9.,]/g, '').replace(',', '.')) || 0,
-          categoria: String(item.categoria || item.CATEGORIA || '')
-        })).filter(l => l.proyecto && l.uv && l.manzano && l.lote);
-        setLotesBD(limpios);
-        if(limpios.length > 0) setFormDescuento(p => ({...p, modoBusqueda: 'inteligente'}));
-      }
-    }).catch(() => console.warn("Lotes JSON no encontrado. Modo manual.")).finally(() => setCargandoLotes(false));
-  }, []);
+  // CÁLCULOS SEGUIMIENTO DIARIO
+  const listSeguimiento = ASESORES_INICIALES.map((a) => {
+    const proyMatch = formProyeccion.asesores.find(p => p.nombre === a.nombre);
+    const colReal = proyMatch ? (Number(proyMatch.colAct) || 0) + proyMatch.dias.reduce((x,y)=>x+y,0) : a.col;
+    const oD = a.obj / 30;
+    const sA = colReal - (Math.max(0, diaControl - 1) * oD);
+    const mR = colReal - a.obj;
+    return { ...a, col: colReal, objDiario: oD, saldoAcumulado: sA, metaRestante: mR, cumplimiento: (colReal/a.obj)*100, faltanteRally: Math.max(0, 37500 - colReal) };
+  });
 
-  // Handlers Comunes
+  const totSeg = {
+    obj: listSeguimiento.reduce((s,a)=>s+a.obj,0), objD: listSeguimiento.reduce((s,a)=>s+a.objDiario,0), v: listSeguimiento.reduce((s,a)=>s+a.ventas,0),
+    col: listSeguimiento.reduce((s,a)=>s+a.col,0), sAcum: listSeguimiento.reduce((s,a)=>s+a.saldoAcumulado,0), mRest: listSeguimiento.reduce((s,a)=>s+a.metaRestante,0),
+    falt: listSeguimiento.reduce((s,a)=>s+a.faltanteRally,0)
+  };
+  const cumpOficina = totSeg.obj > 0 ? (totSeg.col / totSeg.obj) * 100 : 0;
+
+  // HANDLERS GENÉRICOS
   const hC = (setter) => (e) => setter(p => ({ ...p, [e.target.name]: e.target.value }));
   
   const handleAmortChange = (e) => {
@@ -217,122 +193,79 @@ export default function App() {
     setFormDescuento(p => {
       const ns = { ...p, [name]: value };
       if(name === 'proyecto' && value === 'OTRO...') ns.modoBusqueda = 'manual';
-      if(ns.modoBusqueda === 'inteligente' && ['proyecto','uv','manzano'].includes(name)){
-        if(name === 'proyecto'){ ns.uv=''; ns.manzano=''; ns.lote=''; ns.m2=''; ns.precioM2=''; ns.categoria=''; }
-        if(name === 'uv'){ ns.manzano=''; ns.lote=''; ns.m2=''; ns.precioM2=''; ns.categoria=''; }
-        if(name === 'manzano'){ ns.lote=''; ns.m2=''; ns.precioM2=''; ns.categoria=''; }
-      }
       return ns;
     });
   };
 
-  // Lógica Autocompletado Descuentos
-  const pL_filtro = formDescuento.proyecto.toLowerCase();
-  const uL_filtro = formDescuento.uv.toLowerCase();
-  const mL_filtro = formDescuento.manzano.toLowerCase();
-  
-  const opUV = [...new Set(lotesBD.filter(l => l.proyecto.toLowerCase() === pL_filtro).map(l => l.uv))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
-  const opMZN = [...new Set(lotesBD.filter(l => l.proyecto.toLowerCase() === pL_filtro && l.uv.toLowerCase() === uL_filtro).map(l => l.manzano))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
-  const opLT = [...new Set(lotesBD.filter(l => l.proyecto.toLowerCase() === pL_filtro && l.uv.toLowerCase() === uL_filtro && l.manzano.toLowerCase() === mL_filtro).map(l => l.lote))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
-
-  useEffect(() => {
-    if(formDescuento.modoBusqueda !== 'inteligente') return;
-    const l = lotesBD.find(x => x.proyecto.toLowerCase() === pL_filtro && x.uv.toLowerCase() === uL_filtro && x.manzano.toLowerCase() === mL_filtro && x.lote.toLowerCase() === formDescuento.lote.toLowerCase());
-    if(l) setFormDescuento(p => ({...p, m2: String(l.m2), precioM2: String(l.precioM2), categoria: l.categoria}));
-  }, [formDescuento.lote, formDescuento.modoBusqueda, lotesBD, pL_filtro, uL_filtro, mL_filtro]);
-
-  // Cálculos Financieros y Simuladores
+  // FUNCIONES DE CÁLCULO
   const calcAmort = () => {
-    const C = parseFloat(formAmortizacion.precioContado) || 0;
-    const CI = parseFloat(formAmortizacion.cuotaInicial) || 0;
-    const n = (parseInt(formAmortizacion.plazoAnios) || 0) * 12;
-    const k = parseInt(formAmortizacion.cuotasPagadas) || 0;
-    const r = (parseFloat(formAmortizacion.tasaAnual) || 12.1733) / 100 / 12;
-    const amort = parseFloat(formAmortizacion.montoAmortizacion) || 0;
-    const seg = parseFloat(formAmortizacion.seguroMensual) || 0;
+    const C = parseFloat(formAmortizacion.precioContado) || 0, CI = parseFloat(formAmortizacion.cuotaInicial) || 0;
+    const n = (parseInt(formAmortizacion.plazoAnios) || 0) * 12, k = parseInt(formAmortizacion.cuotasPagadas) || 0;
+    const rate = (parseFloat(formAmortizacion.tasaAnual) || 12.1733) / 100 / 12;
+    const amortExtra = parseFloat(formAmortizacion.montoAmortizacion) || 0, seg = parseFloat(formAmortizacion.seguroMensual) || 0;
 
     let P = C - CI, error = "", PMT = 0, Bk = 0, B_new = 0, nNew = 0, ahorro = 0;
-    if (P > 0 && n > 0 && r > 0) {
-      PMT = (P * r) / (1 - Math.pow(1 + r, -n));
+    if (P > 0 && n > 0 && rate > 0) {
+      PMT = (P * rate) / (1 - Math.pow(1 + rate, -n));
       if (k > n) error = "Cuotas pagadas exceden el plazo.";
       else {
-        Bk = PMT * (1 - Math.pow(1 + r, -(n - k))) / r;
-        if(amort > 0) {
-          B_new = Math.max(0, Bk - amort);
+        Bk = PMT * (1 - Math.pow(1 + rate, -(n - k))) / rate;
+        if(amortExtra > 0) {
+          B_new = Math.max(0, Bk - amortExtra);
           if(B_new > 0){
-             nNew = Math.ceil(-Math.log(1 - (B_new * r) / PMT) / Math.log(1 + r));
-             ahorro = ((n - k) * PMT - Bk) - ((-Math.log(1 - (B_new * r) / PMT) / Math.log(1 + r)) * PMT - B_new);
+             const nE = -Math.log(1 - (B_new * rate) / PMT) / Math.log(1 + rate);
+             nNew = Math.ceil(nE);
+             ahorro = ((n - k) * PMT - Bk) - (nE * PMT - B_new);
           } else { nNew = 0; ahorro = ((n - k) * PMT - Bk); }
         } else { B_new = Bk; nNew = n - k; }
       }
     } else if (P < 0) error = "La cuota inicial supera el precio.";
-    
     return { P, PMT, cuotaTotal: PMT + seg, Bk, B_new, nOldR: Math.max(0, n - k), nNew, ahorrado: Math.max(0, ahorro + ((n - k - nNew)*seg)), precioFinal: CI + ((PMT + seg)*n), error };
   };
 
   const calcDesc = () => {
-    const { proyecto, modalidad, cuota, modoCuota, m2, precioM2, descMan, tipoDescMan, descPropMan } = { ...formDescuento, descMan: formDescuento.descuentoManual, tipoDescMan: formDescuento.tipoDescuentoManual, descPropMan: formDescuento.descuentoPropiosManual };
+    const { proyecto, modalidad, cuota, modoCuota, m2, precioM2, descuentoManual, tipoDescuentoManual, descuentoPropiosManual } = formDescuento;
     const vc = (parseFloat(m2) || 0) * (parseFloat(precioM2) || 0);
     const pCuota = modoCuota === 'monto' ? (vc > 0 ? ((parseFloat(cuota)||0) / vc) * 100 : 0) : (parseFloat(cuota)||0);
-    
     let dTot = 0, dTex = "";
     if (proyecto === 'OTRO...') {
-      dTot = tipoDescMan === 'porcentaje' ? vc * ((parseFloat(descMan)||0)/100) : (parseFloat(descMan)||0) * (parseFloat(m2)||0);
-      dTex = tipoDescMan === 'porcentaje' ? `${parseFloat(descMan)||0}%` : `$${parseFloat(descMan)||0}/m²`;
+      dTot = tipoDescuentoManual === 'porcentaje' ? vc * ((parseFloat(descuentoManual)||0)/100) : (parseFloat(descuentoManual)||0) * (parseFloat(m2)||0);
+      dTex = tipoDescuentoManual === 'porcentaje' ? `${parseFloat(descuentoManual)||0}%` : `$${parseFloat(descuentoManual)||0}/m²`;
     } else if (PROYECTOS_CONVENIO_1.includes(proyecto) || PROYECTOS_CONVENIO_2.includes(proyecto)) {
       const pd = modalidad === 'Contado' ? (PROYECTOS_CONVENIO_1.includes(proyecto)?3:4) : (pCuota >= 5 ? 2 : (pCuota >= 1.5 ? 1 : 0));
       dTot = pd * (parseFloat(m2)||0); dTex = pd > 0 ? `$${pd}/m²` : '0';
     } else if (PROYECTOS_PROPIOS_1.includes(proyecto)) {
       let pd = 0;
       if (modalidad === 'Contado') pd = 30;
-      else if (pCuota >= 1.5) pd = Math.min(parseFloat(descPropMan)||20, pCuota >= 5 ? 23 : 20);
+      else if (pCuota >= 1.5) pd = Math.min(parseFloat(descuentoPropiosManual)||20, pCuota >= 5 ? 23 : 20);
       dTot = vc * (pd/100); dTex = pd > 0 ? `${pd}%` : '0%';
     }
     return { vc, dTot, dTex, pF: vc - dTot, pmF: (parseFloat(m2)||0)>0 ? (vc-dTot)/(parseFloat(m2)||0) : 0, pCuota };
   };
 
-  // Cálculos de Seguimiento Diario (Módulo Gerencial)
-  const [listSeguimiento, setListSeguimiento] = useState([]);
-  const [totalesSeguimiento, setTotalesSeguimiento] = useState({ obj:0, objD:0, v:0, col:0, sAcum:0, mRest:0, cump:0, falt:0 });
+  const calcularBeneficioRecompra = () => {
+    const p = String(formRecompra.proyecto).toUpperCase();
+    if (p.includes('MUYURINA')) return 200;
+    if (p.includes('RANCHO NUEVO')) return 50;
+    return 100;
+  };
 
-  useEffect(() => {
-    const list = ASESORES_INICIALES.map(a => {
-      // Reemplazamos los datos hardcodeados con lo que el usuario haya metido en el cuadro de proyección
-      const proyMatch = formProyeccion.asesores.find(p => p.nombre === a.nombre);
-      const colReal = proyMatch ? (Number(proyMatch.colAct) || 0) + proyMatch.dias.reduce((x,y)=>x+y,0) : a.col;
-      
-      const oD = a.obj / 30;
-      const sA = colReal - (Math.max(0, diaControl - 1) * oD);
-      const mR = colReal - a.obj;
-      return { ...a, col: colReal, objDiario: oD, saldoAcumulado: sA, metaRestante: mR, cumplimiento: (colReal/a.obj)*100, faltanteRally: Math.max(0, 37500 - colReal) };
-    });
-    setListSeguimiento(list);
-    
-    const tO = list.reduce((s,a)=>s+a.obj,0); const tC = list.reduce((s,a)=>s+a.col,0);
-    setTotalesSeguimiento({
-      obj: tO, objD: list.reduce((s,a)=>s+a.objDiario,0), v: list.reduce((s,a)=>s+a.ventas,0), col: tC,
-      sAcum: list.reduce((s,a)=>s+a.saldoAcumulado,0), mRest: list.reduce((s,a)=>s+a.metaRestante,0),
-      cump: tO > 0 ? (tC/tO)*100 : 0, falt: list.reduce((s,a)=>s+a.faltanteRally,0)
-    });
-  }, [diaControl, formProyeccion]);
-
-  // Funciones de HTML para Emails
+  // GENERADORES HTML
   const wrapDiv = (html) => `<div style="font-family:'Segoe UI',Arial,sans-serif; font-size:14px; color:#1e293b; max-width:800px; line-height:1.6;">${html}</div>`;
-  const btnStyle = "background-color:#0f172a; color:#fff; padding:6px 12px; border-radius:4px; font-weight:bold; font-size:12px;";
-  const tdHeader = "background-color:#f1f5f9; padding:10px; border-bottom:2px solid #cbd5e1; font-weight:bold; color:#0f172a; font-size:13px; text-transform:uppercase;";
-  const tdCell = "padding:10px; border-bottom:1px solid #e2e8f0; color:#334155;";
+  const thStyle = "background-color:#0f172a; color:#fff; padding:10px; border:1px solid #cbd5e1; font-weight:bold; font-size:12px; text-transform:uppercase;";
+  const tdStyle = "padding:10px; border:1px solid #cbd5e1; color:#334155; font-size:13px;";
 
   const getHtmlLlamada = () => wrapDiv(`
-    <p>${obtenerSaludoTiempo()} estimada Olivia,</p>
+    <p>${obtenerSaludoTiempo()},</p>
     <p>Por favor su apoyo con la validación telefónica del siguiente prospecto referido, solicitó ser llamado a Hrs. <b>${formLlamada.horaLlamada || '---'}</b>:</p>
-    <table width="100%" cellspacing="0" style="border:1px solid #e2e8f0; border-radius:8px; margin-bottom:20px;">
-      <tr><td style="${tdHeader}" colspan="2">🗣️ DATOS DEL REFERIDO</td></tr>
-      <tr><td style="${tdCell} width:40%;">Nombre Completo:</td><td style="${tdCell}"><b>${formLlamada.nombreReferido}</b></td></tr>
-      <tr><td style="${tdCell}">Nro. de Contrato:</td><td style="${tdCell}"><b>${formLlamada.contratoReferido}</b></td></tr>
-      <tr><td style="${tdCell}">Teléfono Celular:</td><td style="${tdCell}"><b>${formLlamada.celularReferido}</b></td></tr>
-      <tr><td style="${tdHeader}" colspan="2">🎁 DATOS DE LA BENEFICIARIA</td></tr>
-      <tr><td style="${tdCell}">Nombre Completo:</td><td style="${tdCell}"><b>${formLlamada.nombreBeneficiario}</b></td></tr>
-      <tr><td style="${tdCell} border-bottom:none;">C.I.:</td><td style="${tdCell} border-bottom:none;"><b>${formLlamada.ciBeneficiario}</b></td></tr>
+    <table width="100%" cellspacing="0" style="border-collapse:collapse; margin-bottom:20px;">
+      <tr><th colspan="2" style="${thStyle}">🗣️ DATOS DEL REFERIDO</th></tr>
+      <tr><td style="${tdStyle} width:40%; background:#f8fafc;">Nombre Completo:</td><td style="${tdStyle}"><b>${formLlamada.nombreReferido}</b></td></tr>
+      <tr><td style="${tdStyle} background:#f8fafc;">Nro. de Contrato:</td><td style="${tdStyle}"><b>${formLlamada.contratoReferido}</b></td></tr>
+      <tr><td style="${tdStyle} background:#f8fafc;">Teléfono Celular:</td><td style="${tdStyle}"><b>${formLlamada.celularReferido}</b></td></tr>
+      <tr><th colspan="2" style="${thStyle}">🎁 DATOS DE LA BENEFICIARIA</th></tr>
+      <tr><td style="${tdStyle} background:#f8fafc;">Nombre Completo:</td><td style="${tdStyle}"><b>${formLlamada.nombreBeneficiario}</b></td></tr>
+      <tr><td style="${tdStyle} background:#f8fafc;">C.I.:</td><td style="${tdStyle}"><b>${formLlamada.ciBeneficiario}</b></td></tr>
     </table>
     <p>Saludos cordiales,<br><b>${formLlamada.asesor}</b></p>
   `);
@@ -340,15 +273,11 @@ export default function App() {
   const getHtmlBloqueo = () => wrapDiv(`
     <p>${obtenerSaludoTiempo()} estimado jefe,</p>
     <p>Por favor su autorización para el <b>BLOQUEO INMEDIATO</b> del siguiente lote, el cliente confirma cierre para mañana a Hrs. <b>${formBloqueo.horaVenta}</b>:</p>
-    <table width="100%" cellspacing="0" style="border:1px solid #e2e8f0; border-radius:8px; margin-bottom:20px; background-color:#f8fafc;">
-      <tr><td style="padding:15px; border-bottom:1px solid #e2e8f0;"><span style="color:#0f172a; font-weight:bold; font-size:16px;">PROYECTO: CELINA - ${String(formBloqueo.proyecto).toUpperCase()}</span></td></tr>
-      <tr><td style="padding:15px;">
-        <ul style="margin:0; padding-left:20px; color:#334155; line-height:1.8;">
-          <li><b>Ubicación Lote:</b> UV ${formBloqueo.uv} - MZN ${formBloqueo.manzano} - LOTE ${formBloqueo.lote}</li>
-          <li><b>Superficie:</b> ${formBloqueo.superficie} m²</li>
-          <li><b>Categoría Comercial:</b> ${String(formBloqueo.categoria).toUpperCase()}</li>
-        </ul>
-      </td></tr>
+    <table width="100%" cellspacing="0" style="border-collapse:collapse; margin-bottom:20px;">
+      <tr><td style="${tdStyle} background:#f8fafc; font-size:16px;" colspan="2"><span style="color:#0f172a;"><b>PROYECTO: CELINA - ${String(formBloqueo.proyecto).toUpperCase()}</b></span></td></tr>
+      <tr><td style="${tdStyle} width:30%;"><b>Ubicación Lote:</b></td><td style="${tdStyle}">UV ${formBloqueo.uv} - MZN ${formBloqueo.manzano} - LOTE ${formBloqueo.lote}</td></tr>
+      <tr><td style="${tdStyle}"><b>Superficie:</b></td><td style="${tdStyle}">${formBloqueo.superficie} m²</td></tr>
+      <tr><td style="${tdStyle}"><b>Categoría:</b></td><td style="${tdStyle}">${String(formBloqueo.categoria).toUpperCase()}</td></tr>
     </table>
     <p>Agradezco de antemano la gestión.</p>
     <p>Saludos cordiales,<br><b>${formBloqueo.asesor}</b></p>
@@ -358,9 +287,7 @@ export default function App() {
     <p>${obtenerSaludoTiempo()} estimado jefe,</p>
     <p>Solicito la autorización para el <b>cambio de modalidad de contrato (de Digital a Físico)</b> para la siguiente venta:</p>
     <ul style="padding-left:20px; margin-bottom:20px;">
-      <li><b>Cliente:</b> ${formFisico.nombre}</li>
-      <li><b>C.I.:</b> ${formFisico.ci}</li>
-      <li><b>Contrato Nro:</b> ${formFisico.contrato}</li>
+      <li><b>Cliente:</b> ${formFisico.nombre}</li><li><b>C.I.:</b> ${formFisico.ci}</li><li><b>Contrato Nro:</b> ${formFisico.contrato}</li>
     </ul>
     <div style="background-color:#fef2f2; border:1px solid #fca5a5; padding:15px; border-radius:8px; margin-bottom:20px;">
       <p style="margin:0; color:#991b1b; font-size:13px;"><b>📝 Motivo del Cambio:</b><br>${formFisico.motivo}</p>
@@ -368,31 +295,25 @@ export default function App() {
     <p>Saludos cordiales,<br><b>${formFisico.asesor}</b></p>
   `);
 
-  const getHtmlReenvio = () => {
-    let rows = formReenvio.contratos.map(c => `<tr><td style="${tdCell}"><b>${c.nroContrato}</b></td><td style="${tdCell}">${c.cliente}</td><td style="${tdCell}">${c.ci}</td><td style="${tdCell}">UV ${c.uv} - MZN ${c.manzano} - Lote ${c.lote}</td></tr>`).join('');
-    return wrapDiv(`
-      <p>${obtenerSaludoTiempo()} estimado jefe,</p>
-      <p>Solicito el reenvío del correo para la Firma Digital de los siguientes clientes (Proyecto ${formReenvio.proyecto}), debido a caducidad o error en la bandeja de entrada:</p>
-      <table width="100%" cellspacing="0" style="border:1px solid #e2e8f0; margin-bottom:20px;">
-        <tr><th style="${tdHeader}">Nro. Contrato</th><th style="${tdHeader}">Cliente</th><th style="${tdHeader}">C.I.</th><th style="${tdHeader}">Lote</th></tr>
-        ${rows}
-      </table>
-      <p>Saludos cordiales,<br><b>${formReenvio.asesor}</b></p>
-    `);
-  };
+  const getHtmlReenvio = () => wrapDiv(`
+    <p>${obtenerSaludoTiempo()} estimado jefe,</p>
+    <p>Solicito el reenvío del correo para la Firma Digital de los siguientes clientes (Proyecto ${formReenvio.proyecto}):</p>
+    <table width="100%" cellspacing="0" style="border-collapse:collapse; margin-bottom:20px;">
+      <tr><th style="${thStyle}">Nro. Contrato</th><th style="${thStyle}">Cliente</th><th style="${thStyle}">C.I.</th><th style="${thStyle}">Lote</th></tr>
+      ${formReenvio.contratos.map(c => `<tr><td style="${tdStyle}"><b>${c.nroContrato}</b></td><td style="${tdStyle}">${c.cliente}</td><td style="${tdStyle}">${c.ci}</td><td style="${tdStyle}">UV ${c.uv} - MZN ${c.manzano} - Lote ${c.lote}</td></tr>`).join('')}
+    </table>
+    <p>Saludos cordiales,<br><b>${formReenvio.asesor}</b></p>
+  `);
 
-  const getHtmlSeguro = () => {
-    let rows = formSeguro.beneficiarios.map(b => `<tr><td style="${tdCell}"><b>${b.nombre}</b></td><td style="${tdCell}">${b.parentesco}</td><td style="${tdCell} text-align:center;">${b.porcentaje}%</td><td style="${tdCell}">${b.ci}</td></tr>`).join('');
-    return wrapDiv(`
-      <p>${obtenerSaludoTiempo()} jefe,</p>
-      <p>Por favor su ayuda con la adición de beneficiarios a la póliza de Seguro de Vida correspondiente al contrato <b>${formSeguro.nroContrato}</b> (Cliente: ${formSeguro.cliente}):</p>
-      <table width="100%" cellspacing="0" style="border:1px solid #e2e8f0; margin-bottom:20px;">
-        <tr><th style="${tdHeader}">Nombre del Beneficiario</th><th style="${tdHeader}">Parentesco</th><th style="${tdHeader} text-align:center;">Porcentaje</th><th style="${tdHeader}">C.I.</th></tr>
-        ${rows}
-      </table>
-      <p>Saludos cordiales,<br><b>${formSeguro.asesor}</b></p>
-    `);
-  };
+  const getHtmlSeguro = () => wrapDiv(`
+    <p>${obtenerSaludoTiempo()} jefe,</p>
+    <p>Por favor su ayuda con la adición de beneficiarios a la póliza de Seguro de Vida correspondiente al contrato <b>${formSeguro.nroContrato}</b> (Cliente: ${formSeguro.cliente}):</p>
+    <table width="100%" cellspacing="0" style="border-collapse:collapse; margin-bottom:20px;">
+      <tr><th style="${thStyle}">Nombre del Beneficiario</th><th style="${thStyle}">Parentesco</th><th style="${thStyle} text-align:center;">%</th><th style="${thStyle}">C.I.</th></tr>
+      ${formSeguro.beneficiarios.map(b => `<tr><td style="${tdStyle}"><b>${b.nombre}</b></td><td style="${tdStyle}">${b.parentesco}</td><td style="${tdStyle} text-align:center;">${b.porcentaje}%</td><td style="${tdStyle}">${b.ci}</td></tr>`).join('')}
+    </table>
+    <p>Saludos cordiales,<br><b>${formSeguro.asesor}</b></p>
+  `);
 
   const getHtmlRenuncia = () => wrapDiv(`
     <p>${obtenerSaludoTiempo()} estimada Carolina,</p>
@@ -417,11 +338,11 @@ export default function App() {
   const getHtmlEvaluacion = () => wrapDiv(`
     <p>${obtenerSaludoTiempo()} María Fernanda,</p>
     <p>Remito los resultados de la Evaluación de Desempeño (Fin de Programa de Aprendizaje) del asesor <b>${formEvaluacion.nombre}</b>:</p>
-    <table width="100%" cellspacing="0" style="border:1px solid #e2e8f0; margin-bottom:20px;">
-      <tr><td style="${tdHeader}" colspan="2">📊 MÉTRICAS Y RESULTADOS</td></tr>
-      <tr><td style="${tdCell}"><b>Puntuación Final:</b></td><td style="${tdCell}"><span style="${btnStyle} background-color:#0ea5e9;">${formEvaluacion.punteo} pts. (${formEvaluacion.calificacion})</span></td></tr>
-      <tr><td style="${tdCell}"><b>Cierres Comerciales:</b></td><td style="${tdCell}">${formEvaluacion.lotes} lotes ($${formatCurrency(parseFloat(formEvaluacion.monto))})</td></tr>
-      <tr><td style="${tdCell}"><b>Gestión de Leads:</b></td><td style="${tdCell}">${formEvaluacion.leads} generados | ${formEvaluacion.visitas} visitas guiadas</td></tr>
+    <table width="100%" cellspacing="0" style="border-collapse:collapse; margin-bottom:20px;">
+      <tr><td style="${thStyle}" colspan="2">📊 MÉTRICAS Y RESULTADOS</td></tr>
+      <tr><td style="${tdStyle} background:#f8fafc;"><b>Puntuación Final:</b></td><td style="${tdStyle}"><span style="background-color:#0ea5e9; color:#fff; padding:6px 12px; border-radius:4px; font-weight:bold;">${formEvaluacion.punteo} pts. (${formEvaluacion.calificacion})</span></td></tr>
+      <tr><td style="${tdStyle} background:#f8fafc;"><b>Cierres Comerciales:</b></td><td style="${tdStyle}">${formEvaluacion.lotes} lotes ($${formatCurrency(parseFloat(formEvaluacion.monto))})</td></tr>
+      <tr><td style="${tdStyle} background:#f8fafc;"><b>Gestión de Leads:</b></td><td style="${tdStyle}">${formEvaluacion.leads} generados | ${formEvaluacion.visitas} visitas guiadas</td></tr>
     </table>
     <div style="background-color:#f8fafc; padding:15px; border-left:4px solid #4f46e5; margin-bottom:20px;">
       <p style="margin:0; font-size:13px;"><b>Recomendación de Supervisión:</b><br>${formEvaluacion.observaciones}</p>
@@ -444,17 +365,17 @@ export default function App() {
       <p>${obtenerSaludoTiempo()},</p>
       <p>Estimado/a <b>${formAmortizacion.cliente || 'Cliente'}</b>, a continuación le presento la simulación matemática (Sistema Francés) del impacto de su abono a capital:</p>
       
-      <table width="100%" cellspacing="0" style="border:1px solid #e2e8f0; border-radius:8px; overflow:hidden; margin-bottom:20px;">
-        <tr><td colspan="2" style="background-color:#1e293b; color:#fff; padding:12px; font-weight:bold; font-size:13px;">📌 SITUACIÓN ACTUAL DEL CRÉDITO</td></tr>
-        <tr><td style="${tdCell}">Capital Restante Actual:</td><td style="${tdCell} text-align:right; font-weight:bold;">$ ${formatCurrency(r.Bk)}</td></tr>
-        <tr><td style="${tdCell}">Cuota Fija Mensual (Pura):</td><td style="${tdCell} text-align:right;">$ ${formatCurrency(r.PMT)}</td></tr>
-        <tr><td style="${tdCell}">Plazo Restante Actual:</td><td style="${tdCell} text-align:right;">${r.nOldR} meses</td></tr>
+      <table width="100%" cellspacing="0" style="border-collapse:collapse; margin-bottom:20px;">
+        <tr><td colspan="2" style="background-color:#1e293b; color:#fff; padding:10px; font-weight:bold; font-size:12px; text-transform:uppercase;">📌 SITUACIÓN ACTUAL DEL CRÉDITO</td></tr>
+        <tr><td style="${tdStyle} background:#f8fafc;">Capital Restante Actual:</td><td style="${tdStyle} text-align:right; font-weight:bold;">$ ${formatCurrency(r.Bk)}</td></tr>
+        <tr><td style="${tdStyle}">Cuota Fija Mensual (Pura):</td><td style="${tdStyle} text-align:right;">$ ${formatCurrency(r.PMT)}</td></tr>
+        <tr><td style="${tdStyle} background:#f8fafc;">Plazo Restante Actual:</td><td style="${tdStyle} text-align:right;">${r.nOldR} meses</td></tr>
       </table>
 
-      <table width="100%" cellspacing="0" style="border:1px solid #bbf7d0; border-radius:8px; overflow:hidden; margin-bottom:20px;">
-        <tr><td colspan="2" style="background-color:#10b981; color:#fff; padding:12px; font-weight:bold; font-size:13px;">🚀 IMPACTO DEL ABONO EXTRA DE $ ${formatCurrency(formAmortizacion.montoAmortizacion)}</td></tr>
-        <tr><td style="${tdCell}">Nuevo Capital Restante:</td><td style="${tdCell} text-align:right; font-weight:bold; color:#059669; font-size:16px;">$ ${formatCurrency(r.B_new)}</td></tr>
-        <tr><td style="${tdCell}"><b>NUEVO PLAZO RESTANTE:</b></td><td style="${tdCell} text-align:right; font-weight:bold; color:#059669; font-size:18px;">${r.nNew} meses</td></tr>
+      <table width="100%" cellspacing="0" style="border-collapse:collapse; margin-bottom:20px;">
+        <tr><td colspan="2" style="background-color:#10b981; color:#fff; padding:10px; font-weight:bold; font-size:12px; text-transform:uppercase;">🚀 IMPACTO DEL ABONO EXTRA DE $ ${formatCurrency(formAmortizacion.montoAmortizacion)}</td></tr>
+        <tr><td style="${tdStyle} background:#f0fdf4;">Nuevo Capital Restante:</td><td style="${tdStyle} background:#f0fdf4; text-align:right; font-weight:bold; color:#059669; font-size:16px;">$ ${formatCurrency(r.B_new)}</td></tr>
+        <tr><td style="${tdStyle} border-bottom:2px solid #10b981;"><b>NUEVO PLAZO RESTANTE:</b></td><td style="${tdStyle} border-bottom:2px solid #10b981; text-align:right; font-weight:bold; color:#059669; font-size:18px;">${r.nNew} meses</td></tr>
       </table>
 
       <div style="background-color:#fef3c7; border:1px solid #fde68a; padding:15px; border-radius:8px;">
@@ -471,14 +392,13 @@ export default function App() {
   const getHtmlRecompra = () => wrapDiv(`
     <p>${obtenerSaludoTiempo()} jefe,</p>
     <p>Solicito amablemente el código de descuento por concepto de <b>RECOMPRA</b> para el siguiente cliente (Beneficio estimado: $${calcularBeneficioRecompra()}):</p>
-    
-    <table width="100%" cellspacing="0" style="border:1px solid #e2e8f0; margin-bottom:20px;">
-      <tr><th colspan="2" style="background-color:#0f172a; color:#fff; padding:8px;">CONTRATO NUEVO</th><th colspan="2" style="background-color:#ea580c; color:#fff; padding:8px;">CONTRATO ANTIGUO</th></tr>
-      <tr><td style="${tdCell} background:#f8fafc;"><b>Cliente:</b></td><td style="${tdCell} font-weight:bold;">${formRecompra.nombreNuevo}</td><td style="${tdCell} background:#fff7ed;"><b>Cliente:</b></td><td style="${tdCell} font-weight:bold;">${formRecompra.nombreAntiguo}</td></tr>
-      <tr><td style="${tdCell} background:#f8fafc;"><b>Nro Contrato:</b></td><td style="${tdCell} color:#2563eb;"><b>${formRecompra.contratoNuevo}</b></td><td style="${tdCell} background:#fff7ed;"><b>Nro Contrato:</b></td><td style="${tdCell} color:#ea580c;"><b>${formRecompra.contratoAntiguo}</b></td></tr>
-      <tr><td style="${tdCell} background:#f8fafc;"><b>Agencia:</b></td><td style="${tdCell}">${formRecompra.sucursal}</td><td style="${tdCell} background:#fff7ed;"><b>Patrocinador:</b></td><td style="${tdCell}">${formRecompra.patrocinador}</td></tr>
-      <tr><td style="${tdCell} background:#f8fafc;"><b>Venta (Fecha):</b></td><td style="${tdCell}">${formRecompra.fechaVentaNuevo}</td><td style="${tdCell} background:#fff7ed;"><b>Venta (Fecha):</b></td><td style="${tdCell}">${formRecompra.fechaVentaAntiguo}</td></tr>
-      <tr><td style="${tdCell} background:#f8fafc;"><b>Cuotas Pagadas:</b></td><td style="${tdCell}">${formRecompra.cuotasPagadas}</td><td style="${tdCell} background:#fff7ed;"><b>Valor Cuota ($):</b></td><td style="${tdCell} font-weight:bold;">$${formRecompra.valorCuota}</td></tr>
+    <table width="100%" cellspacing="0" style="border-collapse:collapse; margin-bottom:20px; font-size:12px;">
+      <tr><th colspan="2" style="background-color:#0f172a; color:#fff; padding:8px; border:1px solid #0f172a;">CONTRATO NUEVO</th><th colspan="2" style="background-color:#ea580c; color:#fff; padding:8px; border:1px solid #ea580c;">CONTRATO ANTIGUO</th></tr>
+      <tr><td style="${tdStyle} background:#f8fafc;"><b>Cliente:</b></td><td style="${tdStyle} font-weight:bold;">${formRecompra.nombreNuevo}</td><td style="${tdStyle} background:#fff7ed;"><b>Cliente:</b></td><td style="${tdStyle} font-weight:bold;">${formRecompra.nombreAntiguo}</td></tr>
+      <tr><td style="${tdStyle} background:#f8fafc;"><b>Nro Contrato:</b></td><td style="${tdStyle} color:#2563eb;"><b>${formRecompra.contratoNuevo}</b></td><td style="${tdStyle} background:#fff7ed;"><b>Nro Contrato:</b></td><td style="${tdStyle} color:#ea580c;"><b>${formRecompra.contratoAntiguo}</b></td></tr>
+      <tr><td style="${tdStyle} background:#f8fafc;"><b>Agencia:</b></td><td style="${tdStyle}">${formRecompra.sucursal}</td><td style="${tdStyle} background:#fff7ed;"><b>Patrocinador:</b></td><td style="${tdStyle}">${formRecompra.patrocinador}</td></tr>
+      <tr><td style="${tdStyle} background:#f8fafc;"><b>Venta (Fecha):</b></td><td style="${tdStyle}">${formRecompra.fechaVentaNuevo}</td><td style="${tdStyle} background:#fff7ed;"><b>Venta (Fecha):</b></td><td style="${tdStyle}">${formRecompra.fechaVentaAntiguo}</td></tr>
+      <tr><td style="${tdStyle} background:#f8fafc;"><b>Cuotas Pagadas:</b></td><td style="${tdStyle}">${formRecompra.cuotasPagadas}</td><td style="${tdStyle} background:#fff7ed;"><b>Valor Cuota ($):</b></td><td style="${tdStyle} font-weight:bold;">$${formRecompra.valorCuota}</td></tr>
     </table>
     <p>Saludos cordiales,<br><b>${formRecompra.asesor}</b></p>
   `);
@@ -490,16 +410,15 @@ export default function App() {
       <p>${obtenerSaludoTiempo()} jefe,</p>
       ${isAlerta ? `<div style="background:#fef2f2; color:#b91c1c; padding:10px; border-radius:6px; border:1px solid #fca5a5; font-weight:bold; margin-bottom:15px;">⚠️ SOLICITUD DE EXCEPCIÓN: Autorización para bajar Cuota Inicial al ${formatCurrency(pCuota)}% (Categoría Calle).</div>` : ''}
       <p>Solicito la aplicación del descuento de la campaña comercial para el proyecto <b>${formDescuento.proyecto === 'OTRO...' ? formDescuento.proyectoManual : formDescuento.proyecto}</b> bajo la modalidad <b>${formDescuento.modalidad}</b>:</p>
-      
-      <table width="100%" cellspacing="0" style="border:1px solid #e2e8f0; border-radius:8px; margin-bottom:20px;">
-        <tr><td style="${tdHeader}" colspan="2">📐 DATOS DEL LOTE (UV ${formDescuento.uv} - MZN ${formDescuento.manzano} - LT ${formDescuento.lote})</td></tr>
-        <tr><td style="${tdCell}">Superficie:</td><td style="${tdCell} text-align:right;"><b>${formDescuento.m2} m²</b></td></tr>
-        <tr><td style="${tdCell}">Precio de Lista (m²):</td><td style="${tdCell} text-align:right;"><b>$ ${formatCurrency(formDescuento.precioM2)}</b></td></tr>
-        <tr><td style="${tdCell} background:#f8fafc;">Valor Contrato Base:</td><td style="${tdCell} text-align:right; font-size:15px; color:#0f172a;"><b>$ ${formatCurrency(vc)}</b></td></tr>
-        <tr><td style="${tdHeader}" colspan="2">🏷️ APLICACIÓN DE DESCUENTO (${dTex})</td></tr>
-        <tr><td style="${tdCell} color:#059669;"><b>Total Descuento Campaña:</b></td><td style="${tdCell} text-align:right; color:#059669;"><b>- $ ${formatCurrency(dTot)}</b></td></tr>
-        <tr><td style="${tdCell} background:#0f172a; color:#fff; font-size:16px;"><b>NUEVO PRECIO PROMOCIONAL:</b></td><td style="${tdCell} background:#0f172a; color:#34d399; font-size:20px; text-align:right;"><b>$ ${formatCurrency(pF)}</b></td></tr>
-        <tr><td style="${tdCell} border:none; text-align:right; font-size:11px; color:#64748b;" colspan="2">(Equivalente a $${formatCurrency(pmF)} el m²)</td></tr>
+      <table width="100%" cellspacing="0" style="border-collapse:collapse; margin-bottom:20px;">
+        <tr><th style="${thStyle}" colspan="2">📐 DATOS DEL LOTE (UV ${formDescuento.uv} - MZN ${formDescuento.manzano} - LT ${formDescuento.lote})</th></tr>
+        <tr><td style="${tdStyle} background:#f8fafc;">Superficie:</td><td style="${tdStyle} background:#f8fafc; text-align:right;"><b>${formDescuento.m2} m²</b></td></tr>
+        <tr><td style="${tdStyle}">Precio de Lista (m²):</td><td style="${tdStyle} text-align:right;"><b>$ ${formatCurrency(formDescuento.precioM2)}</b></td></tr>
+        <tr><td style="${tdStyle} background:#f1f5f9;">Valor Contrato Base:</td><td style="${tdStyle} background:#f1f5f9; text-align:right; font-size:15px; color:#0f172a;"><b>$ ${formatCurrency(vc)}</b></td></tr>
+        <tr><th style="${thStyle} background:#059669; border-color:#059669;" colspan="2">🏷️ APLICACIÓN DE DESCUENTO (${dTex})</th></tr>
+        <tr><td style="${tdStyle} color:#059669;"><b>Total Descuento Campaña:</b></td><td style="${tdStyle} text-align:right; color:#059669;"><b>- $ ${formatCurrency(dTot)}</b></td></tr>
+        <tr><td style="${tdStyle} background:#0f172a; color:#fff; font-size:16px;"><b>NUEVO PRECIO PROMOCIONAL:</b></td><td style="${tdStyle} background:#0f172a; color:#34d399; font-size:20px; text-align:right;"><b>$ ${formatCurrency(pF)}</b></td></tr>
+        <tr><td style="${tdStyle} border:none; text-align:right; font-size:11px; color:#64748b;" colspan="2">(Equivalente a $${formatCurrency(pmF)} el m²)</td></tr>
       </table>
       <p>Quedo atento a su aprobación.</p><p><b>${formDescuento.asesor}</b></p>
     `);
@@ -508,84 +427,61 @@ export default function App() {
   const getHtmlCuota = () => wrapDiv(`
     <p>${obtenerSaludoTiempo()} jefe,</p>
     <p>Solicito la <b>anulación y reingreso</b> del contrato ${formCuota.nroContrato} a nombre de ${formCuota.cliente} para aplicar un incremento extraordinario a su cuota inicial:</p>
-    <table width="100%" cellspacing="0" style="border:1px solid #e2e8f0; margin-bottom:20px;">
-      <tr><td style="${tdCell} width:50%;">Ubicación:</td><td style="${tdCell}"><b>${formCuota.proyecto} (UV ${formCuota.uv} - MZN ${formCuota.manzano} - LT ${formCuota.lote})</b></td></tr>
-      <tr><td style="${tdCell} color:#dc2626;">Cuota Inicial Actual Registrada:</td><td style="${tdCell} color:#dc2626; font-weight:bold;">$ ${formatCurrency(formCuota.cuotaInicial)}</td></tr>
-      <tr><td style="${tdCell} background:#f0fdf4; color:#059669; font-size:16px;"><b>NUEVA CUOTA INICIAL A ABONAR:</b></td><td style="${tdCell} background:#f0fdf4; color:#059669; font-weight:bold; font-size:18px;">$ ${formatCurrency(formCuota.nuevaCuota)}</td></tr>
+    <table width="100%" cellspacing="0" style="border-collapse:collapse; margin-bottom:20px;">
+      <tr><td style="${tdStyle} width:50%; background:#f8fafc;">Ubicación:</td><td style="${tdStyle} background:#f8fafc;"><b>${formCuota.proyecto} (UV ${formCuota.uv} - MZN ${formCuota.manzano} - LT ${formCuota.lote})</b></td></tr>
+      <tr><td style="${tdStyle} color:#dc2626;">Cuota Inicial Actual Registrada:</td><td style="${tdStyle} color:#dc2626; font-weight:bold;">$ ${formatCurrency(formCuota.cuotaInicial)}</td></tr>
+      <tr><td style="${tdStyle} background:#f0fdf4; color:#059669; font-size:15px;"><b>NUEVA CUOTA INICIAL A ABONAR:</b></td><td style="${tdStyle} background:#f0fdf4; color:#059669; font-weight:bold; font-size:18px;">$ ${formatCurrency(formCuota.nuevaCuota)}</td></tr>
     </table>
     <p><b>Justificación:</b> ${formCuota.motivo}</p>
     <p>Saludos cordiales,<br><b>${formCuota.asesorVentas}</b></p>
   `);
 
   const generarHtmlProyeccionOutlook = () => {
-    let filas = "", tCol=0, tProyS=0, tMes=0, pA = [0,0,0,0,0];
-    
+    let f = "", tC=0, tP=0, tM=0, pA = [0,0,0,0,0];
     formProyeccion.asesores.forEach((a, i) => {
-      const proyVentas = a.dias.reduce((x,y)=>x+y,0);
-      const colAct = parseFloat(a.colAct)||0;
-      const finMes = colAct + proyVentas;
-      tCol+=colAct; tProyS+=proyVentas; tMes+=finMes;
-      a.proy.forEach((v,x) => pA[x]+=(parseFloat(v)||0));
-      
-      const prod = finMes >= 25000;
-      filas += `
-        <tr style="background-color:${prod ? '#f0fdf4':'#ffffff'};">
-          <td style="${tdCell} text-align:center;">${i+1}</td>
-          <td style="${tdCell} font-weight:bold;">${a.nombre}</td>
-          <td style="${tdCell} text-align:right;">${formatVacio(colAct)}</td>
-          ${a.dias.map(d => `<td style="${tdCell} text-align:center; color:#64748b;">${formatDias(d)}</td>`).join('')}
-          ${a.proy.map(p => `<td style="${tdCell} text-align:center; font-weight:bold; color:#0284c7;">${formatDias(p)}</td>`).join('')}
-          <td style="${tdCell} text-align:right; font-weight:bold;">${formatVacio(proyVentas)}</td>
-          <td style="${tdCell} text-align:right; font-weight:bold; color:${prod?'#059669':'#0f172a'};">${formatVacio(finMes)} ${prod?'✔':''}</td>
-        </tr>`;
+      const pv = a.dias.reduce((x,y)=>x+y,0); const ca = parseFloat(a.colAct)||0; const fm = ca + pv;
+      tC+=ca; tP+=pv; tM+=fm; a.proy.forEach((v,x) => pA[x]+=(parseFloat(v)||0));
+      const prod = fm >= 25000;
+      f += `<tr style="background-color:${prod ? '#f0fdf4':'#ffffff'};"><td style="${tdStyle} text-align:center;">${i+1}</td><td style="${tdStyle} font-weight:bold;">${a.nombre}</td><td style="${tdStyle} text-align:right;">${formatVacio(ca)}</td>${a.dias.map(d => `<td style="${tdStyle} text-align:center; color:#64748b;">${formatDias(d)}</td>`).join('')}${a.proy.map(p => `<td style="${tdStyle} text-align:center; font-weight:bold; color:#0284c7;">${formatDias(p)}</td>`).join('')}<td style="${tdStyle} text-align:right; font-weight:bold;">${formatVacio(pv)}</td><td style="${tdStyle} text-align:right; font-weight:bold; color:${prod?'#059669':'#0f172a'};">${formatVacio(fm)} ${prod?'✔':''}</td></tr>`;
     });
-
-    const obj = formProyeccion.objetivoMensual;
-    const av = obj>0 ? (tCol/obj)*100 : 0;
-    const fi = obj>0 ? (tMes/obj)*100 : 0;
-
+    const o = formProyeccion.objetivoMensual, a = o>0 ? (tC/o)*100 : 0, fi = o>0 ? (tM/o)*100 : 0;
     return wrapDiv(`
       <p><b>${obtenerSaludoTiempo()} estimado jefe,</b></p>
       <p>Adjunto el cuadro gerencial de Proyección Semanal del equipo:</p>
-      <table width="100%" cellspacing="0" style="border:1px solid #cbd5e1; border-collapse:collapse; font-size:12px; margin-bottom:20px;">
+      <table width="100%" cellspacing="0" style="border:1px solid #cbd5e1; border-collapse:collapse; font-size:11px; margin-bottom:20px;">
         <thead>
-          <tr>
-            <th colspan="3" style="background:#0f172a; color:#fff; padding:10px; text-align:left;">Equipo: Oscar Saravia</th>
-            <th colspan="7" style="background:#1e293b; color:#fff; padding:10px; text-align:center;">Ventas Proyectadas Diarias</th>
-            <th colspan="5" style="background:#0ea5e9; color:#fff; padding:10px; text-align:center;">Proyectos</th>
-            <th rowspan="2" style="background:#0f172a; color:#fff; padding:10px; text-align:right; vertical-align:bottom;">Total Proy.</th>
-            <th rowspan="2" style="background:#10b981; color:#fff; padding:10px; text-align:right; vertical-align:bottom;">Cierre Mes</th>
-          </tr>
-          <tr>
-            <th style="background:#334155; color:#fff; padding:8px;">#</th><th style="background:#334155; color:#fff; padding:8px;">Asesor</th><th style="background:#334155; color:#fff; padding:8px;">Coloc. Actual</th>
-            ${[0,1,2,3,4,5,6].map(d => `<th style="background:#475569; color:#fff; padding:8px; text-align:center;">${formatDiaMes(formProyeccion.fechaInicio, d)}</th>`).join('')}
-            ${NOMBRES_PROYECTOS_PROYECCION.map(p => `<th style="background:#38bdf8; color:#fff; padding:8px; text-align:center;">${p}</th>`).join('')}
-          </tr>
+          <tr><th colspan="3" style="background:#0f172a; color:#fff; padding:8px; text-align:left;">Equipo: Oscar Saravia</th><th colspan="7" style="background:#1e293b; color:#fff; padding:8px; text-align:center;">Ventas Diarias</th><th colspan="5" style="background:#0ea5e9; color:#fff; padding:8px; text-align:center;">Proyectos</th><th rowspan="2" style="background:#0f172a; color:#fff; padding:8px; text-align:right;">Total Proy.</th><th rowspan="2" style="background:#10b981; color:#fff; padding:8px; text-align:right;">Cierre Mes</th></tr>
+          <tr><th style="background:#334155; color:#fff; padding:6px;">#</th><th style="background:#334155; color:#fff; padding:6px;">Asesor</th><th style="background:#334155; color:#fff; padding:6px;">Coloc. Actual</th>${[0,1,2,3,4,5,6].map(d => `<th style="background:#475569; color:#fff; padding:6px;">${formatDiaMes(formProyeccion.fechaInicio, d)}</th>`).join('')}${NOMBRES_PROYECTOS_PROYECCION.map(p => `<th style="background:#38bdf8; color:#fff; padding:6px;">${p}</th>`).join('')}</tr>
         </thead>
         <tbody>
-          ${filas}
-          <tr style="background:#f1f5f9;">
-            <td colspan="3" style="padding:10px; text-align:right; font-weight:bold; border-top:2px solid #cbd5e1;">TOTALES</td>
-            <td colspan="7" style="border-top:2px solid #cbd5e1;"></td>
-            ${pA.map(p => `<td style="padding:10px; text-align:center; font-weight:bold; color:#0284c7; border-top:2px solid #cbd5e1;">${p||'-'}</td>`).join('')}
-            <td style="padding:10px; text-align:right; font-weight:bold; border-top:2px solid #cbd5e1;">${formatCurrency(tProyS)}</td>
-            <td style="padding:10px; text-align:right; font-weight:bold; color:#059669; font-size:14px; border-top:2px solid #cbd5e1;">$${formatCurrency(tMes)}</td>
-          </tr>
+          ${f}
+          <tr style="background:#f1f5f9;"><td colspan="3" style="padding:10px; text-align:right; font-weight:bold; border-top:2px solid #cbd5e1;">TOTALES</td><td colspan="7" style="border-top:2px solid #cbd5e1;"></td>${pA.map(p => `<td style="padding:10px; text-align:center; font-weight:bold; color:#0284c7; border-top:2px solid #cbd5e1;">${p||'-'}</td>`).join('')}<td style="padding:10px; text-align:right; font-weight:bold; border-top:2px solid #cbd5e1;">${formatCurrency(tP)}</td><td style="padding:10px; text-align:right; font-weight:bold; color:#059669; font-size:14px; border-top:2px solid #cbd5e1;">$${formatCurrency(tM)}</td></tr>
         </tbody>
       </table>
       <table width="350" cellspacing="0" style="border:1px solid #cbd5e1; font-size:12px;">
-        <tr><td style="background:#0f172a; color:#fff; padding:10px;"><b>Objetivo Comercial</b></td><td style="padding:10px; text-align:right;"><b>$ ${formatCurrency(obj)}</b></td></tr>
-        <tr><td style="background:#0f172a; color:#fff; padding:10px;"><b>Avance Real</b></td><td style="padding:10px; text-align:right;">$ ${formatCurrency(tCol)} <span style="background:#f1f5f9; padding:2px 5px; border-radius:4px; font-size:10px;">${av.toFixed(1)}%</span></td></tr>
-        <tr><td style="background:#0f172a; color:#fff; padding:10px;"><b>Cierre Proyectado</b></td><td style="padding:10px; text-align:right; color:#059669; font-size:14px;"><b>$ ${formatCurrency(tMes)}</b> <span style="background:#d1fae5; padding:2px 5px; border-radius:4px; font-size:10px;">${fi.toFixed(1)}%</span></td></tr>
+        <tr><td style="background:#0f172a; color:#fff; padding:8px;"><b>Objetivo Comercial</b></td><td style="padding:8px; text-align:right; border-bottom:1px solid #cbd5e1;"><b>$ ${formatCurrency(o)}</b></td></tr>
+        <tr><td style="background:#0f172a; color:#fff; padding:8px;"><b>Avance Real</b></td><td style="padding:8px; text-align:right; border-bottom:1px solid #cbd5e1;">$ ${formatCurrency(tC)} | ${a.toFixed(1)}%</td></tr>
+        <tr><td style="background:#0f172a; color:#fff; padding:8px;"><b>Cierre Proyectado</b></td><td style="padding:8px; text-align:right; color:#059669; font-size:14px;"><b>$ ${formatCurrency(tM)}</b> | ${fi.toFixed(1)}%</td></tr>
       </table>
       <p>Saludos cordiales.</p>
     `);
   };
 
-  const textFallbacks = {
-    proy: `👋 Jefe, envío el resumen de la proyección del equipo.\n\n🎯 Objetivo Mes: $ ${formatCurrency(formProyeccion.objetivoMensual)}\n📈 Avance Actual: $ ${formatCurrency(formProyeccion.asesores.reduce((s,a)=>s+(Number(a.colAct)||0),0))}\n🏁 Cierre Proyectado: $ ${formatCurrency(formProyeccion.asesores.reduce((s,a)=>s+(Number(a.colAct)||0)+a.dias.reduce((x,y)=>x+y,0),0))}\n\nSaludos.`,
+  const plainT = {
+    llam: `👋 ${obtenerSaludoTiempo()},\nEstimada Olivia, por favor validación:\n\n*🗣️ REFERIDO*\nNombre: ${formLlamada.nombreReferido}\nContrato: ${formLlamada.contratoReferido}\nCelular: ${formLlamada.celularReferido}\nHora: ${formLlamada.horaLlamada}\n\n*🎁 BENEFICIARIA*\nNombre: ${formLlamada.nombreBeneficiario}\nCI: ${formLlamada.ciBeneficiario}\n\nSaludos.`,
+    bloq: `👋 ${obtenerSaludoTiempo()},\nJefe favor autorizar BLOQUEO para venta mañana a Hrs. ${formBloqueo.horaVenta}:\n\n* PROYECTO: CELINA - ${String(formBloqueo.proyecto).toUpperCase()}\n* LOTE: UV ${formBloqueo.uv} - MZN ${formBloqueo.manzano} - LOTE ${formBloqueo.lote}\n* SUP: ${formBloqueo.superficie} m2\n* CAT: ${formBloqueo.categoria}\n\nGracias.`,
+    fis: `👋 ${obtenerSaludoTiempo()},\nJefe, solicito paso a Contrato Físico:\nCliente: ${formFisico.nombre}\nCI: ${formFisico.ci}\nContrato: ${formFisico.contrato}\n\nMotivo: ${formFisico.motivo}\n\nSaludos.`,
+    ren: `👋 ${obtenerSaludoTiempo()},\nJefe, pido reenvío de Firma Digital (Proyecto ${formReenvio.proyecto}):\n${formReenvio.contratos.map(c=> `- Nro: ${c.nroContrato} | Cliente: ${c.cliente}`).join('\n')}\n\nSaludos.`,
+    seg: `👋 ${obtenerSaludoTiempo()},\nJefe, por favor agregar beneficiarios al Seguro del contrato ${formSeguro.nroContrato} (${formSeguro.cliente}):\n${formSeguro.beneficiarios.map(b=> `- ${b.nombre} (${b.parentesco}) - ${b.porcentaje}%`).join('\n')}\n\nSaludos.`,
+    renun: `👋 ${obtenerSaludoTiempo()} Carolina,\nAdjunto carta de renuncia del asesor ${formRenuncia.nombre} (${formRenuncia.cargo}). Efectivo desde el ${formRenuncia.fechaRenuncia} por: ${formRenuncia.motivo}.\nFavor proceder con la baja.\n\nSaludos.`,
+    alta: `👋 ${obtenerSaludoTiempo()} Carolina,\nSolicito accesos CRM para nuevo asesor:\nNombre: ${formAltaCRM.nombre} ${formAltaCRM.apPaterno} ${formAltaCRM.apMaterno}\nCI: ${formAltaCRM.ci}\nNacimiento: ${formAltaCRM.fechaNacimiento}\nCorreo: ${formAltaCRM.correo}\n\nSaludos.`,
+    eva: `👋 ${obtenerSaludoTiempo()} Ma. Fernanda,\nAdjunto evaluación fin de aprendizaje de ${formEvaluacion.nombre}:\nPunteo: ${formEvaluacion.punteo} (${formEvaluacion.calificacion})\nLotes: ${formEvaluacion.lotes} ($${formEvaluacion.monto})\nLeads: ${formEvaluacion.leads}\nVisitas: ${formEvaluacion.visitas}\n\nSaludos.`,
+    post: `👋 ${obtenerSaludoTiempo()} Ulrich,\nAdjunto entrevista de ${formPostulante.nombre} (Referido por ${formPostulante.referidor}). Sugiero pase a capacitación.\n\nSaludos.`,
     amort: `La simulación muestra que con un abono de $${formAmortizacion.montoAmortizacion}, usted terminaría su crédito en ${calcAmort().nNew} meses.`,
-    recompra: `Solicitud de Recompra para el contrato ${formRecompra.contratoNuevo}. Beneficio estimado: $${calcularBeneficioRecompra()}`
+    recomp: `Solicitud Recompra para el contrato ${formRecompra.contratoNuevo}. Beneficio estimado: $${calcularBeneficioRecompra()}.`,
+    desc: `Solicitud de Descuento: Proyecto ${formDescuento.proyecto}. Valor original $${calcDesc().vc.toFixed(2)}, Aplicando Descuento: -$${calcDesc().dTot.toFixed(2)}. Precio Final: $${calcDesc().pF.toFixed(2)}`,
+    cuo: `Solicitud de Reingreso. Contrato ${formCuota.nroContrato}. Nueva CI a pagar: $${formCuota.nuevaCuota}.`,
+    proy: `👋 Jefe, envío el resumen de proyección:\n🎯 Obj: $ ${formatCurrency(formProyeccion.objetivoMensual)}\n📈 Avance: ${formProyeccion.asesores.reduce((s,a)=>s+(Number(a.colAct)||0),0)}\n🏁 Cierre Proyectado: ${formProyeccion.asesores.reduce((s,a)=>s+(Number(a.colAct)||0)+a.dias.reduce((x,y)=>x+y,0),0)}\n\nSaludos.`
   };
 
   return (
@@ -622,10 +518,7 @@ export default function App() {
         </nav>
         <div className="p-4 border-t border-slate-800 bg-slate-950 text-xs flex items-center">
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-sky-400 flex items-center justify-center mr-3 font-bold shadow-md">OS</div>
-          <div>
-            <p className="font-bold truncate text-white">Oscar H. Saravia L.</p>
-            <p className="text-[10px] text-indigo-300 truncate">ohsaravia@celina.com.bo</p>
-          </div>
+          <div><p className="font-bold truncate text-white">Oscar H. Saravia L.</p><p className="text-[10px] text-indigo-300 truncate">ohsaravia@celina.com.bo</p></div>
         </div>
       </div>
 
@@ -644,25 +537,22 @@ export default function App() {
                   </div>
                   <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-5 rounded-2xl border border-slate-700 shadow-lg min-w-[200px] text-white">
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Avance Global Junio</p>
-                    <div className="flex items-end gap-2">
-                      <span className="text-4xl font-black text-emerald-400">{cumplimientoOficina.toFixed(1)}%</span>
-                    </div>
+                    <div className="flex items-end gap-2"><span className="text-4xl font-black text-emerald-400">{cumpOficina.toFixed(1)}%</span></div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   <div className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-4 opacity-10"><BarChart className="w-16 h-16"/></div>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Presupuesto</p>
-                    <p className="text-2xl font-black text-slate-800">${formatCurrency(totalObjGlobal)}</p>
+                    <p className="text-2xl font-black text-slate-800">${formatCurrency(totSeg.obj)}</p>
                   </div>
                   <div className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center border-l-4 border-l-emerald-500">
                     <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-1">Colocación Actual</p>
-                    <p className="text-2xl font-black text-emerald-600">${formatCurrency(totalColGlobal)}</p>
+                    <p className="text-2xl font-black text-emerald-600">${formatCurrency(totSeg.col)}</p>
                   </div>
                   <div className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center border-l-4 border-l-rose-500">
                     <p className="text-xs font-bold text-rose-500 uppercase tracking-widest mb-1">Brecha Restante</p>
-                    <p className="text-2xl font-black text-rose-600">${formatCurrency(Math.max(0, totalObjGlobal - totalColGlobal))}</p>
+                    <p className="text-2xl font-black text-rose-600">${formatCurrency(Math.max(0, totSeg.obj - totSeg.col))}</p>
                   </div>
                   <div className="p-6 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl shadow-lg shadow-indigo-600/30 flex flex-col justify-center text-white">
                     <p className="text-xs font-bold text-indigo-200 uppercase tracking-widest mb-1">Asesores Activos</p>
@@ -682,8 +572,8 @@ export default function App() {
                     <p className="text-xs text-slate-500 mt-1 font-medium">Control automático de metas. Los saldos positivos indican sobrecumplimiento.</p>
                   </div>
                   <div className="flex items-center bg-slate-50 p-2.5 rounded-xl border border-slate-200 shadow-sm gap-3">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Día de Control:</label>
-                    <input type="number" min="1" max="30" value={diaControl} onChange={(e) => setDiaControl(parseInt(e.target.value) || 1)} className="w-16 text-center font-black bg-white border border-indigo-200 focus:border-indigo-500 outline-none rounded-lg py-1.5 text-indigo-700 shadow-inner" />
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Día Control:</label>
+                    <input type="number" min="1" max="30" value={diaControl} onChange={(e) => setDiaControl(parseInt(e.target.value) || 1)} className="w-16 text-center font-black bg-white border border-indigo-200 outline-none rounded-lg py-1.5 text-indigo-700 shadow-inner" />
                   </div>
                 </div>
 
@@ -720,14 +610,14 @@ export default function App() {
                       ))}
                       <tr className="bg-slate-100 font-black text-slate-900 text-center border-t-2 border-slate-300">
                         <td colSpan="2" className="p-3 text-right border-r border-slate-200">TOTALES OFICINA</td>
-                        <td className="p-3 text-right border-r border-slate-200">${formatCurrency(totalesSeguimiento.obj)}</td>
-                        <td className="p-3 text-right text-slate-500 border-r border-slate-200">${formatCurrency(totalesSeguimiento.objD)}</td>
-                        <td className="p-3 border-r border-slate-200">{totalesSeguimiento.v}</td>
-                        <td className="p-3 text-right bg-slate-200/50 border-r border-slate-200">${formatCurrency(totalesSeguimiento.col)}</td>
-                        <td className={`p-3 text-right border-r border-slate-200 ${totalesSeguimiento.sAcum >= 0 ? 'text-emerald-600 bg-emerald-100/50' : 'text-rose-600 bg-rose-100/50'}`}>{totalesSeguimiento.sAcum < 0 ? '-' : ''}${formatCurrency(Math.abs(totalesSeguimiento.sAcum))}</td>
-                        <td className="p-3 text-right text-rose-600 border-r border-slate-200">-${formatCurrency(Math.abs(totalesSeguimiento.mRest))}</td>
-                        <td className="p-3 text-indigo-700 font-black text-sm border-r border-slate-200">{totalesSeguimiento.cump.toFixed(1)}%</td>
-                        <td className="p-3 text-right text-slate-700">${formatCurrency(totalesSeguimiento.falt)}</td>
+                        <td className="p-3 text-right border-r border-slate-200">${formatCurrency(totSeg.obj)}</td>
+                        <td className="p-3 text-right text-slate-500 border-r border-slate-200">${formatCurrency(totSeg.objD)}</td>
+                        <td className="p-3 border-r border-slate-200">{totSeg.v}</td>
+                        <td className="p-3 text-right bg-slate-200/50 border-r border-slate-200">${formatCurrency(totSeg.col)}</td>
+                        <td className={`p-3 text-right border-r border-slate-200 ${totSeg.sAcum >= 0 ? 'text-emerald-600 bg-emerald-100/50' : 'text-rose-600 bg-rose-100/50'}`}>{totSeg.sAcum < 0 ? '-' : ''}${formatCurrency(Math.abs(totSeg.sAcum))}</td>
+                        <td className="p-3 text-right text-rose-600 border-r border-slate-200">-${formatCurrency(Math.abs(totSeg.mRest))}</td>
+                        <td className="p-3 text-indigo-700 font-black text-sm border-r border-slate-200">{cumpOficina.toFixed(1)}%</td>
+                        <td className="p-3 text-right text-slate-700">${formatCurrency(totSeg.falt)}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -832,7 +722,7 @@ export default function App() {
                 <div className="grid grid-cols-2 gap-3"><Input label="Celular" value={formLlamada.celularReferido} onChange={hC(setFormLlamada)} name="celularReferido" /><Input label="Hora" value={formLlamada.horaLlamada} onChange={hC(setFormLlamada)} name="horaLlamada" /></div>
                 <div className="grid grid-cols-2 gap-3"><Input label="Beneficiaria" value={formLlamada.nombreBeneficiario} onChange={hC(setFormLlamada)} name="nombreBeneficiario" /><Input label="C.I. Ben." value={formLlamada.ciBeneficiario} onChange={hC(setFormLlamada)} name="ciBeneficiario" /></div>
               </div>
-              <ResultCard title="Correo a Atención Cliente" text="Validación de llamada..." htmlContent={getHtmlLlamada()} subject="Validación de Referido" fixedEmail="omendoza@celina.com.bo" fixedLabel="Olivia Mendoza" />
+              <ResultCard title="Correo a Atención Cliente" text={plainT.llam} htmlContent={getHtmlLlamada()} subject="Validación de Referido" fixedEmail="omendoza@celina.com.bo" fixedLabel="Olivia Mendoza" />
             </div>
           )}
 
@@ -845,7 +735,7 @@ export default function App() {
                 <div className="grid grid-cols-2 gap-3"><Input label="Superficie (m2)" value={formBloqueo.superficie} onChange={hC(setFormBloqueo)} name="superficie" /><Input label="Categoría" value={formBloqueo.categoria} onChange={hC(setFormBloqueo)} name="categoria" /></div>
                 <Input label="Hora Cierre" value={formBloqueo.horaVenta} onChange={hC(setFormBloqueo)} name="horaVenta" />
               </div>
-              <ResultCard title="Correo Autorización" text="Bloqueo Lote..." htmlContent={getHtmlBloqueo()} subject={`Solicitud bloqueo - Venta segura (${formBloqueo.proyecto})`} fixedEmail="rvaca@grupopaz.com.bo" fixedLabel="Robert Vaca" ccEmails="vchoque@celina.com.bo, mreyes@celina.com.bo" />
+              <ResultCard title="Correo Autorización" text={plainT.bloq} htmlContent={getHtmlBloqueo()} subject={`Solicitud bloqueo - Venta segura (${formBloqueo.proyecto})`} fixedEmail="rvaca@grupopaz.com.bo" fixedLabel="Robert Vaca" ccEmails="vchoque@celina.com.bo, mreyes@celina.com.bo" />
             </div>
           )}
 
@@ -857,7 +747,7 @@ export default function App() {
                 <div className="grid grid-cols-2 gap-3"><Input label="C.I." value={formFisico.ci} onChange={hC(setFormFisico)} name="ci" /><Input label="Contrato" value={formFisico.contrato} onChange={hC(setFormFisico)} name="contrato" /></div>
                 <TextArea label="Motivo" value={formFisico.motivo} onChange={hC(setFormFisico)} name="motivo" />
               </div>
-              <ResultCard title="Solicitud Físico" text="Cambio Físico..." htmlContent={getHtmlFisico()} subject={`Solicitud Contrato Físico - ${formFisico.nombre}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} />
+              <ResultCard title="Solicitud Físico" text={plainT.fis} htmlContent={getHtmlFisico()} subject={`Solicitud Contrato Físico - ${formFisico.nombre}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} />
             </div>
           )}
 
@@ -876,7 +766,7 @@ export default function App() {
                 </div>
                 <button onClick={()=>setFormReenvio({...formReenvio, contratos: [...formReenvio.contratos, {nroContrato:'',cliente:'',ci:'',uv:'',manzano:'',lote:''}]})} className="w-full mt-4 py-3 border-2 border-dashed rounded-xl font-bold text-slate-500 hover:text-indigo-600">+ Añadir Contrato</button>
               </div>
-              <ResultCard title="Correo Reenvío" text="Reenvío firmas..." htmlContent={getHtmlReenvio()} subject={`Reenvío Firma Digital - ${formReenvio.proyecto}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} />
+              <ResultCard title="Correo Reenvío" text={plainT.ren} htmlContent={getHtmlReenvio()} subject={`Reenvío Firma Digital - ${formReenvio.proyecto}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} />
             </div>
           )}
 
@@ -896,7 +786,7 @@ export default function App() {
                 </div>
                 <button onClick={()=>setFormSeguro({...formSeguro, beneficiarios: [...formSeguro.beneficiarios, {nombre:'',parentesco:'',porcentaje:'100',ci:''}]})} className="w-full mt-4 py-3 border-2 border-dashed rounded-xl font-bold text-slate-500 hover:text-indigo-600">+ Añadir Beneficiario</button>
               </div>
-              <ResultCard title="Póliza Seguro" text="Seguro de vida..." htmlContent={getHtmlSeguro()} subject={`Adición Seguros - Contrato ${formSeguro.nroContrato}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} />
+              <ResultCard title="Póliza Seguro" text={plainT.seg} htmlContent={getHtmlSeguro()} subject={`Adición Seguros - Contrato ${formSeguro.nroContrato}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} />
             </div>
           )}
 
@@ -908,7 +798,7 @@ export default function App() {
                 <div className="grid grid-cols-2 gap-3"><Input label="Fecha Ingreso" value={formRenuncia.fechaIngreso} onChange={hC(setFormRenuncia)} name="fechaIngreso" /><Input label="Fecha Retiro" value={formRenuncia.fechaRenuncia} onChange={hC(setFormRenuncia)} name="fechaRenuncia" /></div>
                 <TextArea label="Motivos" value={formRenuncia.motivo} onChange={hC(setFormRenuncia)} name="motivo" />
               </div>
-              <ResultCard title="Correo RRHH" text="Renuncia..." htmlContent={getHtmlRenuncia()} subject={`Carta Renuncia - ${formRenuncia.nombre}`} fixedEmail="cmontero@celina.com.bo" fixedLabel="Carolina Montero" ccEmails="mfroca@celina.com.bo" />
+              <ResultCard title="Correo RRHH" text={plainT.renun} htmlContent={getHtmlRenuncia()} subject={`Carta Renuncia - ${formRenuncia.nombre}`} fixedEmail="cmontero@celina.com.bo" fixedLabel="Carolina Montero" ccEmails="mfroca@celina.com.bo" />
             </div>
           )}
 
@@ -920,7 +810,7 @@ export default function App() {
                 <div className="grid grid-cols-2 gap-3"><Input label="C.I." value={formAltaCRM.ci} onChange={hC(setFormAltaCRM)} name="ci" /><Input label="Fecha Nac." value={formAltaCRM.fechaNacimiento} onChange={hC(setFormAltaCRM)} name="fechaNacimiento" /></div>
                 <Input label="Correo Personal/Celina" value={formAltaCRM.correo} onChange={hC(setFormAltaCRM)} name="correo" />
               </div>
-              <ResultCard title="Correo Alta" text="Alta CRM..." htmlContent={getHtmlAltaCRM()} subject={`Alta Sistemas CRM - ${formAltaCRM.nombre}`} fixedEmail="cmontero@celina.com.bo" fixedLabel="Carolina Montero" ccEmails="mfroca@celina.com.bo" />
+              <ResultCard title="Correo Alta" text={plainT.alta} htmlContent={getHtmlAltaCRM()} subject={`Alta Sistemas CRM - ${formAltaCRM.nombre}`} fixedEmail="cmontero@celina.com.bo" fixedLabel="Carolina Montero" ccEmails="mfroca@celina.com.bo" />
             </div>
           )}
 
@@ -933,7 +823,7 @@ export default function App() {
                 <div className="grid grid-cols-3 gap-2"><Input label="Lotes" value={formEvaluacion.lotes} onChange={hC(setFormEvaluacion)} name="lotes" type="number" /><Input label="Monto $" value={formEvaluacion.monto} onChange={hC(setFormEvaluacion)} name="monto" type="number" /><Input label="Leads" value={formEvaluacion.leads} onChange={hC(setFormEvaluacion)} name="leads" type="number" /></div>
                 <TextArea label="Recomendación" value={formEvaluacion.observaciones} onChange={hC(setFormEvaluacion)} name="observaciones" />
               </div>
-              <ResultCard title="Reporte Final" text="Evaluacion..." htmlContent={getHtmlEvaluacion()} subject={`Evaluación Desempeño - ${formEvaluacion.nombre}`} fixedEmail="mfroca@celina.com.bo" fixedLabel="Maria Fernanda Roca" />
+              <ResultCard title="Reporte Final" text={plainT.eva} htmlContent={getHtmlEvaluacion()} subject={`Evaluación Desempeño - ${formEvaluacion.nombre}`} fixedEmail="mfroca@celina.com.bo" fixedLabel="Maria Fernanda Roca" />
             </div>
           )}
 
@@ -944,7 +834,7 @@ export default function App() {
                 <Input label="Postulante" value={formPostulante.nombre} onChange={hC(setFormPostulante)} name="nombre" />
                 <Input label="Referido por" value={formPostulante.referidor} onChange={hC(setFormPostulante)} name="referidor" />
               </div>
-              <ResultCard title="Correo Selección" text="Postulante..." htmlContent={getHtmlPostulante()} subject={`Nuevo Postulante Evaluado - ${formPostulante.nombre}`} fixedEmail="uklein@grupopaz.com.bo" fixedLabel="Ulrich Klein" />
+              <ResultCard title="Correo Selección" text={plainT.post} htmlContent={getHtmlPostulante()} subject={`Nuevo Postulante Evaluado - ${formPostulante.nombre}`} fixedEmail="uklein@grupopaz.com.bo" fixedLabel="Ulrich Klein" />
             </div>
           )}
 
@@ -960,13 +850,13 @@ export default function App() {
                   {!r.error && (
                     <div className="bg-slate-900 text-white p-4 rounded-xl mt-2 grid grid-cols-2 gap-3 text-xs shadow-inner">
                       <div><p className="text-slate-400 font-bold mb-1">Cap. Financiado</p><p className="text-lg font-black">${formatCurrency(r.P)}</p></div>
-                      <div><p className="text-slate-400 font-bold mb-1">Cuota Fija</p><p className="text-lg font-black">${formatCurrency(r.PMT)}</p></div>
+                      <div><p className="text-slate-400 font-bold mb-1">Cuota Fija (Pura)</p><p className="text-lg font-black">${formatCurrency(r.PMT)}</p></div>
                       <div><p className="text-slate-400 font-bold mb-1">Saldo Actual</p><p className="text-lg font-black text-sky-400">${formatCurrency(r.Bk)}</p></div>
                       <div><p className="text-slate-400 font-bold mb-1">Ahorro Estimado</p><p className="text-lg font-black text-emerald-400">${formatCurrency(r.ahorrado)}</p></div>
                     </div>
                   )}
                 </div>
-                <ResultCard hideDestino text={textFallbacks.amort} htmlContent={getHtmlAmort()} />
+                <ResultCard hideDestino text={plainT.amort} htmlContent={getHtmlAmort()} />
               </div>
             );
           })()}
@@ -980,7 +870,7 @@ export default function App() {
                   <div className="bg-orange-50 p-4 rounded-xl border border-orange-100"><h4 className="font-black text-orange-800 mb-3 text-xs uppercase tracking-widest border-b border-orange-200 pb-2">Contrato Antiguo</h4><Input label="Cliente Antiguo" value={formRecompra.nombreAntiguo} onChange={hC(setFormRecompra)} name="nombreAntiguo" /><Input label="Contrato" value={formRecompra.contratoAntiguo} onChange={hC(setFormRecompra)} name="contratoAntiguo" /><div className="grid grid-cols-2 gap-2"><Input label="Patrocinador" value={formRecompra.patrocinador} onChange={hC(setFormRecompra)} name="patrocinador" /><Input label="Cuota $" value={formRecompra.valorCuota} onChange={hC(setFormRecompra)} name="valorCuota" type="number" /></div><div className="grid grid-cols-2 gap-2"><Input label="Venta" value={formRecompra.fechaVentaAntiguo} onChange={hC(setFormRecompra)} name="fechaVentaAntiguo" /><Input label="Fecha Pago" value={formRecompra.fechaPago} onChange={hC(setFormRecompra)} name="fechaPago" /></div></div>
                 </div>
               </div>
-              <ResultCard title="Correo Recompra" text={textFallbacks.recompra} htmlContent={getHtmlRecompra()} subject={`Solicitud Recompra - ${formRecompra.nombreNuevo}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} />
+              <ResultCard title="Correo Recompra" text={plainT.recomp} htmlContent={getHtmlRecompra()} subject={`Solicitud Recompra - ${formRecompra.nombreNuevo}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} />
             </div>
           )}
 
@@ -998,7 +888,7 @@ export default function App() {
                   <div className="grid grid-cols-2 gap-3 mb-2"><Input label="Superficie m2" value={formDescuento.m2} onChange={handleDescChange} name="m2" type="number" /><Input label="Precio m2" value={formDescuento.precioM2} onChange={handleDescChange} name="precioM2" type="number" /></div>
                   <Input label="Tu Nombre" value={formDescuento.asesor} onChange={handleDescChange} name="asesor" />
                 </div>
-                <ResultCard title="Correo Campañas" text="Descuento..." htmlContent={getHtmlDescuento()} subject={`Autorización Descuento Campaña`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} />
+                <ResultCard title="Correo Campañas" text={plainT.desc} htmlContent={getHtmlDescuento()} subject={`Autorización Descuento Campaña`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} />
               </div>
             );
           })()}
@@ -1014,7 +904,7 @@ export default function App() {
                 <div className="grid grid-cols-2 gap-3"><Input label="C.I. Registrada" value={formCuota.cuotaInicial} onChange={hC(setFormCuota)} name="cuotaInicial" type="number" /><Input label="NUEVA C.I." value={formCuota.nuevaCuota} onChange={hC(setFormCuota)} name="nuevaCuota" type="number" /></div>
                 <TextArea label="Motivo Reingreso" value={formCuota.motivo} onChange={hC(setFormCuota)} name="motivo" />
               </div>
-              <ResultCard title="Correo Incremento" text="Incremento CI..." htmlContent={getHtmlCuota()} subject={`Incremento Cuota Inicial - ${formCuota.proyecto}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} />
+              <ResultCard title="Correo Incremento" text={plainT.cuo} htmlContent={getHtmlCuota()} subject={`Incremento Cuota Inicial - ${formCuota.proyecto}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} />
             </div>
           )}
 
