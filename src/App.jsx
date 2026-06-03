@@ -22,22 +22,14 @@ import {
   Edit3,
   PhoneCall,
   Shield,
-  Repeat,
-  UserMinus,
-  UserPlus,
-  ClipboardCheck,
-  UserCheck,
-  Users
+  Repeat
 } from 'lucide-react';
 
-// --- CONTROL DE VERSIÓN DE DATOS ---
-const DATA_VERSION = "v1.2"; 
-
 // --- CONFIGURACIÓN DE DATOS MOCK ---
-const PROYECTOS_CONVENIO_1 = ["Los Jardines", "El Renacer", "Rancho Nuevo", "Santa Fe"];
+const PROYECTOS_CONVENIO_1 = ["Los Jardines", "El Renacer"];
 const PROYECTOS_CONVENIO_2 = ["Cañaveral"];
-const PROYECTOS_PROPIOS_1 = ["Muyurina"];
-const PROYECTOS = ["Cañaveral", "El Renacer", "Los Jardines", "Muyurina", "Rancho Nuevo", "Santa Fe", "OTRO..."];
+const PROYECTOS_PROPIOS_1 = ["Muyurina", "Santa Fe"];
+const PROYECTOS = ["Cañaveral", "El Renacer", "Los Jardines", "Muyurina", "Santa Fe", "OTRO..."];
 
 const SUPERVISORES = [
   { id: 'mreyes', nombre: 'Mauricio Reyes Suarez', correo: 'mreyes@celina.com.bo', genero: 'M', titulo: 'Lic. Mauricio' },
@@ -48,47 +40,137 @@ const SUPERVISORES = [
   { id: 'ropaz', nombre: 'Roberto Paz Paz', correo: 'ropaz@celina.com.bo', genero: 'M', titulo: 'Lic. Roberto' },
   { id: 'rvalverded', nombre: 'Rene Valverde Duran', correo: 'rvalverded@celina.com.bo', genero: 'M', titulo: 'Lic. Rene' },
   { id: 'cbaldiviezo', nombre: 'Cristhiand Baldiviezo Balcazar', correo: 'cbaldiviezo@celina.com.bo', genero: 'M', titulo: 'Lic. Cristhiand' },
-  { id: 'ohsaravia', nombre: 'Oscar Hugo Saravia L.', correo: 'ohsaravia@celina.com.bo', genero: 'M', titulo: 'Lic. Oscar' },
-  { id: 'rvaca', nombre: 'Robert Vaca', correo: 'rvaca@grupopaz.com.bo', genero: 'M', titulo: 'Lic. Robert' },
-  { id: 'cbarretto', nombre: 'Charles Barretto', correo: 'cbarretto@celina.com.bo', genero: 'M', titulo: 'Lic. Charles' },
-  { id: 'uklein', nombre: 'Ulrich Klein Montano', correo: 'uklein@grupopaz.com.bo', genero: 'M', titulo: 'Lic. Ulrich' },
-  { id: 'mfroca', nombre: 'Maria Fernanda Roca Miranda', correo: 'mfroca@celina.com.bo', genero: 'F', titulo: 'Lic. Maria Fernanda' },
-  { id: 'lbakovic', nombre: 'Lucio Bakovic', correo: 'lbakovic@grupopaz.com.bo', genero: 'M', titulo: 'Lic. Lucio' },
-  { id: 'maguilar', nombre: 'Miguel Angel Aguilar A.', correo: 'maguilar@celina.com.bo', genero: 'M', titulo: 'Lic. Miguel Angel' },
-  { id: 'madett', nombre: 'Mario Adett Zamora', correo: 'madett@grupopaz.com.bo', genero: 'M', titulo: 'Lic. Mario' },
-  { id: 'ccastedo', nombre: 'Cristian Daniel Castedo Castedo', correo: 'ccastedo@celina.com.bo', genero: 'M', titulo: 'Lic. Cristian' },
-  { id: 'vchoque', nombre: 'Verenice Choque', correo: 'vchoque@celina.com.bo', genero: 'F', titulo: 'Lic. Verenice' },
-  { id: 'cmontero', nombre: 'Carolina Montero Araujo', correo: 'cmontero@celina.com.bo', genero: 'F', titulo: 'Lic. Carolina' }
+  { id: 'ohsaravia', nombre: 'Oscar Hugo Saravia L.', correo: 'ohsaravia@celina.com.bo', genero: 'M', titulo: 'Lic. Oscar' }
 ];
 
+// --- EQUIPOS DE ASESORES POR SUPERVISOR ---
 const EQUIPOS_ASESORES = {
   "Oscar Saravia": [
-    { nombre: "Carlos Enrique Calderon", colAct: 6899.99 },
-    { nombre: "Daniel Angulo Maldonado", colAct: 0 },
+    { nombre: "Carlos Enrique Calderon", colAct: 13829.20 },
+    { nombre: "Daniel Angulo Maldonado", colAct: 62640.00 },
     { nombre: "Ely Gonzales Garcia", colAct: 0 },
-    { nombre: "Gloriana Silva Almenda", colAct: 13200.00 },
+    { nombre: "Gloriana Silva Almenda", colAct: 6600.00 },
     { nombre: "Jaime F. Rios Castro", colAct: 0 },
-    { nombre: "Marisol Urgel Pizarro", colAct: 10200.00 },
-    { nombre: "Merly Mendez Hurtado", colAct: 0 },
-    { nombre: "Rodrigo Rojas Siles", colAct: 9668.66 },
-    { nombre: "Yocelin Salvatierra", colAct: 0 }
+    { nombre: "Marioly Viñolas", colAct: 0 },
+    { nombre: "Marisol Urgel Pizarro", colAct: 58146.00 },
+    { nombre: "Merly Mendez Hurtado", colAct: 7750.00 },
+    { nombre: "Rodrigo Rojas Siles", colAct: 0 },
+    { nombre: "Yocelin Salvatierra", colAct: 7500.00 }
+  ],
+  "Ana Karen Parada Vaca": [
+    { nombre: "Maria Julieta Ortuste", colAct: 106980 },
+    { nombre: "Joan Junior Falon", colAct: 52560 },
+    { nombre: "Claudia Alejandra Balcazar", colAct: 27068 },
+    { nombre: "Ana Lucia Rivero", colAct: 23164 },
+    { nombre: "Jose Gabriel Padilla", colAct: 17424 },
+    { nombre: "Roberto Aguilar", colAct: 7500 },
+    { nombre: "Adrian Pedraza", colAct: 0 },
+    { nombre: "Carla Tatiana Ribera", colAct: 0 },
+    { nombre: "Helen Jimena Cruz", colAct: 0 },
+    { nombre: "Jheraldine Endara", colAct: 0 },
+    { nombre: "Karmiña Alejandra Orrego", colAct: 0 },
+    { nombre: "Mary Selva Castro", colAct: 0 },
+    { nombre: "Milenka Ortiz", colAct: 0 },
+    { nombre: "Waldo Gomez", colAct: 0 }
+  ],
+  "Angelica Pinto Sosa": [
+    { nombre: "Jimmy Gonzales", colAct: 24789 },
+    { nombre: "Widen Barba", colAct: 20160 },
+    { nombre: "Miguel Angel Gomez", colAct: 17781 },
+    { nombre: "Carla Yessenia Carumetty", colAct: 17214 },
+    { nombre: "Emar Leandro Rivas", colAct: 12850 },
+    { nombre: "Rocio Peredo", colAct: 9100 },
+    { nombre: "Yohana Avila", colAct: 6900 },
+    { nombre: "Maria Gabriela Porcel", colAct: 6900 },
+    { nombre: "Diana Mojica", colAct: 0 },
+    { nombre: "Herman Jessmany Michel", colAct: 0 },
+    { nombre: "Ivana Mendez", colAct: 0 },
+    { nombre: "Javier Uriona", colAct: 0 },
+    { nombre: "Lucy Milena Gomez", colAct: 0 },
+    { nombre: "Paula Alejandra Escalante", colAct: 0 },
+    { nombre: "Victoria Roman", colAct: 0 }
+  ],
+  "Cristhiand Baldiviezo Balcazar": [
+    { nombre: "Miguel Rene Rivero", colAct: 17712 },
+    { nombre: "Sheila Rubi Sheidl", colAct: 16500 },
+    { nombre: "Gabriela Vidal", colAct: 10850 },
+    { nombre: "Daniel Mauricio Chipunavi", colAct: 7700 },
+    { nombre: "Jimena Mayta", colAct: 7500 },
+    { nombre: "Nahely Gonzales", colAct: 6400 },
+    { nombre: "Lider Cabral", colAct: 5750 },
+    { nombre: "Ana Karla Castro", colAct: 0 },
+    { nombre: "Carlos Gaston Camacho", colAct: 0 },
+    { nombre: "Delfy Rios", colAct: 0 },
+    { nombre: "Oscar Andres Cupary", colAct: 0 },
+    { nombre: "Wilson Saucedo", colAct: 0 }
+  ],
+  "Fernando Jose Almanza Urquiza": [
+    { nombre: "Laura Ximena Vallejos", colAct: 30240 },
+    { nombre: "Karina Mercedes Molina", colAct: 22409 },
+    { nombre: "Diana Perez", colAct: 13709 },
+    { nombre: "Hilda Mendoza", colAct: 10368 },
+    { nombre: "Blanca Merving Cuellar", colAct: 0 },
+    { nombre: "Renata Veronica Guzman", colAct: 0 }
+  ],
+  "Jorge Justiniano Senseve": [
+    { nombre: "Marvin Negrette", colAct: 36770 },
+    { nombre: "Juan Pablo Vaca", colAct: 30841 },
+    { nombre: "Lino Flores", colAct: 19600 },
+    { nombre: "Freddy Fernando Delgadillo", colAct: 15550 },
+    { nombre: "Carlos Alberto Chavez", colAct: 7800 },
+    { nombre: "German Suarez", colAct: 6000 },
+    { nombre: "Alejandra Montero", colAct: 0 },
+    { nombre: "Ariel Justiniano", colAct: 0 },
+    { nombre: "Daniela Eguez", colAct: 0 },
+    { nombre: "Gustavo Adolfo Mendez", colAct: 0 },
+    { nombre: "Jose Fernando Ortiz", colAct: 0 },
+    { nombre: "Juan Carlos Choque", colAct: 0 },
+    { nombre: "Luis Gustavo Huarachi", colAct: 0 },
+    { nombre: "Melissa Padilla", colAct: 0 }
+  ],
+  "Rene Valverde Duran": [
+    { nombre: "Luis Enrique Choque", colAct: 221883 },
+    { nombre: "Rodrigo Lara", colAct: 53061 },
+    { nombre: "Rosa Maria Hurtado", colAct: 25345 },
+    { nombre: "Katherine Albitre", colAct: 12600 },
+    { nombre: "Andrea Garcia", colAct: 8250 },
+    { nombre: "Ghigliola Moreno", colAct: 7200 },
+    { nombre: "Carlos Rodas", colAct: 0 },
+    { nombre: "Cristian Erick Rocha", colAct: 0 },
+    { nombre: "Rodrigo Roca", colAct: 0 },
+    { nombre: "Sarah Desiree Cespedes", colAct: 0 }
+  ],
+  "Roberto Paz Paz": [
+    { nombre: "Wilma Limpias", colAct: 49319 },
+    { nombre: "Ericka Alejandra Fernandez", colAct: 19680 },
+    { nombre: "Nancy Rojas", colAct: 19349 },
+    { nombre: "Georgina Alexandra Sejas", colAct: 12600 },
+    { nombre: "Yaeli Alvarez", colAct: 9450 },
+    { nombre: "Anahi Velasco", colAct: 0 },
+    { nombre: "Freimi Maely Subirana", colAct: 0 },
+    { nombre: "Heydy Laura Gutierrez", colAct: 0 },
+    { nombre: "Madeline Carballo", colAct: 0 },
+    { nombre: "Maria Sendy Quispe", colAct: 0 },
+    { nombre: "Mariel Becerra", colAct: 0 },
+    { nombre: "Samuel Rivero", colAct: 0 }
   ]
 };
 
 const OBJETIVOS_MENSUALES = {
-  "Oscar Saravia": 350000
+  "Oscar Saravia": 250000,
+  "Ana Karen Parada Vaca": 515000,
+  "Angelica Pinto Sosa": 515000,
+  "Cristhiand Baldiviezo Balcazar": 515000,
+  "Fernando Jose Almanza Urquiza": 160000,
+  "Jorge Justiniano Senseve": 515000,
+  "Rene Valverde Duran": 515000,
+  "Roberto Paz Paz": 515000
 };
 
 const NOMBRES_PROYECTOS_PROYECCION = ["Muyurina", "Renacer", "Santa Fe", "Rancho Nuevo", "Jardines"];
 
 // --- FUNCIONES GLOBALES ---
-const formatCurrency = (val) => {
-  const numericVal = Number(val) || 0;
-  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numericVal);
-};
-
-const formatVacio = (val) => val === 0 ? '-' : formatCurrency(val);
-const formatDias = (val) => val === 0 ? '-' : val;
+const formatCurrency = (val) => new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
 
 const obtenerSaludoTiempo = () => {
   const hora = new Date().getHours();
@@ -99,7 +181,7 @@ const obtenerSaludoTiempo = () => {
 
 const formatDiaMes = (fechaIso, sumarDias = 0) => {
   if (!fechaIso) return `Día ${sumarDias + 1}`;
-  const partes = String(fechaIso).split('-');
+  const partes = fechaIso.split('-');
   if (partes.length !== 3) return `Día ${sumarDias + 1}`;
   const date = new Date(partes[0], partes[1] - 1, partes[2]);
   date.setDate(date.getDate() + sumarDias);
@@ -112,7 +194,7 @@ const formatDiaMes = (fechaIso, sumarDias = 0) => {
 // --- COMPONENTES UI ---
 const Input = ({ label, name, value, onChange, placeholder, type = "text", required = false }) => (
   <div className="mb-4 w-full">
-    <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5 truncate">{String(label)}</label>
+    <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5 truncate">{label}</label>
     <input
       type={type}
       name={name}
@@ -127,7 +209,7 @@ const Input = ({ label, name, value, onChange, placeholder, type = "text", requi
 
 const TextArea = ({ label, name, value, onChange, placeholder }) => (
   <div className="mb-4 w-full">
-    <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5 truncate">{String(label)}</label>
+    <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5 truncate">{label}</label>
     <textarea
       name={name}
       value={value}
@@ -146,12 +228,10 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
     try {
       if (htmlContent) {
         const div = document.createElement('div');
-        div.innerHTML = String(htmlContent);
+        div.innerHTML = htmlContent;
         div.style.position = 'fixed';
         div.style.pointerEvents = 'none';
         div.style.opacity = '0';
-        div.style.backgroundColor = '#ffffff';
-        div.style.color = '#000000';
         document.body.appendChild(div);
 
         const range = document.createRange();
@@ -166,7 +246,7 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
         document.body.removeChild(div);
       } else {
         const textArea = document.createElement("textarea");
-        textArea.value = String(text);
+        textArea.value = text;
         textArea.style.position = "fixed";
         textArea.style.top = "-9999px";
         textArea.style.left = "-9999px";
@@ -184,8 +264,10 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
     }
   };
 
+  // --- TRUCO MAGICO PARA CELULARES ---
   const handleOpenEmailApp = () => {
     handleCopy();
+    
     const to = fixedDestinoEmail || supervisorDestino;
     const ccQuery = ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : '';
     const instruccionPega = "(Por favor, borra este texto, mantén presionado aquí y selecciona 'Pegar' para insertar la tabla con su formato oficial)";
@@ -193,40 +275,6 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
     
     setTimeout(() => {
       window.location.href = mailtoLink;
-    }, 400);
-  };
-
-  const handleOpenGmail = () => {
-    handleCopy();
-    const to = fixedDestinoEmail || supervisorDestino;
-    const ccQuery = ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : '';
-    const instruccionPega = "(Por favor, borra este texto, mantén presionado aquí y selecciona 'Pegar' para insertar la tabla con su formato oficial)";
-    const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${encodeURIComponent(subject)}${ccQuery}&body=${encodeURIComponent(instruccionPega)}`;
-    
-    setTimeout(() => {
-      window.open(gmailLink, '_blank');
-    }, 400);
-  };
-
-  const handleOpenOutlook = () => {
-    handleCopy();
-    const to = fixedDestinoEmail || supervisorDestino;
-    const ccQuery = ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : '';
-    const subjectEnc = encodeURIComponent(subject);
-    const bodyEnc = encodeURIComponent("(Por favor, borra este texto, mantén presionado aquí y selecciona 'Pegar' para insertar la tabla con su formato oficial)");
-    
-    setTimeout(() => {
-      const isAndroid = /Android/i.test(navigator.userAgent);
-      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-      
-      if (isAndroid) {
-        const intentUrl = `intent:${to}?subject=${subjectEnc}${ccQuery}&body=${bodyEnc}#Intent;scheme=mailto;package=com.microsoft.office.outlook;end;`;
-        window.location.href = intentUrl;
-      } else if (isIOS) {
-        window.location.href = `ms-outlook://compose?to=${to}&subject=${subjectEnc}${ccQuery}&body=${bodyEnc}`;
-      } else {
-        window.location.href = `mailto:${to}?subject=${subjectEnc}${ccQuery}&body=${bodyEnc}`;
-      }
     }, 400);
   };
 
@@ -241,7 +289,7 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
         <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Enviar a:</label>
         {fixedDestinoEmail ? (
           <div className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-slate-100/70 text-slate-700 font-semibold shadow-inner truncate text-sm">
-            {String(fixedDestinoLabel)} ({String(fixedDestinoEmail)})
+            {fixedDestinoLabel} ({fixedDestinoEmail})
           </div>
         ) : (
           <select 
@@ -250,12 +298,12 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
             className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 text-slate-800 font-semibold shadow-sm cursor-pointer text-sm"
           >
             {SUPERVISORES.map(s => (
-              <option key={s.id} value={s.correo}>{String(s.nombre)} ({String(s.correo)})</option>
+              <option key={s.id} value={s.correo}>{s.nombre} ({s.correo})</option>
             ))}
           </select>
         )}
         {ccEmails && (
-            <p className="text-xs text-slate-500 mt-2 ml-1"><strong>CC:</strong> {String(ccEmails)}</p>
+            <p className="text-xs text-slate-500 mt-2 ml-1"><strong>CC:</strong> {ccEmails}</p>
         )}
       </div>
 
@@ -263,17 +311,18 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
         <div className="mb-4 p-3.5 bg-indigo-50/50 border border-indigo-100 rounded-xl flex gap-3 items-start shadow-sm w-full">
           <Info className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
           <p className="text-xs text-indigo-800 leading-relaxed">
-            <strong>Si usas PC:</strong> Haz clic en <b>"Copiar Formato PC"</b> y pega directo en tu gestor de correo.<br/>
-            <strong>Si usas Celular:</strong> Usa los botones inferiores para abrir la App con el diseño copiado en memoria.
+            <strong>Modo PC:</strong> Usa <b>"Copiar Formato PC"</b> y pégalo en tu correo.<br/>
+            <strong>Modo Celular:</strong> Usa <b>"Copiar y Abrir Correo"</b> y sigue las instrucciones para mantener los cuadros.
           </p>
         </div>
       )}
 
-      <div className="bg-[#f8fafc] p-5 rounded-xl border border-slate-200 mb-5 flex-1 overflow-auto shadow-inner w-full min-w-0" id="vista-previa-contenido">
+      {/* AQUÍ ESTÁ EL FIX DE MIN-W-0 PARA QUE LA TABLA NO ROMPA LA PANTALLA EN PC */}
+      <div className="bg-[#f8fafc] p-5 rounded-xl border border-slate-200 mb-5 flex-1 overflow-auto shadow-inner w-full min-w-0">
         {htmlContent ? (
-          <div dangerouslySetInnerHTML={{ __html: String(htmlContent) }} />
+          <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
         ) : (
-          <div className="font-mono text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{String(text)}</div>
+          <div className="font-mono text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{text}</div>
         )}
       </div>
       
@@ -286,30 +335,13 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
           {copied ? '¡Copiado Exitosamente!' : 'Copiar Formato PC'}
         </button>
         {showTextPlain && (
-          <div className="flex-1 flex flex-col gap-2">
-            <button
-              onClick={handleOpenEmailApp}
-              className="w-full flex items-center justify-center py-2 px-4 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-900 hover:to-black text-white rounded-xl font-bold transition-all shadow-md shadow-slate-900/20 whitespace-nowrap text-sm"
-              title="Abrir en la aplicación de correo predeterminada del sistema"
-            >
-              <Mail className="w-4 h-4 mr-2" />
-              App de Correo (Por defecto)
-            </button>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={handleOpenGmail}
-                className="flex items-center justify-center py-2 px-2 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transition-all shadow-md text-xs whitespace-nowrap"
-              >
-                Abrir en Gmail
-              </button>
-              <button
-                onClick={handleOpenOutlook}
-                className="flex items-center justify-center py-2 px-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all shadow-md text-xs whitespace-nowrap"
-              >
-                App Outlook
-              </button>
-            </div>
-          </div>
+          <button
+            onClick={handleOpenEmailApp}
+            className="flex-1 flex items-center justify-center py-3 px-4 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-900 hover:to-black text-white rounded-xl font-bold transition-all shadow-md shadow-slate-900/20 whitespace-nowrap"
+          >
+            <Mail className="w-4 h-4 mr-2" />
+            Copiar y Abrir Correo
+          </button>
         )}
       </div>
     </div>
@@ -318,6 +350,7 @@ const ResultCard = ({ title, text, htmlContent, subject, supervisorDestino, setS
 
 export default function App() {
 
+  // --- FIX PARA PANTALLA COMPLETA (Elimina las restricciones por defecto de Vite en Desktop) ---
   useEffect(() => {
     const root = document.getElementById('root');
     if (root) {
@@ -331,10 +364,10 @@ export default function App() {
     document.body.style.display = 'block';
   }, []);
 
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('proyeccion');
   const [supervisorDestino, setSupervisorDestino] = useState(SUPERVISORES[0].correo);
-  const [globalStats, setGlobalStats] = useState({ goal: 0, actual: 0, teams: [] });
   
+  // --- ESTADOS PARA LA BASE DE DATOS DE LOTES DESDE JSON ---
   const [lotesBD, setLotesBD] = useState([]);
   const [cargandoLotes, setCargandoLotes] = useState(true);
   const [loteAutocompletado, setLoteAutocompletado] = useState(false);
@@ -344,7 +377,7 @@ export default function App() {
   });
 
   const [formLlamada, setFormLlamada] = useState({
-    asesor: '', nombreReferido: '', contratoReferido: '', celularReferido: '', horaLlamada: '', nombreBeneficiario: '', ciBeneficiario: ''
+    asesor: '', nombreReferido: '', ciReferido: '', horaLlamada: '', nombreBeneficiario: '', ciBeneficiario: ''
   });
   
   const [formSeguro, setFormSeguro] = useState({
@@ -366,7 +399,7 @@ export default function App() {
     modoBusqueda: 'manual', 
     m2: '', precioM2: '', categoria: '', asesor: '',
     proyectoManual: '', descuentoManual: '', tipoDescuentoManual: 'porcentaje',
-    descuentoPropiosManual: '23' 
+    descuentoPropiosManual: '23' // Estado para el descuento personalizado de proyectos propios
   });
 
   const [formCuota, setFormCuota] = useState({
@@ -381,131 +414,35 @@ export default function App() {
     contratos: [{ nroContrato: '', cliente: '', ci: '', uv: '', manzano: '', lote: '' }]
   });
 
-  const [formRenuncia, setFormRenuncia] = useState({
-    asesor: '', nombre: '', cargo: 'Asesor de Ventas', fechaIngreso: '', fechaRenuncia: '', motivo: ''
-  });
-
-  const [formAltaCRM, setFormAltaCRM] = useState({
-    asesor: '', nombre: '', apPaterno: '', apMaterno: '', ci: '', fechaNacimiento: '', correo: ''
-  });
-
-  const [formEvaluacion, setFormEvaluacion] = useState({
-    asesor: '', nombre: '', punteo: '', calificacion: 'Muy Bueno', lotes: '', monto: '', leads: '', visitas: '', observaciones: ''
-  });
-
-  const [formPostulante, setFormPostulante] = useState({
-    asesor: '', nombre: '', referidor: ''
-  });
-
-  const [sumaVentaModal, setSumaVentaModal] = useState({ show: false, index: null, nombre: '', monto: '' });
-  const [equipoSeleccionado, setEquipoSeleccionado] = useState('Oscar Saravia');
-  
-  useEffect(() => {
-    const currentVersion = localStorage.getItem('portalAsesores_dataVersion');
-    if (currentVersion !== DATA_VERSION) {
-      Object.keys(EQUIPOS_ASESORES).forEach(team => {
-        localStorage.removeItem(`portalAsesores_proyeccion_${team}`);
-      });
-      localStorage.setItem('portalAsesores_dataVersion', DATA_VERSION);
-      setFormProyeccion({
-        equipo: 'Oscar Saravia',
-        fechaInicio: new Date().toISOString().split('T')[0],
-        objetivoMensual: OBJETIVOS_MENSUALES['Oscar Saravia'],
-        asesores: EQUIPOS_ASESORES['Oscar Saravia'].map(a => ({
-          nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0] 
-        }))
-      });
-    }
-  }, []);
-
+  // --- ESTADO PARA PROYECCIÓN (AHORA CARGA DESDE LOCALSTORAGE SI EXISTE) ---
   const [formProyeccion, setFormProyeccion] = useState(() => {
-    try {
-      const currentVersion = localStorage.getItem('portalAsesores_dataVersion');
-      if (currentVersion === DATA_VERSION) {
-        const savedData = localStorage.getItem(`portalAsesores_proyeccion_Oscar Saravia`);
-        if (savedData) {
-          return JSON.parse(savedData);
-        }
+    const savedData = localStorage.getItem('portalAsesores_proyeccion_Oscar Saravia');
+    if (savedData) {
+      try {
+        return JSON.parse(savedData);
+      } catch(e) {
+        console.error("Error cargando proyección de localStorage", e);
       }
-    } catch (e) {}
-    
+    }
+    // Si no hay nada guardado, carga los datos por defecto
     return {
       equipo: 'Oscar Saravia',
-      fechaInicio: new Date().toISOString().split('T')[0],
+      fechaInicio: new Date().toISOString().split('T')[0], // Hoy
       objetivoMensual: OBJETIVOS_MENSUALES['Oscar Saravia'],
-      asesores: EQUIPOS_ASESORES['Oscar Saravia'].map(a => ({
+      asesores: EQUIPOS_ASESORES["Oscar Saravia"].map(a => ({
         nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0] 
       }))
     };
   });
 
+  // --- EFECTO PARA GUARDAR PROYECCIÓN EN LOCALSTORAGE CADA VEZ QUE CAMBIA ---
   useEffect(() => {
-    let tGoal = 0;
-    let tAct = 0;
-    let tTeams = [];
-
-    Object.keys(OBJETIVOS_MENSUALES).forEach(team => {
-      let teamGoal = OBJETIVOS_MENSUALES[team] || 0;
-      let teamAct = 0;
-      
-      try {
-        const teamSaved = localStorage.getItem(`portalAsesores_proyeccion_${team}`);
-        if (teamSaved && localStorage.getItem('portalAsesores_dataVersion') === DATA_VERSION) {
-          const tData = JSON.parse(teamSaved);
-          teamGoal = typeof tData.objetivoMensual === 'number' ? tData.objetivoMensual : teamGoal;
-          if (Array.isArray(tData.asesores)) {
-            teamAct = tData.asesores.reduce((sum, a) => {
-              const sumDias = Array.isArray(a.dias) ? a.dias.reduce((d1, d2) => d1 + d2, 0) : 0;
-              return sum + (Number(a.colAct) || 0) + sumDias;
-            }, 0);
-          }
-        } else if (EQUIPOS_ASESORES[team]) {
-          teamAct = EQUIPOS_ASESORES[team].reduce((sum, a) => sum + (Number(a.colAct) || 0), 0);
-        }
-      } catch (e) {}
-
-      tGoal += teamGoal;
-      tAct += teamAct;
-      tTeams.push({ 
-        name: String(team), 
-        goal: Number(teamGoal) || 0, 
-        actual: Number(teamAct) || 0, 
-        percent: teamGoal > 0 ? (teamAct / teamGoal) * 100 : 0 
-      });
-    });
-
-    tTeams.sort((a, b) => b.percent - a.percent);
-    setGlobalStats({ goal: tGoal, actual: tAct, teams: tTeams });
-  }, [formProyeccion, activeTab]);
-
-  useEffect(() => {
-    const savedData = localStorage.getItem(`portalAsesores_proyeccion_${equipoSeleccionado}`);
-    if (savedData && localStorage.getItem('portalAsesores_dataVersion') === DATA_VERSION) {
-      try {
-        const pData = JSON.parse(savedData);
-        if (pData && Array.isArray(pData.asesores)) {
-          setFormProyeccion(pData);
-        }
-      } catch(e) {}
-    } else {
-      setFormProyeccion({
-        equipo: equipoSeleccionado,
-        fechaInicio: new Date().toISOString().split('T')[0],
-        objetivoMensual: OBJETIVOS_MENSUALES[equipoSeleccionado] || 0,
-        asesores: EQUIPOS_ASESORES[equipoSeleccionado] ? EQUIPOS_ASESORES[equipoSeleccionado].map(a => ({
-          nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0] 
-        })) : []
-      });
+    if (formProyeccion.equipo) {
+      localStorage.setItem(`portalAsesores_proyeccion_${formProyeccion.equipo}`, JSON.stringify(formProyeccion));
     }
-  }, [equipoSeleccionado]);
+  }, [formProyeccion]);
 
-  const saveProyeccionState = async (newState) => {
-    setFormProyeccion(newState);
-    try {
-      localStorage.setItem(`portalAsesores_proyeccion_${newState.equipo}`, JSON.stringify(newState));
-    } catch (e) {}
-  };
-
+  // --- CARGAR DATOS DESDE EL ARCHIVO JSON AL INICIAR ---
   useEffect(() => {
     const fetchLotes = async () => {
       try {
@@ -521,7 +458,6 @@ export default function App() {
               else if (rawProy.includes("MUYURINA")) proyLimpio = "Muyurina";
               else if (rawProy.includes("SANTA FE")) proyLimpio = "Santa Fe";
               else if (rawProy.includes("CAÑAVERAL") || rawProy.includes("CANAVERAL")) proyLimpio = "Cañaveral";
-              else if (rawProy.includes("RANCHO NUEVO")) proyLimpio = "Rancho Nuevo";
 
               const rawM2 = String(item.superficie || item.SUPERFICIE || item.m2 || '0').replace(/[^0-9.,]/g, '').replace(',', '.');
               const rawPrecio = String(item.precio || item.PRECIO || item.precioM2 || '0').replace(/[^0-9.,]/g, '').replace(',', '.');
@@ -554,6 +490,7 @@ export default function App() {
     fetchLotes();
   }, []);
 
+  // --- OBTENER OPCIONES CASCADA (BÚSQUEDA INTELIGENTE) PROTEGIDAS ---
   const safeToLower = (val) => (val === null || val === undefined) ? '' : String(val).toLowerCase();
   
   const pL_filtro = safeToLower(formDescuento.proyecto);
@@ -575,6 +512,7 @@ export default function App() {
     .map(l => l.lote)
   )].filter(val => val !== null && val !== undefined && val !== '').sort((a,b) => String(a).localeCompare(String(b), undefined, {numeric: true}));
 
+  // --- EFECTO DE AUTOCOMPLETADO DE LOTES ---
   useEffect(() => {
     const { proyecto, uv, manzano, lote } = formDescuento;
     if (proyecto && uv && manzano && lote && lotesBD.length > 0) {
@@ -607,14 +545,12 @@ export default function App() {
     }
   }, [formDescuento.proyecto, formDescuento.uv, formDescuento.manzano, formDescuento.lote, lotesBD]);
 
+
+  // --- HANDLERS COMUNES ---
   const handleFisicoChange = (e) => setFormFisico({ ...formFisico, [e.target.name]: e.target.value });
   const handleCuotaChange = (e) => setFormCuota({ ...formCuota, [e.target.name]: e.target.value });
   const handleLlamadaChange = (e) => setFormLlamada({ ...formLlamada, [e.target.name]: e.target.value });
   const handleSeguroChange = (e) => setFormSeguro({ ...formSeguro, [e.target.name]: e.target.value });
-  const handleRenunciaChange = (e) => setFormRenuncia({ ...formRenuncia, [e.target.name]: e.target.value });
-  const handleAltaCRMChange = (e) => setFormAltaCRM({ ...formAltaCRM, [e.target.name]: e.target.value });
-  const handleEvaluacionChange = (e) => setFormEvaluacion({ ...formEvaluacion, [e.target.name]: e.target.value });
-  const handlePostulanteChange = (e) => setFormPostulante({ ...formPostulante, [e.target.name]: e.target.value });
   
   const handleRecompraChange = (e) => {
     const { name, value } = e.target;
@@ -674,35 +610,39 @@ export default function App() {
   };
 
   const handleEquipoChange = (e) => {
-    setEquipoSeleccionado(String(e.target.value));
+    const nuevoEquipo = e.target.value;
+    
+    const savedData = localStorage.getItem(`portalAsesores_proyeccion_${nuevoEquipo}`);
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        setFormProyeccion(parsedData);
+        return; 
+      } catch(error) {
+        console.error(`Error cargando proyeccion de ${nuevoEquipo}`, error);
+      }
+    }
+    
+    const nuevosAsesores = EQUIPOS_ASESORES[nuevoEquipo].map(a => ({
+      nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0]
+    }));
+    setFormProyeccion({ ...formProyeccion, equipo: nuevoEquipo, asesores: nuevosAsesores, objetivoMensual: OBJETIVOS_MENSUALES[nuevoEquipo] || 0 });
   };
   
   const updateAsesorProyeccion = (index, field, valStr) => {
-    if (!formProyeccion || !Array.isArray(formProyeccion.asesores)) return;
     const nuevosAsesores = [...formProyeccion.asesores];
     nuevosAsesores[index][field] = parseFloat(valStr) || 0;
-    saveProyeccionState({ ...formProyeccion, asesores: nuevosAsesores });
+    setFormProyeccion({ ...formProyeccion, asesores: nuevosAsesores });
   };
-  
   const updateAsesorArrayProyeccion = (index, type, arrayIndex, valStr) => {
-    if (!formProyeccion || !Array.isArray(formProyeccion.asesores)) return;
     const nuevosAsesores = [...formProyeccion.asesores];
     nuevosAsesores[index][type][arrayIndex] = parseFloat(valStr) || 0;
-    saveProyeccionState({ ...formProyeccion, asesores: nuevosAsesores });
+    setFormProyeccion({ ...formProyeccion, asesores: nuevosAsesores });
   };
 
-  const confirmarSumaVenta = () => {
-    const montoASumar = parseFloat(sumaVentaModal.monto);
-    if (!isNaN(montoASumar) && montoASumar > 0) {
-      const nuevosAsesores = [...formProyeccion.asesores];
-      nuevosAsesores[sumaVentaModal.index].colAct = (Number(nuevosAsesores[sumaVentaModal.index].colAct) || 0) + montoASumar;
-      saveProyeccionState({ ...formProyeccion, asesores: nuevosAsesores });
-    }
-    setSumaVentaModal({ show: false, index: null, nombre: '', monto: '' });
-  };
-
+  // --- LÓGICA DE DESCUENTOS CAMPAÑAS ---
   const calcularDescuento = () => {
-    const { proyecto, modalidad, cuota, modoCuota, m2, precioM2, descuentoManual, tipoDescuentoManual } = formDescuento;
+    const { proyecto, modalidad, cuota, modoCuota, m2, precioM2, descuentoManual, tipoDescuentoManual, categoria } = formDescuento;
     const m2Num = parseFloat(m2) || 0;
     const precioM2Num = parseFloat(precioM2) || 0;
     const vc = m2Num * precioM2Num;
@@ -732,17 +672,19 @@ export default function App() {
          descuentoTexto = descManualNum > 0 ? `$${descManualNum} por m²` : '0';
       }
     } else if (PROYECTOS_CONVENIO_1.includes(proyecto) || PROYECTOS_CONVENIO_2.includes(proyecto)) {
+      // Convenios
       let descuentoPorM2 = 0;
       if (modalidad === 'Contado') {
         descuentoPorM2 = PROYECTOS_CONVENIO_1.includes(proyecto) ? 3 : 4; 
       } else if (modalidad === 'Crédito') {
-        if (porcentajeCuota >= 5) descuentoPorM2 = 2; 
+        if (porcentajeCuota >= 3) descuentoPorM2 = 2; 
         else if (porcentajeCuota >= 1.5) descuentoPorM2 = 1; 
       }
       descuentoTotal = descuentoPorM2 * m2Num;
       descuentoTexto = descuentoPorM2 > 0 ? `$${descuentoPorM2} por m²` : '0';
 
     } else if (PROYECTOS_PROPIOS_1.includes(proyecto)) {
+      // Propios
       let porcentaje = 0;
       if (modalidad === 'Contado') {
         porcentaje = 30; 
@@ -753,10 +695,7 @@ export default function App() {
           if (isNaN(inputDesc)) inputDesc = maxDesc;
           porcentaje = Math.max(0, Math.min(inputDesc, maxDesc));
         } else if (porcentajeCuota >= 1.5) {
-          const maxDesc = 20;
-          let inputDesc = parseFloat(formDescuento.descuentoPropiosManual);
-          if (isNaN(inputDesc)) inputDesc = maxDesc;
-          porcentaje = Math.max(0, Math.min(inputDesc, maxDesc));
+          porcentaje = 20; 
         }
       }
       descuentoTotal = vc * (porcentaje / 100);
@@ -770,7 +709,7 @@ export default function App() {
   };
 
   const calcularBeneficioRecompra = () => {
-    const p = String(formRecompra.proyecto).toUpperCase();
+    const p = formRecompra.proyecto.toUpperCase();
     if (p.includes('MUYURINA')) return 200;
     if (p.includes('RANCHO NUEVO')) return 50;
     return 100;
@@ -785,6 +724,8 @@ export default function App() {
     };
   };
 
+  // --- GENERADORES DE TEXTOS PLANOS PARA CELULAR ---
+  
   const generarTextoRecompraCelular = () => {
     const beneficio = calcularBeneficioRecompra();
     const { saludo, nombrePila } = obtenerDatosSupervisor();
@@ -797,11 +738,8 @@ export default function App() {
     const nomProyecto = formDescuento.proyecto === 'OTRO...' ? (formDescuento.proyectoManual || 'PROYECTO MANUAL') : formDescuento.proyecto;
     let condicionTexto = formDescuento.modalidad === 'Crédito' ? `con cuota inicial del ${formatCurrency(porcentajeCuota)}% venta a plazos` : `venta al contado`;
     const catStr = formDescuento.categoria ? String(formDescuento.categoria).toUpperCase() : '';
-    
-    const requiereAutorizacion = formDescuento.modalidad === 'Crédito' && porcentajeCuota >= 1.5 && porcentajeCuota < 5;
-    const badgeText = requiereAutorizacion ? `\n🚨 *REQUIERE AUTORIZACIÓN: Bajada de Cuota Inicial al 1.5% (Categoría Calle)*\n` : '';
 
-    return `👋 ${obtenerSaludoTiempo()}\n${saludo} ${titulo},${badgeText}\nPor favor le solicito la aplicación del descuento de la campaña vigente del proyecto *${nomProyecto}*:\n\n*📌 DATOS DEL LOTE*\n📐 Superficie: ${formDescuento.m2 || '0'} m²\n💵 Precio M2 Normal: $ ${formatCurrency(formDescuento.precioM2 || 0)}\n💰 *Precio Original: $ ${formatCurrency(vc)}*\n\n*🏷️ APLICACIÓN DE CAMPAÑA*\n✅ Condición: ${descuentoTexto} ${condicionTexto}\n🔥 *Descuento Total: -$ ${formatCurrency(descuentoTotal)}*\n\n*✨ PRECIO FINAL PROMOCIÓN ✨*\n➡️ *Precio Final: $ ${formatCurrency(nuevoPrecioTotal)}*\n➡️ *Precio M2 Final: $ ${formatCurrency(nuevoPrecioM2)}*\n\n*📍 UBICACIÓN*\nUV: ${formDescuento.uv || 'SN'} | MZN: ${formDescuento.manzano || '---'} | LT: ${formDescuento.lote || '---'}\n${catStr ? `🏢 Categoría: ${catStr}\n` : ''}\nQuedo atento a su aprobación para continuar con el proceso de venta.\n\nSaludos cordiales,\n*${formDescuento.asesor || 'Nombre del Asesor'}*`;
+    return `👋 ${obtenerSaludoTiempo()}\n${saludo} ${titulo},\n\nPor favor le solicito la aplicación del descuento de la campaña vigente del proyecto *${nomProyecto}*:\n\n*📌 DATOS DEL LOTE*\n📐 Superficie: ${formDescuento.m2 || '0'} m²\n💵 Precio M2 Normal: $ ${formatCurrency(formDescuento.precioM2 || 0)}\n💰 *Precio Original: $ ${formatCurrency(vc)}*\n\n*🏷️ APLICACIÓN DE CAMPAÑA*\n✅ Condición: ${descuentoTexto} ${condicionTexto}\n🔥 *Descuento Total: -$ ${formatCurrency(descuentoTotal)}*\n\n*✨ PRECIO FINAL PROMOCIÓN ✨*\n➡️ *Precio Final: $ ${formatCurrency(nuevoPrecioTotal)}*\n➡️ *Precio M2 Final: $ ${formatCurrency(nuevoPrecioM2)}*\n\n*📍 UBICACIÓN*\nUV: ${formDescuento.uv || 'SN'} | MZN: ${formDescuento.manzano || '---'} | LT: ${formDescuento.lote || '---'}\n${catStr ? `🏢 Categoría: ${catStr}\n` : ''}\nQuedo atento a su aprobación para continuar con el proceso de venta.\n\nSaludos cordiales,\n*${formDescuento.asesor || 'Nombre del Asesor'}*`;
   };
 
   const generarTextoCuotaCelular = () => {
@@ -836,7 +774,7 @@ export default function App() {
   };
 
   const generarTextoLlamadaCelular = () => {
-    return `👋 ${obtenerSaludoTiempo()}\nEstimada Olivia,\n\nPor favor su ayuda con la validación de llamada de este cliente referido, solicita que lo llamen a las *${formLlamada.horaLlamada || '[HORA]'}*:\n\n*🗣️ REFERIDO*\n👤 Nombre: ${formLlamada.nombreReferido || '---'}\n📄 Contrato: ${formLlamada.contratoReferido || '---'}\n📱 Celular: ${formLlamada.celularReferido || '---'}\n\n*🎁 BENEFICIARIA*\n👤 Nombre: ${formLlamada.nombreBeneficiario || '---'}\n🪪 CI: ${formLlamada.ciBeneficiario || '---'}\n\nSaludos cordiales,\n*${formLlamada.asesor || 'Asesor'}*`;
+    return `👋 ${obtenerSaludoTiempo()}\nEstimada Olivia,\n\nPor favor su ayuda con la validación de llamada de este cliente referido, solicita que lo llamen a las *${formLlamada.horaLlamada || '[HORA]'}*:\n\n*🗣️ REFERIDO*\n👤 Nombre: ${formLlamada.nombreReferido || '---'}\n🪪 CI: ${formLlamada.ciReferido || '---'}\n\n*🎁 BENEFICIARIA*\n👤 Nombre: ${formLlamada.nombreBeneficiario || '---'}\n🪪 CI: ${formLlamada.ciBeneficiario || '---'}\n\nSaludos cordiales,\n*${formLlamada.asesor || 'Asesor'}*`;
   };
 
   const generarTextoProyeccionCelular = () => {
@@ -846,31 +784,27 @@ export default function App() {
     let sumColAct = 0;
     let sumTotalColMes = 0;
 
-    if (formProyeccion && Array.isArray(formProyeccion.asesores)) {
-      formProyeccion.asesores.forEach((asesor, i) => {
-        const sumDias = Array.isArray(asesor.dias) ? asesor.dias.reduce((a, b) => a + b, 0) : 0;
-        const colActualNum = Number(asesor.colAct) || 0;
-        const totalColMes = colActualNum + sumDias;
-        sumColAct += colActualNum;
-        sumTotalColMes += totalColMes;
-        
-        if (colActualNum > 0 || sumDias > 0) {
-          texto += `*${i+1}. ${asesor.nombre || ''}*\n`;
-          texto += `   📈 Colocación Actual: $ ${formatCurrency(colActualNum)}\n`;
-          texto += `   🎯 Proyección Semanal: $ ${formatCurrency(sumDias)}\n`;
-          texto += `   🏁 Cierre de Mes: $ ${formatCurrency(totalColMes)}\n\n`;
-        }
-      });
-    }
+    formProyeccion.asesores.forEach((asesor, i) => {
+      const sumDias = asesor.dias.reduce((a, b) => a + b, 0);
+      const totalColMes = asesor.colAct + sumDias;
+      sumColAct += asesor.colAct;
+      sumTotalColMes += totalColMes;
+      
+      if (asesor.colAct > 0 || sumDias > 0) {
+        texto += `*${i+1}. ${asesor.nombre}*\n`;
+        texto += `   📈 Colocación Actual: $ ${formatCurrency(asesor.colAct)}\n`;
+        texto += `   🎯 Proyección Semanal: $ ${formatCurrency(sumDias)}\n`;
+        texto += `   🏁 Cierre de Mes: $ ${formatCurrency(totalColMes)}\n\n`;
+      }
+    });
 
     const mesStr = new Date(formProyeccion.fechaInicio || new Date()).toLocaleString('es-ES', { month: 'long' });
     const capMes = mesStr.charAt(0).toUpperCase() + mesStr.slice(1);
-    const objMensual = Number(formProyeccion.objetivoMensual) || 0;
-    const porcentajeAvance = objMensual ? (sumColAct / objMensual) * 100 : 0;
-    const porcentajeFin = objMensual ? (sumTotalColMes / objMensual) * 100 : 0;
+    const porcentajeAvance = formProyeccion.objetivoMensual ? (sumColAct / formProyeccion.objetivoMensual) * 100 : 0;
+    const porcentajeFin = formProyeccion.objetivoMensual ? (sumTotalColMes / formProyeccion.objetivoMensual) * 100 : 0;
 
     texto += `*📊 RESUMEN DEL EQUIPO*\n`;
-    texto += `🎯 Objetivo ${capMes}: $ ${formatCurrency(objMensual)}\n`;
+    texto += `🎯 Objetivo ${capMes}: $ ${formatCurrency(formProyeccion.objetivoMensual)}\n`;
     texto += `📈 Colocación Actual: $ ${formatCurrency(sumColAct)} (${formatCurrency(porcentajeAvance)}%)\n`;
     texto += `🏁 Colocación Fin de Mes: $ ${formatCurrency(sumTotalColMes)} (${formatCurrency(porcentajeFin)}%)\n\n`;
     texto += `Saludos cordiales.`;
@@ -878,27 +812,12 @@ export default function App() {
     return texto;
   };
 
-  const generarTextoRenunciaCelular = () => {
-    return `👋 ${obtenerSaludoTiempo()} estimada Carolina,\n\nPor medio del presente, te hago entrega formal de la carta de renuncia de la Sra./Sr. *${formRenuncia.nombre || '[Nombre]'}*, quien se desempeñaba como *${formRenuncia.cargo || 'Asesor de Ventas'}* desde el pasado ${formRenuncia.fechaIngreso || '[Fecha]'}.\n\nEn su nota, con fecha ${formRenuncia.fechaRenuncia || '[Fecha]'}, la/el asesor/a comunica que su retiro se debe a ${formRenuncia.motivo || '[motivos...]'}. Adjunto el documento escaneado para que se proceda con el trámite correspondiente en el departamento de Recursos Humanos.\n\nQuedo atento a cualquier requerimiento adicional para cerrar este proceso.\n\nSaludos cordiales,\n*${formRenuncia.asesor || 'Oscar Saravia'}*`;
-  };
-
-  const generarTextoAltaCRMCelular = () => {
-    return `👋 ${obtenerSaludoTiempo()}\nEstimada Carolina,\n\nPor medio de la presente, solicito por favor la gestión para la creación del usuario de acceso a los sistemas *CRM y CESI* para el nuevo asesor comercial que se están integrando a mi equipo.\n\nA continuación, detallo los datos personales requeridos de cada uno, basados en sus fichas de ingreso:\n\n*Nombre:* ${formAltaCRM.nombre || '-'}\n*Apellido Paterno:* ${formAltaCRM.apPaterno || '-'}\n*Apellido Materno:* ${formAltaCRM.apMaterno || '-'}\n*Carnet de Identidad:* ${formAltaCRM.ci || '-'}\n*Fecha de Nacimiento:* ${formAltaCRM.fechaNacimiento || '-'}\n*Correo Electrónico:* ${formAltaCRM.correo || '-'}\n\nQuedo atento a la confirmación de las credenciales para poder facilitarle el acceso y que inicie sus gestiones lo antes posible.\nDe antemano, muchas gracias por tu colaboración.\n\nSaludos cordiales,\n*${formAltaCRM.asesor || 'Oscar Saravia'}*`;
-  };
-
-  const generarTextoEvaluacionCelular = () => {
-    return `👋 ${obtenerSaludoTiempo()}.\nEstimada María Fernanda,\n\nEn respuesta a tu correo, adjunto el formulario de evaluación de desempeño debidamente completado del asesor de la sucursal Montero que acaba de finalizar su programa de aprendizaje.\n\nA continuación, comparto un resumen detallado de las observaciones y mis recomendaciones:\n\n*1. ${formEvaluacion.nombre || '[Nombre]'}*\n- *Punteo Total:* ${formEvaluacion.punteo || '0'} (${formEvaluacion.calificacion || 'Muy Bueno'})\n- *Resultados:* ${formEvaluacion.lotes || '0'} lotes vendidos ($${formatCurrency(formEvaluacion.monto)}), ${formEvaluacion.leads || '0'} leads y ${formEvaluacion.visitas || '0'} visitas.\n- *Observaciones y recomendación:* ${formEvaluacion.observaciones || '[Detalles]'}\n\nQuedo a su disposición ante cualquier consulta.\n\nSaludos cordiales,\n*${formEvaluacion.asesor || 'Oscar Hugo Saravia'}*`;
-  };
-
-  const generarTextoPostulanteCelular = () => {
-    return `👋 ${obtenerSaludoTiempo()}\nEstimado Ulrich,\n\nTe adjunto el formulario de entrevista de *${formPostulante.nombre || '[Nombre]'}* para el puesto de Asesor de Ventas. Él llega a nosotros como referido de la asesora ${formPostulante.referidor || '[Nombre]'}.\n\nDespués de realizarle la entrevista y evaluar su perfil, mi recomendación es que proceda. Me gustaría que lo puedan tomar en cuenta para pasarlo a la etapa de capacitación y así poder ir preparándolo para que se integre a la Máquina de Ventas aquí en la sucursal de Montero.\n\nEn el documento adjunto podrás ver el detalle completo de su experiencia, evaluación de competencias y el role play.\n\nCualquier consulta me avisas.\n\nSaludos cordiales,\n*${formPostulante.asesor || 'Oscar Saravia'}*`;
-  };
-
+  // --- HTML PARA PC ---
   const generarHtmlRecompra = () => {
     const beneficio = calcularBeneficioRecompra();
     const { saludo, nombrePila } = obtenerDatosSupervisor();
     return `
-    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 1200px; line-height: 1.5; text-align: left;">
+    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 1200px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()},</p>
       <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${nombrePila} por favor su ayuda con el c&oacute;digo de pago por recompra de este cliente, le toca pagar su cuota el <strong>${formRecompra.fechaPago || '[FECHA PAGO]'}</strong> muchas gracias de antemano:</p>
       
@@ -906,57 +825,57 @@ export default function App() {
         <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; font-family: Arial, sans-serif; font-size: 11px; text-align: center; width: 100%; min-width: 1200px; border: 1px solid #000000; color: #000000;">
           <thead>
             <tr>
-              <th colspan="8" style="background-color: #ffc000; border: 1px solid #000000; padding: 6px; color: #000000;"><b>CONTRATO NUEVO</b></th>
-              <th colspan="7" style="background-color: #ed7d31; border: 1px solid #000000; padding: 6px; color: #000000;"><b>CONTRATO ANTIGUO</b></th>
-              <th rowspan="2" style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; color: #000000;"><b>VALOR DE<br>CUOTA $</b></th>
-              <th rowspan="2" style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; color: #000000;"><b>BENEFICIO $</b></th>
+              <th colspan="8" style="background-color: #ffc000; border: 1px solid #000000; padding: 6px;"><font color="#000000"><b>CONTRATO NUEVO</b></font></th>
+              <th colspan="7" style="background-color: #ed7d31; border: 1px solid #000000; padding: 6px;"><font color="#000000"><b>CONTRATO ANTIGUO</b></font></th>
+              <th rowspan="2" style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px;"><font color="#000000"><b>VALOR DE<br>CUOTA $</b></font></th>
+              <th rowspan="2" style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px;"><font color="#000000"><b>BENEFICIO $</b></font></th>
             </tr>
             <tr>
-              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; color: #000000;"><b>Agencia</b></th>
-              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>Fecha de<br>venta</b></th>
-              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; min-width: 150px; color: #000000;"><b>Nombre</b></th>
-              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>Contrato</b></th>
-              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>Se aplico<br>descuento<br>por metro ?</b></th>
-              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>Cant. De<br>cuotas ya<br>pagadas</b></th>
-              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>¿Procesado?</b></th>
-              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>¿Vigente?</b></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px;"><font color="#000000"><b>Agencia</b></font></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>Fecha de<br>venta</b></font></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; min-width: 150px;"><font color="#000000"><b>Nombre</b></font></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>Contrato</b></font></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>Se aplico<br>descuento<br>por metro ?</b></font></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>Cant. De<br>cuotas ya<br>pagadas</b></font></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>¿Procesado?</b></font></th>
+              <th style="background-color: #ffe699; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>¿Vigente?</b></font></th>
 
-              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; min-width: 150px; color: #000000;"><b>Nombre</b></th>
-              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>Contrato</b></th>
-              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>Fecha de<br>venta</b></th>
-              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>Fecha Pago</b></th>
-              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>¿Procesado?</b></th>
-              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;"><b>¿Vigente?</b></th>
-              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; min-width: 120px; color: #000000;"><b>Patrocinador</b></th>
+              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; min-width: 150px;"><font color="#000000"><b>Nombre</b></font></th>
+              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>Contrato</b></font></th>
+              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>Fecha de<br>venta</b></font></th>
+              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>Fecha Pago</b></font></th>
+              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>¿Procesado?</b></font></th>
+              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000"><b>¿Vigente?</b></font></th>
+              <th style="background-color: #fce4d6; border: 1px solid #000000; padding: 6px; min-width: 120px;"><font color="#000000"><b>Patrocinador</b></font></th>
             </tr>
           </thead>
           <tbody>
             <tr style="background-color: #ffffff;">
-              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase; color: #000000;">${formRecompra.sucursal || ''}</td>
-              <td style="border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;">${formRecompra.fechaVentaNuevo || ''}</td>
-              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase; color: #000000;">${formRecompra.nombreNuevo || ''}</td>
-              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase; white-space: nowrap; color: #000000;">${formRecompra.contratoNuevo || ''}</td>
-              <td style="border: 1px solid #000000; padding: 6px; color: #000000;">${formRecompra.aplicoDescuento || 'NO'}</td>
-              <td style="border: 1px solid #000000; padding: 6px; color: #000000;">${formRecompra.cuotasPagadas || '0'}</td>
-              <td style="border: 1px solid #000000; padding: 6px; color: #000000;">${formRecompra.procesadoNuevo || 'SI'}</td>
-              <td style="border: 1px solid #000000; padding: 6px; color: #000000;">${formRecompra.vigenteNuevo || 'SI'}</td>
+              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase;"><font color="#000000">${formRecompra.sucursal || ''}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000">${formRecompra.fechaVentaNuevo || ''}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase;"><font color="#000000">${formRecompra.nombreNuevo || ''}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase; white-space: nowrap;"><font color="#000000">${formRecompra.contratoNuevo || ''}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><font color="#000000">${formRecompra.aplicoDescuento || 'NO'}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><font color="#000000">${formRecompra.cuotasPagadas || '0'}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><font color="#000000">${formRecompra.procesadoNuevo || 'SI'}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><font color="#000000">${formRecompra.vigenteNuevo || 'SI'}</font></td>
               
-              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase; color: #000000;">${formRecompra.nombreAntiguo || ''}</td>
-              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase; white-space: nowrap; color: #000000;">${formRecompra.contratoAntiguo || ''}</td>
-              <td style="border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;">${formRecompra.fechaVentaAntiguo || ''}</td>
-              <td style="border: 1px solid #000000; padding: 6px; white-space: nowrap; color: #000000;">${formRecompra.fechaPago || ''}</td>
-              <td style="border: 1px solid #000000; padding: 6px; color: #000000;">${formRecompra.procesadoAntiguo || 'SI'}</td>
-              <td style="border: 1px solid #000000; padding: 6px; color: #000000;">${formRecompra.vigenteAntiguo || 'SI'}</td>
-              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase; color: #000000;">${formRecompra.patrocinador || ''}</td>
+              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase;"><font color="#000000">${formRecompra.nombreAntiguo || ''}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase; white-space: nowrap;"><font color="#000000">${formRecompra.contratoAntiguo || ''}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000">${formRecompra.fechaVentaAntiguo || ''}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px; white-space: nowrap;"><font color="#000000">${formRecompra.fechaPago || ''}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><font color="#000000">${formRecompra.procesadoAntiguo || 'SI'}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><font color="#000000">${formRecompra.vigenteAntiguo || 'SI'}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px; text-transform: uppercase;"><font color="#000000">${formRecompra.patrocinador || ''}</font></td>
               
-              <td style="border: 1px solid #000000; padding: 6px; color: #000000;">${formRecompra.valorCuota || ''}</td>
-              <td style="border: 1px solid #000000; padding: 6px; color: #000000;"><b>${beneficio}</b></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><font color="#000000">${formRecompra.valorCuota || ''}</font></td>
+              <td style="border: 1px solid #000000; padding: 6px;"><font color="#000000"><b>${beneficio}</b></font></td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <p style="margin-top: 25px; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
+      <p style="margin-top: 25px; margin-bottom: 2px;">Saludos cordiales,</p>
       <p style="margin-top: 0; font-weight: bold; color: #333333;">${formRecompra.asesor || '[Nombre del Asesor]'}</p>
     </div>`;
   };
@@ -970,81 +889,70 @@ export default function App() {
     let sumTotalProySemanal = 0;
     let sumTotalColMes = 0;
 
-    if (formProyeccion && Array.isArray(formProyeccion.asesores)) {
-      formProyeccion.asesores.forEach((asesor, i) => {
-        const sumDias = Array.isArray(asesor.dias) ? asesor.dias.reduce((a, b) => a + b, 0) : 0;
-        const colActNum = Number(asesor.colAct) || 0;
-        const totalColMes = colActNum + sumDias;
-        
-        sumColAct += colActNum;
-        if (Array.isArray(asesor.proy)) {
-          asesor.proy.forEach((val, idx) => {
-            if (sumProyA[idx] !== undefined) {
-               sumProyA[idx] += (Number(val) || 0);
-            }
-          });
-        }
-        sumTotalProySemanal += sumDias;
-        sumTotalColMes += totalColMes;
+    formProyeccion.asesores.forEach((asesor, i) => {
+      const sumDias = asesor.dias.reduce((a, b) => a + b, 0);
+      const totalColMes = asesor.colAct + sumDias;
+      
+      sumColAct += asesor.colAct;
+      asesor.proy.forEach((val, idx) => sumProyA[idx] += val);
+      sumTotalProySemanal += sumDias;
+      sumTotalColMes += totalColMes;
 
-        const isProductivo = totalColMes >= 25000;
-        const rowBgStyle = isProductivo ? 'background-color: #d1fae5;' : 'background-color: #ffffff;';
-        const textColor = isProductivo ? '#065f46' : '#000000';
+      const formatVacio = (val) => val === 0 ? '-' : formatCurrency(val);
+      const formatDias = (val) => val === 0 ? '-' : val;
 
-        filasAsesoresHtml += `
-          <tr>
-            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff; color: #000000;"><b>${i+1}</b></td>
-            <td style="border: 1px solid #cbd5e1; padding: 6px; background-color: #ffffff; white-space: nowrap; color: #000000;"><b>${String(asesor.nombre || '')}</b></td>
-            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap; color: #000000;">${formatVacio(colActNum)}</td>
-            ${Array.isArray(asesor.dias) ? asesor.dias.map(d => `<td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff; color: #000000;">${formatDias(Number(d)||0)}</td>`).join('') : ''}
-            ${Array.isArray(asesor.proy) ? asesor.proy.map(p => `<td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff; color: #000000;"><b>${Number(p)||0}</b></td>`).join('') : ''}
-            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap; color: #000000;"><b>${formatVacio(sumDias)}</b></td>
-            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; ${rowBgStyle} white-space: nowrap; color: ${textColor};"><b>${formatVacio(totalColMes)}</b></td>
-            <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff; color: #000000;"></td>
-          </tr>
-        `;
-      });
-    }
+      filasAsesoresHtml += `
+        <tr>
+          <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><font color="#000000"><b>${i+1}</b></font></td>
+          <td style="border: 1px solid #cbd5e1; padding: 6px; background-color: #ffffff; white-space: nowrap;"><font color="#000000"><b>${asesor.nombre}</b></font></td>
+          <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap;"><font color="#000000">${formatVacio(asesor.colAct)}</font></td>
+          ${asesor.dias.map(d => `<td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><font color="#000000">${formatDias(d)}</font></td>`).join('')}
+          ${asesor.proy.map(p => `<td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><font color="#000000"><b>${p}</b></font></td>`).join('')}
+          <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap;"><font color="#000000"><b>${formatVacio(sumDias)}</b></font></td>
+          <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: right; background-color: #ffffff; white-space: nowrap;"><font color="#000000"><b>${formatVacio(totalColMes)}</b></font></td>
+          <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; background-color: #ffffff;"><font color="#000000"></font></td>
+        </tr>
+      `;
+    });
 
     const mesStr = new Date(formProyeccion.fechaInicio || new Date()).toLocaleString('es-ES', { month: 'long' });
     const capMes = mesStr.charAt(0).toUpperCase() + mesStr.slice(1);
-    const objMensual = Number(formProyeccion.objetivoMensual) || 0;
-    const porcentajeAvance = objMensual ? (sumColAct / objMensual) * 100 : 0;
-    const porcentajeFin = objMensual ? (sumTotalColMes / objMensual) * 100 : 0;
+    const porcentajeAvance = formProyeccion.objetivoMensual ? (sumColAct / formProyeccion.objetivoMensual) * 100 : 0;
+    const porcentajeFin = formProyeccion.objetivoMensual ? (sumTotalColMes / formProyeccion.objetivoMensual) * 100 : 0;
 
     return `
-    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 13px; color: #333333; text-align: left;">
-      <p style="color: #333333;">${obtenerSaludoTiempo()}</p>
-      <p style="color: #333333;">${saludo} ${nombrePila},</p>
-      <p style="color: #333333;">Adjunto el consolidado de proyecci&oacute;n de ventas semanal del equipo correspondiente a la semana actual.</p>
+    <div style="font-family: Arial, sans-serif; font-size: 13px; color: #333333; text-align: left;">
+      <p>${obtenerSaludoTiempo()}</p>
+      <p>${saludo} ${nombrePila},</p>
+      <p>Adjunto el consolidado de proyecci&oacute;n de ventas semanal del equipo correspondiente a la semana actual.</p>
       
       <div style="overflow-x: auto; width: 100%; max-width: 100%;">
       <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; font-family: Arial, sans-serif; font-size: 11px; margin-top: 15px; width: 100%; min-width: 900px; text-align: left; border-color: #cbd5e1; background-color: #ffffff;">
         <thead>
           <tr>
-            <th colspan="3" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: left; color: #ffffff;"><b>Proyeccion Equipo: ${String(formProyeccion.equipo || '')}</b></th>
-            <th colspan="7" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; color: #ffffff;"><b>Ventas</b></th>
-            <th colspan="5" style="background-color: #92d050; border: 1px solid #92d050; padding: 6px; text-align: center; color: #000000;"><b>Proyectos</b></th>
-            <th rowspan="2" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; vertical-align: bottom; color: #ffffff;"><b>Total<br>Proyeccion<br>semanal</b></th>
-            <th rowspan="2" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; vertical-align: bottom; color: #ffffff;"><b>Total<br>colocacion<br>asesor/mes</b></th>
-            <th rowspan="2" style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; vertical-align: bottom; color: #ffffff;"><b>Productivo<br>valor = $25.000</b></th>
+            <th colspan="3" style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: left;"><font color="#ffffff"><b>Proyeccion Equipo: ${formProyeccion.equipo}</b></font></th>
+            <th colspan="7" style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center;"><font color="#ffffff"><b>Ventas</b></font></th>
+            <th colspan="5" style="background-color: #92d050; border: 1px solid #ffffff; padding: 6px; text-align: center;"><font color="#000000"><b>Proyectos</b></font></th>
+            <th rowspan="2" style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center; vertical-align: bottom;"><font color="#ffffff"><b>Total<br>Proyeccion<br>semanal</b></font></th>
+            <th rowspan="2" style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center; vertical-align: bottom;"><font color="#ffffff"><b>Total<br>colocacion<br>asesor/mes</b></font></th>
+            <th rowspan="2" style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center; vertical-align: bottom;"><font color="#ffffff"><b>Productivo<br>valor = $25.000</b></font></th>
           </tr>
           <tr>
-            <th style="background-color: #002060; border: 1px solid #002060; padding: 6px;"></th>
-            <th style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: left; white-space: nowrap; color: #ffffff;"><b>Asesor</b></th>
-            <th style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; white-space: nowrap; color: #ffffff;"><b>Colocacion<br>actual</b></th>
-            ${[0,1,2,3,4,5,6].map(d => `<th style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; white-space: nowrap; color: #ffffff;"><b>${formatDiaMes(formProyeccion.fechaInicio, d)}</b></th>`).join('')}
-            ${NOMBRES_PROYECTOS_PROYECCION.map(p => `<th style="background-color: #92d050; border: 1px solid #92d050; padding: 6px; text-align: center; white-space: nowrap; color: #000000;"><b>${String(p)}</b></th>`).join('')}
+            <th style="background-color: #002060; border: 1px solid #ffffff; padding: 6px;"></th>
+            <th style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: left; white-space: nowrap;"><font color="#ffffff"><b>Asesor</b></font></th>
+            <th style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center; white-space: nowrap;"><font color="#ffffff"><b>Colocacion<br>actual</b></font></th>
+            ${[0,1,2,3,4,5,6].map(d => `<th style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center; white-space: nowrap;"><font color="#ffffff"><b>${formatDiaMes(formProyeccion.fechaInicio, d)}</b></font></th>`).join('')}
+            ${NOMBRES_PROYECTOS_PROYECCION.map(p => `<th style="background-color: #92d050; border: 1px solid #ffffff; padding: 6px; text-align: center; white-space: nowrap;"><font color="#000000"><b>${p}</b></font></th>`).join('')}
           </tr>
         </thead>
         <tbody>
           ${filasAsesoresHtml}
           <tr>
             <td colspan="10" style="border: none; background-color: #ffffff;"></td>
-            ${sumProyA.map(p => `<td style="background-color: #8faadc; border: 1px solid #cbd5e1; text-align: center; padding: 6px; color: #000000;"><b>${p}</b></td>`).join('')}
+            ${sumProyA.map(p => `<td style="background-color: #8faadc; border: 1px solid #cbd5e1; text-align: center; padding: 6px;"><font color="#000000"><b>${p}</b></font></td>`).join('')}
             <td style="border: none; background-color: #ffffff;"></td>
-            <td style="background-color: #f8fafc; border: 1px solid #cbd5e1; text-align: right; padding: 6px; white-space: nowrap; color: #000000;"><b>${formatCurrency(sumTotalColMes)}</b></td>
-            <td style="border: 1px solid #cbd5e1; text-align: center; padding: 6px; background-color: #ffffff; color: #ff0000;"><b>0%</b></td>
+            <td style="background-color: #f8fafc; border: 1px solid #cbd5e1; text-align: right; padding: 6px; white-space: nowrap;"><font color="#000000"><b>${formatCurrency(sumTotalColMes)}</b></font></td>
+            <td style="border: 1px solid #cbd5e1; text-align: center; padding: 6px; background-color: #ffffff;"><font color="#ff0000"><b>0%</b></font></td>
           </tr>
         </tbody>
       </table>
@@ -1052,39 +960,39 @@ export default function App() {
 
       <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; font-family: Arial, sans-serif; font-size: 11px; margin-top: 20px; width: 350px; text-align: left; border-color: #cbd5e1; background-color: #ffffff;">
         <tr>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; color: #ffffff;"><b>Proyeccion ${capMes}</b></td>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; color: #ffffff;"><b>-</b></td>
+          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px;"><font color="#ffffff"><b>Proyeccion ${capMes}</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center;"><font color="#ffffff"><b>-</b></font></td>
           <td style="border: none; background-color: #ffffff;"></td>
         </tr>
         <tr>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; color: #ffffff;"><b>Colocacion actual</b></td>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: right; white-space: nowrap; color: #ffffff;"><b>${formatCurrency(sumColAct)}</b></td>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; color: #ffffff;"><b>${formatCurrency(porcentajeAvance)}%</b></td>
+          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px;"><font color="#ffffff"><b>Colocacion actual</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: right; white-space: nowrap;"><font color="#ffffff"><b>${formatCurrency(sumColAct)}</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center;"><font color="#ffffff"><b>${formatCurrency(porcentajeAvance)}%</b></font></td>
         </tr>
         <tr>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; color: #ffffff;"><b>Objetivo ${capMes} ${new Date().getFullYear()}</b></td>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: right; white-space: nowrap; color: #ffffff;"><b>${formatCurrency(objMensual)}</b></td>
+          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px;"><font color="#ffffff"><b>Objetivo ${capMes} ${new Date().getFullYear()}</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: right; white-space: nowrap;"><font color="#ffffff"><b>${formatCurrency(formProyeccion.objetivoMensual)}</b></font></td>
           <td style="border: none; background-color: #ffffff;"></td>
         </tr>
         <tr>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; color: #ffffff;"><b>Colocacion fin de mes</b></td>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: right; white-space: nowrap; color: #ffffff;"><b>${formatCurrency(sumTotalColMes)}</b></td>
-          <td style="background-color: #002060; border: 1px solid #002060; padding: 6px; text-align: center; color: #ffffff;"><b>${formatCurrency(porcentajeFin)}%</b></td>
+          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px;"><font color="#ffffff"><b>Colocacion fin de mes</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: right; white-space: nowrap;"><font color="#ffffff"><b>${formatCurrency(sumTotalColMes)}</b></font></td>
+          <td style="background-color: #002060; border: 1px solid #ffffff; padding: 6px; text-align: center;"><font color="#ffffff"><b>${formatCurrency(porcentajeFin)}%</b></font></td>
         </tr>
       </table>
-      <p style="margin-top: 25px; margin-bottom: 2px; color: #333333;">Saludos cordiales.</p>
+      <p style="margin-top: 25px; margin-bottom: 2px;">Saludos cordiales.</p>
     </div>`;
   };
 
   const generarHtmlLlamada = () => {
     return `
-    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
       <p style="margin-top: 0; margin-bottom: 25px;">Estimada Olivia,</p>
       <p style="margin-bottom: 20px;">Por favor su ayuda con la validaci&oacute;n de llamada de este cliente referido, el cliente menciona que tendr&aacute; tiempo de contestar hoy a las <strong>${formLlamada.horaLlamada || '[HORA]'}</strong>, por favor pido la ayuda de tu equipo para que la puedan llamar a esa hora:</p>
       
       <p style="margin-bottom: 5px; color: #555555;">Cliente referido:</p>
-      <p style="margin-top: 0; margin-bottom: 15px; font-weight: bold; font-size: 15px; color: #000000;">${formLlamada.nombreReferido || '[NOMBRE REFERIDO]'} - Contrato: ${formLlamada.contratoReferido || '[CONTRATO]'} - Celular: ${formLlamada.celularReferido || '[CELULAR]'}</p>
+      <p style="margin-top: 0; margin-bottom: 15px; font-weight: bold; font-size: 15px; color: #000000;">${formLlamada.nombreReferido || '[NOMBRE REFERIDO]'}, ${formLlamada.ciReferido || '[CI REFERIDO]'}</p>
       
       <p style="margin-bottom: 5px; color: #555555;">Cliente beneficiaria:</p>
       <p style="margin-top: 0; margin-bottom: 25px; font-weight: bold; font-size: 15px; color: #000000;">${formLlamada.nombreBeneficiario || '[NOMBRE BENEFICIARIA]'}, ${formLlamada.ciBeneficiario || '[CI BENEFICIARIA]'}</p>
@@ -1099,11 +1007,11 @@ export default function App() {
     const cant = formSeguro.beneficiarios.length;
     let filas = "";
     formSeguro.beneficiarios.forEach(b => {
-      filas += `<tr style="background-color: #ffffff;"><td style="border: 1px solid #cbd5e1; padding: 8px 12px; font-weight: bold; color: #000000;">${b.nombre || '---'}</td><td style="border: 1px solid #cbd5e1; padding: 8px 12px; color: #000000;">${b.parentesco || '---'}</td><td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; color: #000000;">${b.porcentaje ? b.porcentaje + '%' : '---'}</td><td style="border: 1px solid #cbd5e1; padding: 8px 12px; color: #000000;">${b.ci || '---'}</td></tr>`;
+      filas += `<tr style="background-color: #ffffff;"><td style="border: 1px solid #cbd5e1; padding: 8px 12px; font-weight: bold;"><font color="#000000">${b.nombre || '---'}</font></td><td style="border: 1px solid #cbd5e1; padding: 8px 12px;"><font color="#000000">${b.parentesco || '---'}</font></td><td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center;"><font color="#000000">${b.porcentaje ? b.porcentaje + '%' : '---'}</font></td><td style="border: 1px solid #cbd5e1; padding: 8px 12px;"><font color="#000000">${b.ci || '---'}</font></td></tr>`;
     });
 
     return `
-    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
       <p style="margin-top: 0; margin-bottom: 20px;">${saludo} ${nombrePila},</p>
       <p style="margin-bottom: 20px;">Por favor tu ayuda adicionando a estos ${cant} beneficiarios al seguro de vida de esta venta, detallo todo a continuaci&oacute;n:</p>
@@ -1114,7 +1022,7 @@ export default function App() {
 
       <p style="margin-bottom: 10px; font-weight: bold;">Beneficiarios del seguro ${cant} personas:</p>
       <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; border: 1px solid #cbd5e1; font-family: Arial, sans-serif; font-size: 13px; margin-bottom: 25px; width: 100%; text-align: left; background-color: #ffffff;">
-        <thead><tr style="background-color: #f8fafc;"><th style="border: 1px solid #cbd5e1; padding: 8px 12px; color: #0f172a;"><b>NOMBRE</b></th><th style="border: 1px solid #cbd5e1; padding: 8px 12px; color: #0f172a;"><b>PARENTESCO</b></th><th style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; color: #0f172a;"><b>%</b></th><th style="border: 1px solid #cbd5e1; padding: 8px 12px; color: #0f172a;"><b>CI.</b></th></tr></thead>
+        <thead><tr style="background-color: #f8fafc;"><th style="border: 1px solid #cbd5e1; padding: 8px 12px;"><font color="#0f172a"><b>NOMBRE</b></font></th><th style="border: 1px solid #cbd5e1; padding: 8px 12px;"><font color="#0f172a"><b>PARENTESCO</b></font></th><th style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center;"><font color="#0f172a"><b>%</b></font></th><th style="border: 1px solid #cbd5e1; padding: 8px 12px;"><font color="#0f172a"><b>CI.</b></font></th></tr></thead>
         <tbody>${filas}</tbody>
       </table>
       
@@ -1127,7 +1035,7 @@ export default function App() {
   const generarHtmlFisico = () => {
     const { saludo, titulo } = obtenerDatosSupervisor();
     return `
-    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
       <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${titulo},</p>
       <p style="margin-bottom: 20px;">Por medio de la presente, solicito el cambio de contrato digital a f&iacute;sico para el siguiente cliente:</p>
@@ -1150,21 +1058,15 @@ export default function App() {
     const nomProyecto = formDescuento.proyecto === 'OTRO...' ? (formDescuento.proyectoManual || 'PROYECTO MANUAL') : formDescuento.proyecto;
     let condicionTexto = formDescuento.modalidad === 'Crédito' ? `con cuota inicial del ${formatCurrency(porcentajeCuota)}% venta a plazos` : `venta al contado`;
 
-    const requiereAutorizacion = formDescuento.modalidad === 'Crédito' && porcentajeCuota >= 1.5 && porcentajeCuota < 5;
-    const badgeHtml = requiereAutorizacion 
-       ? `<div style="background-color: #fee2e2; color: #991b1b; padding: 10px 14px; border-radius: 6px; font-size: 13px; font-weight: bold; margin-bottom: 15px; border: 1px solid #f87171;">&#9888; REQUIERE AUTORIZACI&Oacute;N: Bajada de Cuota Inicial al 1.5% (Categor&iacute;a Calle)</div>` 
-       : '';
-
     return `
-    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #1e293b; max-width: 650px; line-height: 1.5; text-align: left;">
+    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #1e293b; max-width: 650px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
-      <p style="margin-top: 0; margin-bottom: 20px;">${saludo} ${titulo},</p>
-      ${badgeHtml}
+      <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${titulo},</p>
       <p style="margin-bottom: 20px;">Por favor le solicito mediante el presente correo, la aplicaci&oacute;n del descuento correspondiente a la campa&ntilde;a vigente del proyecto ${nomProyecto}: ${descuentoTexto} ${condicionTexto}:</p>
 
       <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-family: Arial, sans-serif; overflow: hidden; text-align: left;">
         <tr><td style="padding: 15px; border-bottom: 1px solid #e2e8f0; background-color: #f8fafc;">
-              <table width="100%" cellpadding="0" cellspacing="0"><tr><td style="color: #334155; font-size: 13px; font-weight: bold; letter-spacing: 1px;">&#128195; RESUMEN DE DESCUENTOS</td><td align="right"><span style="background-color: #d1fae5; color: #047857; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">ACTIVO</span></td></tr></table>
+             <table width="100%" cellpadding="0" cellspacing="0"><tr><td style="color: #334155; font-size: 13px; font-weight: bold; letter-spacing: 1px;">&#128195; RESUMEN DE DESCUENTOS</td><td align="right"><span style="background-color: #d1fae5; color: #047857; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">ACTIVO</span></td></tr></table>
           </td></tr>
         <tr><td style="padding: 15px;">
             <table width="100%" cellpadding="0" cellspacing="0"><tr>
@@ -1196,8 +1098,8 @@ export default function App() {
           </td></tr>
         <tr><td style="padding: 0 15px 15px 15px;">
              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #0f172a; border-radius: 8px;">
-                <tr><td style="padding: 20px 20px 10px 20px; font-size: 12px; font-weight: bold; color: #cbd5e1; text-transform: uppercase;">Precio M2 a Aplicar</td>
-                   <td align="right" style="padding: 20px 20px 10px 20px; font-size: 26px; font-weight: bold; color: #34d399;">$${formatCurrency(nuevoPrecioM2)}</td></tr>
+                <tr><td style="padding: 20px 20px 10px 20px; font-size: 12px; font-weight: bold; color: #cbd5e1; text-transform: uppercase;"><font color="#cbd5e1">Precio M2 a Aplicar</font></td>
+                   <td align="right" style="padding: 20px 20px 10px 20px; font-size: 26px; font-weight: bold; color: #34d399;"><font color="#34d399">$${formatCurrency(nuevoPrecioM2)}</font></td></tr>
                 <tr><td colspan="2" style="padding: 0 20px 20px 20px;">
                       <div style="background-color: #1e293b; padding: 10px; border-radius: 6px; text-align: center; font-size: 11px; font-family: monospace; color: #94a3b8; letter-spacing: 1px;">
                          UV <strong style="color: #ffffff;">${formDescuento.uv || 'SN'}</strong> &nbsp;&bull;&nbsp; MZN <strong style="color: #ffffff;">${formDescuento.manzano || '-'}</strong> &nbsp;&bull;&nbsp; LT <strong style="color: #ffffff;">${formDescuento.lote || '-'}</strong>
@@ -1216,7 +1118,7 @@ export default function App() {
   const generarHtmlCuota = () => {
     const { saludo, titulo } = obtenerDatosSupervisor();
     return `
-    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
       <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${titulo},</p>
       <p style="margin-bottom: 20px;">Por favor su autorizaci&oacute;n para proceder con la anulaci&oacute;n del contrato actual del cliente <strong>${formCuota.cliente || '[Nombre del Cliente]'}</strong> y realizar un reingreso. El motivo de esta gesti&oacute;n es que el cliente desea incrementar significativamente su cuota inicial para reducir sus pagos mensuales.</p>
@@ -1238,88 +1140,21 @@ export default function App() {
     const { saludo, nombrePila } = obtenerDatosSupervisor();
     let filas = "";
     formReenvio.contratos.forEach(c => {
-      filas += `<tr style="background-color: #ffffff;"><td style="border: 1px solid #333333; padding: 6px 8px; font-weight: bold; color: #000000;">${c.nroContrato || '---'}</td><td style="border: 1px solid #333333; padding: 6px 8px; color: #000000;">${c.cliente || '---'}</td><td style="border: 1px solid #333333; padding: 6px 8px; color: #000000;">${c.ci || '---'}</td><td style="border: 1px solid #333333; padding: 6px 8px; color: #000000;">UV: ${c.uv || 'SN'} - Mzn: ${c.manzano || '-'} - Lote: ${c.lote || '-'}</td></tr>`;
+      filas += `<tr style="background-color: #ffffff;"><td style="border: 1px solid #333333; padding: 6px 8px; font-weight: bold;"><font color="#000000">${c.nroContrato || '---'}</font></td><td style="border: 1px solid #333333; padding: 6px 8px;"><font color="#000000">${c.cliente || '---'}</font></td><td style="border: 1px solid #333333; padding: 6px 8px;"><font color="#000000">${c.ci || '---'}</font></td><td style="border: 1px solid #333333; padding: 6px 8px;"><font color="#000000">UV: ${c.uv || 'SN'} - Mzn: ${c.manzano || '-'} - Lote: ${c.lote || '-'}</font></td></tr>`;
     });
     const esMultiple = formReenvio.contratos.length > 1;
     return `
-    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
       <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
       <p style="margin-top: 0; margin-bottom: 25px;">${saludo} ${nombrePila},</p>
       <p style="margin-bottom: 20px;">Te escribo para solicitar tu apoyo habilitando nuevamente el env&iacute;o del correo para la firma digital de ${esMultiple ? "los siguientes contratos" : "el siguiente contrato"}. Debido a un error involuntario por parte de ${esMultiple ? "los clientes" : "el cliente"}, el proceso no se pudo completar en la primera instancia.</p>
       <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; border: 1px solid #333333; font-family: Arial, sans-serif; font-size: 13px; margin-bottom: 25px; width: 100%; text-align: left; background-color: #ffffff;">
-        <thead><tr style="background-color: #f2f2f2;"><th style="border: 1px solid #333333; padding: 6px 8px; color: #000000;"><b>Nro. Contrato</b></th><th style="border: 1px solid #333333; padding: 6px 8px; color: #000000;"><b>Cliente</b></th><th style="border: 1px solid #333333; padding: 6px 8px; color: #000000;"><b>Carnet (CI)</b></th><th style="border: 1px solid #333333; padding: 6px 8px; color: #000000;"><b>Ubicaci&oacute;n</b></th></tr></thead>
+        <thead><tr style="background-color: #f2f2f2;"><th style="border: 1px solid #333333; padding: 6px 8px;"><font color="#000000"><b>Nro. Contrato</b></font></th><th style="border: 1px solid #333333; padding: 6px 8px;"><font color="#000000"><b>Cliente</b></font></th><th style="border: 1px solid #333333; padding: 6px 8px;"><font color="#000000"><b>Carnet (CI)</b></font></th><th style="border: 1px solid #333333; padding: 6px 8px;"><font color="#000000"><b>Ubicaci&oacute;n</b></font></th></tr></thead>
         <tbody>${filas}</tbody>
       </table>
       <p style="margin-bottom: 25px;">Quedo atento a tu confirmaci&oacute;n para proceder con la regularizaci&oacute;n.</p>
       <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
       <p style="margin-top: 0; font-weight: bold; color: #333333;">${formReenvio.asesor || '[Nombre del Asesor]'}</p>
-    </div>`;
-  };
-
-  const generarHtmlRenuncia = () => {
-    return `
-    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
-      <p style="margin-bottom: 20px;">${obtenerSaludoTiempo()} estimada Carolina,</p>
-      <p style="margin-bottom: 20px;">Por medio del presente, te hago entrega formal de la carta de renuncia de la Sra./Sr. <strong>${formRenuncia.nombre || '[Nombre]'}</strong>, quien se desempe&ntilde;aba como <strong>${formRenuncia.cargo || 'Asesor de Ventas'}</strong> desde el pasado ${formRenuncia.fechaIngreso || '[Fecha]'}.</p>
-      <p style="margin-bottom: 20px;">En su nota, con fecha ${formRenuncia.fechaRenuncia || '[Fecha]'}, la/el asesor/a comunica que su retiro se debe a ${formRenuncia.motivo || '[motivos que le impiden continuar cumpliendo con sus funciones de manera &oacute;ptima]'}. Adjunto el documento escaneado para que se proceda con el tr&aacute;mite correspondiente en el departamento de Recursos Humanos.</p>
-      <p style="margin-bottom: 20px;">Quedo atento a cualquier requerimiento adicional para cerrar este proceso.</p>
-      <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
-      <p style="margin-top: 0; font-weight: bold; color: #333333;">${formRenuncia.asesor || 'Oscar Saravia'}</p>
-    </div>`;
-  };
-
-  const generarHtmlAltaCRM = () => {
-    return `
-    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
-      <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
-      <p style="margin-top: 0; margin-bottom: 20px;">Estimada Carolina,</p>
-      <p style="margin-bottom: 20px;">Por medio de la presente, solicito por favor la gesti&oacute;n para la creaci&oacute;n del usuario de acceso a los sistemas <strong>CRM y CESI</strong> para el nuevo asesor comercial que se est&aacute;n integrando a mi equipo.</p>
-      <p style="margin-bottom: 15px;">A continuaci&oacute;n, detallo los datos personales requeridos de cada uno, basados en sus fichas de ingreso:</p>
-      <ul style="margin-bottom: 20px; list-style-type: none; padding-left: 0;">
-        <li style="margin-bottom: 5px;">Nombre: ${formAltaCRM.nombre || '---'}</li>
-        <li style="margin-bottom: 5px;">Apellido Paterno: ${formAltaCRM.apPaterno || '---'}</li>
-        <li style="margin-bottom: 5px;">Apellido Materno: ${formAltaCRM.apMaterno || '---'}</li>
-        <li style="margin-bottom: 5px;">Carnet de Identidad: ${formAltaCRM.ci || '---'}</li>
-        <li style="margin-bottom: 5px;">Fecha de Nacimiento: ${formAltaCRM.fechaNacimiento || '---'}</li>
-        <li style="margin-bottom: 5px;">Correo Electr&oacute;nico: ${formAltaCRM.correo || '---'}</li>
-      </ul>
-      <p style="margin-bottom: 5px;">Quedo atento a la confirmaci&oacute;n de las credenciales para poder facilitarle el acceso y que inicie sus gestiones lo antes posible.</p>
-      <p style="margin-bottom: 20px;">De antemano, muchas gracias por tu colaboraci&oacute;n.</p>
-      <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
-      <p style="margin-top: 0; font-weight: bold; color: #333333;">${formAltaCRM.asesor || 'Oscar Saravia'}</p>
-    </div>`;
-  };
-
-  const generarHtmlEvaluacion = () => {
-    return `
-    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
-      <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}.</p>
-      <p style="margin-top: 0; margin-bottom: 20px;">Estimada Mar&iacute;a Fernanda,</p>
-      <p style="margin-bottom: 20px;">En respuesta a tu correo, adjunto el formulario de evaluaci&oacute;n de desempe&ntilde;o debidamente completado del asesor de la sucursal Montero que acaba de finalizar su programa de aprendizaje.</p>
-      <p style="margin-bottom: 15px;">A continuaci&oacute;n, comparto un resumen detallado de las observaciones y mis recomendaciones:</p>
-      <p style="margin-bottom: 10px;"><strong>1. ${formEvaluacion.nombre || '[Nombre Completo]'}</strong></p>
-      <ul style="margin-bottom: 20px; padding-left: 20px;">
-        <li style="margin-bottom: 10px;"><strong>Punteo Total:</strong> ${formEvaluacion.punteo || '0'} (${formEvaluacion.calificacion || 'Muy Bueno'})</li>
-        <li style="margin-bottom: 10px;"><strong>Resultados:</strong> ${formEvaluacion.lotes || '0'} lotes vendidos ($${formatCurrency(formEvaluacion.monto)}), ${formEvaluacion.leads || '0'} leads y ${formEvaluacion.visitas || '0'} visitas.</li>
-        <li style="margin-bottom: 10px;"><strong>Observaciones y recomendaci&oacute;n:</strong> ${formEvaluacion.observaciones || '[Texto de observaciones...]'}</li>
-      </ul>
-      <p style="margin-bottom: 20px;">Quedo a su disposici&oacute;n ante cualquier consulta.</p>
-      <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
-      <p style="margin-top: 0; font-weight: bold; color: #333333;">${formEvaluacion.asesor || 'Oscar Hugo Saravia'}</p>
-    </div>`;
-  };
-
-  const generarHtmlPostulante = () => {
-    return `
-    <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
-      <p style="margin-bottom: 5px;">${obtenerSaludoTiempo()}</p>
-      <p style="margin-top: 0; margin-bottom: 25px;">Estimado Ulrich,</p>
-      <p style="margin-bottom: 20px;">Te adjunto el formulario de entrevista de <strong>${formPostulante.nombre || '[Nombre Postulante]'}</strong> para el puesto de Asesor de Ventas. &Eacute;l llega a nosotros como referido de la asesora ${formPostulante.referidor || '[Nombre Referidor]'}.</p>
-      <p style="margin-bottom: 20px;">Despu&eacute;s de realizarle la entrevista y evaluar su perfil, mi recomendaci&oacute;n es que proceda. Me gustar&iacute;a que lo puedan tomar en cuenta para pasarlo a la etapa de capacitaci&oacute;n y as&iacute; poder ir prepar&aacute;ndolo para que se integre a la M&aacute;quina de Ventas aqu&iacute; en la sucursal de Montero.</p>
-      <p style="margin-bottom: 20px;">En el documento adjunto podr&aacute;s ver el detalle completo de su experiencia, evaluaci&oacute;n de competencias y el role play.</p>
-      <p style="margin-bottom: 25px;">Cualquier consulta me avisas.</p>
-      <p style="margin-top: 0; margin-bottom: 2px;">Saludos cordiales,</p>
-      <p style="margin-top: 0; font-weight: bold; color: #333333;">${formPostulante.asesor || 'Oscar Saravia'}</p>
     </div>`;
   };
 
@@ -1329,8 +1164,8 @@ export default function App() {
       {/* SIDEBAR */}
       <div className="w-full md:w-72 bg-gradient-to-b from-slate-950 via-slate-900 to-indigo-950 text-white flex flex-col shadow-2xl z-20 shrink-0 border-r border-slate-800/50">
         <div className="p-7">
-          <h1 className="text-2xl font-extrabold tracking-tight flex items-center text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.8)]">
-            <Building2 className="w-7 h-7 mr-2 text-white" />
+          <h1 className="text-2xl font-extrabold tracking-tight flex items-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-300">
+            <Building2 className="w-7 h-7 mr-2 text-blue-400" />
             Portal Asesores
           </h1>
           <p className="text-slate-400 text-xs mt-1.5 font-medium tracking-wide">Herramientas de Gestión</p>
@@ -1359,20 +1194,6 @@ export default function App() {
           </button>
           <button onClick={() => setActiveTab('seguro')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'seguro' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <Shield className="w-5 h-5 mr-3" /> Seguro de Vida
-          </button>
-
-          <div className="pt-5 pb-2"><p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Recursos Humanos (RRHH)</p></div>
-          <button onClick={() => setActiveTab('renuncia')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'renuncia' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
-            <UserMinus className="w-5 h-5 mr-3" /> Carta de Renuncia
-          </button>
-          <button onClick={() => setActiveTab('altaCrm')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'altaCrm' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
-            <UserPlus className="w-5 h-5 mr-3" /> Alta Usuarios CRM
-          </button>
-          <button onClick={() => setActiveTab('evaluacion')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'evaluacion' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
-            <ClipboardCheck className="w-5 h-5 mr-3" /> Evaluación Fin de Mes
-          </button>
-          <button onClick={() => setActiveTab('postulante')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'postulante' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
-            <UserCheck className="w-5 h-5 mr-3" /> Postulante Nuevo
           </button>
 
           <div className="pt-5 pb-2"><p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Cotizaciones y Recompras</p></div>
@@ -1406,62 +1227,16 @@ export default function App() {
           {/* DASHBOARD VIEW */}
           {activeTab === 'dashboard' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="bg-white/80 backdrop-blur-xl p-8 md:p-10 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60">
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-                  <div>
-                    <div className="inline-flex items-center justify-center px-3 py-1 mb-3 text-xs font-bold tracking-wide text-indigo-600 bg-indigo-100 rounded-full">PORTAL V2.0</div>
-                    <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 tracking-tight">Panel de Control Global</h2>
-                    <p className="text-slate-500 mt-2">Visión en tiempo real de la proyección de ventas de todos los equipos.</p>
-                  </div>
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 shadow-sm min-w-[200px]">
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Avance Global</p>
-                    <div className="flex items-end gap-2">
-                      <span className="text-3xl font-black text-indigo-600">{globalStats.goal > 0 ? (globalStats.actual / globalStats.goal * 100).toFixed(1) : 0}%</span>
-                    </div>
-                  </div>
+              <div className="bg-white/80 backdrop-blur-xl p-10 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60">
+                <div className="inline-flex items-center justify-center px-3 py-1 mb-4 text-xs font-bold tracking-wide text-indigo-600 bg-indigo-100 rounded-full">PORTAL V2.0</div>
+                <h2 className="text-4xl font-extrabold text-slate-800 mb-3 tracking-tight">Bienvenido al Portal de Solicitudes</h2>
+                <p className="text-slate-600 mb-10 text-lg leading-relaxed max-w-3xl">Esta herramienta está diseñada para estandarizar nuestras solicitudes y ahorrar tiempo. Selecciona el trámite a realizar en el menú lateral.</p>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <div className="p-6 bg-gradient-to-br from-blue-50 to-white rounded-2xl border border-blue-100/50 shadow-sm flex flex-col items-center text-center transition-transform hover:-translate-y-1"><div className="p-3 bg-blue-100 rounded-xl mb-4"><FileText className="w-8 h-8 text-blue-600" /></div><h3 className="font-bold text-slate-800">Cero Errores</h3></div>
+                  <div className="p-6 bg-gradient-to-br from-emerald-50 to-white rounded-2xl border border-emerald-100/50 shadow-sm flex flex-col items-center text-center transition-transform hover:-translate-y-1"><div className="p-3 bg-emerald-100 rounded-xl mb-4"><TrendingUp className="w-8 h-8 text-emerald-600" /></div><h3 className="font-bold text-slate-800">Más Rápido</h3></div>
+                  <div className="p-6 bg-gradient-to-br from-amber-50 to-white rounded-2xl border border-amber-100/50 shadow-sm flex flex-col items-center text-center transition-transform hover:-translate-y-1"><div className="p-3 bg-amber-100 rounded-xl mb-4"><Calculator className="w-8 h-8 text-amber-600" /></div><h3 className="font-bold text-slate-800">Cálculos Exactos</h3></div>
+                  <div className="p-6 bg-gradient-to-br from-purple-50 to-white rounded-2xl border border-purple-100/50 shadow-sm flex flex-col items-center text-center transition-transform hover:-translate-y-1"><div className="p-3 bg-purple-100 rounded-xl mb-4"><Database className="w-8 h-8 text-purple-600" /></div><h3 className="font-bold text-slate-800">Conectado a BD</h3></div>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                  <div className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
-                    <p className="text-sm font-bold text-slate-500 mb-1">Meta Global</p>
-                    <p className="text-2xl font-black text-slate-800">${formatCurrency(globalStats.goal)}</p>
-                  </div>
-                  <div className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center border-l-4 border-l-emerald-500">
-                    <p className="text-sm font-bold text-slate-500 mb-1">Colocación Actual</p>
-                    <p className="text-2xl font-black text-emerald-600">${formatCurrency(globalStats.actual)}</p>
-                  </div>
-                  <div className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center border-l-4 border-l-amber-500">
-                    <p className="text-sm font-bold text-slate-500 mb-1">Brecha (Falta)</p>
-                    <p className="text-2xl font-black text-amber-600">${formatCurrency(Math.max(0, globalStats.goal - globalStats.actual))}</p>
-                  </div>
-                  <div className="p-6 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl shadow-md shadow-indigo-200 flex flex-col justify-center text-white">
-                    <p className="text-sm font-bold text-indigo-200 mb-1">Total Equipos</p>
-                    <p className="text-2xl font-black">{String(globalStats.teams.length)}</p>
-                  </div>
-                </div>
-
-                <h3 className="text-lg font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">Rendimiento por Equipo</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[400px] overflow-y-auto pr-2 pb-4">
-                  {globalStats.teams.map((t, idx) => (
-                    <div key={t.name} className="bg-slate-50 p-5 rounded-xl border border-slate-100">
-                      <div className="flex justify-between items-center mb-3">
-                        <span className="font-bold text-slate-700 flex items-center">
-                          <span className="w-6 h-6 rounded bg-slate-200 text-slate-500 flex items-center justify-center text-xs mr-2">{idx + 1}</span>
-                          {String(t.name)}
-                        </span>
-                        <span className="text-xs font-bold bg-white px-2 py-1 rounded text-slate-600 shadow-sm">{t.percent.toFixed(1)}%</span>
-                      </div>
-                      <div className="w-full bg-slate-200 rounded-full h-2 mb-3 overflow-hidden">
-                        <div className="bg-indigo-500 h-2 rounded-full transition-all duration-1000" style={{ width: `${Math.min(t.percent, 100)}%` }}></div>
-                      </div>
-                      <div className="flex justify-between text-xs font-semibold text-slate-500">
-                        <span>Actual: ${formatCurrency(t.actual)}</span>
-                        <span>Meta: ${formatCurrency(t.goal)}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
               </div>
             </div>
           )}
@@ -1479,12 +1254,9 @@ export default function App() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
                     <Input label="Nombre del Referido" name="nombreReferido" value={formLlamada.nombreReferido} onChange={handleLlamadaChange} placeholder="Ej. Maria Fernanda Ramos Escobar" />
-                    <Input label="Número de Contrato" name="contratoReferido" value={formLlamada.contratoReferido} onChange={handleLlamadaChange} placeholder="Ej. C2604002026" />
+                    <Input label="Carnet (CI) Referido" name="ciReferido" value={formLlamada.ciReferido} onChange={handleLlamadaChange} placeholder="Ej. C2604002026" />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
-                    <Input label="Celular del Referido" name="celularReferido" value={formLlamada.celularReferido} onChange={handleLlamadaChange} placeholder="Ej. 77712345" />
-                    <Input label="Hora para la llamada" name="horaLlamada" value={formLlamada.horaLlamada} onChange={handleLlamadaChange} placeholder="Ej. 16:00 PM" />
-                  </div>
+                  <Input label="Hora para la llamada" name="horaLlamada" value={formLlamada.horaLlamada} onChange={handleLlamadaChange} placeholder="Ej. 16:00 PM" />
 
                   <div className="mt-6 mb-4 pb-2 border-b border-slate-100">
                     <h3 className="text-sm font-bold text-slate-800">Datos del Cliente Beneficiaria</h3>
@@ -1499,7 +1271,7 @@ export default function App() {
                     title="Validación Llamada" 
                     text={generarTextoLlamadaCelular()} 
                     htmlContent={generarHtmlLlamada()} 
-                    subject={`Solicitud de validación llamada Cliente referido: ${formLlamada.nombreReferido || 'NOMBRE'}, ${formLlamada.contratoReferido || 'CONTRATO'}`} 
+                    subject={`Solicitud de validación llamada Cliente referido: ${formLlamada.nombreReferido || 'NOMBRE'}, ${formLlamada.ciReferido || 'CI'}`} 
                     fixedDestinoLabel="Olivia Mendoza Duran"
                     fixedDestinoEmail="omendoza@celina.com.bo"
                     ccEmails="elizarraga@celina.com.bo, aperez@celina.com.bo"
@@ -1697,23 +1469,17 @@ export default function App() {
                         className="w-full px-3 py-1.5 mt-1 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 bg-white font-medium"
                       >
                         {Object.keys(EQUIPOS_ASESORES).map(equipo => (
-                          <option key={equipo} value={equipo}>{String(equipo)}</option>
+                          <option key={equipo} value={equipo}>{equipo}</option>
                         ))}
                       </select>
                     </div>
                     <div className="w-full sm:w-40">
                       <label className="block text-xs font-bold text-slate-500 uppercase">Semana del (Lunes)</label>
-                      <input type="date" value={formProyeccion.fechaInicio} onChange={(e) => {
-                        const newState = {...formProyeccion, fechaInicio: e.target.value};
-                        saveProyeccionState(newState);
-                      }} className="w-full px-3 py-1.5 mt-1 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 bg-white" />
+                      <input type="date" value={formProyeccion.fechaInicio} onChange={(e) => setFormProyeccion({...formProyeccion, fechaInicio: e.target.value})} className="w-full px-3 py-1.5 mt-1 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 bg-white" />
                     </div>
                     <div className="w-full sm:w-40">
                       <label className="block text-xs font-bold text-slate-500 uppercase">Objetivo Mes</label>
-                      <input type="number" value={formProyeccion.objetivoMensual} onChange={(e) => {
-                        const newState = {...formProyeccion, objetivoMensual: parseFloat(e.target.value) || 0};
-                        saveProyeccionState(newState);
-                      }} className="w-full px-3 py-1.5 mt-1 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 bg-white" />
+                      <input type="number" value={formProyeccion.objetivoMensual} onChange={(e) => setFormProyeccion({...formProyeccion, objetivoMensual: parseFloat(e.target.value) || 0})} className="w-full px-3 py-1.5 mt-1 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 bg-white" />
                     </div>
                   </div>
 
@@ -1727,85 +1493,49 @@ export default function App() {
                           <th colSpan="5" className="bg-[#92d050] text-black p-2 border border-slate-400 text-center">Proyectos</th>
                         </tr>
                         <tr>
-                          {[0,1,2,3,4,5,6].map(d => <th key={d} className="bg-[#002060] text-white p-2 border border-slate-400 text-center font-normal">{String(formatDiaMes(formProyeccion.fechaInicio, d))}</th>)}
-                          {NOMBRES_PROYECTOS_PROYECCION.map(p => <th key={p} className="bg-[#92d050] text-black p-2 border border-slate-400 text-center font-normal">{String(p)}</th>)}
+                          {[0,1,2,3,4,5,6].map(d => <th key={d} className="bg-[#002060] text-white p-2 border border-slate-400 text-center font-normal">{formatDiaMes(formProyeccion.fechaInicio, d)}</th>)}
+                          {NOMBRES_PROYECTOS_PROYECCION.map(p => <th key={p} className="bg-[#92d050] text-black p-2 border border-slate-400 text-center font-normal">{p}</th>)}
                         </tr>
                       </thead>
                       <tbody>
-                        {Array.isArray(formProyeccion.asesores) && formProyeccion.asesores.map((asesor, i) => {
-                          const totalColMes = (Number(asesor.colAct) || 0) + (Array.isArray(asesor.dias) ? asesor.dias.reduce((a,b)=>a+b,0) : 0);
-                          const isProductivo = totalColMes >= 25000;
-                          
-                          return (
-                          <tr key={i} className={`hover:bg-blue-50/50 ${isProductivo ? 'bg-emerald-50/30' : ''}`}>
-                            <td className="p-2 border border-slate-300 font-medium text-slate-800">{i+1}. {String(asesor.nombre || '')}</td>
+                        {formProyeccion.asesores.map((asesor, i) => (
+                          <tr key={i} className="hover:bg-blue-50/50">
+                            <td className="p-2 border border-slate-300 font-medium text-slate-800">{i+1}. {asesor.nombre}</td>
                             <td className="p-1 border border-slate-300">
-                              <div className="flex items-center gap-1">
-                                <input type="number" value={asesor.colAct === 0 ? '' : asesor.colAct} onChange={(e) => updateAsesorProyeccion(i, 'colAct', e.target.value)} className="w-full min-w-[50px] p-1 text-right text-xs bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded" placeholder="0" />
-                                <button onClick={() => setSumaVentaModal({show: true, index: i, nombre: asesor.nombre, monto: ''})} className="p-1.5 bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200 transition-colors shadow-sm" title="Sumar Nueva Venta"><Plus className="w-3.5 h-3.5" /></button>
-                              </div>
+                              <input type="number" value={asesor.colAct === 0 ? '' : asesor.colAct} onChange={(e) => updateAsesorProyeccion(i, 'colAct', e.target.value)} className="w-full min-w-[60px] p-1 text-right text-xs bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded" placeholder="0" />
                             </td>
-                            {Array.isArray(asesor.dias) && asesor.dias.map((diaVal, dIdx) => (
+                            {asesor.dias.map((diaVal, dIdx) => (
                               <td key={dIdx} className="p-1 border border-slate-300">
                                 <input type="number" value={diaVal === 0 ? '' : diaVal} onChange={(e) => updateAsesorArrayProyeccion(i, 'dias', dIdx, e.target.value)} className="w-full min-w-[40px] p-1 text-center text-xs bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded" placeholder="-" />
                               </td>
                             ))}
-                            {Array.isArray(asesor.proy) && asesor.proy.map((proyVal, pIdx) => (
+                            {asesor.proy.map((proyVal, pIdx) => (
                               <td key={pIdx} className="p-1 border border-slate-300 bg-green-50/30">
                                 <input type="number" value={proyVal === 0 ? '' : proyVal} onChange={(e) => updateAsesorArrayProyeccion(i, 'proy', pIdx, e.target.value)} className="w-full min-w-[40px] p-1 text-center text-xs font-bold text-slate-700 bg-transparent border-none outline-none focus:ring-1 focus:ring-blue-400 rounded" placeholder="0" />
                               </td>
                             ))}
                           </tr>
-                        )})}
+                        ))}
                       </tbody>
                     </table>
                   </div>
-                  <div className="p-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 flex items-center justify-between">
-                     <span className="flex items-center"><Info className="w-4 h-4 mr-2 flex-shrink-0" /> Los datos se guardan de forma local en tu navegador. Si el asesor supera los $25,000 en el correo aparecerá en color verde.</span>
+                  <div className="p-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 flex items-center">
+                     <Info className="w-4 h-4 mr-2 flex-shrink-0" /> Los totales por semana, por mes y promedios se calculan solos en la vista previa a la derecha.
                   </div>
                 </div>
 
-                <div className="w-full min-w-0 flex flex-col h-full">
-                  <div className="flex-1">
-                    <ResultCard 
-                      title="Proyección Semanal" 
-                      text={String(generarTextoProyeccionCelular())} 
-                      htmlContent={String(generarHtmlProyeccion())}
-                      subject={`Proyección Semanal Equipo ${String(formProyeccion.equipo)} - ${String(formatDiaMes(formProyeccion.fechaInicio, 0))}`} 
-                      supervisorDestino={supervisorDestino}
-                      setSupervisorDestino={setSupervisorDestino}
-                      showTextPlain={true}
-                    />
-                  </div>
+                <div className="w-full min-w-0">
+                  <ResultCard 
+                    title="Proyección Semanal" 
+                    text={generarTextoProyeccionCelular()} 
+                    htmlContent={generarHtmlProyeccion()}
+                    subject={`Proyección Semanal Equipo ${formProyeccion.equipo} - ${formatDiaMes(formProyeccion.fechaInicio, 0)}`} 
+                    supervisorDestino={supervisorDestino}
+                    setSupervisorDestino={setSupervisorDestino}
+                    showTextPlain={true}
+                  />
                 </div>
               </div>
-
-              {/* MODAL SUMAR VENTA */}
-              {sumaVentaModal.show && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm px-4">
-                  <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 animate-in zoom-in-95 duration-200">
-                    <h3 className="text-lg font-bold text-slate-800 mb-2">Añadir Nueva Venta</h3>
-                    <p className="text-sm text-slate-500 mb-4">Sumar al acumulado de <strong className="text-slate-700">{sumaVentaModal.nombre}</strong></p>
-                    <div className="mb-5">
-                       <label className="block text-xs font-bold text-slate-700 mb-1.5">Monto de la Venta ($)</label>
-                       <input
-                         type="number"
-                         autoFocus
-                         value={sumaVentaModal.monto}
-                         onChange={(e) => setSumaVentaModal({...sumaVentaModal, monto: e.target.value})}
-                         className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 text-lg font-bold outline-none"
-                         placeholder="Ej. 6600"
-                         onKeyDown={(e) => e.key === 'Enter' && confirmarSumaVenta()}
-                       />
-                    </div>
-                    <div className="flex gap-3">
-                       <button onClick={() => setSumaVentaModal({show: false, index: null, nombre: '', monto: ''})} className="flex-1 px-4 py-2.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Cancelar</button>
-                       <button onClick={confirmarSumaVenta} className="flex-1 px-4 py-2.5 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/30 transition-colors">Sumar Venta</button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
             </div>
           )}
 
@@ -1871,13 +1601,6 @@ export default function App() {
           {activeTab === 'descuento' && (() => {
             const { porcentajeCuota, montoCuotaNum } = calcularDescuento();
             const nomProyectoFinal = formDescuento.proyecto === 'OTRO...' ? (formDescuento.proyectoManual || 'PROYECTO MANUAL') : formDescuento.proyecto;
-            
-            // Lógica inteligente para el asunto del correo
-            let asuntoDescuento = `Solicitud Descuento Campañas - ${nomProyectoFinal} UV:${formDescuento.uv} Mz:${formDescuento.manzano} Lt:${formDescuento.lote}`;
-            if (formDescuento.modalidad === 'Crédito' && porcentajeCuota >= 1.5 && porcentajeCuota < 5) {
-              asuntoDescuento += ` - AUTORIZACIÓN PARA BAJAR LA CUOTA INICIAL AL 1.5% CATEGORÍA CALLE`;
-            }
-
             return (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
                 <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
@@ -1907,7 +1630,7 @@ export default function App() {
                       <div className="w-full">
                         <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Proyecto</label>
                         <select name="proyecto" value={formDescuento.proyecto} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm text-sm">
-                          {PROYECTOS.map(p => <option key={p} value={p}>{String(p).toUpperCase()}</option>)}
+                          {PROYECTOS.map(p => <option key={p} value={p}>{p.toUpperCase()}</option>)}
                         </select>
                       </div>
                       <div className="w-full">
@@ -1972,12 +1695,12 @@ export default function App() {
                       </div>
                     )}
 
-                    {/* NUEVO BLOQUE: DESCUENTO MANUAL PROYECTOS PROPIOS >= 1.5% */}
-                    {PROYECTOS_PROPIOS_1.includes(formDescuento.proyecto) && formDescuento.modalidad === 'Crédito' && porcentajeCuota >= 1.5 && (
+                    {/* NUEVO BLOQUE: DESCUENTO MANUAL PROYECTOS PROPIOS >= 5% */}
+                    {PROYECTOS_PROPIOS_1.includes(formDescuento.proyecto) && formDescuento.modalidad === 'Crédito' && porcentajeCuota >= 5 && (
                       <div className="mb-6 bg-purple-50/80 p-4 rounded-xl border border-purple-200 shadow-sm w-full flex flex-col sm:flex-row items-center justify-between gap-4">
                          <div className="flex-1">
                            <label className="block text-sm font-bold text-purple-900 mb-1">¡Aplica a Descuento Especial!</label>
-                           <p className="text-xs text-purple-700 leading-tight">Puedes ajustar el % manualmente si lo deseas (Máximo {porcentajeCuota >= 5 ? '23' : '20'}%).</p>
+                           <p className="text-xs text-purple-700 leading-tight">Puedes ajustar el % manualmente si lo deseas (Máximo 23%).</p>
                          </div>
                          <div className="w-full sm:w-auto flex items-center bg-white rounded-lg border border-purple-200 overflow-hidden">
                            <input
@@ -1985,7 +1708,7 @@ export default function App() {
                              name="descuentoPropiosManual"
                              value={formDescuento.descuentoPropiosManual}
                              onChange={handleDescuentoChange}
-                             max={porcentajeCuota >= 5 ? "23" : "20"}
+                             max="23"
                              min="0"
                              className="w-20 px-3 py-2 text-center font-bold text-purple-700 focus:outline-none"
                            />
@@ -2002,21 +1725,21 @@ export default function App() {
                             <label className="block text-xs font-bold text-emerald-700 mb-1.5 ml-0.5 uppercase tracking-wide">Elegir UV</label>
                             <select name="uv" value={formDescuento.uv} onChange={handleDescuentoChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 font-semibold cursor-pointer text-sm">
                               <option value="">---</option>
-                              {opcionesUV.map(u => <option key={u} value={u}>{String(u)}</option>)}
+                              {opcionesUV.map(u => <option key={u} value={u}>{u}</option>)}
                             </select>
                           </div>
                           <div className="w-full">
                             <label className="block text-xs font-bold text-emerald-700 mb-1.5 ml-0.5 uppercase tracking-wide">Elegir MZN</label>
                             <select name="manzano" value={formDescuento.manzano} onChange={handleDescuentoChange} disabled={!formDescuento.uv} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 font-semibold cursor-pointer disabled:opacity-50 disabled:bg-slate-100 text-sm">
                               <option value="">---</option>
-                              {opcionesMZN.map(m => <option key={m} value={m}>{String(m)}</option>)}
+                              {opcionesMZN.map(m => <option key={m} value={m}>{m}</option>)}
                             </select>
                           </div>
                           <div className="w-full">
                             <label className="block text-xs font-bold text-emerald-700 mb-1.5 ml-0.5 uppercase tracking-wide">Elegir Lote</label>
                             <select name="lote" value={formDescuento.lote} onChange={handleDescuentoChange} disabled={!formDescuento.manzano} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 font-semibold cursor-pointer disabled:opacity-50 disabled:bg-slate-100 text-sm">
                               <option value="">---</option>
-                              {opcionesLote.map(lt => <option key={lt} value={lt}>{String(lt)}</option>)}
+                              {opcionesLote.map(lt => <option key={lt} value={lt}>{lt}</option>)}
                             </select>
                           </div>
                         </div>
@@ -2044,7 +1767,7 @@ export default function App() {
                       <div className="bg-slate-900 border border-slate-800 text-white p-4 rounded-xl text-xs font-bold mb-5 flex items-center shadow-md uppercase tracking-wider w-full overflow-hidden">
                         <Tag className="w-4 h-4 mr-2.5 text-cyan-400 flex-shrink-0" />
                         <span className="text-slate-400 mr-1.5 font-semibold flex-shrink-0">Categoría:</span> 
-                        <span className="truncate">{String(formDescuento.categoria)}</span>
+                        <span className="truncate">{formDescuento.categoria}</span>
                       </div>
                     ) : formDescuento.modoBusqueda === 'manual' ? (
                       <div className="mb-4 w-full">
@@ -2065,7 +1788,7 @@ export default function App() {
                     
                     <div className="border-t border-slate-100 pt-5 mt-2 w-full"><Input label="Nombre del Asesor" name="asesor" value={formDescuento.asesor} onChange={handleDescuentoChange} /></div>
                   </div>
-                  <div className="w-full min-w-0"><ResultCard title="Descuento" text={generarTextoDescuentoCelular()} htmlContent={generarHtmlDescuento()} subject={asuntoDescuento} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
+                  <div className="w-full min-w-0"><ResultCard title="Descuento" text={generarTextoDescuentoCelular()} htmlContent={generarHtmlDescuento()} subject={`Solicitud Descuento Campañas - ${nomProyectoFinal} Mz${formDescuento.manzano} Lt${formDescuento.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
                 </div>
               </div>
             );
@@ -2084,7 +1807,7 @@ export default function App() {
                   <Input label="Nombre del Cliente" name="cliente" value={formCuota.cliente} onChange={handleCuotaChange} />
                   <div className="mb-5 w-full">
                     <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Proyecto</label>
-                    <select name="proyecto" value={formCuota.proyecto} onChange={handleCuotaChange} className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm text-sm">{PROYECTOS.map(p => <option key={p} value={p}>{String(p)}</option>)}</select>
+                    <select name="proyecto" value={formCuota.proyecto} onChange={handleCuotaChange} className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 text-slate-800 shadow-sm text-sm">{PROYECTOS.map(p => <option key={p} value={p}>{p}</option>)}</select>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full">
                     <Input label="UV" name="uv" value={formCuota.uv} onChange={handleCuotaChange} />
@@ -2099,133 +1822,6 @@ export default function App() {
                   <div className="border-t border-slate-100 pt-5 mt-2 w-full"><Input label="Nombre del Asesor" name="asesorVentas" value={formCuota.asesorVentas} onChange={handleCuotaChange} /></div>
                 </div>
                 <div className="w-full min-w-0"><ResultCard title="Incremento Cuota" text={generarTextoCuotaCelular()} htmlContent={generarHtmlCuota()} subject={`Incremento Cuota Inicial - ${formCuota.proyecto} Mz${formCuota.manzano} Lt${formCuota.lote}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} /></div>
-              </div>
-            </div>
-          )}
-
-          {/* FORM: RRHH - RENUNCIA */}
-          {activeTab === 'renuncia' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
-              <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><UserMinus className="w-6 h-6 mr-2 text-blue-600" /> Entrega de Carta de Renuncia</h2></div>
-              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
-                  <Input label="Tu Nombre (Remitente)" name="asesor" value={formRenuncia.asesor} onChange={handleRenunciaChange} placeholder="Ej. Oscar Saravia" />
-                  <div className="mt-4 mb-4 pb-2 border-b border-slate-100"><h3 className="text-sm font-bold text-slate-800">Datos de la Renuncia</h3></div>
-                  <Input label="Nombre del Asesor que renuncia" name="nombre" value={formRenuncia.nombre} onChange={handleRenunciaChange} placeholder="Ej. Nataly Heredia B." />
-                  <Input label="Cargo" name="cargo" value={formRenuncia.cargo} onChange={handleRenunciaChange} placeholder="Ej. Asesor de Ventas" />
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mb-2">
-                    <Input label="Fecha de Ingreso" name="fechaIngreso" value={formRenuncia.fechaIngreso} onChange={handleRenunciaChange} placeholder="Ej. 24 de marzo de 2026" />
-                    <Input label="Fecha de la Nota/Renuncia" name="fechaRenuncia" value={formRenuncia.fechaRenuncia} onChange={handleRenunciaChange} placeholder="Ej. 17 de abril de 2026" />
-                  </div>
-                  <TextArea label="Motivo de la renuncia" name="motivo" value={formRenuncia.motivo} onChange={handleRenunciaChange} placeholder="Ej. Motivos de salud que le impiden continuar..." />
-                </div>
-                <div className="w-full min-w-0">
-                  <ResultCard 
-                    title="Carta de Renuncia" 
-                    text={generarTextoRenunciaCelular()} 
-                    htmlContent={generarHtmlRenuncia()} 
-                    subject={`Entrega de carta de renuncia - ${formRenuncia.nombre || 'Asesor'}`} 
-                    fixedDestinoLabel="Carolina Montero Araujo"
-                    fixedDestinoEmail="cmontero@celina.com.bo"
-                    ccEmails="mfroca@celina.com.bo, mreyes@celina.com.bo, rvaca@grupopaz.com.bo"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* FORM: RRHH - ALTA CRM */}
-          {activeTab === 'altaCrm' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
-              <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><UserPlus className="w-6 h-6 mr-2 text-blue-600" /> Solicitud de Alta de Usuarios CRM y CESI</h2></div>
-              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
-                  <Input label="Tu Nombre (Remitente)" name="asesor" value={formAltaCRM.asesor} onChange={handleAltaCRMChange} placeholder="Ej. Oscar Saravia" />
-                  <div className="mt-4 mb-4 pb-2 border-b border-slate-100"><h3 className="text-sm font-bold text-slate-800">Datos del Nuevo Asesor</h3></div>
-                  <Input label="Nombre(s)" name="nombre" value={formAltaCRM.nombre} onChange={handleAltaCRMChange} placeholder="Ej. DANIEL" />
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mb-2">
-                    <Input label="Apellido Paterno" name="apPaterno" value={formAltaCRM.apPaterno} onChange={handleAltaCRMChange} placeholder="Ej. ANGULO" />
-                    <Input label="Apellido Materno" name="apMaterno" value={formAltaCRM.apMaterno} onChange={handleAltaCRMChange} placeholder="Ej. MALDONADO" />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mb-2">
-                    <Input label="Carnet de Identidad" name="ci" value={formAltaCRM.ci} onChange={handleAltaCRMChange} placeholder="Ej. 6237199 S/E" />
-                    <Input label="Fecha de Nacimiento" name="fechaNacimiento" value={formAltaCRM.fechaNacimiento} onChange={handleAltaCRMChange} placeholder="Ej. 07 abr 1985" />
-                  </div>
-                  <Input label="Correo Electrónico" name="correo" value={formAltaCRM.correo} onChange={handleAltaCRMChange} placeholder="Ej. danielangulom7@gmail.com" />
-                </div>
-                <div className="w-full min-w-0">
-                  <ResultCard 
-                    title="Alta Usuarios CRM" 
-                    text={generarTextoAltaCRMCelular()} 
-                    htmlContent={generarHtmlAltaCRM()} 
-                    subject={`Solicitud de Alta de Usuarios CRM y CESI – ${formAltaCRM.nombre} ${formAltaCRM.apPaterno} ${formAltaCRM.apMaterno}`.trim()} 
-                    fixedDestinoLabel="Carolina Montero Araujo"
-                    fixedDestinoEmail="cmontero@celina.com.bo"
-                    ccEmails="mfroca@celina.com.bo"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* FORM: RRHH - EVALUACION */}
-          {activeTab === 'evaluacion' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
-              <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><ClipboardCheck className="w-6 h-6 mr-2 text-blue-600" /> Reporte de Finalización (Aprendizaje)</h2></div>
-              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
-                  <Input label="Tu Nombre (Remitente)" name="asesor" value={formEvaluacion.asesor} onChange={handleEvaluacionChange} placeholder="Ej. Oscar Hugo Saravia" />
-                  <div className="mt-4 mb-4 pb-2 border-b border-slate-100"><h3 className="text-sm font-bold text-slate-800">Resultados de la Evaluación</h3></div>
-                  <Input label="Nombre del Asesor Evaluado" name="nombre" value={formEvaluacion.nombre} onChange={handleEvaluacionChange} placeholder="Ej. Jaime Fabricio Rios Castro" />
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mb-2">
-                    <Input label="Punteo Total" name="punteo" value={formEvaluacion.punteo} onChange={handleEvaluacionChange} placeholder="Ej. 41" type="number" />
-                    <Input label="Calificación (Texto)" name="calificacion" value={formEvaluacion.calificacion} onChange={handleEvaluacionChange} placeholder="Ej. Muy Bueno" />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full mb-2">
-                    <Input label="Lotes Vendidos" name="lotes" value={formEvaluacion.lotes} onChange={handleEvaluacionChange} placeholder="Ej. 9" type="number" />
-                    <Input label="Monto Vendido ($)" name="monto" value={formEvaluacion.monto} onChange={handleEvaluacionChange} placeholder="Ej. 91110" type="number" />
-                    <Input label="Leads" name="leads" value={formEvaluacion.leads} onChange={handleEvaluacionChange} placeholder="Ej. 153" type="number" />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full mb-2">
-                    <Input label="Visitas" name="visitas" value={formEvaluacion.visitas} onChange={handleEvaluacionChange} placeholder="Ej. 7" type="number" />
-                  </div>
-                  <TextArea label="Observaciones y Recomendación" name="observaciones" value={formEvaluacion.observaciones} onChange={handleEvaluacionChange} placeholder={`Ej. Su desempeño ha sido sobresaliente... Solicito su ratificación y la firma de su contrato...`} />
-                </div>
-                <div className="w-full min-w-0">
-                  <ResultCard 
-                    title="Reporte de Evaluación" 
-                    text={generarTextoEvaluacionCelular()} 
-                    htmlContent={generarHtmlEvaluacion()} 
-                    subject={`RE: REPORTE DE FINALIZACION DEL PROGRAMA DE APRENDIZAJE - ${formEvaluacion.nombre || 'Asesor'}`.toUpperCase()} 
-                    fixedDestinoLabel="Maria Fernanda Roca Miranda"
-                    fixedDestinoEmail="mfroca@celina.com.bo"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* FORM: RRHH - POSTULANTE */}
-          {activeTab === 'postulante' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
-              <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><UserCheck className="w-6 h-6 mr-2 text-blue-600" /> Postulante para Capacitación</h2></div>
-              <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
-                  <Input label="Tu Nombre (Remitente)" name="asesor" value={formPostulante.asesor} onChange={handlePostulanteChange} placeholder="Ej. Oscar Saravia" />
-                  <div className="mt-4 mb-4 pb-2 border-b border-slate-100"><h3 className="text-sm font-bold text-slate-800">Datos del Postulante</h3></div>
-                  <Input label="Nombre del Postulante" name="nombre" value={formPostulante.nombre} onChange={handlePostulanteChange} placeholder="Ej. Daniel Angulo Maldonado" />
-                  <Input label="Referido por (Nombre Asesor)" name="referidor" value={formPostulante.referidor} onChange={handlePostulanteChange} placeholder="Ej. Marisol Urgel" />
-                </div>
-                <div className="w-full min-w-0">
-                  <ResultCard 
-                    title="Postulante Capacitación" 
-                    text={generarTextoPostulanteCelular()} 
-                    htmlContent={generarHtmlPostulante()} 
-                    subject={`Postulante para capacitación: ${formPostulante.nombre} (Referido de ${formPostulante.referidor})`} 
-                    fixedDestinoLabel="Ulrich Klein Montano"
-                    fixedDestinoEmail="uklein@grupopaz.com.bo"
-                  />
-                </div>
               </div>
             </div>
           )}
