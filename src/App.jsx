@@ -31,7 +31,9 @@ import {
   LineChart,
   PieChart,
   Target,
-  CalendarDays
+  CalendarDays,
+  Menu,
+  X
 } from 'lucide-react';
 
 // --- CONTROL DE VERSIÓN DE DATOS ---
@@ -420,6 +422,14 @@ export default function App() {
 
   const [sumaVentaModal, setSumaVentaModal] = useState({ show: false, index: null, nombre: '', monto: '' });
   const [equipoSeleccionado, setEquipoSeleccionado] = useState('Oscar Saravia');
+
+  // ESTADO MENÚ CELULAR
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setIsSidebarOpen(false);
+  };
 
   // AUTO-CALCULO DEL SEGURO DE VIDA
   useEffect(() => {
@@ -1555,11 +1565,31 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] flex flex-col md:flex-row font-sans selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="min-h-screen bg-[#f8fafc] bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] flex flex-col md:flex-row font-sans selection:bg-indigo-100 selection:text-indigo-900 overflow-hidden">
       
+      {/* MOBILE HEADER */}
+      <div className="md:hidden bg-slate-950 text-white p-4 flex items-center justify-between shrink-0 z-30 shadow-md">
+        <div className="flex items-center font-bold text-lg">
+          <Building2 className="w-6 h-6 mr-2 text-indigo-400" /> Portal Asesores
+        </div>
+        <button onClick={() => setIsSidebarOpen(true)} className="p-1 rounded-md hover:bg-white/10 transition-colors">
+          <Menu className="w-6 h-6" />
+        </button>
+      </div>
+
+      {/* MOBILE OVERLAY */}
+      {isSidebarOpen && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 md:hidden" onClick={() => setIsSidebarOpen(false)} />
+      )}
+
       {/* SIDEBAR */}
-      <div className="w-full md:w-72 bg-gradient-to-b from-slate-950 via-slate-900 to-indigo-950 text-white flex flex-col shadow-2xl z-20 shrink-0 border-r border-slate-800/50 h-screen sticky top-0 overflow-hidden">
-        <div className="p-7 shrink-0">
+      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 transition-transform duration-300 ease-in-out z-50 w-72 bg-gradient-to-b from-slate-950 via-slate-900 to-indigo-950 text-white flex flex-col shadow-2xl shrink-0 border-r border-slate-800/50 h-screen overflow-hidden`}>
+        
+        <button className="md:hidden absolute top-6 right-5 p-1 rounded-md text-slate-400 hover:text-white hover:bg-white/10" onClick={() => setIsSidebarOpen(false)}>
+          <X className="w-5 h-5"/>
+        </button>
+
+        <div className="p-7 shrink-0 pr-12 md:pr-7">
           <h1 className="text-2xl font-extrabold tracking-tight flex items-center text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.8)]">
             <Building2 className="w-7 h-7 mr-2 text-white" />
             Portal Asesores
@@ -1568,65 +1598,63 @@ export default function App() {
           <p className="text-indigo-400/80 text-[10px] mt-2 font-bold tracking-widest uppercase">Diseñado por Oscar Saravia &reg;</p>
         </div>
         
-        <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
-          <button onClick={() => setActiveTab('dashboard')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'dashboard' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+        <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent pb-8">
+          <button onClick={() => handleTabChange('dashboard')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'dashboard' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <LayoutDashboard className="w-5 h-5 mr-3 shrink-0" /> Inicio
           </button>
 
           <div className="pt-5 pb-2"><p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Gerencia</p></div>
-          <button onClick={() => { setActiveTab('proyeccion'); setSupervisorDestino('mreyes@celina.com.bo'); }} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'proyeccion' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+          <button onClick={() => { handleTabChange('proyeccion'); setSupervisorDestino('mreyes@celina.com.bo'); }} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'proyeccion' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <BarChart className="w-5 h-5 mr-3 shrink-0" /> Proyección Semanal
           </button>
-          <button onClick={() => setActiveTab('diaria')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'diaria' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+          <button onClick={() => handleTabChange('diaria')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'diaria' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <CalendarDays className="w-5 h-5 mr-3 shrink-0" /> Proyección Diaria
           </button>
-          <button onClick={() => setActiveTab('seguimiento')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'seguimiento' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+          <button onClick={() => handleTabChange('seguimiento')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'seguimiento' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <Target className="w-5 h-5 mr-3 shrink-0" /> Seguimiento de Ventas
           </button>
           
           <div className="pt-5 pb-2"><p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Cotizaciones y Recompras</p></div>
-          <button onClick={() => setActiveTab('amortizacion')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'amortizacion' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+          <button onClick={() => handleTabChange('amortizacion')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'amortizacion' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <Calculator className="w-5 h-5 mr-3 shrink-0" /> Amortización a Capital
           </button>
-          <button onClick={() => setActiveTab('recompra')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'recompra' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+          <button onClick={() => handleTabChange('recompra')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'recompra' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <Repeat className="w-5 h-5 mr-3 shrink-0" /> Recompra
           </button>
-          <button onClick={() => setActiveTab('descuento')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'descuento' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+          <button onClick={() => handleTabChange('descuento')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'descuento' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <Tag className="w-5 h-5 mr-3 shrink-0" /> Descuentos Campañas
           </button>
-          <button onClick={() => setActiveTab('cuota')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'cuota' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+          <button onClick={() => handleTabChange('cuota')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'cuota' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <TrendingUp className="w-5 h-5 mr-3 shrink-0" /> Inc. Cuota Inicial
           </button>
 
           <div className="pt-5 pb-2"><p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Trámites Generales</p></div>
-          <button onClick={() => setActiveTab('llamada')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'llamada' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+          <button onClick={() => handleTabChange('llamada')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'llamada' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <PhoneCall className="w-5 h-5 mr-3 shrink-0" /> Validación Llamada
           </button>
-          <button onClick={() => setActiveTab('fisico')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'fisico' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+          <button onClick={() => handleTabChange('fisico')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'fisico' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <FileText className="w-5 h-5 mr-3 shrink-0" /> Contrato Físico
           </button>
-          <button onClick={() => setActiveTab('reenvio')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'reenvio' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+          <button onClick={() => handleTabChange('reenvio')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'reenvio' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <FileSignature className="w-5 h-5 mr-3 shrink-0" /> Reenvío Firma Digital
           </button>
-          <button onClick={() => setActiveTab('seguro')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'seguro' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+          <button onClick={() => handleTabChange('seguro')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'seguro' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <Shield className="w-5 h-5 mr-3 shrink-0" /> Seguro de Vida
           </button>
 
           <div className="pt-5 pb-2"><p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Recursos Humanos (RRHH)</p></div>
-          <button onClick={() => setActiveTab('renuncia')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'renuncia' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+          <button onClick={() => handleTabChange('renuncia')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'renuncia' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <UserMinus className="w-5 h-5 mr-3 shrink-0" /> Carta de Renuncia
           </button>
-          <button onClick={() => setActiveTab('altaCrm')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'altaCrm' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+          <button onClick={() => handleTabChange('altaCrm')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'altaCrm' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <UserPlus className="w-5 h-5 mr-3 shrink-0" /> Alta Usuarios CRM
           </button>
-          <button onClick={() => setActiveTab('evaluacion')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'evaluacion' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+          <button onClick={() => handleTabChange('evaluacion')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'evaluacion' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <ClipboardCheck className="w-5 h-5 mr-3 shrink-0" /> Evaluación Fin de Mes
           </button>
-          <button onClick={() => setActiveTab('postulante')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'postulante' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+          <button onClick={() => handleTabChange('postulante')} className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'postulante' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <UserCheck className="w-5 h-5 mr-3 shrink-0" /> Postulante Nuevo
           </button>
-
-          <div className="pb-8"></div>
         </nav>
         
         <div className="p-5 border-t border-slate-800/50 bg-slate-950/30 shrink-0">
@@ -1641,7 +1669,7 @@ export default function App() {
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 overflow-auto p-4 md:p-8 lg:p-10 w-full h-screen">
+      <div className="flex-1 overflow-auto p-4 md:p-8 lg:p-10 w-full h-[calc(100vh-72px)] md:h-screen">
         <div className="max-w-[1600px] mx-auto w-full pb-10">
           
           {/* DASHBOARD VIEW */}
