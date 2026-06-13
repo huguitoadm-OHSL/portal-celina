@@ -12,6 +12,10 @@ import CartaRenuncia from './views/CartaRenuncia';
 import AltaCRM from './views/AltaCRM';
 import EvaluacionFinMes from './views/EvaluacionFinMes';
 import PostulanteNuevo from './views/PostulanteNuevo';
+import IncrementoCuota from './views/IncrementoCuota';
+import ReenvioFirma from './views/ReenvioFirma';
+import ValidacionLlamada from './views/ValidacionLlamada';
+import SeguroVida from './views/SeguroVida';
 
 export default function App() {
   // Iniciamos la aplicación mostrando el Dashboard por defecto
@@ -44,6 +48,10 @@ export default function App() {
       case 'altaCrm': return <AltaCRM />;
       case 'evaluacion': return <EvaluacionFinMes />;
       case 'postulante': return <PostulanteNuevo />;
+      case 'cuota': return <IncrementoCuota />;
+      case 'reenvio': return <ReenvioFirma />;
+      case 'llamada': return <ValidacionLlamada />;
+      case 'seguro': return <SeguroVida />;
       
       // Si el usuario hace clic en un botón del menú que aún no hemos migrado, muestra esto:
       default: 
