@@ -99,3 +99,4 @@ export const Sidebar = ({ activeTab, setActiveTab, isOpen, closeSidebar, setSupe
     </>
   );
 };
+
