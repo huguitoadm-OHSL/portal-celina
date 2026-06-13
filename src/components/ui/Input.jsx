@@ -14,3 +14,4 @@ export const Input = ({ label, name, value, onChange, placeholder, type = "text"
     />
   </div>
 );
+
