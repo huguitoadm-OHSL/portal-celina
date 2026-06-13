@@ -8,6 +8,10 @@ import ContratoFisico from './views/ContratoFisico';
 import SimuladorAmortizacion from './views/SimuladorAmortizacion';
 import DescuentosCampanas from './views/DescuentosCampanas';
 import Recompra from './views/Recompra';
+import CartaRenuncia from './views/CartaRenuncia';
+import AltaCRM from './views/AltaCRM';
+import EvaluacionFinMes from './views/EvaluacionFinMes';
+import PostulanteNuevo from './views/PostulanteNuevo';
 
 export default function App() {
   // Iniciamos la aplicación mostrando el Dashboard por defecto
@@ -36,6 +40,10 @@ export default function App() {
       case 'amortizacion': return <SimuladorAmortizacion />;
       case 'descuento': return <DescuentosCampanas />;
       case 'recompra': return <Recompra />;
+      case 'renuncia': return <CartaRenuncia />;
+      case 'altaCrm': return <AltaCRM />;
+      case 'evaluacion': return <EvaluacionFinMes />;
+      case 'postulante': return <PostulanteNuevo />;
       
       // Si el usuario hace clic en un botón del menú que aún no hemos migrado, muestra esto:
       default: 
