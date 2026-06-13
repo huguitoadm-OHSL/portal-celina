@@ -180,3 +180,4 @@ export const ResultCard = ({ title, text, htmlContent, subject, supervisorDestin
     </div>
   );
 };
+
