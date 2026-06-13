@@ -9,13 +9,22 @@ import { generarHtmlAmortizacion } from '../utils/htmlTemplates';
 
 export default function SimuladorAmortizacion() {
   const [formAmortizacion, setFormAmortizacion] = useState({ cliente: '', precioContrato: '', cuotaInicial: '', plazoOriginal: '10', cuotasPagadas: '', montoAmortizacion: '' });
+  const [supervisorDestino, setSupervisorDestino] = useState('ninguno');
+  
   const handleA = (e) => setFormAmortizacion({ ...formAmortizacion, [e.target.name]: e.target.value });
   const calculos = calcularAmortizacion(formAmortizacion);
   
-  // Gráfico de Barras: Original vs Nuevo
-  const costoTotalOriginal = calculos.precioFinalPlazos || 0;
-  const costoTotalNuevo = (calculos.P_actual - calculos.montoNum + (calculos.n_new * calculos.C_pura) + (calculos.cuotasPagadasNum * calculos.C_pura) + calculos.cuotaInicialNum) || 0;
-  const pctAhorro = costoTotalOriginal > 0 ? ((calculos.ahorrado / costoTotalOriginal) * 100) : 0;
+  // Variables matemáticas aseguradas (Blindaje Anti-Errores)
+  const costoTotalOriginal = Number(calculos.precioFinalPlazos) || 0;
+  const pActualNum = Number(calculos.P_actual) || 0;
+  const montoNum = Number(formAmortizacion.montoAmortizacion) || 0;
+  const nNewNum = Number(calculos.n_new) || 0;
+  const cPuraNum = Number(calculos.C_pura) || 0;
+  const cuotasPagadasNum = Number(formAmortizacion.cuotasPagadas) || 0;
+  const cuotaIniNum = Number(formAmortizacion.cuotaInicial) || 0;
+
+  const costoTotalNuevo = (pActualNum - montoNum + (nNewNum * cPuraNum) + (cuotasPagadasNum * cPuraNum) + cuotaIniNum) || 0;
+  const pctAhorro = costoTotalOriginal > 0 ? ((Number(calculos.ahorrado) || 0) / costoTotalOriginal) * 100 : 0;
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
@@ -34,15 +43,14 @@ export default function SimuladorAmortizacion() {
               <label className="block text-sm font-bold text-emerald-800 mb-2">Monto a Amortizar (Abono Extra)</label>
               <div className="flex relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600 font-bold">$</span>
-                <input type="number" name="montoAmortizacion" value={formAmortizacion.montoAmortizacion} onChange={handleA} className="w-full pl-8 pr-4 py-3 border-2 border-emerald-300 rounded-xl focus:ring-4 focus:ring-emerald-500/20 text-lg font-bold text-emerald-900 bg-white" placeholder="Ej. 5000" />
+                <input type="number" name="montoAmortizacion" value={formAmortizacion.montoAmortizacion} onChange={handleA} className="w-full pl-8 pr-4 py-3 border-2 border-emerald-300 rounded-xl focus:ring-4 focus:ring-emerald-500/20 text-lg font-bold text-emerald-900 bg-white outline-none" placeholder="Ej. 5000" />
               </div>
             </div>
           </div>
         </div>
 
         <div className="w-full space-y-6">
-          {/* GRÁFICO VISUAL DE AHORRO PARA EL CLIENTE */}
-          {calculos.ahorrado > 0 && (
+          {(Number(calculos.ahorrado) || 0) > 0 && (
             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-lg">
               <h3 className="text-center font-black text-slate-800 text-lg mb-6 flex items-center justify-center"><ShieldCheck className="w-5 h-5 mr-2 text-emerald-500"/> Impacto de la Inversión</h3>
               <div className="flex items-end justify-center gap-8 h-40 mb-4 px-4">
@@ -59,15 +67,14 @@ export default function SimuladorAmortizacion() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4 mt-6">
-                <div className="bg-emerald-50 p-4 rounded-xl text-center border border-emerald-100"><Clock className="w-6 h-6 mx-auto mb-1 text-emerald-500"/><p className="text-xs text-emerald-600 uppercase font-bold">Tiempo Ahorrado</p><p className="text-xl font-black text-emerald-800">{calculos.tiempoAhorrado} Meses</p></div>
-                <div className="bg-blue-50 p-4 rounded-xl text-center border border-blue-100"><DollarSign className="w-6 h-6 mx-auto mb-1 text-blue-500"/><p className="text-xs text-blue-600 uppercase font-bold">Dinero Ahorrado</p><p className="text-xl font-black text-blue-800">${formatCurrency(calculos.ahorrado)}</p></div>
+                <div className="bg-emerald-50 p-4 rounded-xl text-center border border-emerald-100"><Clock className="w-6 h-6 mx-auto mb-1 text-emerald-500"/><p className="text-xs text-emerald-600 uppercase font-bold">Tiempo Ahorrado</p><p className="text-xl font-black text-emerald-800">{calculos.tiempoAhorrado || 0} Meses</p></div>
+                <div className="bg-blue-50 p-4 rounded-xl text-center border border-blue-100"><DollarSign className="w-6 h-6 mx-auto mb-1 text-blue-500"/><p className="text-xs text-blue-600 uppercase font-bold">Dinero Ahorrado</p><p className="text-xl font-black text-blue-800">${formatCurrency(calculos.ahorrado || 0)}</p></div>
               </div>
             </div>
           )}
-          <ResultCard title="Enviar Simulación" text={generarTextoAmortizacionCelular(formAmortizacion, calculos)} htmlContent={generarHtmlAmortizacion(formAmortizacion, calculos)} subject={`Simulación Amortización a Capital - ${formAmortizacion.cliente}`} supervisorDestino="ninguno@localhost" />
+          <ResultCard title="Enviar Simulación" text={generarTextoAmortizacionCelular(formAmortizacion, calculos)} htmlContent={generarHtmlAmortizacion(formAmortizacion, calculos)} subject={`Simulación Amortización a Capital - ${formAmortizacion.cliente}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} />
         </div>
       </div>
     </div>
   );
 }
-
