@@ -25,3 +25,4 @@ export const formatDiaMes = (fechaIso, sumarDias = 0) => {
   if (!mes) return `Día ${sumarDias + 1}`; 
   return `${dia}-${mes}`;
 };
+
