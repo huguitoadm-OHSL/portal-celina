@@ -63,7 +63,7 @@ const EQUIPOS_ASESORES = {
   "Oscar Saravia": [
     { nombre: "Marisol Urgel Pizarro", colAct: 24384.00, tipo: "Interno", ventas: 1 },
     { nombre: "Carlos Enrique Calderon", colAct: 0, tipo: "Interno", ventas: 0 },
-    { nombre: "Ely Gonzales Garcia", colAct: 7200.00, tipo: "Interno", ventas: 1 },
+    { nombre: "Ely Gonzales Garcia", colAct: 7200, tipo: "Interno", ventas: 1 },
     { nombre: "Rodrigo Rojas Siles", colAct: 0, tipo: "Interno", ventas: 0 },
     { nombre: "Jaime F. Rios Castro", colAct: 7500, tipo: "Interno", ventas: 1 },
     { nombre: "Merly Mendez Hurtado", colAct: 0, tipo: "Interno", ventas: 0 },
