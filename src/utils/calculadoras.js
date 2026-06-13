@@ -68,65 +68,82 @@ export const calcularDescuento = (formDescuento) => {
   return { vc, descuentoTotal, descuentoTexto, nuevoPrecioTotal, nuevoPrecioM2, porcentajeCuota, montoCuotaNum };
 };
 
-// --- CALCULADORA DE AMORTIZACIÓN (SISTEMA FRANCÉS ORIGINAL) ---
-export const calcularAmortizacion = (form) => {
-  const parseNum = (val) => Number(String(val).replace(',', '.')) || 0;
-  
-  const precio = parseNum(form.precioContrato);
-  const enganche = parseNum(form.cuotaInicial);
-  const plazoAnios = parseNum(form.plazoOriginal);
-  const pagadas = parseNum(form.cuotasPagadas);
-  const abono = parseNum(form.montoAmortizacion);
-  const seguro = parseNum(form.seguroMensual);
-  const tasaAnual = parseNum(form.tasaAnual) || 12.1733;
+export const calcularSimulacionAmortizacion = (formAmortizacion) => {
+  const PV = parseFloat(formAmortizacion.precioContrato?.toString().replace(/,/g, '')) || 0;
+  const CI = parseFloat(formAmortizacion.cuotaInicial?.toString().replace(/,/g, '')) || 0;
+  const t = parseFloat(formAmortizacion.plazoOriginal) || 0;
+  const p = parseFloat(formAmortizacion.cuotasPagadas) || 0;
+  const S = parseFloat(formAmortizacion.seguroMensual?.toString().replace(/,/g, '')) || 0;
+  const r_anual = parseFloat(formAmortizacion.tasaAnual?.toString().replace(/,/g, '')) || 0;
+  const A = parseFloat(formAmortizacion.montoAmortizacion?.toString().replace(/,/g, '')) || 0;
 
-  if (precio === 0 || plazoAnios === 0) {
-    return { P: 0, C_pura: 0, n: 0, C_total: 0, precioFinalPlazos: 0, P_actual: 0, cuotasRestantesOrig: 0, saldoNuevo: 0, n_new: 0, tiempoAhorrado: 0, ahorrado: 0 };
-  }
-
-  const P = Math.max(precio - enganche, 0);
-  const n = plazoAnios * 12;
-  const i = (tasaAnual / 100) / 12;
+  const n = t * 12;
+  const r_mensual = r_anual / 100 / 12;
+  const P = Math.max(0, PV - CI);
 
   let C_pura = 0;
-  if (i > 0) {
-    C_pura = P * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
-  } else {
+  if (r_mensual > 0 && n > 0) {
+    C_pura = P * (r_mensual * Math.pow(1 + r_mensual, n)) / (Math.pow(1 + r_mensual, n) - 1);
+  } else if (n > 0) {
     C_pura = P / n;
   }
-
-  const C_total = C_pura + seguro;
-  const precioFinalPlazos = enganche + (C_total * n);
-
+  
+  const C_total = C_pura + S;
+  const precioFinalPlazos = CI + (C_total * n);
+  
   let P_actual = 0;
-  if (i > 0) {
-    P_actual = P * (Math.pow(1 + i, n) - Math.pow(1 + i, pagadas)) / (Math.pow(1 + i, n) - 1);
+  if (r_mensual > 0 && n > 0 && p > 0) {
+    P_actual = P * (Math.pow(1 + r_mensual, n) - Math.pow(1 + r_mensual, p)) / (Math.pow(1 + r_mensual, n) - 1);
+  } else if (n > 0) {
+    P_actual = Math.max(0, P - (C_pura * p));
   } else {
-    P_actual = Math.max(P - (C_pura * pagadas), 0);
+    P_actual = P;
   }
 
-  const cuotasRestantesOrig = Math.max(n - pagadas, 0);
-  const saldoNuevo = Math.max(P_actual - abono, 0);
+  const cuotasRestantesOrig = Math.max(0, n - p);
+  const saldoNuevo = Math.max(0, P_actual - A);
 
   let n_new = 0;
-  if (saldoNuevo > 0 && C_pura > 0) {
-     if (i > 0) {
-         n_new = Math.ceil(-Math.log(1 - (saldoNuevo * i) / C_pura) / Math.log(1 + i));
-     } else {
-         n_new = Math.ceil(saldoNuevo / C_pura);
-     }
+  let error = "";
+  if (r_mensual > 0 && C_pura > 0 && saldoNuevo > 0) {
+    const term = 1 - (saldoNuevo * r_mensual) / C_pura;
+    if (term <= 0) {
+      error = "La amortización no cubre los intereses.";
+      n_new = cuotasRestantesOrig;
+    } else {
+      n_new = -Math.log(term) / Math.log(1 + r_mensual);
+    }
+  } else if (C_pura > 0) {
+    n_new = saldoNuevo / C_pura;
   }
 
-  const tiempoAhorrado = Math.max(cuotasRestantesOrig - n_new, 0);
+  n_new = Math.ceil(n_new - 0.0001); 
+  if(n_new < 0) n_new = 0;
+
+  const tiempoAhorrado = Math.max(0, cuotasRestantesOrig - n_new);
   
-  // Cálculo de Ahorro: (Tiempo ahorrado * Cuota Pura) - Abono + (Tiempo ahorrado * Seguro)
-  const interesAhorrado = (tiempoAhorrado * C_pura) - abono;
-  const seguroAhorrado = tiempoAhorrado * seguro;
-  const ahorrado = Math.max(interesAhorrado + seguroAhorrado, 0);
+  const intsOrig = Math.max(0, (C_pura * cuotasRestantesOrig) - P_actual);
+  const intsNew = Math.max(0, (C_pura * n_new) - saldoNuevo);
+  const ahorrado = Math.max(0, intsOrig - intsNew);
 
   return {
-    P, C_pura, n, C_total, precioFinalPlazos, P_actual, cuotasRestantesOrig, saldoNuevo, n_new, tiempoAhorrado, ahorrado,
-    montoNum: abono
+    P, C_pura, S, C_total, precioFinalPlazos, P_actual, 
+    cuotasRestantesOrig, saldoNuevo, n_new, tiempoAhorrado, ahorrado, n, error
   };
 };
 
+export const calcularBeneficioRecompra = (proyecto) => {
+  const p = String(proyecto).toUpperCase();
+  if (p.includes('MUYURINA')) return 200;
+  if (p.includes('RANCHO NUEVO')) return 50;
+  return 100;
+};
+
+export const obtenerDatosSupervisor = (supervisorDestino, SUPERVISORES) => {
+  const supervisorSeleccionado = SUPERVISORES.find(s => s.correo === supervisorDestino) || SUPERVISORES[0];
+  return {
+    saludo: supervisorSeleccionado.genero === 'F' ? 'Estimada' : 'Estimado',
+    titulo: supervisorSeleccionado.titulo,
+    nombrePila: supervisorSeleccionado.nombre.split(' ')[0] 
+  };
+};
