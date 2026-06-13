@@ -16,3 +16,4 @@ export const MobileHeader = ({ onMenuClick }) => {
     </div>
   );
 };
+
