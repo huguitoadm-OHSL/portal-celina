@@ -148,3 +148,58 @@ export const obtenerDatosSupervisor = (supervisorDestino, SUPERVISORES) => {
   };
 };
 
+
+// --- CALCULADORA DE AMORTIZACIÓN A CAPITAL ---
+export const calcularAmortizacion = (form) => {
+  const precio = Number(form.precioContrato) || 0;
+  const enganche = Number(form.cuotaInicial) || 0;
+  const plazoAnios = Number(form.plazoOriginal) || 0;
+  const pagadas = Number(form.cuotasPagadas) || 0;
+  const abono = Number(form.montoAmortizacion) || 0;
+
+  if (precio === 0 || plazoAnios === 0) {
+    return { error: null, P: 0, C_pura: 0, n: 0, S: 0, C_total: 0, precioFinalPlazos: 0, P_actual: 0, cuotasRestantesOrig: 0, saldoNuevo: 0, n_new: 0, tiempoAhorrado: 0, ahorrado: 0, montoNum: 0, cuotasPagadasNum: 0, cuotaInicialNum: 0 };
+  }
+
+  const P = precio - enganche; // Capital financiado original
+  const n = plazoAnios * 12; // Plazo en meses
+  
+  // Asumimos cuota pura (sin interés) por defecto en terrenos. 
+  // Si Celina maneja un % específico anual, se cambia este valor (ej. 0.07 para 7%)
+  const tasaAnual = 0; 
+  const i = tasaAnual / 12;
+
+  let C_pura = 0;
+  let precioFinalPlazos = precio;
+
+  if (i > 0) {
+    // Fórmula Sistema Francés con interés
+    C_pura = P * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
+    precioFinalPlazos = enganche + (C_pura * n);
+  } else {
+    // Fórmula plana sin interés (Puro Capital)
+    C_pura = P / n;
+  }
+
+  // Situación Actual
+  const P_actual = Math.max(P - (C_pura * pagadas), 0); // Saldo actual antes del abono
+  const cuotasRestantesOrig = Math.max(n - pagadas, 0);
+  
+  // Impacto del Abono (Amortización)
+  const saldoNuevo = Math.max(P_actual - abono, 0); 
+  const n_new = C_pura > 0 ? Math.ceil(saldoNuevo / C_pura) : 0; 
+  const tiempoAhorrado = Math.max(cuotasRestantesOrig - n_new, 0);
+  
+  // Dinero Ahorrado
+  const pagoRestanteOriginal = cuotasRestantesOrig * C_pura;
+  const pagoRestanteNuevo = n_new * C_pura;
+  const ahorrado = Math.max(pagoRestanteOriginal - pagoRestanteNuevo - abono, 0);
+
+  return {
+    P, C_pura, n, S: 0, C_total: C_pura, precioFinalPlazos,
+    P_actual, cuotasRestantesOrig, saldoNuevo, n_new,
+    tiempoAhorrado, ahorrado,
+    montoNum: abono, cuotasPagadasNum: pagadas, cuotaInicialNum: enganche,
+    error: null
+  };
+};
