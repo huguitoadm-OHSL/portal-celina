@@ -404,3 +404,66 @@ export const generarHtmlSeguro = (formSeguro, supervisorData) => {
     <p style="margin-top: 0; font-weight: bold; color: #333333;">${formSeguro.asesor || '[Nombre del Asesor]'}</p>
   </div>`;
 };
+export const generarHtmlDiaria = (formDiaria, supervisorData) => {
+  const { saludo, nombrePila } = supervisorData;
+  let filas = "";
+  let tVisitas = 0, tVentas = 0, tColocacion = 0;
+
+  formDiaria.forEach((a, i) => {
+    tVisitas += Number(a.visita) || 0;
+    tVentas += Number(a.venta) || 0;
+    tColocacion += Number(a.colocacion) || 0;
+    
+    filas += `
+      <tr style="background-color: #ffffff; border-bottom: 1px solid #e2e8f0; color: #334155;">
+        <td style="padding: 8px; text-align: center;">${i + 1}</td>
+        <td style="padding: 8px; font-weight: bold; text-transform: uppercase; font-size: 11px;">${a.nombre}</td>
+        <td style="padding: 8px; text-align: center;">${a.tipo}</td>
+        <td style="padding: 8px; text-align: center;">${a.visita || '0'}</td>
+        <td style="padding: 8px; text-align: center;">${a.venta || '0'}</td>
+        <td style="padding: 8px; text-align: center; font-weight: bold; color: #0f172a;">${formatCurrency(a.colocacion)}</td>
+        <td style="padding: 8px; text-transform: uppercase;">${a.hora || ''}</td>
+        <td style="padding: 8px; text-transform: uppercase;">${a.medio || ''}</td>
+      </tr>
+    `;
+  });
+
+  return `
+  <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 13px; color: #333333; max-width: 900px; line-height: 1.5; text-align: left;">
+    <p style="margin-bottom: 20px;">${obtenerSaludoTiempo()} ${saludo} ${nombrePila},<br><br>Adjunto el reporte de Proyección Diaria del equipo correspondiente al día de hoy:</p>
+    
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; border: 1px solid #002060; font-family: Arial, sans-serif; font-size: 11px;">
+      <thead>
+        <tr style="background-color: #002060; color: #ffffff;">
+          <th style="padding: 10px; border-right: 1px solid #001540;">Nº</th>
+          <th style="padding: 10px; border-right: 1px solid #001540; text-align: left;">Asesor</th>
+          <th style="padding: 10px; border-right: 1px solid #001540;">Tipo</th>
+          <th style="padding: 10px; border-right: 1px solid #001540;">Visitas</th>
+          <th style="padding: 10px; border-right: 1px solid #001540;">Ventas</th>
+          <th style="padding: 10px; border-right: 1px solid #001540;">$us Colocación</th>
+          <th style="padding: 10px; border-right: 1px solid #001540;">Hora/Proyecto</th>
+          <th style="padding: 10px;">Medio</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${filas}
+        <tr style="background-color: #f8fafc; font-weight: bold; border-top: 2px solid #cbd5e1;">
+          <td colspan="3" style="padding: 10px; text-align: right; color: #0f172a;">TOTAL VISITAS</td>
+          <td style="padding: 10px; text-align: center; background-color: #ffffff; color: #0f172a;">${tVisitas}</td>
+          <td colspan="4"></td>
+        </tr>
+        <tr style="background-color: #f8fafc; font-weight: bold; border-top: 1px solid #cbd5e1;">
+          <td colspan="3" style="padding: 10px; text-align: right; color: #0f172a;">TOTAL VENTAS</td>
+          <td style="padding: 10px; text-align: center; background-color: #ffffff; color: #0f172a;">${tVentas}</td>
+          <td colspan="4"></td>
+        </tr>
+        <tr style="background-color: #002060; font-weight: bold; color: #ffffff;">
+          <td colspan="3" style="padding: 12px; text-align: right;">TOTAL DÍA $us.</td>
+          <td style="padding: 12px; text-align: center; font-size: 14px;">$${formatCurrency(tColocacion)}</td>
+          <td colspan="4"></td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top: 25px;">Saludos cordiales.</p>
+  </div>`;
+};
