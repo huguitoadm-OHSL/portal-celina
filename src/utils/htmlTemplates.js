@@ -314,3 +314,93 @@ export const generarHtmlPostulante = (formPostulante) => {
     <p style="margin-top: 0; font-weight: bold; color: #333333;">${formPostulante.asesor || 'Oscar Saravia'}</p>
   </div>`;
 };
+export const generarHtmlCuota = (formCuota, supervisorData) => {
+  const { saludo, titulo } = supervisorData;
+  return `
+  <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+    <p style="margin-bottom: 5px; color: #333333;">${obtenerSaludoTiempo()}</p>
+    <p style="margin-top: 0; margin-bottom: 25px; color: #333333;">${saludo} ${titulo},</p>
+    <p style="margin-bottom: 20px; color: #333333;">Por favor su autorizaci&oacute;n para proceder con la anulaci&oacute;n del contrato actual del cliente <strong>${formCuota.cliente || '[Nombre del Cliente]'}</strong> y realizar un reingreso. El motivo de esta gesti&oacute;n es que el cliente desea incrementar significativamente su cuota inicial para reducir sus pagos mensuales.</p>
+    <p style="margin-bottom: 10px; color: #333333;">A continuaci&oacute;n, detallo los datos de la operaci&oacute;n actual en sistema:</p>
+    <ul style="margin-bottom: 20px; list-style-type: none; padding-left: 0; color: #333333;">
+      <li style="margin-bottom: 5px;">- <strong>Nro. Contrato:</strong> ${formCuota.nroContrato || '[Nro]'}</li>
+      <li style="margin-bottom: 5px;">- <strong>Carnet (CI):</strong> ${formCuota.ci || '[CI]'}</li>
+      <li style="margin-bottom: 5px;">- <strong>Ubicaci&oacute;n:</strong> Proyecto ${formCuota.proyecto} | UV ${formCuota.uv || '[X]'} | MZN ${formCuota.manzano || '[X]'} | LOTE ${formCuota.lote || '[X]'}</li>
+    </ul>
+    <p style="margin-bottom: 5px; color: #333333;"><strong>Motivos del Reingreso / Observaciones:</strong></p>
+    <p style="margin-bottom: 20px; color: #333333;">${formCuota.motivo || '[Detalle el motivo del incremento...]'}</p>
+    <p style="margin-bottom: 25px; color: #333333;">Quedo atento a su aprobaci&oacute;n para proceder.</p>
+    <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
+    <p style="margin-top: 0; font-weight: bold; color: #333333;">${formCuota.asesorVentas || '[Nombre del Asesor]'}</p>
+  </div>`;
+};
+
+export const generarHtmlReenvio = (formReenvio, supervisorData) => {
+  const { saludo, nombrePila } = supervisorData;
+  let filas = "";
+  formReenvio.contratos.forEach(c => {
+    filas += `<tr style="background-color: #ffffff;"><td style="border: 1px solid #333333; padding: 6px 8px; font-weight: bold;"><span style="color: #000000;"><font color="#000000">${c.nroContrato || '---'}</font></span></td><td style="border: 1px solid #333333; padding: 6px 8px;"><span style="color: #000000;"><font color="#000000">${c.cliente || '---'}</font></span></td><td style="border: 1px solid #333333; padding: 6px 8px;"><span style="color: #000000;"><font color="#000000">${c.ci || '---'}</font></span></td><td style="border: 1px solid #333333; padding: 6px 8px;"><span style="color: #000000;"><font color="#000000">UV: ${c.uv || 'SN'} - Mzn: ${c.manzano || '-'} - Lote: ${c.lote || '-'}</font></span></td></tr>`;
+  });
+  const esMultiple = formReenvio.contratos.length > 1;
+  return `
+  <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+    <p style="margin-bottom: 5px; color: #333333;">${obtenerSaludoTiempo()}</p>
+    <p style="margin-top: 0; margin-bottom: 25px; color: #333333;">${saludo} ${nombrePila},</p>
+    <p style="margin-bottom: 20px; color: #333333;">Te escribo para solicitar tu apoyo habilitando nuevamente el env&iacute;o del correo para la firma digital de ${esMultiple ? "los siguientes contratos" : "el siguiente contrato"}. Debido a un error involuntario por parte de ${esMultiple ? "los clientes" : "el cliente"}, el proceso no se pudo completar en la primera instancia.</p>
+    <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; border: 1px solid #333333; font-family: Arial, sans-serif; font-size: 13px; margin-bottom: 25px; width: 100%; text-align: left; background-color: #ffffff;">
+      <thead><tr style="background-color: #f2f2f2;"><th style="border: 1px solid #333333; padding: 6px 8px;"><span style="color: #000000;"><font color="#000000"><b>Nro. Contrato</b></font></span></th><th style="border: 1px solid #333333; padding: 6px 8px;"><span style="color: #000000;"><font color="#000000"><b>Cliente</b></font></span></th><th style="border: 1px solid #333333; padding: 6px 8px;"><span style="color: #000000;"><font color="#000000"><b>Carnet (CI)</b></font></span></th><th style="border: 1px solid #333333; padding: 6px 8px;"><span style="color: #000000;"><font color="#000000"><b>Ubicaci&oacute;n</b></font></span></th></tr></thead>
+      <tbody>${filas}</tbody>
+    </table>
+    <p style="margin-bottom: 25px; color: #333333;">Quedo atento a tu confirmaci&oacute;n para proceder con la regularizaci&oacute;n.</p>
+    <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
+    <p style="margin-top: 0; font-weight: bold; color: #333333;">${formReenvio.asesor || '[Nombre del Asesor]'}</p>
+  </div>`;
+};
+
+export const generarHtmlLlamada = (formLlamada) => {
+  return `
+  <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+    <p style="margin-bottom: 5px; color: #333333;">${obtenerSaludoTiempo()}</p>
+    <p style="margin-top: 0; margin-bottom: 25px; color: #333333;">Estimada Olivia,</p>
+    <p style="margin-bottom: 20px; color: #333333;">Por favor su ayuda con la validaci&oacute;n de llamada de este cliente referido, el cliente menciona que tendr&aacute; tiempo de contestar hoy a las <strong>${formLlamada.horaLlamada || '[HORA]'}</strong>, por favor pido la ayuda de tu equipo para que la puedan llamar a esa hora:</p>
+    
+    <p style="margin-bottom: 5px; color: #555555;">Cliente referido:</p>
+    <p style="margin-top: 0; margin-bottom: 15px; font-weight: bold; font-size: 15px; color: #000000;">${formLlamada.nombreReferido || '[NOMBRE REFERIDO]'} - Contrato: ${formLlamada.contratoReferido || '[CONTRATO]'} - Celular: ${formLlamada.celularReferido || '[CELULAR]'}</p>
+    
+    <p style="margin-bottom: 5px; color: #555555;">Cliente beneficiaria:</p>
+    <p style="margin-top: 0; margin-bottom: 25px; font-weight: bold; font-size: 15px; color: #000000;">${formLlamada.nombreBeneficiario || '[NOMBRE BENEFICIARIA]'}, ${formLlamada.ciBeneficiario || '[CI BENEFICIARIA]'}</p>
+    
+    <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
+    <p style="margin-top: 0; font-weight: bold; color: #333333;">${formLlamada.asesor || '[Nombre del Asesor]'}</p>
+  </div>`;
+};
+
+export const generarHtmlSeguro = (formSeguro, supervisorData) => {
+  const { saludo, nombrePila } = supervisorData;
+  const cant = formSeguro.beneficiarios.length;
+  let filas = "";
+  formSeguro.beneficiarios.forEach(b => {
+    filas += `<tr style="background-color: #ffffff;"><td style="border: 1px solid #cbd5e1; padding: 8px 12px; font-weight: bold;"><span style="color: #000000;"><font color="#000000">${b.nombre || '---'}</font></span></td><td style="border: 1px solid #cbd5e1; padding: 8px 12px;"><span style="color: #000000;"><font color="#000000">${b.parentesco || '---'}</font></span></td><td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center;"><span style="color: #000000;"><font color="#000000">${b.porcentaje ? b.porcentaje + '%' : '---'}</font></span></td><td style="border: 1px solid #cbd5e1; padding: 8px 12px;"><span style="color: #000000;"><font color="#000000">${b.ci || '---'}</font></span></td></tr>`;
+  });
+
+  return `
+  <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+    <p style="margin-bottom: 5px; color: #333333;">${obtenerSaludoTiempo()}</p>
+    <p style="margin-top: 0; margin-bottom: 20px; color: #333333;">${saludo} ${nombrePila},</p>
+    <p style="margin-bottom: 20px; color: #333333;">Por favor tu ayuda adicionando a estos ${cant} beneficiarios al seguro de vida de esta venta, detallo todo a continuaci&oacute;n:</p>
+    
+    <p style="margin-bottom: 5px; color: #333333;"><strong>Cliente(s):</strong> ${formSeguro.cliente || '[Nombre del Cliente]'}</p>
+    <p style="margin-bottom: 5px; margin-top: 0; color: #333333;"><strong>Nro. Contrato:</strong> ${formSeguro.nroContrato || '[Nro]'}</p>
+    <p style="margin-bottom: 20px; margin-top: 0; color: #333333;"><strong>UV:</strong> ${formSeguro.uv || 'SN'} &nbsp;&nbsp;&nbsp;<strong>MZN:</strong> ${formSeguro.manzano || 'SN'} &nbsp;&nbsp;&nbsp;<strong>LOTE:</strong> ${formSeguro.lote || 'SN'}</p>
+
+    <p style="margin-bottom: 10px; font-weight: bold; color: #333333;">Beneficiarios del seguro ${cant} personas:</p>
+    <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; border: 1px solid #cbd5e1; font-family: Arial, sans-serif; font-size: 13px; margin-bottom: 25px; width: 100%; text-align: left; background-color: #ffffff;">
+      <thead><tr style="background-color: #f8fafc;"><th style="border: 1px solid #cbd5e1; padding: 8px 12px;"><span style="color: #0f172a;"><font color="#0f172a"><b>NOMBRE</b></font></span></th><th style="border: 1px solid #cbd5e1; padding: 8px 12px;"><span style="color: #0f172a;"><font color="#0f172a"><b>PARENTESCO</b></font></span></th><th style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center;"><span style="color: #0f172a;"><font color="#0f172a"><b>%</b></font></span></th><th style="border: 1px solid #cbd5e1; padding: 8px 12px;"><span style="color: #0f172a;"><font color="#0f172a"><b>CI.</b></font></span></th></tr></thead>
+      <tbody>${filas}</tbody>
+    </table>
+    
+    <p style="margin-bottom: 25px; color: #333333;">Much&iacute;simas gracias de antemano.</p>
+    <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
+    <p style="margin-top: 0; font-weight: bold; color: #333333;">${formSeguro.asesor || '[Nombre del Asesor]'}</p>
+  </div>`;
+};
