@@ -467,3 +467,134 @@ export const generarHtmlDiaria = (formDiaria, supervisorData) => {
     <p style="margin-top: 25px;">Saludos cordiales.</p>
   </div>`;
 };
+export const generarHtmlProyeccion = (formProyeccion, supervisorData) => {
+  const { saludo, nombrePila } = supervisorData;
+  let filasAsesoresHtml = "";
+  
+  let sumColAct = 0;
+  let sumProyA = [0,0,0,0,0];
+  let sumTotalProySemanal = 0;
+  let sumTotalColMes = 0;
+
+  const formatCurr = (val) => new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(val) || 0);
+  const fVacio = (val) => val === 0 ? '-' : formatCurr(val);
+  const fDias = (val) => val === 0 ? '-' : formatCurr(val);
+  
+  const NOMBRES_PROYECTOS_PROYECCION = ["Muyurina", "Renacer", "Santa Fe", "Rancho Nuevo", "Jardines"];
+
+  const formatDiaMes = (fechaIso, sumarDias = 0) => {
+    if (!fechaIso) return `Día ${sumarDias + 1}`;
+    const partes = String(fechaIso).split('-');
+    if (partes.length !== 3) return `Día ${sumarDias + 1}`;
+    const date = new Date(Date.UTC(partes[0], partes[1] - 1, partes[2])); 
+    date.setDate(date.getDate() + sumarDias);
+    const dia = date.getDate();
+    const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    const mes = meses[date.getMonth()];
+    if (!mes) return `Día ${sumarDias + 1}`; 
+    return `${dia}-${mes}`;
+  };
+
+  if (formProyeccion && Array.isArray(formProyeccion.asesores)) {
+    formProyeccion.asesores.forEach((asesor, i) => {
+      const sumDias = Array.isArray(asesor.dias) ? asesor.dias.reduce((a, b) => a + (Number(b) || 0), 0) : 0;
+      const colActNum = Number(asesor.colAct) || 0;
+      const totalColMes = colActNum + sumDias;
+      
+      sumColAct += colActNum;
+      if (Array.isArray(asesor.proy)) {
+        asesor.proy.forEach((val, idx) => {
+          if (sumProyA[idx] !== undefined) sumProyA[idx] += (Number(val) || 0);
+        });
+      }
+      sumTotalProySemanal += sumDias;
+      sumTotalColMes += totalColMes;
+
+      const isProductivo = totalColMes >= 25000;
+      const rowBgStyle = isProductivo ? 'background-color: #ecfdf5;' : 'background-color: #ffffff;';
+      const textColor = isProductivo ? '#059669' : '#0f172a';
+
+      filasAsesoresHtml += `
+        <tr style="${rowBgStyle}">
+          <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center; color: #64748b;">${i+1}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: left; color: #0f172a; font-weight: bold; white-space: nowrap;">${String(asesor.nombre || '')}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: right; color: #334155;">${fVacio(colActNum)}</td>
+          ${Array.isArray(asesor.dias) ? asesor.dias.map(d => `<td style="padding: 8px; border-bottom: 1px solid #e2e8f0; border-left: 1px solid #f1f5f9; text-align: center; color: #475569;">${fDias(Number(d)||0)}</td>`).join('') : ''}
+          ${Array.isArray(asesor.proy) ? asesor.proy.map(p => `<td style="padding: 8px; border-bottom: 1px solid #e2e8f0; border-left: 1px solid #f0f9ff; text-align: center; color: #0369a1; font-weight: bold;">${fDias(Number(p)||0)}</td>`).join('') : ''}
+          <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; border-left: 1px solid #e2e8f0; text-align: right; color: #334155; font-weight: bold;">${fVacio(sumDias)}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; border-left: 1px solid #e2e8f0; text-align: right; font-weight: bold; color: ${textColor};">${fVacio(totalColMes)}${isProductivo ? ' &#10004;' : ''}</td>
+        </tr>
+      `;
+    });
+  }
+
+  const mesStr = new Date(formProyeccion.fechaInicio || new Date()).toLocaleString('es-ES', { month: 'long' });
+  const capMes = mesStr.charAt(0).toUpperCase() + mesStr.slice(1);
+  const objMensual = Number(formProyeccion.objetivoMensual) || 0;
+  const porcentajeAvance = objMensual ? (sumColAct / objMensual) * 100 : 0;
+  const porcentajeFin = objMensual ? (sumTotalColMes / objMensual) * 100 : 0;
+
+  return `
+  <div style="background-color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 14px; color: #334155; line-height: 1.6; max-width: 1200px; text-align: left;">
+    <p style="color: #0f172a; font-size: 16px;"><b>Buenos d&iacute;as ${saludo} ${nombrePila},</b></p>
+    <p style="color: #334155;">Adjunto el consolidado de proyecci&oacute;n de ventas semanal del equipo. A continuaci&oacute;n el detalle actualizado:</p>
+    
+    <div style="overflow-x: auto; width: 100%; max-width: 100%;">
+    <table border="0" cellpadding="8" cellspacing="0" style="border-collapse: collapse; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 12px; margin-top: 15px; width: 100%; min-width: 900px; text-align: left; background-color: #ffffff; border: 1px solid #e2e8f0;">
+      <thead>
+        <tr>
+          <th colspan="3" style="background-color: #f8fafc; border-bottom: 2px solid #cbd5e1; padding: 10px; text-align: left; color: #0f172a; font-size: 13px;"><b>Equipo: ${String(formProyeccion.equipo || '')}</b></th>
+          <th colspan="7" style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1; border-left: 1px solid #e2e8f0; padding: 10px; text-align: center; color: #334155; text-transform: uppercase; font-size: 11px; letter-spacing: 1px;"><b>Ventas Diarias</b></th>
+          <th colspan="5" style="background-color: #eff6ff; border-bottom: 2px solid #bae6fd; border-left: 1px solid #e2e8f0; padding: 10px; text-align: center; color: #0369a1; text-transform: uppercase; font-size: 11px; letter-spacing: 1px;"><b>Proyectos</b></th>
+          <th rowspan="2" style="background-color: #f8fafc; border-bottom: 2px solid #cbd5e1; border-left: 1px solid #e2e8f0; padding: 10px; text-align: right; color: #334155; vertical-align: bottom;"><b>Total<br>Proy. Semanal</b></th>
+          <th rowspan="2" style="background-color: #f0fdf4; border-bottom: 2px solid #6ee7b7; border-left: 1px solid #e2e8f0; padding: 10px; text-align: right; color: #065f46; vertical-align: bottom;"><b>Cierre Mes<br>(Meta $25k)</b></th>
+        </tr>
+        <tr>
+          <th style="background-color: #f8fafc; border-bottom: 2px solid #cbd5e1; padding: 8px; color: #64748b; width: 30px; text-align: center;">#</th>
+          <th style="background-color: #f8fafc; border-bottom: 2px solid #cbd5e1; padding: 8px; text-align: left; color: #475569; white-space: nowrap;"><b>Asesor</b></th>
+          <th style="background-color: #f8fafc; border-bottom: 2px solid #cbd5e1; padding: 8px; text-align: right; color: #475569; white-space: nowrap;"><b>Coloc. Actual</b></th>
+          ${[0,1,2,3,4,5,6].map(d => `<th style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1; border-left: 1px solid #e2e8f0; padding: 8px; text-align: center; color: #64748b; white-space: nowrap;">${formatDiaMes(formProyeccion.fechaInicio, d)}</th>`).join('')}
+          ${NOMBRES_PROYECTOS_PROYECCION.map(p => `<th style="background-color: #eff6ff; border-bottom: 2px solid #bae6fd; border-left: 1px solid #e2e8f0; padding: 8px; text-align: center; color: #0284c7; white-space: nowrap;">${String(p)}</th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>
+        ${filasAsesoresHtml}
+        <tr style="background-color: #f8fafc;">
+          <td colspan="3" style="padding: 10px 8px; text-align: right; color: #0f172a; border-top: 2px solid #cbd5e1;"><b>TOTALES GLOBALES</b></td>
+          <td colspan="7" style="padding: 10px 8px; border-top: 2px solid #cbd5e1;"></td>
+          ${sumProyA.map(p => `<td style="padding: 10px 8px; text-align: center; color: #0284c7; border-top: 2px solid #bae6fd; font-weight: bold;">${p === 0 ? '-' : p}</td>`).join('')}
+          <td style="padding: 10px 8px; text-align: right; color: #0f172a; border-top: 2px solid #cbd5e1;"><b>${formatCurr(sumTotalProySemanal)}</b></td>
+          <td style="padding: 10px 8px; text-align: right; color: #059669; border-top: 2px solid #6ee7b7; background-color: #d1fae5; font-size: 14px;"><b>$${formatCurr(sumTotalColMes)}</b></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <table border="0" cellpadding="0" cellspacing="0" style="margin-top: 25px; width: 100%; max-width: 450px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
+      <tr>
+        <td colspan="2" style="background-color: #0f172a; color: #ffffff; padding: 12px 16px; font-size: 14px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">
+          <span style="color: #ffffff;"><font color="#ffffff">Resumen General - ${capMes}</font></span>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 12px 16px; color: #475569; font-size: 13px; border-bottom: 1px solid #f1f5f9;"><b>Objetivo del Mes</b></td>
+        <td style="padding: 12px 16px; text-align: right; color: #0f172a; font-size: 14px; font-weight: bold; border-bottom: 1px solid #f1f5f9;">$${formatCurr(objMensual)}</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px 16px; color: #475569; font-size: 13px; border-bottom: 1px solid #f1f5f9;"><b>Colocaci&oacute;n Actual</b></td>
+        <td style="padding: 12px 16px; text-align: right; border-bottom: 1px solid #f1f5f9;">
+          <span style="color: #0f172a; font-size: 14px; font-weight: bold;">$${formatCurr(sumColAct)}</span>
+          <span style="display: inline-block; background-color: #f1f5f9; color: #334155; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 8px; font-weight: bold;">${formatCurr(porcentajeAvance)}%</span>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 14px 16px; color: #0f172a; font-size: 14px;"><b>Proyecci&oacute;n Cierre de Mes</b></td>
+        <td style="padding: 14px 16px; text-align: right;">
+          <span style="color: #059669; font-size: 16px; font-weight: bold;">$${formatCurr(sumTotalColMes)}</span>
+          <span style="display: inline-block; background-color: #d1fae5; color: #065f46; padding: 3px 8px; border-radius: 4px; font-size: 12px; margin-left: 8px; font-weight: bold;">${formatCurr(porcentajeFin)}%</span>
+        </td>
+      </tr>
+    </table>
+    <p style="margin-top: 25px; margin-bottom: 2px; color: #475569;">Saludos cordiales.</p>
+  </div>`;
+};
