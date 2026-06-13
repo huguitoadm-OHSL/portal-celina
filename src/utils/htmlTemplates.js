@@ -250,3 +250,67 @@ export const generarHtmlRecompra = (formRecompra, supervisorData, beneficio) => 
     <p style="margin-top: 0; font-weight: bold; color: #333333;">${formRecompra.asesor || '[Nombre del Asesor]'}</p>
   </div>`;
 };
+export const generarHtmlRenuncia = (formRenuncia) => {
+  return `
+  <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+    <p style="margin-bottom: 20px; color: #333333;">${obtenerSaludoTiempo()} estimado Ulrich,</p>
+    <p style="margin-bottom: 20px; color: #333333;">Por medio del presente, te hago entrega formal de la carta de renuncia de la Sra./Sr. <strong>${formRenuncia.nombre || '[Nombre]'}</strong>, quien se desempe&ntilde;aba como <strong>${formRenuncia.cargo || 'Asesor de Ventas'}</strong> desde el pasado ${formRenuncia.fechaIngreso || '[Fecha]'}.</p>
+    <p style="margin-bottom: 20px; color: #333333;">En su nota, con fecha ${formRenuncia.fechaRenuncia || '[Fecha]'}, la/el asesor/a comunica que su retiro se debe a ${formRenuncia.motivo || '[motivos...]'}. Adjunto el documento escaneado para que se proceda con el tr&aacute;mite correspondiente en el departamento de Recursos Humanos.</p>
+    <p style="margin-bottom: 20px; color: #333333;">Quedo atento a cualquier requerimiento adicional para cerrar este proceso.</p>
+    <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
+    <p style="margin-top: 0; font-weight: bold; color: #333333;">${formRenuncia.asesor || 'Oscar Saravia'}</p>
+  </div>`;
+};
+
+export const generarHtmlAltaCRM = (formAltaCRM) => {
+  return `
+  <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+    <p style="margin-bottom: 5px; color: #333333;">${obtenerSaludoTiempo()}</p>
+    <p style="margin-top: 0; margin-bottom: 20px; color: #333333;">Estimado Ulrich,</p>
+    <p style="margin-bottom: 20px; color: #333333;">Por medio de la presente, solicito por favor la gesti&oacute;n para la creaci&oacute;n del usuario de acceso a los sistemas <strong>CRM y CESI</strong> para el nuevo asesor comercial que se est&aacute; integrando a mi equipo.</p>
+    <p style="margin-bottom: 15px; color: #333333;">A continuaci&oacute;n, detallo los datos personales requeridos:</p>
+    <ul style="margin-bottom: 20px; list-style-type: none; padding-left: 0; color: #333333;">
+      <li style="margin-bottom: 5px;">Nombre: ${formAltaCRM.nombre || '---'}</li>
+      <li style="margin-bottom: 5px;">Apellido Paterno: ${formAltaCRM.apPaterno || '---'}</li>
+      <li style="margin-bottom: 5px;">Apellido Materno: ${formAltaCRM.apMaterno || '---'}</li>
+      <li style="margin-bottom: 5px;">Carnet de Identidad: ${formAltaCRM.ci || '---'}</li>
+      <li style="margin-bottom: 5px;">Fecha de Nacimiento: ${formAltaCRM.fechaNacimiento || '---'}</li>
+      <li style="margin-bottom: 5px;">Correo Electr&oacute;nico: ${formAltaCRM.correo || '---'}</li>
+    </ul>
+    <p style="margin-bottom: 5px; color: #333333;">Quedo atento a la confirmaci&oacute;n de las credenciales para poder facilitarle el acceso.</p>
+    <p style="margin-bottom: 20px; color: #333333;">De antemano, muchas gracias por tu colaboraci&oacute;n.</p>
+    <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
+    <p style="margin-top: 0; font-weight: bold; color: #333333;">${formAltaCRM.asesor || 'Oscar Saravia'}</p>
+  </div>`;
+};
+
+export const generarHtmlEvaluacion = (formEvaluacion) => {
+  return `
+  <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+    <p style="margin-bottom: 5px; color: #333333;">${obtenerSaludoTiempo()}.</p>
+    <p style="margin-top: 0; margin-bottom: 20px; color: #333333;">Estimado Ulrich,</p>
+    <p style="margin-bottom: 20px; color: #333333;">En respuesta a tu correo, adjunto el formulario de evaluaci&oacute;n de desempe&ntilde;o debidamente completado del asesor de la sucursal Montero que acaba de finalizar su programa de aprendizaje.</p>
+    <p style="margin-bottom: 10px; color: #333333;"><strong>1. ${formEvaluacion.nombre || '[Nombre Completo]'}</strong></p>
+    <ul style="margin-bottom: 20px; padding-left: 20px; color: #333333;">
+      <li style="margin-bottom: 10px;"><strong>Punteo Total:</strong> ${formEvaluacion.punteo || '0'} (${formEvaluacion.calificacion || 'Muy Bueno'})</li>
+      <li style="margin-bottom: 10px;"><strong>Resultados:</strong> ${formEvaluacion.lotes || '0'} lotes vendidos ($${formEvaluacion.monto || '0'}), ${formEvaluacion.leads || '0'} leads y ${formEvaluacion.visitas || '0'} visitas.</li>
+      <li style="margin-bottom: 10px;"><strong>Observaciones y recomendaci&oacute;n:</strong> ${formEvaluacion.observaciones || '[Texto...]'}</li>
+    </ul>
+    <p style="margin-bottom: 20px; color: #333333;">Quedo a su disposici&oacute;n ante cualquier consulta.</p>
+    <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
+    <p style="margin-top: 0; font-weight: bold; color: #333333;">${formEvaluacion.asesor || 'Oscar Saravia'}</p>
+  </div>`;
+};
+
+export const generarHtmlPostulante = (formPostulante) => {
+  return `
+  <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+    <p style="margin-bottom: 5px; color: #333333;">${obtenerSaludoTiempo()}</p>
+    <p style="margin-top: 0; margin-bottom: 25px; color: #333333;">Estimado Ulrich,</p>
+    <p style="margin-bottom: 20px; color: #333333;">Te adjunto el formulario de entrevista de <strong>${formPostulante.nombre || '[Nombre]'}</strong> para el puesto de Asesor de Ventas. &Eacute;l llega a nosotros como referido de la asesora ${formPostulante.referidor || '[Nombre]'}.</p>
+    <p style="margin-bottom: 20px; color: #333333;">Despu&eacute;s de realizarle la entrevista y evaluar su perfil, mi recomendaci&oacute;n es que proceda a la etapa de capacitaci&oacute;n para que se integre a la M&aacute;quina de Ventas en Montero.</p>
+    <p style="margin-bottom: 20px; color: #333333;">En el documento adjunto podr&aacute;s ver el detalle completo de su experiencia, evaluaci&oacute;n de competencias y el role play.</p>
+    <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
+    <p style="margin-top: 0; font-weight: bold; color: #333333;">${formPostulante.asesor || 'Oscar Saravia'}</p>
+  </div>`;
+};
