@@ -129,3 +129,4 @@ export const calcularAmortizacion = (form) => {
     montoNum: abono
   };
 };
+
