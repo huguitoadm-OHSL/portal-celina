@@ -13,3 +13,4 @@ export const TextArea = ({ label, name, value, onChange, placeholder }) => (
     />
   </div>
 );
+
