@@ -7,6 +7,7 @@ import Dashboard from './views/Dashboard';
 import ContratoFisico from './views/ContratoFisico';
 import SimuladorAmortizacion from './views/SimuladorAmortizacion';
 import DescuentosCampanas from './views/DescuentosCampanas';
+import Recompra from './views/Recompra';
 
 export default function App() {
   // Iniciamos la aplicación mostrando el Dashboard por defecto
@@ -34,6 +35,7 @@ export default function App() {
       case 'fisico': return <ContratoFisico />;
       case 'amortizacion': return <SimuladorAmortizacion />;
       case 'descuento': return <DescuentosCampanas />;
+      case 'recompra': return <Recompra />;
       
       // Si el usuario hace clic en un botón del menú que aún no hemos migrado, muestra esto:
       default: 
