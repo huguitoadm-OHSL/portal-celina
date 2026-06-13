@@ -115,3 +115,21 @@ export const generarTextoProyeccionCelular = (formProyeccion, supervisorData) =>
 
   return texto;
 };
+
+export const generarTextoDiariaCelular = (formDiaria, supervisorData) => {
+  const { saludo, nombrePila } = supervisorData;
+  let texto = `👋 ${obtenerSaludoTiempo()}\n${saludo} ${nombrePila},\n\nAdjunto el reporte de Proyección Diaria del equipo:\n\n`;
+  let tVisitas = 0, tVentas = 0, tColocacion = 0;
+  
+  formDiaria.forEach((a, i) => {
+    if (a.visita || a.venta || a.colocacion) {
+      texto += `*${i+1}. ${a.nombre}*\nVisitas: ${a.visita||0} | Ventas: ${a.venta||0} | $: ${formatCurrency(a.colocacion)}\n\n`;
+    }
+    tVisitas += Number(a.visita)||0;
+    tVentas += Number(a.venta)||0;
+    tColocacion += Number(a.colocacion)||0;
+  });
+  
+  texto += `*📊 TOTALES DEL DÍA:*\n📍 Visitas: ${tVisitas}\n🤝 Ventas: ${tVentas}\n💰 Colocación: $${formatCurrency(tColocacion)}\n\nSaludos cordiales.`;
+  return texto;
+};
