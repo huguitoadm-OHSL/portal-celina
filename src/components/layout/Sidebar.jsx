@@ -1,102 +1,124 @@
 import React from 'react';
 import { 
-  LayoutDashboard, BarChart, CalendarDays, Target, Calculator, Repeat, Tag, 
-  TrendingUp, PhoneCall, FileText, FileSignature, Shield, UserMinus, UserPlus, 
-  ClipboardCheck, UserCheck, Building2, X 
+  LayoutDashboard, Calendar, CalendarDays, TrendingUp, 
+  Calculator, RefreshCcw, Tag, ArrowUpCircle, 
+  PhoneCall, FileText, Send, ShieldCheck, 
+  UserMinus, UserPlus, ClipboardCheck, Users, X 
 } from 'lucide-react';
 
-export const Sidebar = ({ activeTab, setActiveTab, isOpen, closeSidebar, setSupervisorDestino }) => {
-  
-  const handleTabChange = (tab) => {
-    setActiveTab(tab);
-    closeSidebar();
-  };
-
-  // Sub-componente para no repetir el código de los botones
-  const NavItem = ({ id, icon: Icon, label, onClickAction }) => {
-    const isActive = activeTab === id;
-    return (
-      <button 
-        onClick={onClickAction || (() => handleTabChange(id))} 
-        className={`w-full flex items-center px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${isActive ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
-      >
-        <Icon className="w-5 h-5 mr-3 shrink-0" /> {label}
-      </button>
-    );
-  };
-
-  const NavSection = ({ title }) => (
-    <div className="pt-5 pb-2">
-      <p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">{title}</p>
-    </div>
-  );
+export function Sidebar({ activeTab, setActiveTab, isOpen, closeSidebar }) {
+  const menuGroups = [
+    {
+      title: 'GERENCIA',
+      items: [
+        { id: 'dashboard', label: 'Inicio', icon: <LayoutDashboard size={18} /> },
+        { id: 'proyeccion', label: 'Proyección Semanal', icon: <Calendar size={18} /> },
+        { id: 'diaria', label: 'Proyección Diaria', icon: <CalendarDays size={18} /> },
+        { id: 'seguimiento', label: 'Seguimiento de Ventas', icon: <TrendingUp size={18} /> },
+      ]
+    },
+    {
+      title: 'COTIZACIONES Y RECOMPRAS',
+      items: [
+        { id: 'amortizacion', label: 'Amortización a Capital', icon: <Calculator size={18} /> },
+        { id: 'recompra', label: 'Recompra', icon: <RefreshCcw size={18} /> },
+        { id: 'descuento', label: 'Descuentos Campañas', icon: <Tag size={18} /> },
+        { id: 'cuota', label: 'Inc. Cuota Inicial', icon: <ArrowUpCircle size={18} /> },
+      ]
+    },
+    {
+      title: 'TRÁMITES GENERALES',
+      items: [
+        { id: 'llamada', label: 'Validación Llamada', icon: <PhoneCall size={18} /> },
+        { id: 'fisico', label: 'Contrato Físico', icon: <FileText size={18} /> },
+        { id: 'reenvio', label: 'Reenvío Firma', icon: <Send size={18} /> },
+        { id: 'seguro', label: 'Seguro de Vida', icon: <ShieldCheck size={18} /> },
+      ]
+    },
+    {
+      title: 'RECURSOS HUMANOS (RRHH)',
+      items: [
+        { id: 'renuncia', label: 'Carta de Renuncia', icon: <UserMinus size={18} /> },
+        { id: 'altaCrm', label: 'Alta Usuarios CRM', icon: <UserPlus size={18} /> },
+        { id: 'evaluacion', label: 'Evaluación Fin de Mes', icon: <ClipboardCheck size={18} /> },
+        { id: 'postulante', label: 'Postulante Nuevo', icon: <Users size={18} /> },
+      ]
+    }
+  ];
 
   return (
     <>
-      {/* OVERLAY PARA MÓVIL */}
+      {/* Fondo oscuro para celulares */}
       {isOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 md:hidden" onClick={closeSidebar} />
+        <div className="fixed inset-0 bg-slate-900/50 z-40 md:hidden" onClick={closeSidebar}></div>
       )}
 
-      {/* MENÚ LATERAL */}
-      <div className={`fixed inset-y-0 left-0 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 transition-transform duration-300 ease-in-out z-50 w-72 bg-gradient-to-b from-slate-950 via-slate-900 to-indigo-950 text-white flex flex-col shadow-2xl shrink-0 border-r border-slate-800/50 h-screen overflow-hidden`}>
+      {/* Contenedor Principal del Sidebar */}
+      <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#0f172a] text-slate-300 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 flex flex-col shadow-2xl ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         
-        <button className="md:hidden absolute top-6 right-5 p-1 rounded-md text-slate-400 hover:text-white hover:bg-white/10" onClick={closeSidebar}>
-          <X className="w-5 h-5"/>
-        </button>
-
-        <div className="p-7 shrink-0 pr-12 md:pr-7">
-          <h1 className="text-2xl font-extrabold tracking-tight flex items-center text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.8)]">
-            <Building2 className="w-7 h-7 mr-2 text-white" />
-            Portal Asesores
-          </h1>
-          <p className="text-slate-400 text-xs mt-1.5 font-medium tracking-wide">Herramientas de Gestión</p>
-          <p className="text-indigo-400/80 text-[10px] mt-2 font-bold tracking-widest uppercase">Diseñado por Oscar Saravia &reg;</p>
+        {/* Cabecera / Título */}
+        <div className="p-6 border-b border-slate-800 flex justify-between items-center shrink-0">
+          <div>
+            <h1 className="text-xl font-black text-white tracking-tight flex items-center">
+              <LayoutDashboard className="w-6 h-6 mr-2 text-blue-500" />
+              Portal Asesores
+            </h1>
+            <p className="text-[10px] uppercase tracking-widest text-slate-500 mt-1 font-bold">Herramientas de Gestión</p>
+            <p className="text-[9px] text-blue-500 mt-2 font-semibold">DISEÑADO POR OSCAR SARAVIA &reg;</p>
+          </div>
+          <button className="md:hidden text-slate-400 hover:text-white" onClick={closeSidebar}>
+            <X size={24} />
+          </button>
         </div>
-        
-        <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent pb-8">
-          <NavItem id="dashboard" icon={LayoutDashboard} label="Inicio" />
 
-          <NavSection title="Gerencia" />
-          <NavItem 
-            id="proyeccion" 
-            icon={BarChart} 
-            label="Proyección Semanal" 
-            onClickAction={() => { handleTabChange('proyeccion'); setSupervisorDestino('mreyes@celina.com.bo'); }} 
-          />
-          <NavItem id="diaria" icon={CalendarDays} label="Proyección Diaria" />
-          <NavItem id="seguimiento" icon={Target} label="Seguimiento de Ventas" />
-          
-          <NavSection title="Cotizaciones y Recompras" />
-          <NavItem id="amortizacion" icon={Calculator} label="Amortización a Capital" />
-          <NavItem id="recompra" icon={Repeat} label="Recompra" />
-          <NavItem id="descuento" icon={Tag} label="Descuentos Campañas" />
-          <NavItem id="cuota" icon={TrendingUp} label="Inc. Cuota Inicial" />
+        {/* Opciones del Menú (CON BOTONES, NO ENLACES) */}
+        <div className="flex-1 overflow-y-auto py-4 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+          {menuGroups.map((group, idx) => (
+            <div key={idx} className="mb-6">
+              <h3 className="px-6 text-[10px] font-black uppercase text-slate-500 tracking-wider mb-3">
+                {group.title}
+              </h3>
+              <ul className="space-y-0.5">
+                {group.items.map(item => (
+                  <li key={item.id}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        if (window.innerWidth < 768) closeSidebar();
+                      }}
+                      className={`w-full flex items-center px-6 py-3 text-sm font-semibold transition-all duration-200 outline-none ${
+                        activeTab === item.id 
+                          ? 'bg-blue-600 text-white border-l-4 border-blue-400' 
+                          : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200 border-l-4 border-transparent'
+                      }`}
+                    >
+                      <span className={`${activeTab === item.id ? 'text-white' : 'text-slate-500'} mr-3`}>
+                        {item.icon}
+                      </span>
+                      {item.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
 
-          <NavSection title="Trámites Generales" />
-          <NavItem id="llamada" icon={PhoneCall} label="Validación Llamada" />
-          <NavItem id="fisico" icon={FileText} label="Contrato Físico" />
-          <NavItem id="reenvio" icon={FileSignature} label="Reenvío Firma Digital" />
-          <NavItem id="seguro" icon={Shield} label="Seguro de Vida" />
-
-          <NavSection title="Recursos Humanos (RRHH)" />
-          <NavItem id="renuncia" icon={UserMinus} label="Carta de Renuncia" />
-          <NavItem id="altaCrm" icon={UserPlus} label="Alta Usuarios CRM" />
-          <NavItem id="evaluacion" icon={ClipboardCheck} label="Evaluación Fin de Mes" />
-          <NavItem id="postulante" icon={UserCheck} label="Postulante Nuevo" />
-        </nav>
-        
-        <div className="p-5 border-t border-slate-800/50 bg-slate-950/30 shrink-0">
-          <div className="flex items-center">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center mr-3 font-bold text-sm shadow-inner ring-2 ring-indigo-400/20 shrink-0">OS</div>
-            <div className="overflow-hidden text-ellipsis whitespace-nowrap">
+        {/* Perfil del Usuario / Footer */}
+        <div className="p-4 border-t border-slate-800 shrink-0 bg-slate-900">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-inner">
+              OS
+            </div>
+            <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-white truncate">Oscar Hugo Saravia L.</p>
-              <p className="text-xs text-indigo-300/80 truncate">ohsaravia@celina.com.bo</p>
+              <p className="text-xs text-slate-500 truncate">ohsaravia@celina.com.bo</p>
             </div>
           </div>
         </div>
+
       </div>
     </>
   );
-};
-
+}
