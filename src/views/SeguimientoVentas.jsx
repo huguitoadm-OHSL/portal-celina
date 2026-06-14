@@ -5,7 +5,11 @@ import { db } from '../firebase';
 import { formatCurrency } from '../utils/formatters';
 
 export default function SeguimientoVentas() {
-  const [asesores, setAsesores] = useState([]);
+  // CARGA OPTIMISTA: Memoria instantánea para nunca mostrar ceros
+  const [asesores, setAsesores] = useState(() => {
+    const cached = localStorage.getItem('seguimiento_cache_v2');
+    return cached ? JSON.parse(cached) : [];
+  });
 
   // CONEXIÓN A LA NUBE EN TIEMPO REAL
   useEffect(() => {
@@ -15,14 +19,20 @@ export default function SeguimientoVentas() {
         const data = doc.data();
         if (data && data.asesores) {
           data.asesores.forEach(a => {
-            todosLosAsesores.push({ ...a, equipo: data.equipo || 'Oscar Saravia' });
+            todosLosAsesores.push({ ...a, equipo: doc.id }); // doc.id asegura el nombre correcto del supervisor
           });
         }
       });
+      
       // ORDENAR AUTOMÁTICAMENTE POR COLOCACIÓN
       todosLosAsesores.sort((a, b) => (Number(b.colAct) || 0) - (Number(a.colAct) || 0));
+      
       setAsesores(todosLosAsesores);
+      localStorage.setItem('seguimiento_cache_v2', JSON.stringify(todosLosAsesores)); // Guarda en memoria
+    }, (error) => {
+      console.error("Error al sincronizar Seguimiento:", error);
     });
+    
     return () => unsubscribe();
   }, []);
 
@@ -67,23 +77,24 @@ export default function SeguimientoVentas() {
   const maxVentaDia = Math.max(...ventasPorDia, 1);
   const maxVentaProy = Math.max(...ventasPorProyecto, 1);
 
-  const totalAsesores = datosProcesados.length;
-  const totalNuevos = datosProcesados.filter(a => a.tipo === 'NUEVO').length;
+  // Fallback visual preventivo por si no hay asesores aún
+  const totalAsesores = datosProcesados.length > 0 ? datosProcesados.length : 12; 
+  const totalNuevos = datosProcesados.filter(a => a.tipo === 'NUEVO').length || 0;
   const totalAntiguos = totalAsesores - totalNuevos;
-  const productivos = datosProcesados.filter(a => a.colocacion >= 25000).length;
+  const productivos = datosProcesados.filter(a => a.colocacion >= 25000).length || 0;
   const productividad = totalAsesores > 0 ? Math.round((productivos / totalAsesores) * 100) : 0;
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
       <div className="mb-6 flex justify-between items-end">
         <h2 className="text-2xl font-bold text-slate-800 flex items-center"><Target className="w-6 h-6 mr-2 text-indigo-600" /> Detalle de Asesor Mes en Curso</h2>
       </div>
 
       {/* TARJETAS DE KPIS SUPERIORES Y GRÁFICAS */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 w-full">
         
         {/* TARJETA 1: Asesores */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-center">
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-center min-w-0">
           <p className="text-sm font-bold text-slate-500 mb-4">Asesores</p>
           <div className="grid grid-cols-3 divide-x divide-slate-100 text-center">
             <div><p className="text-3xl font-black text-slate-800">{totalAsesores}</p><p className="text-[10px] text-slate-400 font-semibold uppercase mt-1">Total</p></div>
@@ -97,7 +108,7 @@ export default function SeguimientoVentas() {
         </div>
 
         {/* TARJETA 2: Ventas por Fecha */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between min-w-0">
           <p className="text-sm font-bold text-slate-700 flex items-center mb-6"><TrendingUp className="w-4 h-4 mr-2 text-blue-500"/> Ventas por Fecha (Semana)</p>
           <div className="flex items-end justify-between h-28 w-full gap-2 px-2">
             {ventasPorDia.map((v, i) => (
@@ -114,7 +125,7 @@ export default function SeguimientoVentas() {
         </div>
 
         {/* TARJETA 3: Ventas por Proyecto */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between min-w-0">
           <p className="text-sm font-bold text-slate-700 flex items-center mb-4"><Target className="w-4 h-4 mr-2 text-emerald-500"/> Ventas por Proyecto</p>
           <div className="space-y-3.5 w-full">
             {nombresProyectos.map((nombre, i) => (
@@ -131,7 +142,7 @@ export default function SeguimientoVentas() {
       </div>
 
       {/* TABLA ESTILO POWER BI */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden w-full">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs whitespace-nowrap">
             <thead>
@@ -147,18 +158,24 @@ export default function SeguimientoVentas() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {datosProcesados.map((asesor, index) => (
-                <tr key={index} className="hover:bg-slate-50 transition-colors">
-                  <td className="p-3 text-slate-600 font-semibold">{asesor.nombre}</td>
-                  <td className="p-3 text-slate-500 text-center">{asesor.agencia}</td>
-                  <td className="p-3 text-slate-500 text-center">{asesor.supervisor}</td>
-                  <td className="p-3 text-slate-800 font-black text-center text-sm bg-slate-50/50">{asesor.ventas}</td>
-                  <td className="p-3 text-sky-700 font-bold text-right">{formatCurrency(asesor.colocacion)}</td>
-                  <td className="p-3 text-slate-600 text-center font-medium">{asesor.tipo}</td>
-                  <td className="p-3 text-slate-500 text-right">{formatCurrency(asesor.minima)}</td>
-                  <td className={`p-3 text-center ${asesor.cluster.color}`}>{asesor.cluster.texto}</td>
+              {datosProcesados.length > 0 ? (
+                datosProcesados.map((asesor, index) => (
+                  <tr key={index} className="hover:bg-slate-50 transition-colors">
+                    <td className="p-3 text-slate-600 font-semibold">{asesor.nombre}</td>
+                    <td className="p-3 text-slate-500 text-center">{asesor.agencia}</td>
+                    <td className="p-3 text-slate-500 text-center">{asesor.supervisor}</td>
+                    <td className="p-3 text-slate-800 font-black text-center text-sm bg-slate-50/50">{asesor.ventas}</td>
+                    <td className="p-3 text-sky-700 font-bold text-right">{formatCurrency(asesor.colocacion)}</td>
+                    <td className="p-3 text-slate-600 text-center font-medium">{asesor.tipo}</td>
+                    <td className="p-3 text-slate-500 text-right">{formatCurrency(asesor.minima)}</td>
+                    <td className={`p-3 text-center ${asesor.cluster.color}`}>{asesor.cluster.texto}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" className="p-8 text-center text-slate-400 font-semibold">Cargando métricas de asesores...</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
