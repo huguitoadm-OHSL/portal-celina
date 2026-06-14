@@ -4,9 +4,16 @@ import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { formatCurrency } from '../utils/formatters';
 
+const PROYECTOS_ACTUALIZADOS = ['Muyurina', 'Renacer', 'Santa Fe', 'Rancho Nuevo', 'Jardines', 'Celina VII F3'];
+
 export default function SeguimientoVentas() {
-  const [asesores, setAsesores] = useState([]);
-  const [cargando, setCargando] = useState(true);
+  const [asesores, setAsesores] = useState(() => {
+    try {
+      const cached = localStorage.getItem('seguimiento_cache_v3');
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) { return []; }
+  });
+  const [sincronizando, setSincronizando] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "proyecciones"), (snapshot) => {
@@ -18,34 +25,36 @@ export default function SeguimientoVentas() {
         }
       });
       todosLosAsesores.sort((a, b) => (Number(b.colAct) || 0) - (Number(a.colAct) || 0));
+      
       setAsesores(todosLosAsesores);
-      setCargando(false);
+      localStorage.setItem('seguimiento_cache_v3', JSON.stringify(todosLosAsesores));
+      setSincronizando(false);
     }, (error) => {
       console.error("Error Firebase:", error);
-      setCargando(false);
+      setSincronizando(false);
     });
     return () => unsubscribe();
   }, []);
 
   const asesoresNuevos = ['NEFI ELIAS CHAVEZ', 'TERESITA CARDOZO AGUIRRE', 'GUICELA ARIAS', 'HUMBERTO FALDIN PARAPAINO'];
-  const nombresProyectos = ['Muyurina', 'Renacer', 'Santa Fe', 'Rancho Nuevo', 'Jardines'];
 
   const ventasPorDia = [0, 0, 0, 0, 0, 0, 0];
-  const ventasPorProyecto = [0, 0, 0, 0, 0];
+  const ventasPorProyecto = [0, 0, 0, 0, 0, 0]; // Ahora son 6 posiciones
 
   const datosProcesados = asesores.map(asesor => {
-    const nombreUpper = asesor.nombre.toUpperCase();
+    const nombreUpper = asesor.nombre ? asesor.nombre.toUpperCase() : '';
     const esNuevo = asesoresNuevos.some(nuevo => nombreUpper.includes(nuevo));
 
     if (asesor.dias) asesor.dias.forEach((d, i) => { ventasPorDia[i] += (Number(d) || 0); });
     
     let totalVentas = 0;
-    // PBI INTELIGENTE: Lee estrictamente las ventas reales guardadas en la Bóveda
-    const ventasReales = asesor.ventasReales || [0, 0, 0, 0, 0];
+    const ventasReales = asesor.ventasReales || [0, 0, 0, 0, 0, 0];
     ventasReales.forEach((p, i) => { 
       const cant = Number(p) || 0;
-      ventasPorProyecto[i] += cant; 
-      totalVentas += cant;
+      if (i < 6) {
+        ventasPorProyecto[i] += cant; 
+        totalVentas += cant;
+      }
     });
 
     const colocacion = Number(asesor.colAct) || 0;
@@ -69,18 +78,14 @@ export default function SeguimientoVentas() {
   const productivos = datosProcesados.filter(a => a.colocacion >= 25000).length || 0;
   const productividad = totalAsesores > 0 ? Math.round((productivos / totalAsesores) * 100) : 0;
 
-  if (cargando) {
-    return (
-      <div className="flex flex-col items-center justify-center h-96 text-slate-500 animate-pulse">
-        <RefreshCw className="w-12 h-12 text-indigo-500 mb-4 animate-spin" />
-        <p className="text-lg font-bold">Procesando Métricas de Ventas Acumuladas...</p>
-      </div>
-    );
-  }
-
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-6 flex justify-between items-end"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><Target className="w-6 h-6 mr-2 text-indigo-600" /> Detalle de Asesor Mes en Curso</h2></div>
+      <div className="mb-6 flex justify-between items-end">
+        <h2 className="text-2xl font-bold text-slate-800 flex items-center">
+          <Target className="w-6 h-6 mr-2 text-indigo-600" /> Detalle de Asesor Mes en Curso
+          {sincronizando && <RefreshCw className="w-4 h-4 ml-3 text-slate-400 animate-spin" />}
+        </h2>
+      </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-center">
@@ -111,9 +116,9 @@ export default function SeguimientoVentas() {
         </div>
 
         <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
-          <p className="text-sm font-bold text-slate-700 flex items-center mb-4"><Target className="w-4 h-4 mr-2 text-emerald-500"/> Ventas por Proyecto Acumuladas</p>
+          <p className="text-sm font-bold text-slate-700 flex items-center mb-4"><Target className="w-4 h-4 mr-2 text-emerald-500"/> Ventas Acumuladas</p>
           <div className="space-y-3.5 w-full">
-            {nombresProyectos.map((nombre, i) => (
+            {PROYECTOS_ACTUALIZADOS.map((nombre, i) => (
               <div key={i} className="flex items-center text-xs">
                 <span className="w-20 font-semibold text-slate-500 truncate">{nombre}</span>
                 <div className="flex-1 h-2.5 bg-slate-100 rounded-full mx-3 overflow-hidden">
@@ -153,7 +158,7 @@ export default function SeguimientoVentas() {
                   <td className="p-3 text-slate-500 text-right">{formatCurrency(asesor.minima)}</td>
                   <td className={`p-3 text-center ${asesor.cluster.color}`}>{asesor.cluster.texto}</td>
                 </tr>
-              )) : <tr><td colSpan="8" className="p-8 text-center text-slate-400 font-semibold">Esperando registros...</td></tr>}
+              )) : <tr><td colSpan="8" className="p-8 text-center text-slate-400 font-semibold">Iniciando plataforma...</td></tr>}
             </tbody>
           </table>
         </div>
