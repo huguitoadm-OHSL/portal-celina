@@ -133,3 +133,18 @@ export const generarTextoDiariaCelular = (formDiaria, supervisorData) => {
   texto += `*📊 TOTALES DEL DÍA:*\n📍 Visitas: ${tVisitas}\n🤝 Ventas: ${tVentas}\n💰 Colocación: $${formatCurrency(tColocacion)}\n\nSaludos cordiales.`;
   return texto;
 };
+export const generarTextoPendienteValidacion = (form) => {
+  return `Buenas tardes Estimado Alex,\n\nPor favor su ayuda con la validación de llamada de este cliente, menciona que tendrá tiempo de contestar hoy a las ${form.horaLlamada || '[Hora]'}, por favor pido la ayuda de tu equipo para que la puedan llamar a esa hora:\n\nCliente sin validación:\n${form.cliente || '[Nombre]'} - Contrato: ${form.contrato || '[Contrato]'} - Celular: ${form.celular || '[Celular]'}\n\nSaludos cordiales,\n${form.asesor || 'Oscar Saravia'}`;
+};
+
+export const generarTextoBloqueoLote = (form) => {
+  return `Buenos días estimado jefe,\n\nPor favor su ayuda necesito su autorización para realizar el bloqueo del lote ubicado en el Proyecto ${form.proyecto || '[Proyecto]'}:\n\nProyecto: ${form.proyecto}\nUV: ${form.uv} Manzano: ${form.manzano} Lote: ${form.lote}\nSuperficie: ${form.superficie} m2\nCategoría: ${form.categoria}\nCuota inicial referencial: $us ${form.cuotaInicial}\n\n${form.motivo}\n\nPor tal motivo, solicito se pueda proceder con el bloqueo del lote mencionado, a fin de resguardar la disponibilidad y evitar cruces comerciales.\n\nQuedo atento a su confirmación.\n\nSaludos cordiales,\n${form.asesor || 'Oscar Saravia'}`;
+};
+
+export const generarTextoMemorandum = (form) => {
+  let asesoresTexto = "";
+  form.asesores.forEach(a => {
+    if(a.nombre) asesoresTexto += `- ${a.nombre}: Registra una colocación actual de ${a.colocacion}, lo cual representa una brecha crítica frente a su compromiso de ${a.compromiso}.\n`;
+  });
+  return `Buenas noches estimado Ulrich,\n\nMe dirijo a ti para solicitar formalmente la emisión de un memorándum de llamada de atención para asesores de mi equipo comercial. El motivo es el incumplimiento reiterado de sus métricas de ventas.\n\nDe acuerdo con el cierre de proyecciones y resultados del mes de ${form.mes || '[Mes]'}, el detalle de su rendimiento es el siguiente:\n\n${asesoresTexto}\nAdjunto a este correo el cuadro de proyección y seguimiento de metas de ${form.mes || '[Mes]'} como respaldo documental.\n\nAgradezco de antemano tu apoyo para gestionar estas llamadas de atención a la brevedad.\n\nSaludos cordiales,\n${form.asesor || 'Oscar Saravia'}`;
+};
