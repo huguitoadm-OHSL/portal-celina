@@ -1,41 +1,64 @@
 import React, { useState, useEffect } from 'react';
 import { Target, TrendingUp, Trophy, Zap, Crown, AlertCircle, Medal } from 'lucide-react';
 import { formatCurrency } from '../utils/formatters';
-import { DATA_VERSION } from '../constants/config';
 import { OBJETIVOS_MENSUALES } from '../constants/equipo';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({ meta: 0, actual: 0, topAsesores: [], avance: 0, brecha: 0 });
+  const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    let metaTotal = 0;
-    let actualTotal = 0;
-    let todosLosAsesores = [];
+    const cargarDatosNube = async () => {
+      let metaTotal = 0;
+      let actualTotal = 0;
+      let todosLosAsesores = [];
 
-    // Leemos la meta total y sumamos las ventas guardadas
-    Object.keys(OBJETIVOS_MENSUALES).forEach(equipo => {
-      metaTotal += OBJETIVOS_MENSUALES[equipo];
+      // Calculamos la meta estática estipulada
+      Object.keys(OBJETIVOS_MENSUALES).forEach(equipo => {
+        metaTotal += OBJETIVOS_MENSUALES[equipo];
+      });
+
       try {
-        const savedData = localStorage.getItem(`portalAsesores_proyeccion_${equipo}`);
-        if (savedData && localStorage.getItem('portalAsesores_dataVersion') === DATA_VERSION) {
-          const data = JSON.parse(savedData);
+        // Consultamos la colección "proyecciones" en tu Firebase
+        const querySnapshot = await getDocs(collection(db, "proyecciones"));
+        
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
           if (data && data.asesores) {
             data.asesores.forEach(a => {
               const col = Number(a.colAct) || 0;
               actualTotal += col;
-              if (col > 0) todosLosAsesores.push({ nombre: a.nombre, venta: col });
+              if (col > 0) {
+                todosLosAsesores.push({ nombre: a.nombre, venta: col });
+              }
             });
           }
-        }
-      } catch (e) {}
-    });
+        });
+      } catch (error) {
+        console.error("Error al conectar con Firestore:", error);
+      }
 
-    const top5 = todosLosAsesores.sort((a, b) => b.venta - a.venta).slice(0, 5);
-    const avanceCalc = metaTotal > 0 ? (actualTotal / metaTotal) * 100 : 0;
-    const brechaCalc = Math.max(metaTotal - actualTotal, 0);
+      const top5 = todosLosAsesores.sort((a, b) => b.venta - a.venta).slice(0, 5);
+      const avanceCalc = metaTotal > 0 ? (actualTotal / metaTotal) * 100 : 0;
+      const brechaCalc = Math.max(metaTotal - actualTotal, 0);
 
-    setStats({ meta: metaTotal, actual: actualTotal, topAsesores: top5, avance: avanceCalc, brecha: brechaCalc });
+      setStats({ meta: metaTotal, actual: actualTotal, topAsesores: top5, avance: avanceCalc, brecha: brechaCalc });
+      setCargando(false);
+    };
+
+    cargarDatosNube();
   }, []);
+
+  if (cargando) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-slate-500 font-bold animate-pulse">
+        <Zap className="w-8 h-8 text-blue-500 mb-2 animate-bounce" />
+        Sincronizando con la nube de la Máquina de Ventas...
+      </div>
+    );
+  }
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -46,9 +69,9 @@ export default function Dashboard() {
           <Zap size={250} />
         </div>
         <div className="relative z-10">
-          <p className="text-blue-200 font-bold tracking-wider text-sm mb-1 uppercase">Portal de Liderazgo v2.0</p>
+          <p className="text-blue-200 font-bold tracking-wider text-sm mb-1 uppercase">Portal de Liderazgo v2.5</p>
           <h2 className="text-3xl md:text-4xl font-black mb-2">Máquina de Ventas</h2>
-          <p className="text-slate-300 max-w-xl">Panel ejecutivo de rendimiento. Monitorea tu meta, el avance de tu equipo y domina los resultados del mes.</p>
+          <p className="text-slate-300 max-w-xl">Base de datos en la nube activada. Monitorea tu meta y el avance de tu equipo sincronizado en tiempo real.</p>
         </div>
         <div className="mt-6 md:mt-0 relative z-10 bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-xl text-center min-w-[160px]">
           <p className="text-xs text-blue-200 uppercase font-bold tracking-wider mb-1">Avance Global</p>
@@ -89,20 +112,17 @@ export default function Dashboard() {
           <h3 className="text-lg font-bold text-slate-800 flex items-center mb-8"><Zap className="w-5 h-5 mr-2 text-blue-600" /> Energía del Equipo</h3>
           
           <div className="relative pt-8 pb-4">
-            {/* Tooltip flotante indicador */}
-            <div className="absolute top-0 transform -translate-x-1/2 transition-all duration-1000 ease-out" style={{ left: `${stats.avance}%` }}>
+            <div className="absolute top-0 transform -translate-x-1/2 transition-all duration-1000 ease-out" style={{ left: `${Math.min(stats.avance, 100)}%` }}>
               <div className="bg-slate-800 text-white text-xs font-bold py-1 px-3 rounded-lg shadow-lg relative">
                 {stats.avance.toFixed(1)}%
                 <div className="absolute bottom-[-4px] left-1/2 transform -translate-x-1/2 w-2 h-2 bg-slate-800 rotate-45"></div>
               </div>
             </div>
             
-            {/* Barra base */}
             <div className="w-full h-6 bg-slate-100 rounded-full overflow-hidden flex shadow-inner">
-              {/* Barra llena */}
               <div 
                 className="h-full bg-gradient-to-r from-blue-500 to-emerald-400 rounded-full transition-all duration-1000 ease-out shadow-sm"
-                style={{ width: `${stats.avance}%` }}
+                style={{ width: `${Math.min(stats.avance, 100)}%` }}
               ></div>
             </div>
             
@@ -113,15 +133,15 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* TOP ASESORES (EL PODIO) */}
+        {/* TOP ASESORES (EL PODIO CLOUD) */}
         <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
           <h3 className="text-lg font-bold text-slate-800 flex items-center mb-6"><Trophy className="w-5 h-5 mr-2 text-amber-500" /> Top Asesores del Mes</h3>
           
           {stats.topAsesores.length === 0 ? (
             <div className="text-center py-10 text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
               <Trophy className="w-12 h-12 mx-auto mb-3 opacity-20" />
-              <p className="font-semibold text-sm">Aún no hay ventas registradas.</p>
-              <p className="text-xs">Ve a Proyección Semanal para cargar las colocaciones.</p>
+              <p className="font-semibold text-sm">Aún no hay ventas registradas en la nube.</p>
+              <p className="text-xs">Guarda datos en la Proyección Semanal para sincronizar.</p>
             </div>
           ) : (
             <div className="space-y-4">
