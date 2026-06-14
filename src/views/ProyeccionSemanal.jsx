@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Plus, Info } from 'lucide-react';
 import { ResultCard } from '../components/ui/ResultCard';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 import { EQUIPOS_ASESORES, OBJETIVOS_MENSUALES, SUPERVISORES } from '../constants/equipo';
 import { PROYECTOS_CONVENIO_1, NOMBRES_PROYECTOS_PROYECCION } from '../constants/proyectos';
 import { DATA_VERSION } from '../constants/config';
@@ -45,6 +47,17 @@ export default function ProyeccionSemanal() {
     setFormProyeccion(newState);
     localStorage.setItem(`portalAsesores_proyeccion_${newState.equipo}`, JSON.stringify(newState));
   };
+  // ENVÍO DE DATOS EN TIEMPO REAL A LA NUBE
+    try {
+      setDoc(doc(db, "proyecciones", newState.equipo), {
+        asesores: newState.asesores,
+        dataVersion: DATA_VERSION,
+        ultimaActualizacion: new Date().toISOString()
+      });
+      console.log("¡Sincronizado con la nube con éxito!");
+    } catch (error) {
+      console.error("Error al sincronizar en la nube:", error);
+    }
 
   const updateAsesor = (idx, field, val) => {
     const n = [...formProyeccion.asesores]; n[idx][field] = parseFloat(val) || 0;
