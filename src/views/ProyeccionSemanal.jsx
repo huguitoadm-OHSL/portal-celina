@@ -17,12 +17,6 @@ export default function ProyeccionSemanal() {
   const [sumaVentaModal, setSumaVentaModal] = useState({ show: false, index: null, nombre: '', monto: '' });
 
   const [formProyeccion, setFormProyeccion] = useState(() => {
-    try {
-      if (localStorage.getItem('portalAsesores_dataVersion') === DATA_VERSION) {
-        const savedData = localStorage.getItem(`portalAsesores_proyeccion_Oscar Saravia`);
-        if (savedData) return JSON.parse(savedData);
-      }
-    } catch (e) {}
     return {
       equipo: 'Oscar Saravia', fechaInicio: new Date().toISOString().split('T')[0],
       objetivoMensual: OBJETIVOS_MENSUALES['Oscar Saravia'],
@@ -30,24 +24,51 @@ export default function ProyeccionSemanal() {
     };
   });
 
+  // ANTENA RECEPTORA: DESCARGA LOS DATOS DE LA NUBE AL ABRIR
   useEffect(() => {
-    const savedData = localStorage.getItem(`portalAsesores_proyeccion_${equipoSeleccionado}`);
-    if (savedData && localStorage.getItem('portalAsesores_dataVersion') === DATA_VERSION) {
-      setFormProyeccion(JSON.parse(savedData));
-    } else {
-      setFormProyeccion({
-        equipo: equipoSeleccionado, fechaInicio: new Date().toISOString().split('T')[0],
-        objetivoMensual: OBJETIVOS_MENSUALES[equipoSeleccionado] || 0,
-        asesores: EQUIPOS_ASESORES[equipoSeleccionado] ? EQUIPOS_ASESORES[equipoSeleccionado].map(a => ({ nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0] })) : []
-      });
-    }
+    const cargarDatos = async () => {
+      try {
+        const docRef = doc(db, "proyecciones", equipoSeleccionado);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+          const dataNube = docSnap.data();
+          const newState = {
+            equipo: equipoSeleccionado, 
+            fechaInicio: new Date().toISOString().split('T')[0],
+            objetivoMensual: OBJETIVOS_MENSUALES[equipoSeleccionado] || 0,
+            asesores: dataNube.asesores
+          };
+          setFormProyeccion(newState);
+          localStorage.setItem(`portalAsesores_proyeccion_${equipoSeleccionado}`, JSON.stringify(newState));
+          console.log("¡Datos descargados de la nube!");
+          return; // Si encontró datos, terminamos aquí.
+        }
+      } catch (error) {
+        console.error("Error al descargar de la nube:", error);
+      }
+
+      // Si no hay nube (equipo nuevo), carga local o default
+      const savedData = localStorage.getItem(`portalAsesores_proyeccion_${equipoSeleccionado}`);
+      if (savedData && localStorage.getItem('portalAsesores_dataVersion') === DATA_VERSION) {
+        setFormProyeccion(JSON.parse(savedData));
+      } else {
+        setFormProyeccion({
+          equipo: equipoSeleccionado, fechaInicio: new Date().toISOString().split('T')[0],
+          objetivoMensual: OBJETIVOS_MENSUALES[equipoSeleccionado] || 0,
+          asesores: EQUIPOS_ASESORES[equipoSeleccionado] ? EQUIPOS_ASESORES[equipoSeleccionado].map(a => ({ nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0] })) : []
+        });
+      }
+    };
+    
+    cargarDatos();
   }, [equipoSeleccionado]);
 
   const saveProyeccionState = (newState) => {
     setFormProyeccion(newState);
     localStorage.setItem(`portalAsesores_proyeccion_${newState.equipo}`, JSON.stringify(newState));
 
-    // ENVÍO DE DATOS EN TIEMPO REAL A LA NUBE
+    // ANTENA TRANSMISORA: ENVÍA LOS DATOS AL GUARDAR
     try {
       setDoc(doc(db, "proyecciones", newState.equipo), {
         asesores: newState.asesores,
