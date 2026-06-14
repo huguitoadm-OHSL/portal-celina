@@ -10,7 +10,6 @@ import { obtenerDatosSupervisor } from '../utils/calculadoras';
 import { generarTextoProyeccionCelular } from '../utils/textTemplates';
 import { generarHtmlProyeccion } from '../utils/htmlTemplates';
 
-// LISTA DE PROYECTOS ACTUALIZADA CON CELINA VII FASE 3
 const PROYECTOS_ACTUALIZADOS = ['Muyurina', 'Renacer', 'Santa Fe', 'Rancho Nuevo', 'Jardines', 'Celina VII F3'];
 
 export default function ProyeccionSemanal() {
@@ -89,11 +88,9 @@ export default function ProyeccionSemanal() {
     setSumaVentaModal({ show: false, index: null, nombre: '', monto: '', proyecto: PROYECTOS_ACTUALIZADOS[0], cantidad: 1 });
   };
 
-  // INYECCIÓN DE BASE DE DATOS MAESTRA
   const inyectarHistorialMaestro = async () => {
-    // Array estricto con los 6 proyectos: [Muyurina, Renacer, Santa Fe, Rancho Nuevo, Jardines, Celina VII]
     const asesoresHistorial = [
-      { nombre: "MARISOL URGEL PIZARRO", colAct: 24384, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [1,0,0,0,0,0] }, 
+      { nombre: "MARISOL URGEL PIZARRO", colAct: 24984, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [1,0,0,0,0,0] }, 
       { nombre: "CARLOS ENRIQUE CALDERON", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0] },
       { nombre: "ELY GONZALES GARCIA", colAct: 7200, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,0,0,0,0,1] }, 
       { nombre: "RODRIGO ROJAS SILES", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0] },
@@ -109,7 +106,7 @@ export default function ProyeccionSemanal() {
 
     try {
       await setDoc(doc(db, "proyecciones", "Oscar Saravia"), {
-        asesores: asesoresHistorial, objetivoMensual: 450000, fechaInicio: new Date().toISOString().split('T')[0],
+        asesores: asesoresHistorial, objetivoMensual: 450000, fechaInicio: formProyeccion.fechaInicio,
         dataVersion: DATA_VERSION, ultimaActualizacion: new Date().toISOString()
       });
       setInyeccionExitosa(true);
@@ -122,7 +119,6 @@ export default function ProyeccionSemanal() {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       
-      {/* BOTÓN MAESTRO DE INYECCIÓN */}
       <div className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl p-4 mb-6 text-white shadow-lg flex items-center justify-between">
         <div>
           <h3 className="font-black text-lg flex items-center"><Database className="mr-2" /> Panel de Inyección de Historial</h3>
@@ -140,6 +136,13 @@ export default function ProyeccionSemanal() {
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col w-full min-w-0">
           <div className="p-4 border-b border-slate-100 flex flex-wrap gap-4 bg-slate-50 items-center w-full">
             <div className="flex-1 min-w-[200px]"><label className="block text-xs font-bold text-slate-500 uppercase">Equipo Supervisor</label><select value={equipoSeleccionado} onChange={(e) => setEquipoSeleccionado(e.target.value)} className="w-full px-3 py-1.5 mt-1 border rounded focus:ring-2 focus:ring-blue-500">{Object.keys(EQUIPOS_ASESORES).map(e => <option key={e} value={e}>{e}</option>)}</select></div>
+            
+            {/* AQUÍ ESTÁ LA CASILLA DE FECHA RESTAURADA */}
+            <div className="w-full sm:w-40">
+              <label className="block text-xs font-bold text-slate-500 uppercase">Semana del (Lunes)</label>
+              <input type="date" value={formProyeccion.fechaInicio} onChange={(e) => saveProyeccionState({...formProyeccion, fechaInicio: e.target.value})} className="w-full px-3 py-1.5 mt-1 border rounded focus:ring-2 focus:ring-blue-500" />
+            </div>
+
             <div className="w-full sm:w-40"><label className="block text-xs font-bold text-slate-500 uppercase">Objetivo Mes</label><input type="number" value={formProyeccion.objetivoMensual} onChange={(e) => saveProyeccionState({...formProyeccion, objetivoMensual: parseFloat(e.target.value) || 0})} className="w-full px-3 py-1.5 mt-1 border rounded focus:ring-2 focus:ring-blue-500" /></div>
           </div>
           <div className="overflow-x-auto w-full">
