@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Target, TrendingUp, Users, Award, AlertCircle } from 'lucide-react';
+import { Target, TrendingUp } from 'lucide-react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { formatCurrency } from '../utils/formatters';
@@ -19,48 +19,54 @@ export default function SeguimientoVentas() {
           });
         }
       });
-
-      // ORDENAR AUTOMÁTICAMENTE POR COLOCACIÓN (De mayor a menor)
+      // ORDENAR AUTOMÁTICAMENTE POR COLOCACIÓN
       todosLosAsesores.sort((a, b) => (Number(b.colAct) || 0) - (Number(a.colAct) || 0));
       setAsesores(todosLosAsesores);
     });
-
     return () => unsubscribe();
   }, []);
 
-  // LÓGICA DE NEGOCIO Y CORRECCIONES AUTOMÁTICAS
   const asesoresNuevos = ['NEFI ELIAS CHAVEZ', 'TERESITA CARDOZO AGUIRRE', 'GUICELA ARIAS', 'HUMBERTO FALDIN PARAPAINO'];
+  const nombresProyectos = ['Muyurina', 'Renacer', 'Santa Fe', 'Rancho Nuevo', 'Jardines'];
+
+  // Variables para las Gráficas
+  const ventasPorDia = [0, 0, 0, 0, 0, 0, 0];
+  const ventasPorProyecto = [0, 0, 0, 0, 0];
 
   const datosProcesados = asesores.map(asesor => {
     const nombreUpper = asesor.nombre.toUpperCase();
     const esNuevo = asesoresNuevos.some(nuevo => nombreUpper.includes(nuevo));
 
-    // EL CÁLCULO MÁGICO: Suma los lotes desde el arreglo de proyectos del Modal Inteligente
-    const totalVentas = asesor.proy ? asesor.proy.reduce((acc, val) => acc + (Number(val) || 0), 0) : 0;
-
-    const colocacion = Number(asesor.colAct) || 0;
+    // Llenar datos de gráficas por Día
+    if (asesor.dias) {
+      asesor.dias.forEach((d, i) => { ventasPorDia[i] += (Number(d) || 0); });
+    }
     
-    // Asignación de Cluster idéntico a Power BI
-    let clusterInfo = { texto: 'Venta Cero', color: 'text-slate-400 font-semibold' };
-    if (colocacion >= 25000) {
-      clusterInfo = { texto: 'Comisionan', color: 'text-emerald-600 font-bold' };
-    } else if (colocacion > 0) {
-      clusterInfo = { texto: 'No Comisionan', color: 'text-amber-600 font-bold' };
+    // Llenar datos de gráficas por Proyecto y contar Ventas
+    let totalVentas = 0;
+    if (asesor.proy) {
+      asesor.proy.forEach((p, i) => { 
+        const cant = Number(p) || 0;
+        ventasPorProyecto[i] += cant; 
+        totalVentas += cant;
+      });
     }
 
+    const colocacion = Number(asesor.colAct) || 0;
+    let clusterInfo = { texto: 'Venta Cero', color: 'text-slate-400 font-semibold' };
+    if (colocacion >= 25000) clusterInfo = { texto: 'Comisionan', color: 'text-emerald-600 font-bold' };
+    else if (colocacion > 0) clusterInfo = { texto: 'No Comisionan', color: 'text-amber-600 font-bold' };
+
     return {
-      nombre: nombreUpper,
-      agencia: 'MONTERO',
-      supervisor: asesor.equipo.toUpperCase(),
-      ventas: totalVentas,
-      colocacion: colocacion,
-      tipo: esNuevo ? 'NUEVO' : 'INTERNO',
-      minima: 25000,
-      cluster: clusterInfo
+      nombre: nombreUpper, agencia: 'MONTERO', supervisor: asesor.equipo.toUpperCase(),
+      ventas: totalVentas, colocacion: colocacion, tipo: esNuevo ? 'NUEVO' : 'INTERNO',
+      minima: 25000, cluster: clusterInfo
     };
   });
 
-  // CÁLCULO DE KPIS GERENCIALES
+  const maxVentaDia = Math.max(...ventasPorDia, 1);
+  const maxVentaProy = Math.max(...ventasPorProyecto, 1);
+
   const totalAsesores = datosProcesados.length;
   const totalNuevos = datosProcesados.filter(a => a.tipo === 'NUEVO').length;
   const totalAntiguos = totalAsesores - totalNuevos;
@@ -70,46 +76,57 @@ export default function SeguimientoVentas() {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="mb-6 flex justify-between items-end">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800 flex items-center"><Target className="w-6 h-6 mr-2 text-indigo-600" /> Detalle de Asesor Mes en Curso</h2>
-        </div>
+        <h2 className="text-2xl font-bold text-slate-800 flex items-center"><Target className="w-6 h-6 mr-2 text-indigo-600" /> Detalle de Asesor Mes en Curso</h2>
       </div>
 
-      {/* TARJETAS DE KPIS SUPERIORES */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+      {/* TARJETAS DE KPIS SUPERIORES Y GRÁFICAS */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        
+        {/* TARJETA 1: Asesores */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-center">
           <p className="text-sm font-bold text-slate-500 mb-4">Asesores</p>
           <div className="grid grid-cols-3 divide-x divide-slate-100 text-center">
-            <div>
-              <p className="text-3xl font-black text-slate-800">{totalAsesores}</p>
-              <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-1">Total</p>
-            </div>
-            <div>
-              <p className="text-3xl font-black text-slate-800">{totalAntiguos}</p>
-              <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-1">Antiguos</p>
-            </div>
-            <div>
-              <p className="text-3xl font-black text-sky-600">{totalNuevos}</p>
-              <p className="text-xs text-sky-500/70 font-semibold uppercase tracking-wider mt-1">Nuevos</p>
-            </div>
+            <div><p className="text-3xl font-black text-slate-800">{totalAsesores}</p><p className="text-[10px] text-slate-400 font-semibold uppercase mt-1">Total</p></div>
+            <div><p className="text-3xl font-black text-slate-800">{totalAntiguos}</p><p className="text-[10px] text-slate-400 font-semibold uppercase mt-1">Antiguos</p></div>
+            <div><p className="text-3xl font-black text-sky-600">{totalNuevos}</p><p className="text-[10px] text-sky-500/70 font-semibold uppercase mt-1">Nuevos</p></div>
           </div>
-          <div className="mt-6 pt-4 border-t border-slate-100 grid grid-cols-2 divide-x divide-slate-100 text-center">
-            <div>
-              <p className="text-2xl font-black text-slate-700">{productivos}</p>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Productivos</p>
-            </div>
-            <div>
-              <p className="text-2xl font-black text-emerald-600">{productividad}%</p>
-              <p className="text-[10px] text-emerald-500/70 font-bold uppercase tracking-wider mt-1">Productividad Cluster</p>
-            </div>
+          <div className="mt-5 pt-4 border-t border-slate-100 grid grid-cols-2 divide-x divide-slate-100 text-center">
+            <div><p className="text-2xl font-black text-slate-700">{productivos}</p><p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Productivos</p></div>
+            <div><p className="text-2xl font-black text-emerald-600">{productividad}%</p><p className="text-[10px] text-emerald-500/70 font-bold uppercase mt-1">Productividad Cluster</p></div>
           </div>
         </div>
 
-        {/* ESPACIO PARA GRÁFICAS */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col items-center justify-center text-slate-400 border-dashed">
-           <TrendingUp className="w-10 h-10 mb-3 opacity-20" />
-           <p className="font-semibold text-sm">Panel de Gráficos Integrado</p>
-           <p className="text-xs text-center mt-2">La sincronización de gráficos avanzados se activará<br/>al recopilar más historial de ventas.</p>
+        {/* TARJETA 2: Ventas por Fecha */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
+          <p className="text-sm font-bold text-slate-700 flex items-center mb-6"><TrendingUp className="w-4 h-4 mr-2 text-blue-500"/> Ventas por Fecha (Semana)</p>
+          <div className="flex items-end justify-between h-28 w-full gap-2 px-2">
+            {ventasPorDia.map((v, i) => (
+              <div key={i} className="flex flex-col items-center w-full group relative">
+                <div className="w-full bg-blue-100 rounded-t-md relative transition-all duration-500 group-hover:bg-blue-300" style={{ height: `${maxVentaDia > 0 ? (v / maxVentaDia) * 100 : 0}%`, minHeight: v > 0 ? '4px' : '0px' }}>
+                  <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-[9px] font-bold text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity bg-white shadow-sm px-1.5 py-0.5 rounded border border-slate-200 z-10 whitespace-nowrap">
+                    ${formatCurrency(v)}
+                  </div>
+                </div>
+                <p className="text-[10px] font-semibold text-slate-400 mt-2">D{i+1}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* TARJETA 3: Ventas por Proyecto */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
+          <p className="text-sm font-bold text-slate-700 flex items-center mb-4"><Target className="w-4 h-4 mr-2 text-emerald-500"/> Ventas por Proyecto</p>
+          <div className="space-y-3.5 w-full">
+            {nombresProyectos.map((nombre, i) => (
+              <div key={i} className="flex items-center text-xs">
+                <span className="w-20 font-semibold text-slate-500 truncate">{nombre}</span>
+                <div className="flex-1 h-2.5 bg-slate-100 rounded-full mx-3 overflow-hidden">
+                  <div className="h-full bg-emerald-400 rounded-full transition-all duration-700" style={{ width: `${maxVentaProy > 0 ? (ventasPorProyecto[i] / maxVentaProy) * 100 : 0}%` }}></div>
+                </div>
+                <span className="w-6 text-right font-bold text-slate-700">{ventasPorProyecto[i]}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
