@@ -46,8 +46,8 @@ export default function ProyeccionSemanal() {
   const saveProyeccionState = (newState) => {
     setFormProyeccion(newState);
     localStorage.setItem(`portalAsesores_proyeccion_${newState.equipo}`, JSON.stringify(newState));
-  };
-  // ENVÍO DE DATOS EN TIEMPO REAL A LA NUBE
+
+    // ENVÍO DE DATOS EN TIEMPO REAL A LA NUBE
     try {
       setDoc(doc(db, "proyecciones", newState.equipo), {
         asesores: newState.asesores,
@@ -58,6 +58,7 @@ export default function ProyeccionSemanal() {
     } catch (error) {
       console.error("Error al sincronizar en la nube:", error);
     }
+  };
 
   const updateAsesor = (idx, field, val) => {
     const n = [...formProyeccion.asesores]; n[idx][field] = parseFloat(val) || 0;
