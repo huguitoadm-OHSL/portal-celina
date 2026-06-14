@@ -90,7 +90,7 @@ export default function ProyeccionSemanal() {
 
   const inyectarHistorialMaestro = async () => {
     const asesoresHistorial = [
-      { nombre: "MARISOL URGEL PIZARRO", colAct: 24984, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [1,0,0,0,0,0] }, 
+      { nombre: "MARISOL URGEL PIZARRO", colAct: 24384, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [1,0,0,0,0,0] }, 
       { nombre: "CARLOS ENRIQUE CALDERON", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0] },
       { nombre: "ELY GONZALES GARCIA", colAct: 7200, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,0,0,0,0,1] }, 
       { nombre: "RODRIGO ROJAS SILES", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0] },
