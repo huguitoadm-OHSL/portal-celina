@@ -13,18 +13,21 @@ import SimuladorAmortizacion from './views/SimuladorAmortizacion';
 import Recompra from './views/Recompra';
 import DescuentosCampanas from './views/DescuentosCampanas';
 import IncrementoCuota from './views/IncrementoCuota';
+import BloqueoLote from './views/BloqueoLote';
 
 // Vistas - Trámites Generales
 import ValidacionLlamada from './views/ValidacionLlamada';
 import ContratoFisico from './views/ContratoFisico';
 import ReenvioFirma from './views/ReenvioFirma';
 import SeguroVida from './views/SeguroVida';
+import PendienteValidacion from './views/PendienteValidacion';
 
 // Vistas - Recursos Humanos (RRHH)
 import CartaRenuncia from './views/CartaRenuncia';
 import AltaCRM from './views/AltaCRM';
 import EvaluacionFinMes from './views/EvaluacionFinMes';
 import PostulanteNuevo from './views/PostulanteNuevo';
+import SolicitudMemorandum from './views/SolicitudMemorandum';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard'); 
@@ -56,18 +59,21 @@ export default function App() {
       case 'recompra': return <Recompra />;
       case 'descuento': return <DescuentosCampanas />;
       case 'cuota': return <IncrementoCuota />;
+      case 'bloqueoLote': return <BloqueoLote />;
       
       // 3. Trámites Generales
       case 'llamada': return <ValidacionLlamada />;
       case 'fisico': return <ContratoFisico />;
       case 'reenvio': return <ReenvioFirma />;
       case 'seguro': return <SeguroVida />;
+      case 'pendienteValidacion': return <PendienteValidacion />;
       
       // 4. Recursos Humanos (RRHH)
       case 'renuncia': return <CartaRenuncia />;
       case 'altaCrm': return <AltaCRM />;
       case 'evaluacion': return <EvaluacionFinMes />;
       case 'postulante': return <PostulanteNuevo />;
+      case 'memorandum': return <SolicitudMemorandum />;
       
       default: 
         return (
