@@ -553,3 +553,53 @@ export const generarHtmlProyeccion = (formProyeccion, supervisorData) => {
     <p style="margin-top: 25px; margin-bottom: 2px; color: #475569;">Saludos cordiales.</p>
   </div>`;
 };
+export const generarHtmlPendienteValidacion = (form) => {
+  return `
+  <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+    <p style="margin-bottom: 20px; color: #333333;">Buenas tardes Estimado Alex,</p>
+    <p style="margin-bottom: 20px; color: #333333;">Por favor su ayuda con la validaci&oacute;n de llamada de este cliente, menciona que tendr&aacute; tiempo de contestar hoy a las <strong>${form.horaLlamada || '[Hora]'}</strong>, por favor pido la ayuda de tu equipo para que la puedan llamar a esa hora:</p>
+    <p style="margin-bottom: 5px; color: #333333;">Cliente sin validaci&oacute;n:</p>
+    <p style="margin-top: 0; margin-bottom: 25px; font-weight: bold; font-size: 15px; color: #000000; text-transform: uppercase;">${form.cliente || '[NOMBRE]'} - Contrato: ${form.contrato || '[CONTRATO]'} - Celular: ${form.celular || '[CELULAR]'}</p>
+    <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
+    <p style="margin-top: 0; font-weight: bold; color: #333333;">${form.asesor || 'Oscar Saravia'}</p>
+  </div>`;
+};
+
+export const generarHtmlBloqueoLote = (form) => {
+  return `
+  <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+    <p style="margin-bottom: 20px; color: #333333;">Buenos d&iacute;as estimado jefe,</p>
+    <p style="margin-bottom: 20px; color: #333333;">Por favor su ayuda necesito su autorizaci&oacute;n para realizar el <strong>bloqueo del lote</strong> ubicado en el <strong>Proyecto ${form.proyecto || '[Proyecto]'}</strong>:</p>
+    <ul style="margin-bottom: 20px; list-style-type: none; padding-left: 0; color: #333333;">
+      <li style="margin-bottom: 5px;"><strong>Proyecto:</strong> ${form.proyecto || '---'}</li>
+      <li style="margin-bottom: 5px;"><strong>UV:</strong> ${form.uv || '---'} <strong>Manzano:</strong> ${form.manzano || '---'} <strong>Lote:</strong> ${form.lote || '---'}</li>
+      <li style="margin-bottom: 5px;"><strong>Superficie:</strong> ${form.superficie || '0'} m&sup2;</li>
+      <li style="margin-bottom: 5px;"><strong>Categor&iacute;a:</strong> ${form.categoria || '---'}</li>
+      <li style="margin-bottom: 5px;"><strong>Cuota inicial referencial:</strong> $us ${form.cuotaInicial || '0'}</li>
+    </ul>
+    <p style="margin-bottom: 20px; color: #333333;">${form.motivo || '[Motivo del bloqueo]'}</p>
+    <p style="margin-bottom: 20px; color: #333333;">Por tal motivo, solicito se pueda proceder con el bloqueo del lote mencionado, a fin de resguardar la disponibilidad y evitar cruces comerciales.</p>
+    <p style="margin-bottom: 20px; color: #333333;">Quedo atento a su confirmaci&oacute;n.</p>
+    <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
+    <p style="margin-top: 0; font-weight: bold; color: #333333;">${form.asesor || 'Oscar Saravia'}</p>
+  </div>`;
+};
+
+export const generarHtmlMemorandum = (form) => {
+  let asesoresHtml = "";
+  form.asesores.forEach(a => {
+    if(a.nombre) asesoresHtml += `<li style="margin-bottom: 10px;"><strong>${a.nombre}:</strong> Registra una colocaci&oacute;n actual de <strong>${a.colocacion}</strong>, lo cual representa una brecha cr&iacute;tica frente a su compromiso de <strong>${a.compromiso}</strong>.</li>`;
+  });
+  return `
+  <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
+    <p style="margin-bottom: 20px; color: #333333;">Buenas noches estimado Ulrich,</p>
+    <p style="margin-bottom: 20px; color: #333333;">Me dirijo a ti para solicitar formalmente la emisi&oacute;n de un <strong>memor&aacute;ndum de llamada de atenci&oacute;n</strong> para los asesores de mi equipo comercial detallados abajo. El motivo de esta solicitud es el incumplimiento reiterado de sus m&eacute;tricas de ventas, ya que llevan dos meses consecutivos sin alcanzar el m&iacute;nimo comisionable establecido.</p>
+    <p style="margin-bottom: 15px; color: #333333;">De acuerdo con el cierre de proyecciones y resultados del mes de <strong>${form.mes || '[Mes]'}</strong>, el detalle de su rendimiento es el siguiente:</p>
+    <ul style="margin-bottom: 20px; color: #333333;">${asesoresHtml}</ul>
+    <p style="margin-bottom: 20px; color: #333333;">Adjunto a este correo el cuadro de proyecci&oacute;n y seguimiento de metas de ${form.mes || '[Mes]'} como respaldo documental, donde podr&aacute;s verificar los datos se&ntilde;alados en rojo.</p>
+    <p style="margin-bottom: 20px; color: #333333;">Agradezco de antemano tu apoyo para gestionar estas llamadas de atenci&oacute;n a la brevedad, con el fin de dejar constancia formal en sus expedientes y proceder con las medidas de seguimiento correspondientes.</p>
+    <p style="margin-bottom: 20px; color: #333333;">Quedo atento por si necesitas alguna informaci&oacute;n o informe adicional de mi parte para procesar este requerimiento.</p>
+    <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
+    <p style="margin-top: 0; font-weight: bold; color: #333333;">${form.asesor || 'Oscar Saravia'}</p>
+  </div>`;
+};
