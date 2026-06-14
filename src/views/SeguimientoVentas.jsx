@@ -1,45 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { Target, TrendingUp } from 'lucide-react';
+import { Target, TrendingUp, RefreshCw } from 'lucide-react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { formatCurrency } from '../utils/formatters';
 
 export default function SeguimientoVentas() {
-  // CARGA OPTIMISTA: Memoria instantánea para nunca mostrar ceros
-  const [asesores, setAsesores] = useState(() => {
-    const cached = localStorage.getItem('seguimiento_cache_v2');
-    return cached ? JSON.parse(cached) : [];
-  });
+  const [asesores, setAsesores] = useState([]);
+  const [cargando, setCargando] = useState(true);
 
-  // CONEXIÓN A LA NUBE EN TIEMPO REAL
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "proyecciones"), (snapshot) => {
       let todosLosAsesores = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
         if (data && data.asesores) {
-          data.asesores.forEach(a => {
-            todosLosAsesores.push({ ...a, equipo: doc.id }); // doc.id asegura el nombre correcto del supervisor
-          });
+          data.asesores.forEach(a => { todosLosAsesores.push({ ...a, equipo: doc.id }); });
         }
       });
-      
-      // ORDENAR AUTOMÁTICAMENTE POR COLOCACIÓN
       todosLosAsesores.sort((a, b) => (Number(b.colAct) || 0) - (Number(a.colAct) || 0));
-      
       setAsesores(todosLosAsesores);
-      localStorage.setItem('seguimiento_cache_v2', JSON.stringify(todosLosAsesores)); // Guarda en memoria
+      setCargando(false);
     }, (error) => {
-      console.error("Error al sincronizar Seguimiento:", error);
+      console.error("Error Firebase:", error);
+      setCargando(false);
     });
-    
     return () => unsubscribe();
   }, []);
 
   const asesoresNuevos = ['NEFI ELIAS CHAVEZ', 'TERESITA CARDOZO AGUIRRE', 'GUICELA ARIAS', 'HUMBERTO FALDIN PARAPAINO'];
   const nombresProyectos = ['Muyurina', 'Renacer', 'Santa Fe', 'Rancho Nuevo', 'Jardines'];
 
-  // Variables para las Gráficas
   const ventasPorDia = [0, 0, 0, 0, 0, 0, 0];
   const ventasPorProyecto = [0, 0, 0, 0, 0];
 
@@ -47,20 +37,16 @@ export default function SeguimientoVentas() {
     const nombreUpper = asesor.nombre.toUpperCase();
     const esNuevo = asesoresNuevos.some(nuevo => nombreUpper.includes(nuevo));
 
-    // Llenar datos de gráficas por Día
-    if (asesor.dias) {
-      asesor.dias.forEach((d, i) => { ventasPorDia[i] += (Number(d) || 0); });
-    }
+    if (asesor.dias) asesor.dias.forEach((d, i) => { ventasPorDia[i] += (Number(d) || 0); });
     
-    // Llenar datos de gráficas por Proyecto y contar Ventas
     let totalVentas = 0;
-    if (asesor.proy) {
-      asesor.proy.forEach((p, i) => { 
-        const cant = Number(p) || 0;
-        ventasPorProyecto[i] += cant; 
-        totalVentas += cant;
-      });
-    }
+    // PBI INTELIGENTE: Lee estrictamente las ventas reales guardadas en la Bóveda
+    const ventasReales = asesor.ventasReales || [0, 0, 0, 0, 0];
+    ventasReales.forEach((p, i) => { 
+      const cant = Number(p) || 0;
+      ventasPorProyecto[i] += cant; 
+      totalVentas += cant;
+    });
 
     const colocacion = Number(asesor.colAct) || 0;
     let clusterInfo = { texto: 'Venta Cero', color: 'text-slate-400 font-semibold' };
@@ -77,24 +63,27 @@ export default function SeguimientoVentas() {
   const maxVentaDia = Math.max(...ventasPorDia, 1);
   const maxVentaProy = Math.max(...ventasPorProyecto, 1);
 
-  // Fallback visual preventivo por si no hay asesores aún
-  const totalAsesores = datosProcesados.length > 0 ? datosProcesados.length : 12; 
+  const totalAsesores = datosProcesados.length > 0 ? datosProcesados.length : 12;
   const totalNuevos = datosProcesados.filter(a => a.tipo === 'NUEVO').length || 0;
   const totalAntiguos = totalAsesores - totalNuevos;
   const productivos = datosProcesados.filter(a => a.colocacion >= 25000).length || 0;
   const productividad = totalAsesores > 0 ? Math.round((productivos / totalAsesores) * 100) : 0;
 
-  return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
-      <div className="mb-6 flex justify-between items-end">
-        <h2 className="text-2xl font-bold text-slate-800 flex items-center"><Target className="w-6 h-6 mr-2 text-indigo-600" /> Detalle de Asesor Mes en Curso</h2>
+  if (cargando) {
+    return (
+      <div className="flex flex-col items-center justify-center h-96 text-slate-500 animate-pulse">
+        <RefreshCw className="w-12 h-12 text-indigo-500 mb-4 animate-spin" />
+        <p className="text-lg font-bold">Procesando Métricas de Ventas Acumuladas...</p>
       </div>
+    );
+  }
 
-      {/* TARJETAS DE KPIS SUPERIORES Y GRÁFICAS */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 w-full">
-        
-        {/* TARJETA 1: Asesores */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-center min-w-0">
+  return (
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="mb-6 flex justify-between items-end"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><Target className="w-6 h-6 mr-2 text-indigo-600" /> Detalle de Asesor Mes en Curso</h2></div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-center">
           <p className="text-sm font-bold text-slate-500 mb-4">Asesores</p>
           <div className="grid grid-cols-3 divide-x divide-slate-100 text-center">
             <div><p className="text-3xl font-black text-slate-800">{totalAsesores}</p><p className="text-[10px] text-slate-400 font-semibold uppercase mt-1">Total</p></div>
@@ -107,16 +96,13 @@ export default function SeguimientoVentas() {
           </div>
         </div>
 
-        {/* TARJETA 2: Ventas por Fecha */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between min-w-0">
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
           <p className="text-sm font-bold text-slate-700 flex items-center mb-6"><TrendingUp className="w-4 h-4 mr-2 text-blue-500"/> Ventas por Fecha (Semana)</p>
           <div className="flex items-end justify-between h-28 w-full gap-2 px-2">
             {ventasPorDia.map((v, i) => (
               <div key={i} className="flex flex-col items-center w-full group relative">
                 <div className="w-full bg-blue-100 rounded-t-md relative transition-all duration-500 group-hover:bg-blue-300" style={{ height: `${maxVentaDia > 0 ? (v / maxVentaDia) * 100 : 0}%`, minHeight: v > 0 ? '4px' : '0px' }}>
-                  <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-[9px] font-bold text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity bg-white shadow-sm px-1.5 py-0.5 rounded border border-slate-200 z-10 whitespace-nowrap">
-                    ${formatCurrency(v)}
-                  </div>
+                  <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-[9px] font-bold text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity bg-white shadow-sm px-1.5 py-0.5 rounded border border-slate-200 z-10 whitespace-nowrap">${formatCurrency(v)}</div>
                 </div>
                 <p className="text-[10px] font-semibold text-slate-400 mt-2">D{i+1}</p>
               </div>
@@ -124,9 +110,8 @@ export default function SeguimientoVentas() {
           </div>
         </div>
 
-        {/* TARJETA 3: Ventas por Proyecto */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between min-w-0">
-          <p className="text-sm font-bold text-slate-700 flex items-center mb-4"><Target className="w-4 h-4 mr-2 text-emerald-500"/> Ventas por Proyecto</p>
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
+          <p className="text-sm font-bold text-slate-700 flex items-center mb-4"><Target className="w-4 h-4 mr-2 text-emerald-500"/> Ventas por Proyecto Acumuladas</p>
           <div className="space-y-3.5 w-full">
             {nombresProyectos.map((nombre, i) => (
               <div key={i} className="flex items-center text-xs">
@@ -141,8 +126,7 @@ export default function SeguimientoVentas() {
         </div>
       </div>
 
-      {/* TABLA ESTILO POWER BI */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden w-full">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs whitespace-nowrap">
             <thead>
@@ -158,24 +142,18 @@ export default function SeguimientoVentas() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {datosProcesados.length > 0 ? (
-                datosProcesados.map((asesor, index) => (
-                  <tr key={index} className="hover:bg-slate-50 transition-colors">
-                    <td className="p-3 text-slate-600 font-semibold">{asesor.nombre}</td>
-                    <td className="p-3 text-slate-500 text-center">{asesor.agencia}</td>
-                    <td className="p-3 text-slate-500 text-center">{asesor.supervisor}</td>
-                    <td className="p-3 text-slate-800 font-black text-center text-sm bg-slate-50/50">{asesor.ventas}</td>
-                    <td className="p-3 text-sky-700 font-bold text-right">{formatCurrency(asesor.colocacion)}</td>
-                    <td className="p-3 text-slate-600 text-center font-medium">{asesor.tipo}</td>
-                    <td className="p-3 text-slate-500 text-right">{formatCurrency(asesor.minima)}</td>
-                    <td className={`p-3 text-center ${asesor.cluster.color}`}>{asesor.cluster.texto}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="8" className="p-8 text-center text-slate-400 font-semibold">Cargando métricas de asesores...</td>
+              {datosProcesados.length > 0 ? datosProcesados.map((asesor, index) => (
+                <tr key={index} className="hover:bg-slate-50 transition-colors">
+                  <td className="p-3 text-slate-600 font-semibold">{asesor.nombre}</td>
+                  <td className="p-3 text-slate-500 text-center">{asesor.agencia}</td>
+                  <td className="p-3 text-slate-500 text-center">{asesor.supervisor}</td>
+                  <td className="p-3 text-slate-800 font-black text-center text-sm bg-slate-50/50">{asesor.ventas}</td>
+                  <td className="p-3 text-sky-700 font-bold text-right">{formatCurrency(asesor.colocacion)}</td>
+                  <td className="p-3 text-slate-600 text-center font-medium">{asesor.tipo}</td>
+                  <td className="p-3 text-slate-500 text-right">{formatCurrency(asesor.minima)}</td>
+                  <td className={`p-3 text-center ${asesor.cluster.color}`}>{asesor.cluster.texto}</td>
                 </tr>
-              )}
+              )) : <tr><td colSpan="8" className="p-8 text-center text-slate-400 font-semibold">Esperando registros...</td></tr>}
             </tbody>
           </table>
         </div>
