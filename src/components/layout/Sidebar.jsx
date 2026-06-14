@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   LayoutDashboard, BarChart, CalendarDays, Target, Calculator, Repeat, Tag, 
   TrendingUp, PhoneCall, FileText, FileSignature, Shield, UserMinus, UserPlus, 
-  ClipboardCheck, UserCheck, Building2, X 
+  ClipboardCheck, UserCheck, Building2, X, Lock, PhoneForwarded, AlertOctagon 
 } from 'lucide-react';
 
 export const Sidebar = ({ activeTab, setActiveTab, isOpen, closeSidebar, setSupervisorDestino }) => {
@@ -72,18 +72,21 @@ export const Sidebar = ({ activeTab, setActiveTab, isOpen, closeSidebar, setSupe
           <NavItem id="recompra" icon={Repeat} label="Recompra" />
           <NavItem id="descuento" icon={Tag} label="Descuentos Campañas" />
           <NavItem id="cuota" icon={TrendingUp} label="Inc. Cuota Inicial" />
+          <NavItem id="bloqueoLote" icon={Lock} label="Bloqueo de Lote" />
 
           <NavSection title="Trámites Generales" />
           <NavItem id="llamada" icon={PhoneCall} label="Validación Llamada" />
           <NavItem id="fisico" icon={FileText} label="Contrato Físico" />
           <NavItem id="reenvio" icon={FileSignature} label="Reenvío Firma Digital" />
           <NavItem id="seguro" icon={Shield} label="Seguro de Vida" />
+          <NavItem id="pendienteValidacion" icon={PhoneForwarded} label="Pend. de Validación" />
 
           <NavSection title="Recursos Humanos (RRHH)" />
           <NavItem id="renuncia" icon={UserMinus} label="Carta de Renuncia" />
           <NavItem id="altaCrm" icon={UserPlus} label="Alta Usuarios CRM" />
           <NavItem id="evaluacion" icon={ClipboardCheck} label="Evaluación Fin de Mes" />
           <NavItem id="postulante" icon={UserCheck} label="Postulante Nuevo" />
+          <NavItem id="memorandum" icon={AlertOctagon} label="Solicitud Memorándum" />
         </nav>
         
         <div className="p-5 border-t border-slate-800/50 bg-slate-950/30 shrink-0">
