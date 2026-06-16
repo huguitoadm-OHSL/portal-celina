@@ -4,15 +4,10 @@ import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { formatCurrency } from '../utils/formatters';
 
-const PROYECTOS_ACTUALIZADOS = ['Muyurina', 'Renacer', 'Santa Fe', 'Rancho Nuevo', 'Jardines', 'Celina VII F3'];
+const PROYECTOS_ACTUALIZADOS = ['Muyurina', 'Renacer', 'Santa Fe', 'Rancho Nuevo', 'Jardines', 'Celina VII F3', 'Cañaveral'];
 
 export default function SeguimientoVentas() {
-  const [asesores, setAsesores] = useState(() => {
-    try {
-      const cached = localStorage.getItem('seguimiento_cache_v3');
-      return cached ? JSON.parse(cached) : [];
-    } catch (e) { return []; }
-  });
+  const [asesores, setAsesores] = useState([]);
   const [sincronizando, setSincronizando] = useState(true);
 
   useEffect(() => {
@@ -20,14 +15,15 @@ export default function SeguimientoVentas() {
       let todosLosAsesores = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
-        if (data && data.asesores) {
-          data.asesores.forEach(a => { todosLosAsesores.push({ ...a, equipo: doc.id }); });
+        if (data && Array.isArray(data.asesores)) {
+          data.asesores.forEach(a => { 
+            if (a && a.nombre) todosLosAsesores.push({ ...a, equipo: doc.id }); 
+          });
         }
       });
       todosLosAsesores.sort((a, b) => (Number(b.colAct) || 0) - (Number(a.colAct) || 0));
       
       setAsesores(todosLosAsesores);
-      localStorage.setItem('seguimiento_cache_v3', JSON.stringify(todosLosAsesores));
       setSincronizando(false);
     }, (error) => {
       console.error("Error Firebase:", error);
@@ -36,22 +32,31 @@ export default function SeguimientoVentas() {
     return () => unsubscribe();
   }, []);
 
+  // CLASIFICACIÓN DE PERSONAL
   const asesoresNuevos = ['NEFI ELIAS CHAVEZ', 'TERESITA CARDOZO AGUIRRE', 'GUICELA ARIAS', 'HUMBERTO FALDIN PARAPAINO'];
+  const asesoresExternos = ['MADELINE CARBALLO'];
 
   const ventasPorDia = [0, 0, 0, 0, 0, 0, 0];
-  const ventasPorProyecto = [0, 0, 0, 0, 0, 0]; // Ahora son 6 posiciones
+  const ventasPorProyecto = [0, 0, 0, 0, 0, 0, 0]; // 7 posiciones
 
   const datosProcesados = asesores.map(asesor => {
-    const nombreUpper = asesor.nombre ? asesor.nombre.toUpperCase() : '';
+    const nombreUpper = String(asesor.nombre || 'ASESOR DESCONOCIDO').toUpperCase();
+    
+    // ASIGNACIÓN DE TIPO
     const esNuevo = asesoresNuevos.some(nuevo => nombreUpper.includes(nuevo));
+    const esExterna = asesoresExternos.some(ext => nombreUpper.includes(ext));
+    
+    let tipoAsesor = 'INTERNO';
+    if (esNuevo) tipoAsesor = 'NUEVO';
+    else if (esExterna) tipoAsesor = 'EXTERNO';
 
-    if (asesor.dias) asesor.dias.forEach((d, i) => { ventasPorDia[i] += (Number(d) || 0); });
+    if (Array.isArray(asesor.dias)) asesor.dias.forEach((d, i) => { ventasPorDia[i] += (Number(d) || 0); });
     
     let totalVentas = 0;
-    const ventasReales = asesor.ventasReales || [0, 0, 0, 0, 0, 0];
+    const ventasReales = Array.isArray(asesor.ventasReales) ? asesor.ventasReales : [0, 0, 0, 0, 0, 0, 0];
     ventasReales.forEach((p, i) => { 
       const cant = Number(p) || 0;
-      if (i < 6) {
+      if (i < 7) {
         ventasPorProyecto[i] += cant; 
         totalVentas += cant;
       }
@@ -64,7 +69,7 @@ export default function SeguimientoVentas() {
 
     return {
       nombre: nombreUpper, agencia: 'MONTERO', supervisor: asesor.equipo.toUpperCase(),
-      ventas: totalVentas, colocacion: colocacion, tipo: esNuevo ? 'NUEVO' : 'INTERNO',
+      ventas: totalVentas, colocacion: colocacion, tipo: tipoAsesor,
       minima: 25000, cluster: clusterInfo
     };
   });
@@ -92,7 +97,7 @@ export default function SeguimientoVentas() {
           <p className="text-sm font-bold text-slate-500 mb-4">Asesores</p>
           <div className="grid grid-cols-3 divide-x divide-slate-100 text-center">
             <div><p className="text-3xl font-black text-slate-800">{totalAsesores}</p><p className="text-[10px] text-slate-400 font-semibold uppercase mt-1">Total</p></div>
-            <div><p className="text-3xl font-black text-slate-800">{totalAntiguos}</p><p className="text-[10px] text-slate-400 font-semibold uppercase mt-1">Antiguos</p></div>
+            <div><p className="text-3xl font-black text-slate-800">{totalAntiguos}</p><p className="text-[10px] text-slate-400 font-semibold uppercase mt-1">Planta/Ext</p></div>
             <div><p className="text-3xl font-black text-sky-600">{totalNuevos}</p><p className="text-[10px] text-sky-500/70 font-semibold uppercase mt-1">Nuevos</p></div>
           </div>
           <div className="mt-5 pt-4 border-t border-slate-100 grid grid-cols-2 divide-x divide-slate-100 text-center">
@@ -158,7 +163,7 @@ export default function SeguimientoVentas() {
                   <td className="p-3 text-slate-500 text-right">{formatCurrency(asesor.minima)}</td>
                   <td className={`p-3 text-center ${asesor.cluster.color}`}>{asesor.cluster.texto}</td>
                 </tr>
-              )) : <tr><td colSpan="8" className="p-8 text-center text-slate-400 font-semibold">Iniciando plataforma...</td></tr>}
+              )) : <tr><td colSpan="8" className="p-8 text-center text-slate-400 font-semibold">Plataforma limpia. Esperando registros...</td></tr>}
             </tbody>
           </table>
         </div>
