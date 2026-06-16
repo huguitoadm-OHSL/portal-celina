@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Save, Cloud, CheckCircle2 } from 'lucide-react';
+import { BarChart, Cloud, CheckCircle2 } from 'lucide-react';
 import { ResultCard } from '../components/ui/ResultCard';
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
-import { formatDiaMes } from '../utils/formatters';
+import { formatDiaMes, formatCurrency } from '../utils/formatters';
 import { obtenerDatosSupervisor } from '../utils/calculadoras';
 import { generarTextoProyeccionCelular } from '../utils/textTemplates';
 import { generarHtmlProyeccion } from '../utils/htmlTemplates';
@@ -32,17 +32,15 @@ export default function ProyeccionSemanal() {
     asesores: BASE_DE_DATOS_PBI.map(a => ({ ...a, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }))
   });
 
-  // ANTENA RECEPTORA: Descarga las proyecciones desde la nube al abrir la app
   useEffect(() => {
     const unsubscribe = onSnapshot(doc(db, "proyecciones_dinamicas", "Oscar Saravia"), (docSnap) => {
       if (docSnap.exists()) {
         const dataNube = docSnap.data();
         setFormProyeccion(prev => {
-          // Fusiona el dinero real de PBI con las proyecciones de la nube
           const asesoresFusionados = BASE_DE_DATOS_PBI.map((asesorBase, index) => {
             const asesorNube = dataNube.asesores && dataNube.asesores[index] ? dataNube.asesores[index] : {};
             return {
-              ...asesorBase, // Mantiene los colAct reales inmutables
+              ...asesorBase,
               dias: asesorNube.dias && asesorNube.dias.length === 7 ? asesorNube.dias : [0,0,0,0,0,0,0],
               proy: asesorNube.proy && asesorNube.proy.length === 7 ? asesorNube.proy : [0,0,0,0,0,0,0]
             };
@@ -65,7 +63,6 @@ export default function ProyeccionSemanal() {
     return () => unsubscribe();
   }, []);
 
-  // TRANSMISOR: Envía los datos a la nube silenciosamente
   const syncToCloud = async (newState) => {
     setGuardandoNube(true);
     setEstadoSincronizacion('Guardando...');
@@ -87,7 +84,6 @@ export default function ProyeccionSemanal() {
     }
   };
 
-  // ACTUALIZACIÓN LOCAL INMEDIATA (Para que el teclado no se trabe)
   const handleLocalArrayChange = (idx, type, arrIdx, val) => {
     const n = [...formProyeccion.asesores];
     n[idx] = { ...n[idx] }; 
@@ -101,7 +97,6 @@ export default function ProyeccionSemanal() {
     setFormProyeccion(newState);
   };
 
-  // DISPARADOR A LA NUBE: Ocurre cuando cambias de casilla (OnBlur)
   const handleBlurSave = () => {
     syncToCloud(formProyeccion);
   };
@@ -112,7 +107,6 @@ export default function ProyeccionSemanal() {
     syncToCloud(newState);
   };
 
-  // Función para resetear las casillas de la semana
   const limpiarSemana = () => {
     if(window.confirm("¿Seguro que deseas limpiar las proyecciones de esta semana para todo el equipo?")) {
       const asesoresLimpios = formProyeccion.asesores.map(a => ({ ...a, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }));
@@ -132,7 +126,6 @@ export default function ProyeccionSemanal() {
           <h2 className="text-2xl font-bold text-slate-800 flex items-center">
             <BarChart className="w-6 h-6 mr-2 text-blue-600" /> Proyección Semanal
             
-            {/* INDICADOR VISUAL DE SINCRONIZACIÓN PARA EL EQUIPO */}
             <span className={`ml-3 text-xs font-bold flex items-center px-2 py-1 rounded border ${estadoSincronizacion === 'Sincronizado' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : estadoSincronizacion === 'Guardando...' ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
               {estadoSincronizacion === 'Sincronizado' ? <CheckCircle2 className="w-3 h-3 mr-1"/> : <Cloud className="w-3 h-3 mr-1"/>} 
               {estadoSincronizacion}
@@ -174,19 +167,17 @@ export default function ProyeccionSemanal() {
                 {formProyeccion.asesores.map((asesor, i) => (
                   <tr key={i} className="hover:bg-blue-50/50 transition-colors">
                     <td className="p-2 border border-slate-300 font-bold text-slate-800 truncate max-w-[130px]">{i+1}. {asesor.nombre}</td>
-                    {/* COLOCACIÓN INMUTABLE LECTURA DESDE PBI */}
+                    {/* COLOCACIÓN INMUTABLE LECTURA DESDE PBI - DISEÑO ELEGANTE Y LIMPIO */}
                     <td className="p-2 border border-slate-300 font-black text-emerald-700 text-right bg-emerald-50/30">
                       ${asesor.colAct > 0 ? formatCurrency(asesor.colAct) : '0'}
                     </td>
                     
-                    {/* CUADRÍCULA DE PROYECCIÓN DIARIA */}
                     {asesor.dias.map((d, dIdx) => (
                       <td key={dIdx} className="p-1 border border-slate-300">
                         <input type="number" value={d === 0 ? '' : d} onChange={(e) => handleLocalArrayChange(i, 'dias', dIdx, e.target.value)} onBlur={handleBlurSave} className="w-full min-w-[30px] p-1 text-center bg-transparent outline-none focus:bg-white focus:ring-2 focus:ring-blue-400 rounded transition-all" placeholder="-" />
                       </td>
                     ))}
                     
-                    {/* CUADRÍCULA DE PROYECTOS POSIBLES */}
                     {asesor.proy.map((p, pIdx) => (
                       <td key={pIdx} className="p-1 border border-slate-300 bg-sky-50/30">
                         <input type="number" value={p === 0 ? '' : p} onChange={(e) => handleLocalArrayChange(i, 'proy', pIdx, e.target.value)} onBlur={handleBlurSave} className="w-full min-w-[30px] p-1 text-center font-bold text-sky-700 bg-transparent outline-none focus:bg-white focus:ring-2 focus:ring-sky-400 rounded transition-all" placeholder="0" />
