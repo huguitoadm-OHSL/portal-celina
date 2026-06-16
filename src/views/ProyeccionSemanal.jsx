@@ -10,7 +10,8 @@ import { obtenerDatosSupervisor } from '../utils/calculadoras';
 import { generarTextoProyeccionCelular } from '../utils/textTemplates';
 import { generarHtmlProyeccion } from '../utils/htmlTemplates';
 
-const PROYECTOS_ACTUALIZADOS = ['Muyurina', 'Renacer', 'Santa Fe', 'Rancho Nuevo', 'Jardines', 'Celina VII F3'];
+// ¡NUEVO PROYECTO CAÑAVERAL AGREGADO!
+const PROYECTOS_ACTUALIZADOS = ['Muyurina', 'Renacer', 'Santa Fe', 'Rancho Nuevo', 'Jardines', 'Celina VII F3', 'Cañaveral'];
 
 export default function ProyeccionSemanal() {
   const [equipoSeleccionado, setEquipoSeleccionado] = useState('Oscar Saravia');
@@ -26,10 +27,9 @@ export default function ProyeccionSemanal() {
   const [formProyeccion, setFormProyeccion] = useState({
     equipo: 'Oscar Saravia', fechaInicio: new Date().toISOString().split('T')[0],
     objetivoMensual: OBJETIVOS_MENSUALES['Oscar Saravia'] || 450000,
-    asesores: EQUIPOS_ASESORES['Oscar Saravia'].map(a => ({ nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0] }))
+    asesores: EQUIPOS_ASESORES['Oscar Saravia'].map(a => ({ nombre: a.nombre, colAct: a.colAct, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0,0] }))
   });
 
-  // SOLUCIÓN DEFINITIVA: Carga inicial segura con getDoc (No choca con el teclado)
   useEffect(() => {
     const cargarDatos = async () => {
       setCargandoNube(true);
@@ -40,12 +40,15 @@ export default function ProyeccionSemanal() {
         if (docSnap.exists()) {
           const dataNube = docSnap.data();
           if (dataNube && Array.isArray(dataNube.asesores)) {
-            const asesoresAsegurados = dataNube.asesores.map(a => ({
-              ...a,
-              proy: a.proy && a.proy.length === 6 ? a.proy : [0,0,0,0,0,0],
-              ventasReales: a.ventasReales && a.ventasReales.length === 6 ? a.ventasReales : [0,0,0,0,0,0],
-              dias: a.dias && a.dias.length === 7 ? a.dias : [0,0,0,0,0,0,0]
-            }));
+            const asesoresAsegurados = dataNube.asesores.map(a => {
+              // Expansión dinámica para que los arreglos antiguos de 6 crezcan a 7 sin romperse
+              const safeProy = Array.isArray(a.proy) ? [...a.proy, 0,0,0,0,0,0,0].slice(0, 7) : [0,0,0,0,0,0,0];
+              const safeVentasReales = Array.isArray(a.ventasReales) ? [...a.ventasReales, 0,0,0,0,0,0,0].slice(0, 7) : [0,0,0,0,0,0,0];
+              const safeDias = Array.isArray(a.dias) ? [...a.dias, 0,0,0,0,0,0,0].slice(0, 7) : [0,0,0,0,0,0,0];
+              
+              return { ...a, proy: safeProy, ventasReales: safeVentasReales, dias: safeDias };
+            });
+
             setFormProyeccion({
               equipo: equipoSeleccionado,
               asesores: asesoresAsegurados,
@@ -60,7 +63,6 @@ export default function ProyeccionSemanal() {
     cargarDatos();
   }, [equipoSeleccionado]);
 
-  // MOTOR DE GUARDADO AUTOMÁTICO
   const syncToCloud = async (newState) => {
     setGuardando(true);
     try {
@@ -104,7 +106,7 @@ export default function ProyeccionSemanal() {
       const n = [...formProyeccion.asesores];
       n[sumaVentaModal.index] = { ...n[sumaVentaModal.index] };
       n[sumaVentaModal.index].colAct = (parseFloat(n[sumaVentaModal.index].colAct) || 0) + m;
-      if (!n[sumaVentaModal.index].ventasReales) n[sumaVentaModal.index].ventasReales = [0,0,0,0,0,0];
+      if (!n[sumaVentaModal.index].ventasReales || n[sumaVentaModal.index].ventasReales.length < 7) n[sumaVentaModal.index].ventasReales = [0,0,0,0,0,0,0];
       if (proyIndex !== -1) n[sumaVentaModal.index].ventasReales[proyIndex] += cant;
       
       const newState = { ...formProyeccion, asesores: n };
@@ -114,21 +116,22 @@ export default function ProyeccionSemanal() {
     setSumaVentaModal({ show: false, index: null, nombre: '', monto: '', proyecto: PROYECTOS_ACTUALIZADOS[0], cantidad: 1 });
   };
 
+  // INYECCIÓN ACTUALIZADA CON MADELINE Y MARISOL
   const inyectarHistorialMaestro = async () => {
     const asesoresHistorial = [
-      { nombre: "MARISOL URGEL PIZARRO", colAct: 24984, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [1,0,0,0,0,0] }, 
-      { nombre: "CARLOS ENRIQUE CALDERON", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0] },
-      { nombre: "ELY GONZALES GARCIA", colAct: 7200, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,0,0,0,0,1] }, 
-      { nombre: "RODRIGO ROJAS SILES", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0] },
-      { nombre: "JAIME F. RIOS CASTRO", colAct: 7500, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,1,0,0,0,0] }, 
-      { nombre: "MERLY MENDEZ HURTADO", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0] },
-      { nombre: "GLORIANA SILVA ALMENDA", colAct: 13200, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,2,0,0,0,0] }, 
-      { nombre: "DANIEL ANGULO MALDONADO", colAct: 45000, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,6,0,0,0,0] }, 
-      { nombre: "NEFI ELIAS CHAVEZ", colAct: 45278, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [1,1,0,0,0,0] }, 
-      { nombre: "TERESITA CARDOZO AGUIRRE", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0] },
-      { nombre: "GUICELA ARIAS", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0] },
-      { nombre: "HUMBERTO FALDIN PARAPAINO", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0] }
-      { nombre: "MADELINE CARBALLO", colAct: 12874, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0] }
+      { nombre: "MARISOL URGEL PIZARRO", colAct: 38484, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0], ventasReales: [1,1,0,0,1,0,0] }, 
+      { nombre: "CARLOS ENRIQUE CALDERON", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0,0] },
+      { nombre: "ELY GONZALES GARCIA", colAct: 7200, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0], ventasReales: [0,0,0,0,0,1,0] }, 
+      { nombre: "RODRIGO ROJAS SILES", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0,0] },
+      { nombre: "JAIME F. RIOS CASTRO", colAct: 7500, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0], ventasReales: [0,1,0,0,0,0,0] }, 
+      { nombre: "MERLY MENDEZ HURTADO", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0,0] },
+      { nombre: "GLORIANA SILVA ALMENDA", colAct: 13200, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0], ventasReales: [0,2,0,0,0,0,0] }, 
+      { nombre: "DANIEL ANGULO MALDONADO", colAct: 45000, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0], ventasReales: [0,6,0,0,0,0,0] }, 
+      { nombre: "NEFI ELIAS CHAVEZ", colAct: 45278, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0], ventasReales: [1,1,0,0,0,0,0] }, 
+      { nombre: "TERESITA CARDOZO AGUIRRE", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0,0] },
+      { nombre: "GUICELA ARIAS", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0,0] },
+      { nombre: "HUMBERTO FALDIN PARAPAINO", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0,0] },
+      { nombre: "MADELINE CARBALLO", colAct: 12874, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0,1] }
     ];
     try {
       await setDoc(doc(db, "proyecciones", "Oscar Saravia"), {
@@ -147,7 +150,7 @@ export default function ProyeccionSemanal() {
     return (
       <div className="flex flex-col items-center justify-center h-96 text-slate-500 animate-pulse">
         <RefreshCw className="w-12 h-12 text-blue-500 mb-4 animate-spin" />
-        <p className="text-lg font-bold">Asegurando Base de Datos...</p>
+        <p className="text-lg font-bold">Cargando Sistema de Proyecciones...</p>
       </div>
     );
   }
@@ -157,11 +160,11 @@ export default function ProyeccionSemanal() {
       
       <div className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl p-4 mb-6 text-white shadow-lg flex items-center justify-between">
         <div>
-          <h3 className="font-black text-lg flex items-center"><Database className="mr-2" /> Restauración de Historial</h3>
-          <p className="text-sm opacity-90">Presiona para restaurar al instante los datos y solucionar cualquier pantalla en blanco.</p>
+          <h3 className="font-black text-lg flex items-center"><Database className="mr-2" /> Actualización de Base de Datos</h3>
+          <p className="text-sm opacity-90">Presiona para agregar a Madeline Carballo y sincronizar las 3 ventas recientes de Marisol.</p>
         </div>
         <button onClick={inyectarHistorialMaestro} className="bg-white text-orange-600 font-bold px-6 py-2 rounded-lg shadow-md hover:scale-105 transition-transform">
-          {inyeccionExitosa ? '¡RESTAURACIÓN EXITOSA! ✅' : 'Restaurar Datos Ahora'}
+          {inyeccionExitosa ? '¡ACTUALIZADO! ✅' : 'Actualizar Datos Ahora'}
         </button>
       </div>
 
@@ -187,7 +190,8 @@ export default function ProyeccionSemanal() {
                   <th rowSpan="2" className="bg-[#f8fafc] text-slate-800 p-2 border border-slate-300">Asesor</th>
                   <th rowSpan="2" className="bg-[#f8fafc] text-slate-800 p-2 border border-slate-300 text-center">Colocación</th>
                   <th colSpan="7" className="bg-[#f1f5f9] text-slate-700 p-2 border border-slate-300 text-center uppercase">Proyección Diaria</th>
-                  <th colSpan="6" className="bg-[#eff6ff] text-sky-800 p-2 border border-slate-300 text-center uppercase">Proyectos (Proyección)</th>
+                  {/* AQUÍ EXPANDIMOS PARA LOS 7 PROYECTOS */}
+                  <th colSpan="7" className="bg-[#eff6ff] text-sky-800 p-2 border border-slate-300 text-center uppercase">Proyectos (Proyección)</th>
                 </tr>
                 <tr>
                   {[0,1,2,3,4,5,6].map(d => <th key={d} className="bg-[#f8fafc] text-slate-600 p-2 border border-slate-300 text-center">{formatDiaMes(formProyeccion.fechaInicio, d)}</th>)}
