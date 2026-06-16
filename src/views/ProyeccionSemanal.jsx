@@ -128,6 +128,7 @@ export default function ProyeccionSemanal() {
       { nombre: "TERESITA CARDOZO AGUIRRE", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0] },
       { nombre: "GUICELA ARIAS", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0] },
       { nombre: "HUMBERTO FALDIN PARAPAINO", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0] }
+      { nombre: "MADELINE CARBALLO", colAct: 12874, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0], ventasReales: [0,0,0,0,0,0] }
     ];
     try {
       await setDoc(doc(db, "proyecciones", "Oscar Saravia"), {
