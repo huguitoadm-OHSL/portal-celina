@@ -45,6 +45,59 @@ export default function App() {
     document.body.style.margin = '0';
     document.body.style.display = 'block';
   }, []);
+  // ================= ESCUDO DE ENTRADA (OMSARAVIA) =================
+  const [autenticado, setAutenticado] = useState(() => {
+    return localStorage.getItem('acceso_portal_omsaravia') === 'PERMITIDO';
+  });
+  const [passInput, setPassInput] = useState('');
+  const [errorPass, setErrorPass] = useState(false);
+
+  const verificarPassword = (e) => {
+    e.preventDefault();
+    if (passInput.trim() === 'OMSARAVIA') {
+      localStorage.setItem('acceso_portal_omsaravia', 'PERMITIDO');
+      setAutenticado(true);
+    } else {
+      setErrorPass(true);
+      setTimeout(() => setErrorPass(false), 2500);
+    }
+  };
+
+  if (!autenticado) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-[#002060] to-blue-950 p-4">
+        <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/20 shadow-2xl max-w-sm w-full text-center animate-in fade-in zoom-in duration-500">
+          <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-600/50">
+            <span className="text-2xl">🔒</span>
+          </div>
+          <h2 className="text-2xl font-black text-white mb-1">Acceso Restringido</h2>
+          <p className="text-xs text-blue-200 mb-6 uppercase tracking-wider font-semibold">Portal de Liderazgo • Celina</p>
+          
+          <form onSubmit={verificarPassword} className="space-y-4">
+            <div>
+              <input 
+                type="password" 
+                autoFocus
+                value={passInput} 
+                onChange={(e) => setPassInput(e.target.value)} 
+                placeholder="Ingresa la contraseña..." 
+                className={`w-full px-4 py-3 rounded-xl bg-white/20 border ${errorPass ? 'border-red-500 text-red-200 placeholder:text-red-300 bg-red-500/10' : 'border-white/20 text-white placeholder:text-slate-300'} font-bold text-center tracking-widest outline-none focus:ring-2 focus:ring-blue-400 transition-all`}
+              />
+              {errorPass && <p className="text-xs font-bold text-red-400 mt-2">❌ Contraseña incorrecta</p>}
+            </div>
+            <button 
+              type="submit" 
+              className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-black rounded-xl shadow-lg transition-all transform hover:scale-[1.02]"
+            >
+              Entrar al Portal
+            </button>
+          </form>
+          <p className="text-[10px] text-slate-400 mt-6">Diseñado por Oscar Saravia ©</p>
+        </div>
+      </div>
+    );
+  }
+  // ================= FIN DEL ESCUDO =================
 
   const renderContent = () => {
     switch (activeTab) {
