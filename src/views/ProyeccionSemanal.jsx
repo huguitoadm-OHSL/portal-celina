@@ -12,8 +12,8 @@ const PROYECTOS_ACTUALIZADOS = ['Muyurina', 'Renacer', 'Santa Fe', 'Rancho Nuevo
 // LA BÓVEDA MAESTRA (Intacta y asegurada)
 const BASE_DE_DATOS_PROYECCION = [
   { nombre: "NEFI ELIAS CHAVEZ", colAct: 45278, dias: [0,0,0,0,0,0,25000], proy: [1,0,0,0,0,0,0] }, 
-  { nombre: "DANIEL ANGULO MALDONADO", colAct: 45000, dias: [0,0,0,9668,0,0,0], proy: [0,1,0,0,0,0,0] },
-  { nombre: "MARISOL URGEL PIZARRO", colAct: 38484, dias: [0,0,0,0,0,0,37000], proy: [0,0,0,0,0,1,0] }, 
+  { nombre: "DANIEL ANGULO MALDONADO", colAct: 45000, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
+  { nombre: "MARISOL URGEL PIZARRO", colAct: 38484, dias: [0,0,0,0,0,0,17000], proy: [0,0,0,0,0,1,0] }, 
   { nombre: "GLORIANA SILVA ALMENDA", colAct: 13200, dias: [0,0,0,0,6000,0,0], proy: [0,0,1,0,0,0,0] },
   { nombre: "MADELINE CARBALLO", colAct: 12874, dias: [0,0,0,0,0,14000,0], proy: [1,0,0,0,0,0,0] }, 
   { nombre: "JAIME FABRICIO RIOS", colAct: 7500, dias: [0,0,0,0,0,6600,0], proy: [0,0,1,0,0,0,0] },
