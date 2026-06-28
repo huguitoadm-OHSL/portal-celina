@@ -14,6 +14,7 @@ import Recompra from './views/Recompra';
 import DescuentosCampanas from './views/DescuentosCampanas';
 import IncrementoCuota from './views/IncrementoCuota';
 import BloqueoLote from './views/BloqueoLote';
+import LiquidacionContado from './views/LiquidacionContado';
 
 // Vistas - Trámites Generales
 import ValidacionLlamada from './views/ValidacionLlamada';
@@ -113,6 +114,7 @@ export default function App() {
       case 'descuento': return <DescuentosCampanas />;
       case 'cuota': return <IncrementoCuota />;
       case 'bloqueoLote': return <BloqueoLote />;
+      case 'liquidacionContado': return <LiquidacionContado />;
       
       // 3. Trámites Generales
       case 'llamada': return <ValidacionLlamada />;
