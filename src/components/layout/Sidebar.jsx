@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   LayoutDashboard, BarChart, CalendarDays, Target, Calculator, Repeat, Tag, 
   TrendingUp, PhoneCall, FileText, FileSignature, Shield, UserMinus, UserPlus, 
-  ClipboardCheck, UserCheck, Building2, X, Lock, PhoneForwarded, AlertOctagon 
+  ClipboardCheck, UserCheck, Building2, X, Lock, PhoneForwarded, AlertOctagon, KeyRound 
 } from 'lucide-react';
 
 export const Sidebar = ({ activeTab, setActiveTab, isOpen, closeSidebar, setSupervisorDestino }) => {
