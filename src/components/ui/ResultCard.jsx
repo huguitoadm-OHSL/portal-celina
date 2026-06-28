@@ -4,95 +4,102 @@ import { Copy, Check, Mail, ChevronDown, Clock } from 'lucide-react';
 export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDestino, setSupervisorDestino }) {
   const [copiado, setCopiado] = useState(false);
 
-  // ================= 1. BÓVEDA PRIORIZADA DE CONTACTOS =================
-  const MAPA_CORREOS = useMemo(() => [
-    // PRIORIDAD #1: TRÍADA EXACTA DE PLATAFORMA (Imágenes 2, 3 y 4)
-    // Atrapa Códigos, Validaciones de Llamada y Pendientes ANTES de que cualquier otra regla actúe.
-    {
-      pantallas: ["cód", "cod.", "código", "codigo", "llamada", "referidos", "validación", "validacion", "pendiente"],
-      contactos: [
-        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' },
-        { email: 'omendoza@celina.com.bo', nombre: 'Olivia Mendoza Duran', saludo: 'Estimada Olivia' },
-        { email: 'rmartinez@celina.com.bo', nombre: 'Rodolfo Martínez', saludo: 'Estimado Rodolfo' }
-      ]
-    },
-    // PRIORIDAD #2: RECOMPRA
-    {
-      pantallas: ["recompra"],
-      contactos: [
+  // ================= 1. DICCIONARIO EXACTO Y ORDENADO =================
+  const contactosDisponibles = useMemo(() => {
+    const tituloNormalizado = (title || "").toLowerCase();
+
+    // 1. RECOMPRA (Estricto para que no se confunda con nada)
+    if (tituloNormalizado.includes("recompra")) {
+      return [
         { email: 'cbarretto@celina.com.bo', nombre: 'Ing. Charles Barretto', saludo: 'Estimado Ing. Charles' },
         { email: 'csalvatierra@celina.com.bo', nombre: 'Cinthia Salvatierra', saludo: 'Estimada Cinthia' },
         { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' }
-      ]
-    },
-    // PRIORIDAD #3: RECURSOS HUMANOS (RRHH)
-    {
-      pantallas: ["renuncia", "crm", "evaluación", "evaluacion", "postulante", "memorándum", "memorandum", "rrhh"],
-      contactos: [
+      ];
+    }
+
+    // 2. PLATAFORMA (La Tríada Exacta de las imágenes 2, 3 y 4)
+    if (
+      tituloNormalizado.includes("cód.") || 
+      tituloNormalizado.includes("llamada") || 
+      tituloNormalizado.includes("pendiente") || 
+      tituloNormalizado.includes("código")
+    ) {
+      return [
+        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' },
+        { email: 'omendoza@celina.com.bo', nombre: 'Olivia Mendoza Duran', saludo: 'Estimada Olivia' },
+        { email: 'rmartinez@celina.com.bo', nombre: 'Rodolfo Martínez', saludo: 'Estimado Rodolfo' }
+      ];
+    }
+
+    // 3. RECURSOS HUMANOS (RRHH Completo)
+    if (
+      tituloNormalizado.includes("renuncia") || 
+      tituloNormalizado.includes("crm") || 
+      tituloNormalizado.includes("evaluación") || 
+      tituloNormalizado.includes("postulante") || 
+      tituloNormalizado.includes("memorándum")
+    ) {
+      return [
         { email: 'uklein@grupopaz.com.bo', nombre: 'Ulrich Klein Montano', saludo: 'Estimado Ulrich' },
         { email: 'mfroca@celina.com.bo', nombre: 'Maria Fernanda Roca Miranda', saludo: 'Estimada Maria Fernanda' },
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
         { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
-      ]
-    },
-    // PRIORIDAD #4: BLOQUEO DE LOTE
-    {
-      pantallas: ["bloqueo", "lote"],
-      contactos: [
+      ];
+    }
+
+    // 4. BLOQUEO DE LOTE
+    if (tituloNormalizado.includes("bloqueo")) {
+      return [
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
         { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' },
         { email: 'lribera@grupopaz.com.bo', nombre: 'Luis Fernando Ribera', saludo: 'Estimado Luis Fernando' }
-      ]
-    },
-    // PRIORIDAD #5: AMORTIZACIÓN COMERCIAL
-    {
-      pantallas: ["amortización a capital", "amortizacion a capital"],
-      contactos: [
+      ];
+    }
+
+    // 5. AMORTIZACIÓN A CAPITAL
+    if (tituloNormalizado.includes("amortización") || tituloNormalizado.includes("amortizacion")) {
+      return [
         { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' }
-      ]
-    },
-    // PRIORIDAD #6: CUOTA INICIAL Y PROYECCIONES
-    {
-      pantallas: ["cuota inicial", "inc.", "proyección", "proyeccion", "semanal", "diaria"],
-      contactos: [
+      ];
+    }
+
+    // 6. CUOTA INICIAL Y PROYECCIONES
+    if (
+      tituloNormalizado.includes("cuota") || 
+      tituloNormalizado.includes("proyección") || 
+      tituloNormalizado.includes("diaria") || 
+      tituloNormalizado.includes("semanal")
+    ) {
+      return [
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
         { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
-      ]
-    },
-    // PRIORIDAD #7: DESCUENTOS Y LIQUIDACIONES COMERCIALES
-    {
-      pantallas: ["campaña", "campana", "descuento", "liquidación", "liquidacion"],
-      contactos: [
+      ];
+    }
+
+    // 7. DESCUENTOS Y LIQUIDACIONES
+    if (
+      tituloNormalizado.includes("liquidación") || 
+      tituloNormalizado.includes("descuento") || 
+      tituloNormalizado.includes("campaña")
+    ) {
+      return [
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
         { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' },
         { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' }
-      ]
+      ];
     }
-  ], []);
 
-  // RESPALDO CORPORATIVO SEGURO (Para pantallas no listadas como Seguro de Vida)
-  const RESPALDO = useMemo(() => [
-    { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' },
-    { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
-    { email: 'maguilar@celina.com.bo', nombre: 'Miguel Angel Aguilar', saludo: 'Estimado Miguel Angel' },
-    { email: 'csalvatierra@celina.com.bo', nombre: 'Cinthia Salvatierra', saludo: 'Estimada Cinthia' }
-  ], []);
+    // RESPALDO CORPORATIVO DEFAULT
+    return [
+      { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' },
+      { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' }
+    ];
+  }, [title]);
 
-  // ================= 2. MOTOR DE ESCANEO PROFUNDO =================
-  // Ahora el motor junta todo (Título + Asunto + Cuerpo del texto) para no quedarse ciego
-  const contactosDisponibles = useMemo(() => {
-    const contextoTotal = ((title || "") + " " + (subject || "") + " " + (text || "")).toLowerCase();
-    for (const grupo of MAPA_CORREOS) {
-      if (grupo.pantallas.some(p => contextoTotal.includes(p))) {
-        return grupo.contactos;
-      }
-    }
-    return RESPALDO;
-  }, [title, subject, text, MAPA_CORREOS, RESPALDO]);
-
-  // Selección efectiva: Garantiza que "Para" nunca esté vacío
-  const destinatarioEfectivo = contactosDisponibles.find(c => c.email === supervisorDestino)?.email || contactosDisponibles[0].email;
-  const objetoDestinatario = contactosDisponibles.find(c => c.email === destinatarioEfectivo) || contactosDisponibles[0];
+  // ================= 2. ESTADOS Y SELECCIÓN BLINDADA =================
+  const contactoSeleccionado = contactosDisponibles.find(c => c.email === supervisorDestino);
+  const destinatarioEfectivo = contactoSeleccionado ? contactoSeleccionado.email : contactosDisponibles[0].email;
+  const objetoDestinatario = contactoSeleccionado || contactosDisponibles[0];
 
   useEffect(() => {
     if (supervisorDestino !== destinatarioEfectivo && setSupervisorDestino) {
@@ -100,9 +107,8 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     }
   }, [destinatarioEfectivo, supervisorDestino, setSupervisorDestino]);
 
-  // ================= 3. CÁLCULO ESTRICTO DE COPIAS (CC) =================
+  // ================= 3. CÁLCULO DE COPIAS (CC) AUTOMÁTICAS =================
   const ccDinamico = useMemo(() => {
-    // Saca de la lista de copias a quien está seleccionado como "Para"
     const copiasExtra = contactosDisponibles
       .filter(c => c.email !== destinatarioEfectivo)
       .map(c => c.email);
@@ -112,7 +118,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     return [...new Set([...copiasExtra, ...copiasProps])].join(', ');
   }, [contactosDisponibles, destinatarioEfectivo, cc]);
 
-  // ================= 4. MUTADOR INTELIGENTE DE SALUDOS =================
+  // ================= 4. MUTADOR DE SALUDOS =================
   const procesarTextoMutante = (contenido) => {
     if (!contenido) return '';
     
@@ -126,7 +132,6 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     let modificado = contenido.replace(/Buenas\s+(noches|días|tardes)/gi, saludoBase);
     modificado = modificado.replace(/\[SALUDO_AUTO\]/gi, "");
 
-    // Intercambia el nombre en el cuerpo del correo de inmediato
     modificado = modificado
       .replace(/Estimado\s+Mauricio/gi, nombreSaludo)
       .replace(/Estimado\s+Robert/gi, nombreSaludo)
@@ -147,7 +152,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
   const htmlFinal = procesarTextoMutante(htmlContent);
   const textoPlanoFinal = procesarTextoMutante(text);
 
-  // ================= 5. MOTORES DE ENVÍO SEGUROS =================
+  // ================= 5. MOTORES DE ENVÍO =================
   const copiarAlPortapapeles = async () => {
     try {
       const blob = new Blob([htmlFinal], { type: 'text/html' });
@@ -162,8 +167,12 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     }
   };
 
+  // 🚀 INYECCIÓN DE CORREO DE AUDITORÍA PARA GMAIL (ohsaravia)
   const abrirEnGmail = () => {
-    const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(destinatarioEfectivo)}&su=${encodeURIComponent(subject || '')}&cc=${encodeURIComponent(ccDinamico)}&body=${encodeURIComponent(textoPlanoFinal)}`;
+    const miCorreoAuditoria = "ohsaravia@celina.com.bo";
+    const ccGmailFinal = ccDinamico ? `${ccDinamico}, ${miCorreoAuditoria}` : miCorreoAuditoria;
+
+    const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(destinatarioEfectivo)}&su=${encodeURIComponent(subject || '')}&cc=${encodeURIComponent(ccGmailFinal)}&body=${encodeURIComponent(textoPlanoFinal)}`;
     window.open(url, '_blank');
   };
 
@@ -175,7 +184,6 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     } catch (err) {
       navigator.clipboard.writeText(textoPlanoFinal);
     }
-    // Ruteo exacto a la app de escritorio usando destinatarioEfectivo
     window.location.href = `mailto:${encodeURIComponent(destinatarioEfectivo)}?subject=${encodeURIComponent(subject || '')}&cc=${encodeURIComponent(ccDinamico)}`;
   };
 
@@ -212,7 +220,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
           </div>
         </div>
 
-        {/* COPIA (CC) AUTOMATIZADA EXACTA */}
+        {/* COPIA AUTOMÁTICA EN TIEMPO REAL (CC) */}
         <div className="mb-4">
           <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">En Copia Automatizada (CC):</label>
           <div className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-[10px] font-bold text-slate-500 overflow-hidden text-ellipsis whitespace-nowrap">
@@ -235,8 +243,13 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
             App Outlook 🖥️
           </button>
         </div>
-        <button onClick={abrirEnGmail} className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs flex items-center justify-center shadow transition-colors">
+        
+        {/* BOTÓN GMAIL CON AVISO DE AUDITORÍA */}
+        <button onClick={abrirEnGmail} className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs flex items-center justify-center shadow transition-colors relative">
           Abrir en Gmail
+          <span className="absolute right-3 text-[9px] font-semibold bg-red-800 px-2 py-0.5 rounded-md opacity-80">
+            + CC: ohsaravia
+          </span>
         </button>
       </div>
     </div>
