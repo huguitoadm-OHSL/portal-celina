@@ -4,45 +4,19 @@ import { Copy, Check, Mail, ChevronDown, Clock } from 'lucide-react';
 export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDestino, setSupervisorDestino }) {
   const [copiado, setCopiado] = useState(false);
 
-  // ================= 1. DICCIONARIO MAESTRO BLINDADO POR MÓDULOS =================
-  // Se respeta estrictamente la Tríada de la Imagen 1 para las Imágenes 2, 3 y 4.
+  // ================= 1. BÓVEDA PRIORIZADA DE CONTACTOS =================
   const MAPA_CORREOS = useMemo(() => [
+    // PRIORIDAD #1: TRÍADA EXACTA DE PLATAFORMA (Imágenes 2, 3 y 4)
+    // Atrapa Códigos, Validaciones de Llamada y Pendientes ANTES de que cualquier otra regla actúe.
     {
-      pantallas: ["campaña", "campana", "descuentos campañas"],
+      pantallas: ["cód", "cod.", "código", "codigo", "llamada", "referidos", "validación", "validacion", "pendiente"],
       contactos: [
-        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
-        { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' },
-        { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
+        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' },
+        { email: 'omendoza@celina.com.bo', nombre: 'Olivia Mendoza Duran', saludo: 'Estimada Olivia' },
+        { email: 'rmartinez@celina.com.bo', nombre: 'Rodolfo Martínez', saludo: 'Estimado Rodolfo' }
       ]
     },
-    {
-      pantallas: ["liquidación", "liquidacion", "descuentos"], // Módulos comerciales de descuentos
-      contactos: [
-        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
-        { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' },
-        { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' }
-      ]
-    },
-    {
-      pantallas: ["proyección semanal", "proyeccion semanal", "semanal"],
-      contactos: [
-        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
-        { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
-      ]
-    },
-    {
-      pantallas: ["proyección diaria", "proyeccion diaria", "diaria"],
-      contactos: [
-        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
-        { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
-      ]
-    },
-    {
-      pantallas: ["amortización a capital", "amortizacion a capital"],
-      contactos: [
-        { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' }
-      ]
-    },
+    // PRIORIDAD #2: RECOMPRA
     {
       pantallas: ["recompra"],
       contactos: [
@@ -51,31 +25,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
         { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' }
       ]
     },
-    {
-      pantallas: ["cuota inicial", "inc."],
-      contactos: [
-        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
-        { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
-      ]
-    },
-    {
-      pantallas: ["bloqueo", "lote"],
-      contactos: [
-        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
-        { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' },
-        { email: 'lribera@grupopaz.com.bo', nombre: 'Luis Fernando Ribera', saludo: 'Estimado Luis Fernando' }
-      ]
-    },
-    // TRÍADA EXACTA (IMAGEN 1) APLICADA A SOLICITUD DE CÓDIGOS Y VALIDACIONES (IMÁGENES 2, 3 Y 4)
-    {
-      pantallas: ["código", "codigo", "códigos", "codigos", "llamada", "referidos", "validación", "validacion", "pendiente", "pend."],
-      contactos: [
-        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' },
-        { email: 'omendoza@celina.com.bo', nombre: 'Olivia Mendoza Duran', saludo: 'Estimada Olivia' },
-        { email: 'rmartinez@celina.com.bo', nombre: 'Rodolfo Martínez', saludo: 'Estimado Rodolfo' }
-      ]
-    },
-    // SECCIÓN COMPLETA DE RECURSOS HUMANOS (RRHH)
+    // PRIORIDAD #3: RECURSOS HUMANOS (RRHH)
     {
       pantallas: ["renuncia", "crm", "evaluación", "evaluacion", "postulante", "memorándum", "memorandum", "rrhh"],
       contactos: [
@@ -84,39 +34,75 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
         { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
       ]
+    },
+    // PRIORIDAD #4: BLOQUEO DE LOTE
+    {
+      pantallas: ["bloqueo", "lote"],
+      contactos: [
+        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
+        { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' },
+        { email: 'lribera@grupopaz.com.bo', nombre: 'Luis Fernando Ribera', saludo: 'Estimado Luis Fernando' }
+      ]
+    },
+    // PRIORIDAD #5: AMORTIZACIÓN COMERCIAL
+    {
+      pantallas: ["amortización a capital", "amortizacion a capital"],
+      contactos: [
+        { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' }
+      ]
+    },
+    // PRIORIDAD #6: CUOTA INICIAL Y PROYECCIONES
+    {
+      pantallas: ["cuota inicial", "inc.", "proyección", "proyeccion", "semanal", "diaria"],
+      contactos: [
+        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
+        { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
+      ]
+    },
+    // PRIORIDAD #7: DESCUENTOS Y LIQUIDACIONES COMERCIALES
+    {
+      pantallas: ["campaña", "campana", "descuento", "liquidación", "liquidacion"],
+      contactos: [
+        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
+        { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' },
+        { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' }
+      ]
     }
   ], []);
 
-  // Respaldo base corporativo por defecto
+  // RESPALDO CORPORATIVO SEGURO (Para pantallas no listadas como Seguro de Vida)
   const RESPALDO = useMemo(() => [
     { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' },
-    { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' }
+    { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
+    { email: 'maguilar@celina.com.bo', nombre: 'Miguel Angel Aguilar', saludo: 'Estimado Miguel Angel' },
+    { email: 'csalvatierra@celina.com.bo', nombre: 'Cinthia Salvatierra', saludo: 'Estimada Cinthia' }
   ], []);
 
-  // ================= 2. MOTOR DE SELECCIÓN BLINDADO =================
+  // ================= 2. MOTOR DE ESCANEO PROFUNDO =================
+  // Ahora el motor junta todo (Título + Asunto + Cuerpo del texto) para no quedarse ciego
   const contactosDisponibles = useMemo(() => {
-    const tituloNormalizado = (title || "").toLowerCase();
+    const contextoTotal = ((title || "") + " " + (subject || "") + " " + (text || "")).toLowerCase();
     for (const grupo of MAPA_CORREOS) {
-      if (grupo.pantallas.some(p => tituloNormalizado.includes(p))) {
+      if (grupo.pantallas.some(p => contextoTotal.includes(p))) {
         return grupo.contactos;
       }
     }
     return RESPALDO;
-  }, [title, MAPA_CORREOS, RESPALDO]);
+  }, [title, subject, text, MAPA_CORREOS, RESPALDO]);
 
-  // Selección nativa inmediata para evitar la desincronización de campos vacíos en Outlook
-  const contactoSeleccionado = contactosDisponibles.find(c => c.email === supervisorDestino);
-  const destinatarioEfectivo = contactoSeleccionado ? contactoSeleccionado.email : contactosDisponibles[0].email;
-  const objetoDestinatario = contactoSeleccionado || contactosDisponibles[0];
+  // Selección efectiva: Garantiza que "Para" nunca esté vacío
+  const destinatarioEfectivo = contactosDisponibles.find(c => c.email === supervisorDestino)?.email || contactosDisponibles[0].email;
+  const objetoDestinatario = contactosDisponibles.find(c => c.email === destinatarioEfectivo) || contactosDisponibles[0];
 
   useEffect(() => {
-    if (!contactoSeleccionado && setSupervisorDestino) {
+    if (supervisorDestino !== destinatarioEfectivo && setSupervisorDestino) {
       setSupervisorDestino(destinatarioEfectivo);
     }
-  }, [contactoSeleccionado, destinatarioEfectivo, setSupervisorDestino]);
+  }, [destinatarioEfectivo, supervisorDestino, setSupervisorDestino]);
 
-  // ================= 3. CÁLCULO ESTRICTO DE EN COPIA (CC) =================
+  // ================= 3. CÁLCULO ESTRICTO DE COPIAS (CC) =================
   const ccDinamico = useMemo(() => {
+    // Saca de la lista de copias a quien está seleccionado como "Para"
     const copiasExtra = contactosDisponibles
       .filter(c => c.email !== destinatarioEfectivo)
       .map(c => c.email);
@@ -126,7 +112,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     return [...new Set([...copiasExtra, ...copiasProps])].join(', ');
   }, [contactosDisponibles, destinatarioEfectivo, cc]);
 
-  // ================= 4. INTELIGENCIA DE MUTACIÓN DE SALUDO =================
+  // ================= 4. MUTADOR INTELIGENTE DE SALUDOS =================
   const procesarTextoMutante = (contenido) => {
     if (!contenido) return '';
     
@@ -140,7 +126,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     let modificado = contenido.replace(/Buenas\s+(noches|días|tardes)/gi, saludoBase);
     modificado = modificado.replace(/\[SALUDO_AUTO\]/gi, "");
 
-    // Intercambio dinámico e instantáneo en la vista previa del mensaje
+    // Intercambia el nombre en el cuerpo del correo de inmediato
     modificado = modificado
       .replace(/Estimado\s+Mauricio/gi, nombreSaludo)
       .replace(/Estimado\s+Robert/gi, nombreSaludo)
@@ -161,7 +147,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
   const htmlFinal = procesarTextoMutante(htmlContent);
   const textoPlanoFinal = procesarTextoMutante(text);
 
-  // ================= 5. DISPARADORES DE CLIENTE DE CORREO =================
+  // ================= 5. MOTORES DE ENVÍO SEGUROS =================
   const copiarAlPortapapeles = async () => {
     try {
       const blob = new Blob([htmlFinal], { type: 'text/html' });
@@ -189,7 +175,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     } catch (err) {
       navigator.clipboard.writeText(textoPlanoFinal);
     }
-    // GARANTÍA DE SISTEMA: El parámetro "destinatarioEfectivo" asegura que el campo Para jamás llegue vacío a Outlook
+    // Ruteo exacto a la app de escritorio usando destinatarioEfectivo
     window.location.href = `mailto:${encodeURIComponent(destinatarioEfectivo)}?subject=${encodeURIComponent(subject || '')}&cc=${encodeURIComponent(ccDinamico)}`;
   };
 
@@ -226,7 +212,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
           </div>
         </div>
 
-        {/* COPIA AUTOMÁTICA EN TIEMPO REAL (CC) */}
+        {/* COPIA (CC) AUTOMATIZADA EXACTA */}
         <div className="mb-4">
           <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">En Copia Automatizada (CC):</label>
           <div className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-[10px] font-bold text-slate-500 overflow-hidden text-ellipsis whitespace-nowrap">
