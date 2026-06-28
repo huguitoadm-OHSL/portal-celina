@@ -4,8 +4,8 @@ import { Copy, Check, Mail, ChevronDown, Clock } from 'lucide-react';
 export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDestino, setSupervisorDestino }) {
   const [copiado, setCopiado] = useState(false);
 
-  // ================= 1. DICCIONARIO PURIFICADO DE MÓDULOS =================
-  // Cero rastros de Lucio o Mario Adett. Mapeo estricto por palabras clave del título.
+  // ================= 1. DICCIONARIO MAESTRO BLINDADO POR MÓDULOS =================
+  // Se respeta estrictamente la Tríada de la Imagen 1 para las Imágenes 2, 3 y 4.
   const MAPA_CORREOS = useMemo(() => [
     {
       pantallas: ["campaña", "campana", "descuentos campañas"],
@@ -13,6 +13,14 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
         { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' },
         { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
+      ]
+    },
+    {
+      pantallas: ["liquidación", "liquidacion", "descuentos"], // Módulos comerciales de descuentos
+      contactos: [
+        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
+        { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' },
+        { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' }
       ]
     },
     {
@@ -30,7 +38,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       ]
     },
     {
-      pantallas: ["amortización", "amortizacion"],
+      pantallas: ["amortización a capital", "amortizacion a capital"],
       contactos: [
         { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' }
       ]
@@ -58,15 +66,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
         { email: 'lribera@grupopaz.com.bo', nombre: 'Luis Fernando Ribera', saludo: 'Estimado Luis Fernando' }
       ]
     },
-    {
-      pantallas: ["liquidación", "liquidacion", "descuentos"],
-      contactos: [
-        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
-        { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' },
-        { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' }
-      ]
-    },
-    // TRÍADA EXACTA SOLICITADA PARA CÓDIGOS, VALIDACIONES Y PENDIENTES
+    // TRÍADA EXACTA (IMAGEN 1) APLICADA A SOLICITUD DE CÓDIGOS Y VALIDACIONES (IMÁGENES 2, 3 Y 4)
     {
       pantallas: ["código", "codigo", "códigos", "codigos", "llamada", "referidos", "validación", "validacion", "pendiente", "pend."],
       contactos: [
@@ -75,7 +75,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
         { email: 'rmartinez@celina.com.bo', nombre: 'Rodolfo Martínez', saludo: 'Estimado Rodolfo' }
       ]
     },
-    // SECCIÓN COMPLETA DE RRHH
+    // SECCIÓN COMPLETA DE RECURSOS HUMANOS (RRHH)
     {
       pantallas: ["renuncia", "crm", "evaluación", "evaluacion", "postulante", "memorándum", "memorandum", "rrhh"],
       contactos: [
@@ -87,13 +87,13 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     }
   ], []);
 
-  // Respaldo base corporativo (Sin Lucio ni Mario Adett)
+  // Respaldo base corporativo por defecto
   const RESPALDO = useMemo(() => [
     { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' },
     { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' }
   ], []);
 
-  // ================= 2. SELECCIÓN BLINDADA DE CONTACTOS =================
+  // ================= 2. MOTOR DE SELECCIÓN BLINDADO =================
   const contactosDisponibles = useMemo(() => {
     const tituloNormalizado = (title || "").toLowerCase();
     for (const grupo of MAPA_CORREOS) {
@@ -104,7 +104,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     return RESPALDO;
   }, [title, MAPA_CORREOS, RESPALDO]);
 
-  // Resolución del destinatario en tiempo real para evitar campos "Para" vacíos
+  // Selección nativa inmediata para evitar la desincronización de campos vacíos en Outlook
   const contactoSeleccionado = contactosDisponibles.find(c => c.email === supervisorDestino);
   const destinatarioEfectivo = contactoSeleccionado ? contactoSeleccionado.email : contactosDisponibles[0].email;
   const objetoDestinatario = contactoSeleccionado || contactosDisponibles[0];
@@ -115,7 +115,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     }
   }, [contactoSeleccionado, destinatarioEfectivo, setSupervisorDestino]);
 
-  // ================= 3. CÁLCULO DE COPIAS (CC) AUTOMÁTICAS =================
+  // ================= 3. CÁLCULO ESTRICTO DE EN COPIA (CC) =================
   const ccDinamico = useMemo(() => {
     const copiasExtra = contactosDisponibles
       .filter(c => c.email !== destinatarioEfectivo)
@@ -126,7 +126,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     return [...new Set([...copiasExtra, ...copiasProps])].join(', ');
   }, [contactosDisponibles, destinatarioEfectivo, cc]);
 
-  // ================= 4. MUTADOR AUTOMÁTICO DE SALUDOS =================
+  // ================= 4. INTELIGENCIA DE MUTACIÓN DE SALUDO =================
   const procesarTextoMutante = (contenido) => {
     if (!contenido) return '';
     
@@ -140,7 +140,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     let modificado = contenido.replace(/Buenas\s+(noches|días|tardes)/gi, saludoBase);
     modificado = modificado.replace(/\[SALUDO_AUTO\]/gi, "");
 
-    // Intercambio dinámico de nombres en el cuerpo del mensaje
+    // Intercambio dinámico e instantáneo en la vista previa del mensaje
     modificado = modificado
       .replace(/Estimado\s+Mauricio/gi, nombreSaludo)
       .replace(/Estimado\s+Robert/gi, nombreSaludo)
@@ -161,7 +161,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
   const htmlFinal = procesarTextoMutante(htmlContent);
   const textoPlanoFinal = procesarTextoMutante(text);
 
-  // ================= 5. MOTORES DE ENVÍO Y COPIADO =================
+  // ================= 5. DISPARADORES DE CLIENTE DE CORREO =================
   const copiarAlPortapapeles = async () => {
     try {
       const blob = new Blob([htmlFinal], { type: 'text/html' });
@@ -189,7 +189,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     } catch (err) {
       navigator.clipboard.writeText(textoPlanoFinal);
     }
-    // Disparo nativo asegurado con el destinatario resuelto al 100%
+    // GARANTÍA DE SISTEMA: El parámetro "destinatarioEfectivo" asegura que el campo Para jamás llegue vacío a Outlook
     window.location.href = `mailto:${encodeURIComponent(destinatarioEfectivo)}?subject=${encodeURIComponent(subject || '')}&cc=${encodeURIComponent(ccDinamico)}`;
   };
 
@@ -198,14 +198,14 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       <div>
         <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
           <h3 className="font-black text-slate-800 text-base flex items-center">
-            <Check className="w-5 h-5 text-emerald-500 mr-2" /> {title || "Vista Previa"}
+            <Check className="w-5 h-5 text-emerald-500 mr-2" /> {title || "Vista Previa del Mensaje"}
           </h3>
           <span className="text-[10px] font-bold bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-full border border-indigo-100 flex items-center">
             <Clock className="w-3 h-3 mr-1" /> Automático ⏱️
           </span>
         </div>
 
-        {/* SELECTOR DESPLEGABLE BLOQUEADO SEGÚN MÓDULO */}
+        {/* SELECTOR DESPLEGABLE BLOQUEADO */}
         <div className="mb-4">
           <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Destinatario (Enviar a):</label>
           <div className="relative">
@@ -226,7 +226,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
           </div>
         </div>
 
-        {/* COPIA (CC) AUTOMÁTICA EN TIEMPO REAL */}
+        {/* COPIA AUTOMÁTICA EN TIEMPO REAL (CC) */}
         <div className="mb-4">
           <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">En Copia Automatizada (CC):</label>
           <div className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-[10px] font-bold text-slate-500 overflow-hidden text-ellipsis whitespace-nowrap">
@@ -256,5 +256,6 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     </div>
   );
 }
+
 
 
