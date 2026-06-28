@@ -74,6 +74,7 @@ export const Sidebar = ({ activeTab, setActiveTab, isOpen, closeSidebar, setSupe
           <NavItem id="cuota" icon={TrendingUp} label="Inc. Cuota Inicial" />
           <NavItem id="bloqueoLote" icon={Lock} label="Bloqueo de Lote" />
           <NavItem id="liquidacionContado" icon={FileText} label="Liquidación Contado" />
+          <NavItem id="solicitudesCodigo" icon={KeyRound} label="Solicitud de Códigos" />
 
           <NavSection title="Trámites Generales" />
           <NavItem id="llamada" icon={PhoneCall} label="Validación Llamada" />
