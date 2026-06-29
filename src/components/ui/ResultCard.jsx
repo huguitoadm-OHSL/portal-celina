@@ -4,12 +4,13 @@ import { Copy, Check, Mail, ChevronDown, Clock } from 'lucide-react';
 export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDestino, setSupervisorDestino }) {
   const [copiado, setCopiado] = useState(false);
 
-  // ================= 1. DICCIONARIO EXACTO Y ORDENADO =================
+  // ================= 1. BÓVEDA DE REGLAS ESTRICTAS =================
   const contactosDisponibles = useMemo(() => {
-    const tituloNormalizado = (title || "").toLowerCase();
+    // Unimos TODO (título, asunto, texto y HTML) para que el escáner nunca se quede ciego
+    const contextoTotal = [title, subject, text, htmlContent].join(" ").toLowerCase();
 
-    // 1. RECOMPRA (Estricto para que no se confunda con nada)
-    if (tituloNormalizado.includes("recompra")) {
+    // PRIORIDAD 1: RECOMPRA
+    if (contextoTotal.includes("recompra")) {
       return [
         { email: 'cbarretto@celina.com.bo', nombre: 'Ing. Charles Barretto', saludo: 'Estimado Ing. Charles' },
         { email: 'csalvatierra@celina.com.bo', nombre: 'Cinthia Salvatierra', saludo: 'Estimada Cinthia' },
@@ -17,27 +18,16 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       ];
     }
 
-    // 2. PLATAFORMA (La Tríada Exacta de las imágenes 2, 3 y 4)
+    // PRIORIDAD 2: RRHH Y MEMORÁNDUMS (Soluciona la Imagen 2)
     if (
-      tituloNormalizado.includes("cód.") || 
-      tituloNormalizado.includes("llamada") || 
-      tituloNormalizado.includes("pendiente") || 
-      tituloNormalizado.includes("código")
-    ) {
-      return [
-        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' },
-        { email: 'omendoza@celina.com.bo', nombre: 'Olivia Mendoza Duran', saludo: 'Estimada Olivia' },
-        { email: 'rmartinez@celina.com.bo', nombre: 'Rodolfo Martínez', saludo: 'Estimado Rodolfo' }
-      ];
-    }
-
-    // 3. RECURSOS HUMANOS (RRHH Completo)
-    if (
-      tituloNormalizado.includes("renuncia") || 
-      tituloNormalizado.includes("crm") || 
-      tituloNormalizado.includes("evaluación") || 
-      tituloNormalizado.includes("postulante") || 
-      tituloNormalizado.includes("memorándum")
+      contextoTotal.includes("memorándum") || 
+      contextoTotal.includes("memorandum") || 
+      contextoTotal.includes("renuncia") || 
+      contextoTotal.includes("crm") || 
+      contextoTotal.includes("evaluación") || 
+      contextoTotal.includes("evaluacion") || 
+      contextoTotal.includes("postulante") || 
+      contextoTotal.includes("rrhh")
     ) {
       return [
         { email: 'uklein@grupopaz.com.bo', nombre: 'Ulrich Klein Montano', saludo: 'Estimado Ulrich' },
@@ -47,8 +37,25 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       ];
     }
 
-    // 4. BLOQUEO DE LOTE
-    if (tituloNormalizado.includes("bloqueo")) {
+    // PRIORIDAD 3: PLATAFORMA - CÓDIGOS, VALIDACIONES, PENDIENTES (Soluciona la Imagen 1)
+    if (
+      contextoTotal.includes("código") || 
+      contextoTotal.includes("codigo") || 
+      contextoTotal.includes("llamada") || 
+      contextoTotal.includes("validación") || 
+      contextoTotal.includes("validacion") || 
+      contextoTotal.includes("pendiente") || 
+      contextoTotal.includes("referido")
+    ) {
+      return [
+        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' },
+        { email: 'omendoza@celina.com.bo', nombre: 'Olivia Mendoza Duran', saludo: 'Estimada Olivia' },
+        { email: 'rmartinez@celina.com.bo', nombre: 'Rodolfo Martínez', saludo: 'Estimado Rodolfo' }
+      ];
+    }
+
+    // PRIORIDAD 4: BLOQUEO DE LOTE
+    if (contextoTotal.includes("bloqueo") || contextoTotal.includes("lote")) {
       return [
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
         { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' },
@@ -56,19 +63,20 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       ];
     }
 
-    // 5. AMORTIZACIÓN A CAPITAL
-    if (tituloNormalizado.includes("amortización") || tituloNormalizado.includes("amortizacion")) {
+    // PRIORIDAD 5: AMORTIZACIÓN A CAPITAL (Comercial)
+    if (contextoTotal.includes("amortización a capital") || contextoTotal.includes("amortizacion a capital")) {
       return [
         { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' }
       ];
     }
 
-    // 6. CUOTA INICIAL Y PROYECCIONES
+    // PRIORIDAD 6: CUOTA INICIAL Y PROYECCIONES
     if (
-      tituloNormalizado.includes("cuota") || 
-      tituloNormalizado.includes("proyección") || 
-      tituloNormalizado.includes("diaria") || 
-      tituloNormalizado.includes("semanal")
+      contextoTotal.includes("cuota inicial") || 
+      contextoTotal.includes("proyección") || 
+      contextoTotal.includes("proyeccion") || 
+      contextoTotal.includes("semanal") || 
+      contextoTotal.includes("diaria")
     ) {
       return [
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
@@ -76,11 +84,13 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       ];
     }
 
-    // 7. DESCUENTOS Y LIQUIDACIONES
+    // PRIORIDAD 7: DESCUENTOS Y LIQUIDACIONES
     if (
-      tituloNormalizado.includes("liquidación") || 
-      tituloNormalizado.includes("descuento") || 
-      tituloNormalizado.includes("campaña")
+      contextoTotal.includes("descuento") || 
+      contextoTotal.includes("campaña") || 
+      contextoTotal.includes("campana") || 
+      contextoTotal.includes("liquidación") || 
+      contextoTotal.includes("liquidacion")
     ) {
       return [
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
@@ -89,14 +99,14 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       ];
     }
 
-    // RESPALDO CORPORATIVO DEFAULT
+    // RESPALDO CORPORATIVO DEFAULT (Para cualquier otra cosa)
     return [
       { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' },
       { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' }
     ];
-  }, [title]);
+  }, [title, subject, text, htmlContent]);
 
-  // ================= 2. ESTADOS Y SELECCIÓN BLINDADA =================
+  // ================= 2. SELECCIÓN ABSOLUTA =================
   const contactoSeleccionado = contactosDisponibles.find(c => c.email === supervisorDestino);
   const destinatarioEfectivo = contactoSeleccionado ? contactoSeleccionado.email : contactosDisponibles[0].email;
   const objetoDestinatario = contactoSeleccionado || contactosDisponibles[0];
@@ -107,7 +117,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     }
   }, [destinatarioEfectivo, supervisorDestino, setSupervisorDestino]);
 
-  // ================= 3. CÁLCULO DE COPIAS (CC) AUTOMÁTICAS =================
+  // ================= 3. COPIAS AUTOMÁTICAS (CC) =================
   const ccDinamico = useMemo(() => {
     const copiasExtra = contactosDisponibles
       .filter(c => c.email !== destinatarioEfectivo)
@@ -118,7 +128,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     return [...new Set([...copiasExtra, ...copiasProps])].join(', ');
   }, [contactosDisponibles, destinatarioEfectivo, cc]);
 
-  // ================= 4. MUTADOR DE SALUDOS =================
+  // ================= 4. MUTACIÓN DEL SALUDO =================
   const procesarTextoMutante = (contenido) => {
     if (!contenido) return '';
     
@@ -152,7 +162,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
   const htmlFinal = procesarTextoMutante(htmlContent);
   const textoPlanoFinal = procesarTextoMutante(text);
 
-  // ================= 5. MOTORES DE ENVÍO =================
+  // ================= 5. MOTORES DE ENVÍO Y AUDITORÍA =================
   const copiarAlPortapapeles = async () => {
     try {
       const blob = new Blob([htmlFinal], { type: 'text/html' });
@@ -167,7 +177,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     }
   };
 
-  // 🚀 INYECCIÓN DE CORREO DE AUDITORÍA PARA GMAIL (ohsaravia)
+  // 🚀 INYECCIÓN DE CORREO DE AUDITORÍA (Solo para Gmail)
   const abrirEnGmail = () => {
     const miCorreoAuditoria = "ohsaravia@celina.com.bo";
     const ccGmailFinal = ccDinamico ? `${ccDinamico}, ${miCorreoAuditoria}` : miCorreoAuditoria;
@@ -199,7 +209,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
           </span>
         </div>
 
-        {/* SELECTOR DESPLEGABLE BLOQUEADO */}
+        {/* SELECTOR DESPLEGABLE */}
         <div className="mb-4">
           <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Destinatario (Enviar a):</label>
           <div className="relative">
@@ -220,7 +230,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
           </div>
         </div>
 
-        {/* COPIA AUTOMÁTICA EN TIEMPO REAL (CC) */}
+        {/* COPIA CC */}
         <div className="mb-4">
           <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">En Copia Automatizada (CC):</label>
           <div className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-[10px] font-bold text-slate-500 overflow-hidden text-ellipsis whitespace-nowrap">
@@ -244,7 +254,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
           </button>
         </div>
         
-        {/* BOTÓN GMAIL CON AVISO DE AUDITORÍA */}
+        {/* BOTÓN GMAIL CON ESCUDO DE AUDITORÍA */}
         <button onClick={abrirEnGmail} className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs flex items-center justify-center shadow transition-colors relative">
           Abrir en Gmail
           <span className="absolute right-3 text-[9px] font-semibold bg-red-800 px-2 py-0.5 rounded-md opacity-80">
