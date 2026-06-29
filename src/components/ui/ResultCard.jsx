@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Copy, Check, Mail, ChevronDown, Clock } from 'lucide-react';
 
 export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDestino, setSupervisorDestino }) {
   const [copiado, setCopiado] = useState(false);
+  const enlaceFantasmaRef = useRef(null);
 
-  // ================= 1. DICCIONARIO BLINDADO (SOLO LEE TÍTULOS Y ASUNTOS) =================
+  // ================= 1. BÓVEDA ESTRICTA DE CORREOS CORPORATIVOS =================
   const MAPA_CORREOS = useMemo(() => [
     {
-      // 1. CÓDIGOS, VALIDACIONES, PENDIENTES
+      // PLATAFORMA: CÓDIGOS, VALIDACIONES DE LLAMADA Y PENDIENTES
       pantallas: ["código", "codigo", "códigos", "codigos", "llamada", "referido", "validación", "validacion", "pendiente", "pend."],
       contactos: [
         { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' },
@@ -16,7 +17,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       ]
     },
     {
-      // 2. RECURSOS HUMANOS (RRHH)
+      // RECURSOS HUMANOS (RRHH)
       pantallas: ["memorándum", "memorandum", "renuncia", "crm", "evaluación", "evaluacion", "postulante", "rrhh"],
       contactos: [
         { email: 'uklein@grupopaz.com.bo', nombre: 'Ulrich Klein Montano', saludo: 'Estimado Ulrich' },
@@ -26,7 +27,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       ]
     },
     {
-      // 3. RECOMPRA
+      // RECOMPRA
       pantallas: ["recompra"],
       contactos: [
         { email: 'cbarretto@celina.com.bo', nombre: 'Ing. Charles Barretto', saludo: 'Estimado Ing. Charles' },
@@ -35,7 +36,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       ]
     },
     {
-      // 4. BLOQUEO DE LOTE
+      // BLOQUEO DE LOTE
       pantallas: ["bloqueo", "lote"],
       contactos: [
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
@@ -44,14 +45,14 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       ]
     },
     {
-      // 5. AMORTIZACIÓN A CAPITAL
+      // AMORTIZACIÓN A CAPITAL
       pantallas: ["amortización", "amortizacion"],
       contactos: [
         { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' }
       ]
     },
     {
-      // 6. DESCUENTOS CAMPAÑAS
+      // DESCUENTOS CAMPAÑAS
       pantallas: ["campaña", "campana"],
       contactos: [
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
@@ -60,7 +61,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       ]
     },
     {
-      // 7. LIQUIDACIÓN CONTADO / DESCUENTOS REGULARES
+      // LIQUIDACIONES Y DESCUENTOS REGULARES
       pantallas: ["liquidación", "liquidacion", "descuento"],
       contactos: [
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
@@ -69,7 +70,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       ]
     },
     {
-      // 8. PROYECCIONES Y CUOTA INICIAL
+      // PROYECCIONES Y CUOTA INICIAL
       pantallas: ["cuota", "proyección", "proyeccion", "diaria", "semanal", "inc."],
       contactos: [
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
@@ -83,10 +84,9 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' }
   ], []);
 
+  // Motor aislado: Solo escanea Título y Asunto para no confundir módulos
   const contactosDisponibles = useMemo(() => {
-    // SOLUCIÓN A LOS CORREOS CRUZADOS: Ignoramos el cuerpo del mensaje, solo leemos Título y Asunto.
     const contextoTotal = [title, subject].join(" ").toLowerCase();
-    
     for (const grupo of MAPA_CORREOS) {
       if (grupo.pantallas.some(p => contextoTotal.includes(p))) {
         return grupo.contactos;
@@ -95,7 +95,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     return RESPALDO;
   }, [title, subject, MAPA_CORREOS, RESPALDO]);
 
-  // ================= 2. SELECCIÓN ABSOLUTA =================
+  // Sincronización infalible de destinatario
   const contactoSeleccionado = contactosDisponibles.find(c => c.email === supervisorDestino);
   const destinatarioEfectivo = contactoSeleccionado ? contactoSeleccionado.email : contactosDisponibles[0].email;
   const objetoDestinatario = contactoSeleccionado || contactosDisponibles[0];
@@ -106,7 +106,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     }
   }, [destinatarioEfectivo, supervisorDestino, setSupervisorDestino]);
 
-  // ================= 3. COPIAS AUTOMÁTICAS (CC) =================
+  // CC Dinámico: Pone en copia al resto del equipo del módulo activo
   const ccDinamico = useMemo(() => {
     const copiasExtra = contactosDisponibles
       .filter(c => c.email !== destinatarioEfectivo)
@@ -117,7 +117,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     return [...new Set([...copiasExtra, ...copiasProps])].join(', ');
   }, [contactosDisponibles, destinatarioEfectivo, cc]);
 
-  // ================= 4. MUTACIÓN DEL SALUDO =================
+  // ================= 2. MUTADOR INTELIGENTE DE SALUDO =================
   const procesarTextoMutante = (contenido) => {
     if (!contenido) return '';
     
@@ -131,7 +131,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     let modificado = contenido.replace(/Buenas\s+(noches|días|tardes)/gi, saludoBase);
     modificado = modificado.replace(/\[SALUDO_AUTO\]/gi, "");
 
-    modificado = modificado
+    return modificado
       .replace(/Estimado\s+Mauricio/gi, nombreSaludo)
       .replace(/Estimado\s+Robert/gi, nombreSaludo)
       .replace(/Estimada\s+Verenice/gi, nombreSaludo)
@@ -144,14 +144,39 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       .replace(/Estimado\s+Alex/gi, nombreSaludo)
       .replace(/Estimado\s+Ulrich/gi, nombreSaludo)
       .replace(/Estimada\s+Maria\s+Fernanda/gi, nombreSaludo);
-
-    return modificado;
   };
 
   const htmlFinal = procesarTextoMutante(htmlContent);
   const textoPlanoFinal = procesarTextoMutante(text);
 
-  // ================= 5. MOTORES DE ENVÍO Y AUDITORÍA =================
+  // ================= 3. DISPARADOR NATIVO BLINDADO PARA OUTLOOK (MÓVIL Y PC) =================
+  const urlMailtoNativo = useMemo(() => {
+    const dest = encodeURIComponent(destinatarioEfectivo || '');
+    const asun = encodeURIComponent(subject || '');
+    const copias = encodeURIComponent(ccDinamico || '');
+    return `mailto:${dest}?subject=${asun}&cc=${copias}`;
+  }, [destinatarioEfectivo, subject, ccDinamico]);
+
+  const abrirAppOutlookEscritorio = () => {
+    // Intentar copiar la tabla en PC en segundo plano sin bloquear el hilo principal
+    try {
+      if (navigator.clipboard && window.ClipboardItem) {
+        const blob = new Blob([htmlFinal], { type: 'text/html' });
+        const item = new ClipboardItem({ 'text/html': blob });
+        navigator.clipboard.write([item]).catch(() => {});
+      }
+    } catch (e) {
+      // Ignorar bloqueos en navegadores móviles
+    }
+
+    // El clic nativo sobre el nodo ancla (<a/>) puentea el bucle infinito de Windows 11 y móviles
+    if (enlaceFantasmaRef.current) {
+      enlaceFantasmaRef.current.click();
+    } else {
+      window.location.href = urlMailtoNativo;
+    }
+  };
+
   const copiarAlPortapapeles = async () => {
     try {
       const blob = new Blob([htmlFinal], { type: 'text/html' });
@@ -166,39 +191,32 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     }
   };
 
-  // 🚀 INYECCIÓN DE CORREO DE AUDITORÍA (GMAIL)
+  // ================= 4. GMAIL CON COPIA DE AUDITORÍA OCULTA (BCC) =================
   const abrirEnGmail = () => {
     const miCorreoAuditoria = "ohsaravia@celina.com.bo";
-    const ccGmailFinal = ccDinamico ? `${ccDinamico}, ${miCorreoAuditoria}` : miCorreoAuditoria;
+    const dest = encodeURIComponent(destinatarioEfectivo || '');
+    const asun = encodeURIComponent(subject || '');
+    const copiasCC = encodeURIComponent(ccDinamico || '');
+    const copiaBCC = encodeURIComponent(miCorreoAuditoria);
+    const cuerpo = encodeURIComponent(textoPlanoFinal || '');
 
-    const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(destinatarioEfectivo)}&su=${encodeURIComponent(subject || '')}&cc=${encodeURIComponent(ccGmailFinal)}&body=${encodeURIComponent(textoPlanoFinal)}`;
+    const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${dest}&su=${asun}&cc=${copiasCC}&bcc=${copiaBCC}&body=${cuerpo}`;
     window.open(url, '_blank');
   };
 
-  const abrirAppOutlookEscritorio = () => {
-    // SOLUCIÓN AL BLOQUEO DE CELULARES: 
-    // Capturamos cualquier error del portapapeles silenciosamente para que no bloquee la apertura del correo.
-    try {
-      if (navigator.clipboard && window.ClipboardItem) {
-        const blob = new Blob([htmlFinal], { type: 'text/html' });
-        const item = new ClipboardItem({ 'text/html': blob });
-        navigator.clipboard.write([item]).catch(() => {});
-      } else if (navigator.clipboard) {
-        navigator.clipboard.writeText(textoPlanoFinal).catch(() => {});
-      }
-    } catch (e) {
-      // Ignorar errores en móviles restrictivos
-    }
-
-    // Método de enlace fantasma: Obliga a celulares y PCs a abrir la app de correo sin pestañas blancas.
-    const link = `mailto:${encodeURIComponent(destinatarioEfectivo)}?subject=${encodeURIComponent(subject || '')}&cc=${encodeURIComponent(ccDinamico)}`;
-    const a = document.createElement('a');
-    a.href = link;
-    a.click();
-  };
-
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between h-full">
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between h-full relative">
+      {/* Enlace invisible nativo pre-cargado para burlar el bucle de "Cargando..." en Outlook y Móvil */}
+      <a 
+        ref={enlaceFantasmaRef} 
+        href={urlMailtoNativo} 
+        className="hidden" 
+        tabIndex={-1} 
+        aria-hidden="true"
+      >
+        Mailto Fantasma
+      </a>
+
       <div>
         <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
           <h3 className="font-black text-slate-800 text-base flex items-center">
@@ -209,7 +227,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
           </span>
         </div>
 
-        {/* SELECTOR DESPLEGABLE */}
+        {/* SELECTOR DESPLEGABLE SEGURO */}
         <div className="mb-4">
           <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Destinatario (Enviar a):</label>
           <div className="relative">
@@ -230,7 +248,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
           </div>
         </div>
 
-        {/* COPIA CC */}
+        {/* COPIA AUTOMÁTICA EN TIEMPO REAL (CC) */}
         <div className="mb-4">
           <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">En Copia Automatizada (CC):</label>
           <div className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-[10px] font-bold text-slate-500 overflow-hidden text-ellipsis whitespace-nowrap">
@@ -245,19 +263,30 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
 
       <div className="space-y-2.5 pt-4 border-t border-slate-100">
         <div className="grid grid-cols-2 gap-2.5">
-          <button onClick={copiarAlPortapapeles} className={`py-3 px-3 rounded-xl font-black text-xs flex items-center justify-center transition-all shadow-sm ${copiado ? 'bg-emerald-500 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}>
+          <button 
+            onClick={copiarAlPortapapeles} 
+            className={`py-3 px-3 rounded-xl font-black text-xs flex items-center justify-center transition-all shadow-sm ${copiado ? 'bg-emerald-500 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}
+          >
             <Copy className="w-4 h-4 mr-1.5" />
             {copiado ? '¡Copiado! ✅' : 'Copiar Formato PC'}
           </button>
-          <button onClick={abrirAppOutlookEscritorio} className="py-2.5 px-3 bg-[#0072c6] hover:bg-[#005a9e] text-white rounded-xl font-black text-xs flex items-center justify-center shadow transition-all">
+          
+          {/* DISPARADOR PUENTEADO DE OUTLOOK */}
+          <button 
+            onClick={abrirAppOutlookEscritorio} 
+            className="py-2.5 px-3 bg-[#0072c6] hover:bg-[#005a9e] text-white rounded-xl font-black text-xs flex items-center justify-center shadow transition-all active:scale-95"
+          >
             App Outlook 🖥️
           </button>
         </div>
         
         {/* BOTÓN GMAIL CON ESCUDO DE AUDITORÍA */}
-        <button onClick={abrirEnGmail} className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs flex items-center justify-center shadow transition-colors relative">
+        <button 
+          onClick={abrirEnGmail} 
+          className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs flex items-center justify-center shadow transition-colors relative active:scale-95"
+        >
           Abrir en Gmail
-          <span className="absolute right-3 text-[9px] font-semibold bg-red-800 px-2 py-0.5 rounded-md opacity-80">
+          <span className="absolute right-3 text-[9px] font-semibold bg-red-800 px-2 py-0.5 rounded-md opacity-90">
             + CC: ohsaravia
           </span>
         </button>
