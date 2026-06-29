@@ -18,7 +18,7 @@ const BASE_DE_DATOS_PROYECCION = [
   { nombre: "MADELINE CARBALLO", colAct: 12874, dias: [0,0,0,0,0,14000,0], proy: [1,0,0,0,0,0,0] }, 
   { nombre: "JAIME FABRICIO RIOS", colAct: 7500, dias: [0,0,0,0,0,6600,0], proy: [0,0,1,0,0,0,0] },
   { nombre: "ELY GONZALES GARCIA", colAct: 7200, dias: [0,0,0,0,6500,0,12000], proy: [0,3,0,0,0,0,0] }, 
-  { nombre: "CARLOS ENRIQUE CALDERON", colAct: 0, dias: [0,0,0,0,0,7750,17280], proy: [1,0,0,0,1,0,0] },
+  { nombre: "CARLOS ENRIQUE CALDERON", colAct: 25289,98, dias: [0,0,0,0,0,7750,17280], proy: [1,0,0,0,1,0,0] },
   { nombre: "GUICELA ARIAS", colAct: 0, dias: [0,0,0,0,27000,0,0], proy: [1,0,0,0,0,0,0] }, 
   { nombre: "HUMBERTO FALDIN PARAPAINO", colAct: 0, dias: [0,0,0,0,6600,0,0], proy: [0,1,0,0,0,0,0] },
   { nombre: "MERLY MENDEZ HURTADO", colAct: 0, dias: [0,0,0,0,0,7750,12000], proy: [0,2,0,0,0,0,1] }, 
