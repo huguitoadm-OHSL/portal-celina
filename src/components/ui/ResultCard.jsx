@@ -4,107 +4,96 @@ import { Copy, Check, Mail, ChevronDown, Clock } from 'lucide-react';
 export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDestino, setSupervisorDestino }) {
   const [copiado, setCopiado] = useState(false);
 
-  // ================= 1. BÓVEDA DE REGLAS ESTRICTAS =================
-  const contactosDisponibles = useMemo(() => {
-    // Unimos TODO (título, asunto, texto y HTML) para que el escáner nunca se quede ciego
-    const contextoTotal = [title, subject, text, htmlContent].join(" ").toLowerCase();
-
-    // PRIORIDAD 1: RECOMPRA
-    if (contextoTotal.includes("recompra")) {
-      return [
-        { email: 'cbarretto@celina.com.bo', nombre: 'Ing. Charles Barretto', saludo: 'Estimado Ing. Charles' },
-        { email: 'csalvatierra@celina.com.bo', nombre: 'Cinthia Salvatierra', saludo: 'Estimada Cinthia' },
-        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' }
-      ];
-    }
-
-    // PRIORIDAD 2: RRHH Y MEMORÁNDUMS (Soluciona la Imagen 2)
-    if (
-      contextoTotal.includes("memorándum") || 
-      contextoTotal.includes("memorandum") || 
-      contextoTotal.includes("renuncia") || 
-      contextoTotal.includes("crm") || 
-      contextoTotal.includes("evaluación") || 
-      contextoTotal.includes("evaluacion") || 
-      contextoTotal.includes("postulante") || 
-      contextoTotal.includes("rrhh")
-    ) {
-      return [
+  // ================= 1. DICCIONARIO BLINDADO (SOLO LEE TÍTULOS Y ASUNTOS) =================
+  const MAPA_CORREOS = useMemo(() => [
+    {
+      // 1. CÓDIGOS, VALIDACIONES, PENDIENTES
+      pantallas: ["código", "codigo", "códigos", "codigos", "llamada", "referido", "validación", "validacion", "pendiente", "pend."],
+      contactos: [
+        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' },
+        { email: 'omendoza@celina.com.bo', nombre: 'Olivia Mendoza Duran', saludo: 'Estimada Olivia' },
+        { email: 'rmartinez@celina.com.bo', nombre: 'Rodolfo Martínez', saludo: 'Estimado Rodolfo' }
+      ]
+    },
+    {
+      // 2. RECURSOS HUMANOS (RRHH)
+      pantallas: ["memorándum", "memorandum", "renuncia", "crm", "evaluación", "evaluacion", "postulante", "rrhh"],
+      contactos: [
         { email: 'uklein@grupopaz.com.bo', nombre: 'Ulrich Klein Montano', saludo: 'Estimado Ulrich' },
         { email: 'mfroca@celina.com.bo', nombre: 'Maria Fernanda Roca Miranda', saludo: 'Estimada Maria Fernanda' },
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
         { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
-      ];
-    }
-
-    // PRIORIDAD 3: PLATAFORMA - CÓDIGOS, VALIDACIONES, PENDIENTES (Soluciona la Imagen 1)
-    if (
-      contextoTotal.includes("código") || 
-      contextoTotal.includes("codigo") || 
-      contextoTotal.includes("llamada") || 
-      contextoTotal.includes("validación") || 
-      contextoTotal.includes("validacion") || 
-      contextoTotal.includes("pendiente") || 
-      contextoTotal.includes("referido")
-    ) {
-      return [
-        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' },
-        { email: 'omendoza@celina.com.bo', nombre: 'Olivia Mendoza Duran', saludo: 'Estimada Olivia' },
-        { email: 'rmartinez@celina.com.bo', nombre: 'Rodolfo Martínez', saludo: 'Estimado Rodolfo' }
-      ];
-    }
-
-    // PRIORIDAD 4: BLOQUEO DE LOTE
-    if (contextoTotal.includes("bloqueo") || contextoTotal.includes("lote")) {
-      return [
+      ]
+    },
+    {
+      // 3. RECOMPRA
+      pantallas: ["recompra"],
+      contactos: [
+        { email: 'cbarretto@celina.com.bo', nombre: 'Ing. Charles Barretto', saludo: 'Estimado Ing. Charles' },
+        { email: 'csalvatierra@celina.com.bo', nombre: 'Cinthia Salvatierra', saludo: 'Estimada Cinthia' },
+        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' }
+      ]
+    },
+    {
+      // 4. BLOQUEO DE LOTE
+      pantallas: ["bloqueo", "lote"],
+      contactos: [
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
         { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' },
         { email: 'lribera@grupopaz.com.bo', nombre: 'Luis Fernando Ribera', saludo: 'Estimado Luis Fernando' }
-      ];
-    }
-
-    // PRIORIDAD 5: AMORTIZACIÓN A CAPITAL (Comercial)
-    if (contextoTotal.includes("amortización a capital") || contextoTotal.includes("amortizacion a capital")) {
-      return [
+      ]
+    },
+    {
+      // 5. AMORTIZACIÓN A CAPITAL
+      pantallas: ["amortización", "amortizacion"],
+      contactos: [
         { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' }
-      ];
-    }
-
-    // PRIORIDAD 6: CUOTA INICIAL Y PROYECCIONES
-    if (
-      contextoTotal.includes("cuota inicial") || 
-      contextoTotal.includes("proyección") || 
-      contextoTotal.includes("proyeccion") || 
-      contextoTotal.includes("semanal") || 
-      contextoTotal.includes("diaria")
-    ) {
-      return [
+      ]
+    },
+    {
+      // 6. DESCUENTOS CAMPAÑAS
+      pantallas: ["campaña", "campana"],
+      contactos: [
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
+        { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' },
         { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
-      ];
-    }
-
-    // PRIORIDAD 7: DESCUENTOS Y LIQUIDACIONES
-    if (
-      contextoTotal.includes("descuento") || 
-      contextoTotal.includes("campaña") || 
-      contextoTotal.includes("campana") || 
-      contextoTotal.includes("liquidación") || 
-      contextoTotal.includes("liquidacion")
-    ) {
-      return [
+      ]
+    },
+    {
+      // 7. LIQUIDACIÓN CONTADO / DESCUENTOS REGULARES
+      pantallas: ["liquidación", "liquidacion", "descuento"],
+      contactos: [
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
         { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' },
         { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' }
-      ];
+      ]
+    },
+    {
+      // 8. PROYECCIONES Y CUOTA INICIAL
+      pantallas: ["cuota", "proyección", "proyeccion", "diaria", "semanal", "inc."],
+      contactos: [
+        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
+        { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
+      ]
     }
+  ], []);
 
-    // RESPALDO CORPORATIVO DEFAULT (Para cualquier otra cosa)
-    return [
-      { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' },
-      { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' }
-    ];
-  }, [title, subject, text, htmlContent]);
+  const RESPALDO = useMemo(() => [
+    { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' },
+    { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' }
+  ], []);
+
+  const contactosDisponibles = useMemo(() => {
+    // SOLUCIÓN A LOS CORREOS CRUZADOS: Ignoramos el cuerpo del mensaje, solo leemos Título y Asunto.
+    const contextoTotal = [title, subject].join(" ").toLowerCase();
+    
+    for (const grupo of MAPA_CORREOS) {
+      if (grupo.pantallas.some(p => contextoTotal.includes(p))) {
+        return grupo.contactos;
+      }
+    }
+    return RESPALDO;
+  }, [title, subject, MAPA_CORREOS, RESPALDO]);
 
   // ================= 2. SELECCIÓN ABSOLUTA =================
   const contactoSeleccionado = contactosDisponibles.find(c => c.email === supervisorDestino);
@@ -177,7 +166,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     }
   };
 
-  // 🚀 INYECCIÓN DE CORREO DE AUDITORÍA (Solo para Gmail)
+  // 🚀 INYECCIÓN DE CORREO DE AUDITORÍA (GMAIL)
   const abrirEnGmail = () => {
     const miCorreoAuditoria = "ohsaravia@celina.com.bo";
     const ccGmailFinal = ccDinamico ? `${ccDinamico}, ${miCorreoAuditoria}` : miCorreoAuditoria;
@@ -186,15 +175,26 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     window.open(url, '_blank');
   };
 
-  const abrirAppOutlookEscritorio = async () => {
+  const abrirAppOutlookEscritorio = () => {
+    // SOLUCIÓN AL BLOQUEO DE CELULARES: 
+    // Capturamos cualquier error del portapapeles silenciosamente para que no bloquee la apertura del correo.
     try {
-      const blob = new Blob([htmlFinal], { type: 'text/html' });
-      const clipboardItem = new ClipboardItem({ 'text/html': blob });
-      await navigator.clipboard.write([clipboardItem]);
-    } catch (err) {
-      navigator.clipboard.writeText(textoPlanoFinal);
+      if (navigator.clipboard && window.ClipboardItem) {
+        const blob = new Blob([htmlFinal], { type: 'text/html' });
+        const item = new ClipboardItem({ 'text/html': blob });
+        navigator.clipboard.write([item]).catch(() => {});
+      } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(textoPlanoFinal).catch(() => {});
+      }
+    } catch (e) {
+      // Ignorar errores en móviles restrictivos
     }
-    window.location.href = `mailto:${encodeURIComponent(destinatarioEfectivo)}?subject=${encodeURIComponent(subject || '')}&cc=${encodeURIComponent(ccDinamico)}`;
+
+    // Método de enlace fantasma: Obliga a celulares y PCs a abrir la app de correo sin pestañas blancas.
+    const link = `mailto:${encodeURIComponent(destinatarioEfectivo)}?subject=${encodeURIComponent(subject || '')}&cc=${encodeURIComponent(ccDinamico)}`;
+    const a = document.createElement('a');
+    a.href = link;
+    a.click();
   };
 
   return (
@@ -265,3 +265,4 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     </div>
   );
 }
+
