@@ -13,7 +13,7 @@ const BASE_DE_DATOS_PBI = [
   { nombre: "MADELINE CARBALLO", colAct: 12874, ventasReales: [0,0,0,0,0,0,1], tipo: 'EXTERNO' },
   { nombre: "JAIME FABRICIO RIOS", colAct: 7500, ventasReales: [0,1,0,0,0,0,0], tipo: 'INTERNO' },
   { nombre: "ELY GONZALES GARCIA", colAct: 7200, ventasReales: [0,0,0,0,0,1,0], tipo: 'INTERNO' },
-  { nombre: "CARLOS ENRIQUE CALDERON", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
+  { nombre: "CARLOS ENRIQUE CALDERON", colAct: 25289,98, ventasReales: [0,0,0,2,0,0,0], tipo: 'INTERNO' },
   { nombre: "GUICELA ARIAS", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'NUEVO' },
   { nombre: "HUMBERTO FALDIN PARAPAINO", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'NUEVO' },
   { nombre: "MERLY MENDEZ HURTADO", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
