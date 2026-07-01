@@ -4,88 +4,104 @@ import { Copy, Check, Mail, ChevronDown, Clock } from 'lucide-react';
 export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDestino, setSupervisorDestino }) {
   const [copiado, setCopiado] = useState(false);
 
-  // ================= 1. DICCIONARIO BLINDADO =================
-  const MAPA_CORREOS = useMemo(() => [
-    {
-      pantallas: ["código", "codigo", "códigos", "codigos", "llamada", "referido", "validación", "validacion", "pendiente", "pend."],
-      contactos: [
+  // ================= 1. DETECCIÓN DE ENTORNO (CELULAR VS PC) =================
+  const esAndroid = /Android/i.test(navigator.userAgent);
+  const esIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const esMovil = esAndroid || esIOS;
+
+  // ================= 2. ESCÁNER PROFUNDO DE FRASES EXACTAS =================
+  // Soluciona el error de los correos cruzados buscando frases completas en todo el texto.
+  const contactosDisponibles = useMemo(() => {
+    const contenidoTotal = [title, subject, text, htmlContent].join(" ").toLowerCase();
+
+    // 1. RECOMPRA
+    if (contenidoTotal.includes("recompra")) {
+      return [
+        { email: 'cbarretto@celina.com.bo', nombre: 'Ing. Charles Barretto', saludo: 'Estimado Ing. Charles' },
+        { email: 'csalvatierra@celina.com.bo', nombre: 'Cinthia Salvatierra', saludo: 'Estimada Cinthia' },
+        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' }
+      ];
+    }
+
+    // 2. TRÍADA DE PLATAFORMA (Códigos, Validaciones, Referidos, Pendientes)
+    if (
+      contenidoTotal.includes("código de liquidación") || contenidoTotal.includes("codigo de liquidacion") ||
+      contenidoTotal.includes("código de amortización") || contenidoTotal.includes("codigo de amortizacion") ||
+      contenidoTotal.includes("validación de llamada") || contenidoTotal.includes("validacion de llamada") ||
+      contenidoTotal.includes("cliente sin validación") || contenidoTotal.includes("cliente sin validacion") ||
+      contenidoTotal.includes("cliente referido")
+    ) {
+      return [
         { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' },
         { email: 'omendoza@celina.com.bo', nombre: 'Olivia Mendoza Duran', saludo: 'Estimada Olivia' },
         { email: 'rmartinez@celina.com.bo', nombre: 'Rodolfo Martínez', saludo: 'Estimado Rodolfo' }
-      ]
-    },
-    {
-      pantallas: ["memorándum", "memorandum", "renuncia", "crm", "evaluación", "evaluacion", "postulante", "rrhh"],
-      contactos: [
+      ];
+    }
+
+    // 3. RECURSOS HUMANOS (RRHH)
+    if (
+      contenidoTotal.includes("memorándum") || contenidoTotal.includes("memorandum") ||
+      contenidoTotal.includes("carta de renuncia") || contenidoTotal.includes("renuncia") ||
+      contenidoTotal.includes("crm") || contenidoTotal.includes("evaluación") || 
+      contenidoTotal.includes("postulante")
+    ) {
+      return [
         { email: 'uklein@grupopaz.com.bo', nombre: 'Ulrich Klein Montano', saludo: 'Estimado Ulrich' },
         { email: 'mfroca@celina.com.bo', nombre: 'Maria Fernanda Roca Miranda', saludo: 'Estimada Maria Fernanda' },
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
         { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
-      ]
-    },
-    {
-      pantallas: ["recompra"],
-      contactos: [
-        { email: 'cbarretto@celina.com.bo', nombre: 'Ing. Charles Barretto', saludo: 'Estimado Ing. Charles' },
-        { email: 'csalvatierra@celina.com.bo', nombre: 'Cinthia Salvatierra', saludo: 'Estimada Cinthia' },
-        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' }
-      ]
-    },
-    {
-      pantallas: ["bloqueo", "lote"],
-      contactos: [
+      ];
+    }
+
+    // 4. BLOQUEO DE LOTE
+    if (contenidoTotal.includes("bloqueo") || contenidoTotal.includes("lote")) {
+      return [
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
         { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' },
         { email: 'lribera@grupopaz.com.bo', nombre: 'Luis Fernando Ribera', saludo: 'Estimado Luis Fernando' }
-      ]
-    },
-    {
-      pantallas: ["amortización", "amortizacion"],
-      contactos: [
+      ];
+    }
+
+    // 5. AMORTIZACIÓN A CAPITAL
+    if (contenidoTotal.includes("amortización a capital") || contenidoTotal.includes("amortizacion a capital")) {
+      return [
         { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' }
-      ]
-    },
-    {
-      pantallas: ["campaña", "campana"],
-      contactos: [
+      ];
+    }
+
+    // 6. CUOTA INICIAL Y PROYECCIONES
+    if (
+      contenidoTotal.includes("cuota inicial") || 
+      contenidoTotal.includes("proyección") || contenidoTotal.includes("proyeccion") ||
+      contenidoTotal.includes("diaria") || contenidoTotal.includes("semanal")
+    ) {
+      return [
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
-        { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' },
         { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
-      ]
-    },
-    {
-      pantallas: ["liquidación", "liquidacion", "descuento"],
-      contactos: [
+      ];
+    }
+
+    // 7. DESCUENTOS Y LIQUIDACIONES
+    if (
+      contenidoTotal.includes("descuento") || 
+      contenidoTotal.includes("campaña") || contenidoTotal.includes("campana") ||
+      contenidoTotal.includes("liquidación") || contenidoTotal.includes("liquidacion")
+    ) {
+      return [
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
         { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' },
         { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' }
-      ]
-    },
-    {
-      pantallas: ["cuota", "proyección", "proyeccion", "diaria", "semanal", "inc."],
-      contactos: [
-        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
-        { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
-      ]
+      ];
     }
-  ], []);
 
-  const RESPALDO = useMemo(() => [
-    { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' },
-    { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' }
-  ], []);
+    // RESPALDO CORPORATIVO
+    return [
+      { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' },
+      { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' }
+    ];
+  }, [title, subject, text, htmlContent]);
 
-  const contactosDisponibles = useMemo(() => {
-    const contextoTotal = [title, subject].join(" ").toLowerCase();
-    for (const grupo of MAPA_CORREOS) {
-      if (grupo.pantallas.some(p => contextoTotal.includes(p))) {
-        return grupo.contactos;
-      }
-    }
-    return RESPALDO;
-  }, [title, subject, MAPA_CORREOS, RESPALDO]);
-
-  // ================= 2. SELECCIÓN ABSOLUTA =================
+  // ================= 3. SELECCIÓN ABSOLUTA =================
   const contactoSeleccionado = contactosDisponibles.find(c => c.email === supervisorDestino);
   const destinatarioEfectivo = contactoSeleccionado ? contactoSeleccionado.email : contactosDisponibles[0].email;
   const objetoDestinatario = contactoSeleccionado || contactosDisponibles[0];
@@ -96,52 +112,39 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     }
   }, [destinatarioEfectivo, supervisorDestino, setSupervisorDestino]);
 
-  // ================= 3. COPIAS AUTOMÁTICAS (CC) =================
+  // ================= 4. COPIAS AUTOMÁTICAS (CC) =================
   const ccDinamico = useMemo(() => {
     const copiasExtra = contactosDisponibles
       .filter(c => c.email !== destinatarioEfectivo)
       .map(c => c.email);
-    
     const copiasProps = cc ? cc.split(',').map(s => s.trim()).filter(Boolean) : [];
-    
     return [...new Set([...copiasExtra, ...copiasProps])].join(', ');
   }, [contactosDisponibles, destinatarioEfectivo, cc]);
 
-  // ================= 4. MUTACIÓN DEL SALUDO =================
+  // ================= 5. MUTACIÓN DEL SALUDO =================
   const procesarTextoMutante = (contenido) => {
     if (!contenido) return '';
-    
     const hora = new Date().getHours();
     let saludoBase = "Buenas noches";
     if (hora >= 5 && hora < 12) saludoBase = "Buenos días";
     if (hora >= 12 && hora < 19) saludoBase = "Buenas tardes";
-
     const nombreSaludo = objetoDestinatario ? objetoDestinatario.saludo : 'Estimado/a';
-
-    let modificado = contenido.replace(/Buenas\s+(noches|días|tardes)/gi, saludoBase);
-    modificado = modificado.replace(/\[SALUDO_AUTO\]/gi, "");
-
-    modificado = modificado
-      .replace(/Estimado\s+Mauricio/gi, nombreSaludo)
-      .replace(/Estimado\s+Robert/gi, nombreSaludo)
-      .replace(/Estimada\s+Verenice/gi, nombreSaludo)
-      .replace(/Estimado\s+Ing\.\s+Charles/gi, nombreSaludo)
-      .replace(/Estimada\s+Cinthia/gi, nombreSaludo)
-      .replace(/Estimado\s+Enrique/gi, nombreSaludo)
-      .replace(/Estimado\s+Luis\s+Fernando/gi, nombreSaludo)
-      .replace(/Estimada\s+Olivia/gi, nombreSaludo)
-      .replace(/Estimado\s+Rodolfo/gi, nombreSaludo)
-      .replace(/Estimado\s+Alex/gi, nombreSaludo)
-      .replace(/Estimado\s+Ulrich/gi, nombreSaludo)
-      .replace(/Estimada\s+Maria\s+Fernanda/gi, nombreSaludo);
-
-    return modificado;
+    
+    let modificado = contenido.replace(/Buenas\s+(noches|días|tardes)/gi, saludoBase).replace(/\[SALUDO_AUTO\]/gi, "");
+    
+    return modificado
+      .replace(/Estimado\s+Mauricio/gi, nombreSaludo).replace(/Estimado\s+Robert/gi, nombreSaludo)
+      .replace(/Estimada\s+Verenice/gi, nombreSaludo).replace(/Estimado\s+Ing\.\s+Charles/gi, nombreSaludo)
+      .replace(/Estimada\s+Cinthia/gi, nombreSaludo).replace(/Estimado\s+Enrique/gi, nombreSaludo)
+      .replace(/Estimado\s+Luis\s+Fernando/gi, nombreSaludo).replace(/Estimada\s+Olivia/gi, nombreSaludo)
+      .replace(/Estimado\s+Rodolfo/gi, nombreSaludo).replace(/Estimado\s+Alex/gi, nombreSaludo)
+      .replace(/Estimado\s+Ulrich/gi, nombreSaludo).replace(/Estimada\s+Maria\s+Fernanda/gi, nombreSaludo);
   };
 
   const htmlFinal = procesarTextoMutante(htmlContent);
   const textoPlanoFinal = procesarTextoMutante(text);
 
-  // ================= 5. MOTORES DE ENVÍO Y AUDITORÍA =================
+  // ================= 6. MOTORES DE ENVÍO DE CLASE MUNDIAL =================
   const copiarAlPortapapeles = async () => {
     try {
       const blob = new Blob([htmlFinal], { type: 'text/html' });
@@ -156,17 +159,49 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     }
   };
 
-  // 🚀 INYECCIÓN DE CORREO DE AUDITORÍA (GMAIL)
+  // 🔥 GMAIL MÓVIL Y PC: Fuerza la apertura de la APP en celulares
   const abrirEnGmail = () => {
     const miCorreoAuditoria = "ohsaravia@celina.com.bo";
-    const ccGmailFinal = ccDinamico ? `${ccDinamico}, ${miCorreoAuditoria}` : miCorreoAuditoria;
+    const dest = encodeURIComponent(destinatarioEfectivo || '');
+    const asun = encodeURIComponent(subject || '');
+    const copiasCC = encodeURIComponent(ccDinamico || '');
+    const copiaBCC = encodeURIComponent(miCorreoAuditoria);
+    const cuerpo = encodeURIComponent(textoPlanoFinal || '');
 
-    const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(destinatarioEfectivo)}&su=${encodeURIComponent(subject || '')}&cc=${encodeURIComponent(ccGmailFinal)}&body=${encodeURIComponent(textoPlanoFinal)}`;
-    window.open(url, '_blank');
+    if (esAndroid) {
+      window.location.href = `intent://compose?to=${dest}&subject=${asun}&cc=${copiasCC}&bcc=${copiaBCC}&body=${cuerpo}#Intent;package=com.google.android.gm;scheme=mailto;end;`;
+    } else if (esIOS) {
+      window.location.href = `googlegmail://co?to=${dest}&subject=${asun}&cc=${copiasCC}&bcc=${copiaBCC}&body=${cuerpo}`;
+      setTimeout(() => { window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${dest}&su=${asun}&cc=${copiasCC}&bcc=${copiaBCC}&body=${cuerpo}`, '_blank'); }, 1500);
+    } else {
+      window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${dest}&su=${asun}&cc=${copiasCC}&bcc=${copiaBCC}&body=${cuerpo}`, '_blank');
+    }
+  };
+
+  // 🔥 OUTLOOK PC Y MÓVIL: Evita Pantalla Blanca con comandos nativos y retraso estratégico
+  const abrirAppOutlookEscritorio = (e) => {
+    e.preventDefault();
+    copiarAlPortapapeles(); // Copia al portapapeles silenciosamente
+
+    const dest = encodeURIComponent(destinatarioEfectivo || '');
+    const asun = encodeURIComponent(subject || '');
+    const copiasCC = encodeURIComponent(ccDinamico || '');
+    const cuerpoVacio = encodeURIComponent(" "); // EVITA EL BUCLE INFINITO EN WINDOWS 11
+
+    setTimeout(() => {
+      if (esMovil) {
+        window.location.href = `ms-outlook://compose?to=${dest}&subject=${asun}&cc=${copiasCC}`;
+        // Si no tienen Outlook app, cae en el mailto clásico de forma segura
+        setTimeout(() => { window.location.href = `mailto:${dest}?subject=${asun}&cc=${copiasCC}&body=${cuerpoVacio}`; }, 1000);
+      } else {
+        // En PC usamos "_top" para que Windows no bloquee el subproceso
+        window.open(`mailto:${dest}?subject=${asun}&cc=${copiasCC}&body=${cuerpoVacio}`, '_top');
+      }
+    }, 350); // Le damos 350ms a la PC para que copie la tabla en memoria antes de abrir Outlook
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between h-full relative">
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between h-full">
       <div>
         <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
           <h3 className="font-black text-slate-800 text-base flex items-center">
@@ -221,20 +256,14 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
             {copiado ? '¡Copiado! ✅' : 'Copiar Formato PC'}
           </button>
           
-          {/* ENLACE NATIVO BLINDADO: Evita el bloqueo del navegador y las pantallas blancas */}
-          <a 
-            href={`mailto:${encodeURIComponent(destinatarioEfectivo)}?subject=${encodeURIComponent(subject || '')}&cc=${encodeURIComponent(ccDinamico)}`}
-            onClick={() => {
-              // Copiamos al portapapeles silenciosamente para que el usuario pueda hacer Ctrl+V al abrir
-              copiarAlPortapapeles();
-            }}
-            className="py-2.5 px-3 bg-[#0072c6] hover:bg-[#005a9e] text-white rounded-xl font-black text-xs flex items-center justify-center shadow transition-all active:scale-95 text-center decoration-transparent"
+          <button 
+            onClick={abrirAppOutlookEscritorio} 
+            className="py-2.5 px-3 bg-[#0072c6] hover:bg-[#005a9e] text-white rounded-xl font-black text-xs flex items-center justify-center shadow transition-all active:scale-95"
           >
             App Outlook 🖥️
-          </a>
+          </button>
         </div>
         
-        {/* BOTÓN GMAIL CON ESCUDO DE AUDITORÍA */}
         <button 
           onClick={abrirEnGmail} 
           className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs flex items-center justify-center shadow transition-colors relative active:scale-95"
