@@ -11,19 +11,19 @@ const PROYECTOS_ACTUALIZADOS = ['Muyurina', 'Renacer', 'Santa Fe', 'Rancho Nuevo
 
 // LA BÓVEDA MAESTRA (Intacta y asegurada)
 const BASE_DE_DATOS_PROYECCION = [
-  { nombre: "NEFI ELIAS CHAVEZ", colAct: 45278, dias: [0,0,0,0,0,0,25000], proy: [1,0,0,0,0,0,0] }, 
-  { nombre: "DANIEL ANGULO MALDONADO", colAct: 45000, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
-  { nombre: "MARISOL URGEL PIZARRO", colAct: 38484, dias: [0,0,0,0,0,0,17000], proy: [0,0,0,0,0,1,0] }, 
-  { nombre: "GLORIANA SILVA ALMENDA", colAct: 13200, dias: [0,0,0,0,6000,0,0], proy: [0,0,1,0,0,0,0] },
-  { nombre: "MADELINE CARBALLO", colAct: 12874, dias: [0,0,0,0,0,14000,0], proy: [1,0,0,0,0,0,0] }, 
-  { nombre: "JAIME FABRICIO RIOS", colAct: 7500, dias: [0,0,0,0,0,6600,0], proy: [0,0,1,0,0,0,0] },
-  { nombre: "ELY GONZALES GARCIA", colAct: 7200, dias: [0,0,0,0,6500,0,12000], proy: [0,3,0,0,0,0,0] }, 
-  { nombre: "CARLOS ENRIQUE CALDERON", colAct: 25290, dias: [0,0,0,0,0,7750,17280], proy: [1,0,0,0,1,0,0] },
-  { nombre: "GUICELA ARIAS", colAct: 0, dias: [0,0,0,0,27000,0,0], proy: [1,0,0,0,0,0,0] }, 
-  { nombre: "HUMBERTO FALDIN PARAPAINO", colAct: 0, dias: [0,0,0,0,6600,0,0], proy: [0,1,0,0,0,0,0] },
-  { nombre: "MERLY MENDEZ HURTADO", colAct: 0, dias: [0,0,0,0,0,7750,12000], proy: [0,2,0,0,0,0,1] }, 
-  { nombre: "RODRIGO ROJAS SILES", colAct: 0, dias: [0,0,0,0,0,0,25000], proy: [1,0,0,0,0,0,0] },
-  { nombre: "TERESITA CARDOZO AGUIRRE", colAct: 0, dias: [0,0,0,0,0,10500,0], proy: [0,0,0,0,0,0,1] }
+  { nombre: "NEFI ELIAS CHAVEZ", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }, 
+  { nombre: "DANIEL ANGULO MALDONADO", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
+  { nombre: "MARISOL URGEL PIZARRO", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }, 
+  { nombre: "GLORIANA SILVA ALMENDA", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
+  { nombre: "MADELINE CARBALLO", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }, 
+  { nombre: "JAIME FABRICIO RIOS", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
+  { nombre: "ELY GONZALES GARCIA", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }, 
+  { nombre: "CARLOS ENRIQUE CALDERON", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
+  { nombre: "GUICELA ARIAS", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }, 
+  { nombre: "HUMBERTO FALDIN PARAPAINO", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
+  { nombre: "MERLY MENDEZ HURTADO", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }, 
+  { nombre: "RODRIGO ROJAS SILES", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
+  { nombre: "TERESITA CARDOZO AGUIRRE", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }
 ];
 
 export default function ProyeccionSemanal() {
@@ -31,7 +31,7 @@ export default function ProyeccionSemanal() {
   
   const [formProyeccion, setFormProyeccion] = useState({
     equipo: 'Oscar Saravia', 
-    fechaInicio: '2026-06-24', 
+    fechaInicio: '2026-07-06', 
     objetivoMensual: 450000,
     asesores: BASE_DE_DATOS_PROYECCION
   });
