@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Tag, AlertCircle } from 'lucide-react';
+import { Tag } from 'lucide-react';
 import { ResultCard } from '../components/ui/ResultCard';
 
 export default function DescuentosCampanas() {
@@ -16,7 +16,7 @@ export default function DescuentosCampanas() {
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
-  // ================= 1. MATEMÁTICA NUEVA ($2 CONTADO / $1 CRÉDITO) =================
+  // ================= MATEMÁTICA ($2 CONTADO / $1 CRÉDITO) =================
   const sup = parseFloat(form.superficie) || 0;
   const pReg = parseFloat(form.precioReg) || 0;
 
@@ -29,7 +29,7 @@ export default function DescuentosCampanas() {
 
   const fDinero = (num) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
 
-  // ================= 2. CORREO HTML PREMIUM =================
+  // ================= CORREO HTML PREMIUM =================
   const generarHtml = () => `
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; font-size: 13px; color: #0f172a; max-width: 950px; line-height: 1.5;">
       <tr>
@@ -204,14 +204,12 @@ export default function DescuentosCampanas() {
           </div>
           <ResultCard 
             title="Descuento" 
-            text={\`Solicitud de descuento campaña para lote UV: \${form.uv} MZN: \${form.mzn} LOTE: \${form.lote}\`} 
+            text={`Solicitud de descuento campaña para lote UV: ${form.uv} MZN: ${form.mzn} LOTE: ${form.lote}`} 
             htmlContent={generarHtml()} 
-            subject={\`Solicitud Descuento Campañas - \${form.proyecto} UV:\${form.uv} Mz:\${form.mzn} Lt:\${form.lote} - AUTORIZACIÓN VENTA \${form.modalidad.toUpperCase()}\`} 
+            subject={`Solicitud Descuento Campañas - ${form.proyecto} UV:${form.uv} Mz:${form.mzn} Lt:${form.lote} - AUTORIZACIÓN VENTA ${form.modalidad.toUpperCase()}`} 
           />
         </div>
       </div>
     </div>
   );
 }
-
-
