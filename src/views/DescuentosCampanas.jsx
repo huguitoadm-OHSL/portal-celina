@@ -5,7 +5,7 @@ import { ResultCard } from '../components/ui/ResultCard';
 export default function DescuentosCampanas() {
   const [form, setForm] = useState({
     proyecto: 'Muyurina',
-    modalidad: 'Al Contado', // 'A Crédito (Plazos)' o 'Al Contado'
+    modalidad: 'Al Contado', 
     uv: '14',
     mzn: '40',
     lote: '24',
@@ -20,7 +20,6 @@ export default function DescuentosCampanas() {
   const sup = parseFloat(form.superficie) || 0;
   const pReg = parseFloat(form.precioReg) || 0;
 
-  // Factor de descuento
   const factorDescuento = form.modalidad === 'Al Contado' ? 2 : 1;
 
   const precioOriginal = sup * pReg;
@@ -28,17 +27,15 @@ export default function DescuentosCampanas() {
   const precioFinal = precioOriginal - ahorroCliente;
   const precioM2Aplicar = pReg - factorDescuento;
 
-  // Formateadores
   const fDinero = (num) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
 
-  // ================= 2. CORREO HTML (EL DISEÑO EXACTO DE TU IMAGEN) =================
+  // ================= 2. CORREO HTML PREMIUM =================
   const generarHtml = () => `
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; font-size: 13px; color: #0f172a; max-width: 950px; line-height: 1.5;">
       <tr>
         <td>
           <p>Buenas [SALUDO_AUTO]</p>
 
-          <!-- ALERTA ROJA EXACTA -->
           <table width="100%" cellpadding="12" cellspacing="0" border="0" style="background-color: #fef2f2; border: 1px solid #fca5a5; margin-bottom: 15px;">
             <tr>
               <td style="color: #ef4444; font-size: 12px; font-weight: bold;">
@@ -49,10 +46,7 @@ export default function DescuentosCampanas() {
 
           <p style="margin-bottom: 20px;">Por favor le solicito mediante el presente correo, la aplicación del descuento correspondiente a la campaña vigente del proyecto ${form.proyecto}: descuento de $${factorDescuento}/m2 por modalidad ${form.modalidad.toLowerCase()}:</p>
 
-          <!-- CONTENEDOR BLANCO PRINCIPAL -->
           <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border: 1px solid #e2e8f0; background-color: #ffffff;">
-            
-            <!-- Cabecera -->
             <tr>
               <td style="padding: 15px 20px; border-bottom: 1px solid #e2e8f0;">
                 <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -63,8 +57,6 @@ export default function DescuentosCampanas() {
                 </table>
               </td>
             </tr>
-
-            <!-- 3 Columnas Grises -->
             <tr>
               <td style="padding: 20px;">
                 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
@@ -83,8 +75,6 @@ export default function DescuentosCampanas() {
                     </td>
                   </tr>
                 </table>
-
-                <!-- Filas de Detalles Contables -->
                 <table width="100%" cellpadding="14" cellspacing="0" border="0" style="margin-top: 20px; font-size: 13px;">
                   <tr>
                     <td style="color: #64748b; border-bottom: 1px solid #f1f5f9; padding-left: 0;">Condición (${form.proyecto})</td>
@@ -109,8 +99,6 @@ export default function DescuentosCampanas() {
               </td>
             </tr>
           </table>
-
-          <!-- FOOTER OSCURO PREMIUM -->
           <table width="100%" cellpadding="25" cellspacing="0" border="0" style="background-color: #0f172a; margin-top: -1px;">
             <tr>
               <td>
@@ -120,7 +108,6 @@ export default function DescuentosCampanas() {
                     <td align="right" style="font-size: 24px; font-weight: bold; color: #10b981;">${fDinero(precioM2Aplicar)}</td>
                   </tr>
                 </table>
-                
                 <table width="100%" cellpadding="15" cellspacing="0" border="0" style="background-color: #1e293b; margin-top: 20px; border-radius: 4px;">
                   <tr>
                     <td style="font-size: 10px; font-weight: bold; color: #38bdf8; letter-spacing: 1px;">
@@ -134,7 +121,6 @@ export default function DescuentosCampanas() {
               </td>
             </tr>
           </table>
-
           <p style="font-size: 13px; margin-top: 30px;">Quedo atento a su aprobación para continuar con el proceso del cierre de la venta.</p>
           <p style="font-size: 13px;">Saludos cordiales,<br/><strong>${form.asesor}</strong></p>
         </td>
@@ -147,10 +133,7 @@ export default function DescuentosCampanas() {
       <h2 className="text-2xl font-black text-slate-800 flex items-center mb-6">
         <Tag className="w-6 h-6 mr-2 text-blue-600" /> Descuentos Campañas
       </h2>
-
       <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_1fr] gap-6">
-        
-        {/* PANEL IZQUIERDO: FORMULARIO UI */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-5">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -169,7 +152,6 @@ export default function DescuentosCampanas() {
               </select>
             </div>
           </div>
-
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="block text-[10px] font-bold text-slate-800 uppercase mb-1">UV</label>
@@ -184,7 +166,6 @@ export default function DescuentosCampanas() {
               <input type="text" name="lote" value={form.lote} onChange={handleChange} className="w-full px-3 py-2 bg-slate-800 text-white border-none rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 text-center" />
             </div>
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-[10px] font-bold text-slate-800 uppercase mb-1">Superficie (M2)</label>
@@ -195,22 +176,17 @@ export default function DescuentosCampanas() {
               <input type="number" name="precioReg" value={form.precioReg} onChange={handleChange} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
           </div>
-
           <div>
             <label className="block text-[10px] font-bold text-slate-800 uppercase mb-1">Nombre del Asesor</label>
             <input type="text" name="asesor" value={form.asesor} onChange={handleChange} className="w-full px-3 py-2 bg-slate-300/50 text-slate-500 font-bold border-none rounded-lg text-sm outline-none" readOnly />
           </div>
         </div>
-
-        {/* PANEL DERECHO: TICKET DE SIMULACIÓN Y RESULT CARD */}
         <div className="space-y-6">
           <div className="bg-[#1e293b] rounded-2xl p-6 shadow-xl relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-10 text-white pointer-events-none">
               <span className="text-7xl font-black">$</span>
             </div>
-            
             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Ticket de Simulación</h3>
-            
             <div className="flex justify-between items-end mb-6">
               <div>
                 <span className="block text-xs font-bold text-slate-400 mb-1">Precio Original</span>
@@ -221,13 +197,11 @@ export default function DescuentosCampanas() {
                 <span className="text-xl font-black text-[#10b981]">-{fDinero(ahorroCliente)}</span>
               </div>
             </div>
-
             <div className="bg-[#0f172a] rounded-xl p-4 flex justify-between items-center border border-slate-700/50">
               <span className="text-sm font-black text-white tracking-widest">PRECIO FINAL</span>
               <span className="text-3xl font-black text-white">{fDinero(precioFinal)}</span>
             </div>
           </div>
-
           <ResultCard 
             title="Descuento" 
             text={\`Solicitud de descuento campaña para lote UV: \${form.uv} MZN: \${form.mzn} LOTE: \${form.lote}\`} 
@@ -239,6 +213,3 @@ export default function DescuentosCampanas() {
     </div>
   );
 }
-
-
-
