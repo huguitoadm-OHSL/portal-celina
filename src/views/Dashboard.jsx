@@ -4,13 +4,13 @@ import { formatCurrency } from '../utils/formatters';
 
 // LA MISMA BASE DE DATOS MAESTRA DEL SEGUIMIENTO
 const BASE_DE_DATOS_PBI = [
-  { nombre: "NEFI ELIAS CHAVEZ", colAct: 45278 },
-  { nombre: "DANIEL ANGULO MALDONADO", colAct: 45000 },
-  { nombre: "MARISOL URGEL PIZARRO", colAct: 38484 },
-  { nombre: "GLORIANA SILVA ALMENDA", colAct: 13200 },
-  { nombre: "MADELINE CARBALLO", colAct: 12874 },
-  { nombre: "JAIME FABRICIO RIOS", colAct: 7500 },
-  { nombre: "ELY GONZALES GARCIA", colAct: 7200 },
+  { nombre: "NEFI ELIAS CHAVEZ", colAct: 0 },
+  { nombre: "DANIEL ANGULO MALDONADO", colAct: 0 },
+  { nombre: "MARISOL URGEL PIZARRO", colAct: 0 },
+  { nombre: "GLORIANA SILVA ALMENDA", colAct: 0 },
+  { nombre: "MADELINE CARBALLO", colAct: 0 },
+  { nombre: "JAIME FABRICIO RIOS", colAct: 0 },
+  { nombre: "ELY GONZALES GARCIA", colAct: 0 },
   { nombre: "CARLOS ENRIQUE CALDERON", colAct: 0 },
   { nombre: "GUICELA ARIAS", colAct: 0 },
   { nombre: "HUMBERTO FALDIN PARAPAINO", colAct: 0 },
