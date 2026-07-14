@@ -1,147 +1,396 @@
-import React, { useState, useEffect } from 'react';
-import { Calculator, TrendingUp, AlertTriangle } from 'lucide-react';
-
-// Componentes UI
-import { Input } from '../components/ui/Input';
-import { ResultCard } from '../components/ui/ResultCard';
-
-// Utilidades Lógicas
-import { formatCurrency } from '../utils/formatters';
-import { calcularSimulacionAmortizacion } from '../utils/calculadoras';
-import { generarTextoAmortizacionCelular } from '../utils/textTemplates';
-import { generarHtmlAmortizacion } from '../utils/htmlTemplates';
+import React, { useState, useMemo } from 'react';
+import { Calculator, FileText, Calendar, DollarSign, ArrowRight, Clock } from 'lucide-react';
 
 export default function SimuladorAmortizacion() {
-  const [formAmortizacion, setFormAmortizacion] = useState({
-    cliente: '', precioContrato: '', cuotaInicial: '', plazoOriginal: '', cuotasPagadas: '', seguroMensual: '', tasaAnual: '12.1733', montoAmortizacion: ''
+  // ================= 1. ESTADO DEL SIMULADOR (INPUTS) =================
+  const [params, setParams] = useState({
+    proyecto: 'CELINA MUYURINA',
+    uv: '49', mzn: '30', lote: '31', superficie: '300.01',
+    precioTotal: 52781.21,
+    cuotaInicial: 2870.00,
+    tasaAnual: 7.17, // Tasa de plusvalía anual
+    plazoMeses: 120, // 10 años
+    seguroMensual: 23.80,
+    cuotasPagadas: 12, // En qué mes hace la amortización
+    montoAmortizar: 2494.56
   });
 
-  const handleAmortizacionChange = (e) => setFormAmortizacion({ ...formAmortizacion, [e.target.name]: e.target.value });
+  const handleChange = (e) => setParams(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
-  // AUTO-CÁLCULO DEL SEGURO DE VIDA
-  useEffect(() => {
-    const pv = parseFloat(formAmortizacion.precioContrato?.toString().replace(/,/g, '')) || 0;
-    const ci = parseFloat(formAmortizacion.cuotaInicial?.toString().replace(/,/g, '')) || 0;
-    const cap = Math.max(0, pv - ci);
-    if (cap > 0) {
-       const seg = (cap * 0.00077).toFixed(2); // Fórmula: 0.77 por cada 1000
-       setFormAmortizacion(prev => ({...prev, seguroMensual: seg}));
-    } else {
-       setFormAmortizacion(prev => ({...prev, seguroMensual: ''}));
+  // ================= 2. MOTOR MATEMÁTICO BANCARIO =================
+  const calculos = useMemo(() => {
+    const P_total = parseFloat(params.precioTotal) || 0;
+    const Enganche = parseFloat(params.cuotaInicial) || 0;
+    const CapitalInicial = P_total - Enganche;
+    const r_mensual = (parseFloat(params.tasaAnual) || 0) / 100 / 12;
+    const n_meses = parseInt(params.plazoMeses) || 1;
+    const seguro = parseFloat(params.seguroMensual) || 0;
+    const pagadas = parseInt(params.cuotasPagadas) || 0;
+    const amortizacionExtra = parseFloat(params.montoAmortizar) || 0;
+
+    // Cálculo de la Cuota Base (Sistema Francés)
+    const cuotaBase = (CapitalInicial * r_mensual * Math.pow(1 + r_mensual, n_meses)) / (Math.pow(1 + r_mensual, n_meses) - 1);
+    const cuotaTotalMes = cuotaBase + seguro;
+
+    let balanceActual = CapitalInicial;
+    let tabla = [];
+    let interesesTotales = 0;
+
+    // FASE 1: Cuotas normales hasta el mes de la amortización
+    for (let i = 1; i <= pagadas; i++) {
+      const interes = balanceActual * r_mensual;
+      const capital = cuotaBase - interes;
+      balanceActual -= capital;
+      interesesTotales += interes;
+      
+      tabla.push({
+        periodo: i,
+        capital: capital,
+        plusvalia: interes,
+        cuotaBase: cuotaBase,
+        seguro: seguro,
+        pagoTotal: cuotaTotalMes,
+        balance: Math.max(0, balanceActual),
+        pagada: 'SI'
+      });
     }
-  }, [formAmortizacion.precioContrato, formAmortizacion.cuotaInicial]);
 
-  // Ejecutamos los cálculos en tiempo real
-  const calculos = calcularSimulacionAmortizacion(formAmortizacion);
-  const { P, C_pura, S, C_total, precioFinalPlazos, P_actual, cuotasRestantesOrig, saldoNuevo, n_new, tiempoAhorrado, ahorrado, n, error } = calculos;
+    // APLICACIÓN DE LA AMORTIZACIÓN (Inyección de capital directo)
+    const balanceAntesAmortizacion = balanceActual;
+    balanceActual -= amortizacionExtra;
+    const balanceDespuesAmortizacion = Math.max(0, balanceActual);
 
-  const textoWhatsApp = generarTextoAmortizacionCelular(formAmortizacion, calculos);
-  const textoHtml = generarHtmlAmortizacion(formAmortizacion, calculos);
+    // FASE 2: Recálculo de cuotas restantes (Mantiene la cuota, reduce el plazo)
+    let cuotasRestantes = 0;
+    let interesesNuevos = 0;
+    
+    if (balanceActual > 0) {
+      // Fórmula matemática para hallar nuevo "n" (períodos restantes) manteniendo la misma cuota
+      cuotasRestantes = -Math.log(1 - (balanceActual * r_mensual) / cuotaBase) / Math.log(1 + r_mensual);
+      cuotasRestantes = Math.ceil(cuotasRestantes); // Redondeamos hacia arriba para la última cuota pequeña
+
+      for (let i = 1; i <= cuotasRestantes; i++) {
+        const interes = balanceActual * r_mensual;
+        let capital = cuotaBase - interes;
+        
+        // Ajuste de la última cuota
+        if (balanceActual - capital < 0) {
+          capital = balanceActual;
+        }
+        
+        balanceActual -= capital;
+        interesesNuevos += interes;
+        
+        tabla.push({
+          periodo: pagadas + i,
+          capital: capital,
+          plusvalia: interes,
+          cuotaBase: capital + interes,
+          seguro: seguro,
+          pagoTotal: capital + interes + seguro,
+          balance: Math.max(0, balanceActual),
+          pagada: 'NO'
+        });
+      }
+    }
+
+    const ahorroIntereses = ((n_meses - pagadas) * cuotaBase - balanceAntesAmortizacion) - interesesNuevos;
+    const cuotasAhorradas = (n_meses - pagadas) - cuotasRestantes;
+
+    return {
+      CapitalInicial, cuotaBase, cuotaTotalMes, tabla,
+      balanceDespuesAmortizacion, cuotasRestantes, ahorroIntereses, cuotasAhorradas,
+      totalFinanciado: CapitalInicial + interesesTotales + interesesNuevos
+    };
+  }, [params]);
+
+  // Formateador de moneda
+  const fD = (num) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num || 0);
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-800 flex items-center">
-          <Calculator className="w-6 h-6 mr-2 text-blue-600" /> Simulador de Amortización a Capital
-        </h2>
-      </div>
+    <div className="animate-in fade-in duration-500 font-sans">
       
-      <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-[1fr_450px] 2xl:grid-cols-[1fr_500px] gap-8 w-full">
+      {/* ================= PANEL DE CONTROL SUPERIOR (HERRAMIENTA PARA ASESORES) ================= */}
+      <div className="bg-[#0f172a] rounded-xl p-5 mb-6 shadow-xl text-white">
+        <h2 className="text-lg font-black flex items-center mb-4 text-emerald-400">
+          <Calculator className="w-5 h-5 mr-2" /> Motor de Amortización a Capital
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+          <div>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Precio Total</label>
+            <input type="number" name="precioTotal" value={params.precioTotal} onChange={handleChange} className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm outline-none focus:border-emerald-500" />
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Cuota Inicial</label>
+            <input type="number" name="cuotaInicial" value={params.cuotaInicial} onChange={handleChange} className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm outline-none focus:border-emerald-500" />
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Plazo Original (Meses)</label>
+            <input type="number" name="plazoMeses" value={params.plazoMeses} onChange={handleChange} className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm outline-none focus:border-emerald-500" />
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Plusvalía (%)</label>
+            <input type="number" step="0.01" name="tasaAnual" value={params.tasaAnual} onChange={handleChange} className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm outline-none focus:border-emerald-500" />
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold text-emerald-400 uppercase mb-1">Cuotas Pagadas</label>
+            <input type="number" name="cuotasPagadas" value={params.cuotasPagadas} onChange={handleChange} className="w-full px-3 py-2 bg-emerald-900/30 border border-emerald-700 rounded-lg text-sm outline-none focus:border-emerald-500 font-bold text-emerald-300" />
+          </div>
+          <div className="col-span-2">
+            <label className="block text-[10px] font-black text-amber-400 uppercase mb-1">Inyección / Monto a Amortizar ($)</label>
+            <input type="number" name="montoAmortizar" value={params.montoAmortizar} onChange={handleChange} className="w-full px-3 py-2 bg-amber-500/20 border border-amber-500/50 rounded-lg text-lg outline-none focus:border-amber-400 font-black text-amber-300" />
+          </div>
+        </div>
+      </div>
+
+      {/* ================= CONTENEDOR PRINCIPAL ESTILO CRM (Fondo Blanco) ================= */}
+      <div className="bg-white border border-slate-200 shadow-sm flex flex-col xl:flex-row min-h-[700px] text-[11px] text-slate-700">
         
-        {/* CONTROLES IZQUIERDA */}
-        <div className="w-full min-w-0 flex flex-col gap-6">
+        {/* COLUMNA IZQUIERDA: TABLA DE AMORTIZACIÓN */}
+        <div className="w-full xl:w-[60%] border-r border-slate-200 flex flex-col">
+          <div className="bg-slate-50 border-b border-slate-200 p-2.5 font-bold text-slate-800 flex justify-between items-center">
+            <span>Plan de Pagos Detallado</span>
+            <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 border border-emerald-200 rounded">Amortización Aplicada en Mes {params.cuotasPagadas}</span>
+          </div>
           
-          {/* Formulario de Inputs */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-            <Input label="Nombre del Cliente (Opcional)" name="cliente" value={formAmortizacion.cliente} onChange={handleAmortizacionChange} placeholder="Ej. Juan Pérez" />
+          <div className="overflow-auto max-h-[800px] flex-1">
+            <table className="w-full border-collapse">
+              <thead className="bg-slate-100 sticky top-0 border-b border-slate-200 shadow-sm z-10">
+                <tr>
+                  <th className="p-2 border-r border-slate-200 font-bold text-left whitespace-nowrap">Período</th>
+                  <th className="p-2 border-r border-slate-200 font-bold text-right whitespace-nowrap">Capital</th>
+                  <th className="p-2 border-r border-slate-200 font-bold text-right whitespace-nowrap">Plusvalía</th>
+                  <th className="p-2 border-r border-slate-200 font-bold text-right whitespace-nowrap">Cuota</th>
+                  <th className="p-2 border-r border-slate-200 font-bold text-right whitespace-nowrap">Pago Seguro</th>
+                  <th className="p-2 border-r border-slate-200 font-bold text-right whitespace-nowrap">Total Pago</th>
+                  <th className="p-2 border-r border-slate-200 font-bold text-right whitespace-nowrap text-blue-800">Balance Principal</th>
+                  <th className="p-2 border-r border-slate-200 font-bold text-center whitespace-nowrap">Pagada</th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* FILA CERO (ENGANCHE) */}
+                <tr className="border-b border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                  <td className="p-1.5 border-r border-slate-100 text-center text-slate-500">0</td>
+                  <td className="p-1.5 border-r border-slate-100 text-right">{fD(params.cuotaInicial)}</td>
+                  <td className="p-1.5 border-r border-slate-100 text-right">{fD(0)}</td>
+                  <td className="p-1.5 border-r border-slate-100 text-right">{fD(0)}</td>
+                  <td className="p-1.5 border-r border-slate-100 text-right">{fD(0)}</td>
+                  <td className="p-1.5 border-r border-slate-100 text-right font-bold">{fD(params.cuotaInicial)}</td>
+                  <td className="p-1.5 border-r border-slate-100 text-right font-bold text-blue-700">{fD(calculos.CapitalInicial)}</td>
+                  <td className="p-1.5 border-r border-slate-100 text-center font-bold text-emerald-600">SI</td>
+                </tr>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-1 w-full mt-2">
-              <Input label="Precio de Contrato ($)" name="precioContrato" value={formAmortizacion.precioContrato} onChange={handleAmortizacionChange} placeholder="Ej. 24384.14" />
-              <Input label="Cuota Inicial ($)" name="cuotaInicial" value={formAmortizacion.cuotaInicial} onChange={handleAmortizacionChange} placeholder="Ej. 366.00" />
-            </div>
+                {/* FILAS DE MESES */}
+                {calculos.tabla.map((row, idx) => {
+                  const esMesAmortizacion = row.periodo === parseInt(params.cuotasPagadas);
+                  return (
+                    <React.Fragment key={idx}>
+                      <tr className={\`border-b border-slate-100 hover:bg-slate-50 transition-colors \${row.pagada === 'SI' ? 'text-slate-500' : 'text-slate-800'}\`}>
+                        <td className="p-1.5 border-r border-slate-100 text-center">{row.periodo}</td>
+                        <td className="p-1.5 border-r border-slate-100 text-right">{fD(row.capital)}</td>
+                        <td className="p-1.5 border-r border-slate-100 text-right">{fD(row.plusvalia)}</td>
+                        <td className="p-1.5 border-r border-slate-100 text-right">{fD(row.cuotaBase)}</td>
+                        <td className="p-1.5 border-r border-slate-100 text-right">{fD(row.seguro)}</td>
+                        <td className="p-1.5 border-r border-slate-100 text-right">{fD(row.pagoTotal)}</td>
+                        <td className="p-1.5 border-r border-slate-100 text-right font-bold text-blue-700">{fD(row.balance)}</td>
+                        <td className={\`p-1.5 border-r border-slate-100 text-center font-bold \${row.pagada === 'SI' ? 'text-emerald-600' : 'text-slate-300'}\`}>{row.pagada}</td>
+                      </tr>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-5 gap-y-1 w-full">
-              <Input label="Plazo Original (Años)" name="plazoOriginal" value={formAmortizacion.plazoOriginal} onChange={handleAmortizacionChange} placeholder="Ej. 10" type="number" />
-              <Input label="Cuotas Pagadas (Meses)" name="cuotasPagadas" value={formAmortizacion.cuotasPagadas} onChange={handleAmortizacionChange} placeholder="Ej. 12" type="number" />
-              <Input label="Seguro Mensual ($)" name="seguroMensual" value={formAmortizacion.seguroMensual} onChange={handleAmortizacionChange} placeholder="Ej. 18.48" />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-1 w-full border-t border-slate-100 pt-4 mt-2">
-              <Input label="Tasa Anual (%)" name="tasaAnual" value={formAmortizacion.tasaAnual} onChange={handleAmortizacionChange} placeholder="Ej. 12.1733" />
-              <Input label="Monto a Amortizar ($)" name="montoAmortizacion" value={formAmortizacion.montoAmortizacion} onChange={handleAmortizacionChange} placeholder="Ej. 5000" className="[&_input]:bg-emerald-50 [&_input]:border-emerald-200 [&_input]:text-emerald-800 [&_label]:text-emerald-700" />
-            </div>
-
-            {/* Recuadro de Detalle del Sistema (Francés) */}
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mt-4">
-              <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-4">Detalle del Sistema (Francés)</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-sm">
-                <div className="flex justify-between items-center border-b border-slate-200/60 pb-2">
-                  <span className="text-slate-600">Capital Financiado:</span>
-                  <span className="font-extrabold text-slate-800">$ {formatCurrency(P)}</span>
-                </div>
-                <div className="flex justify-between items-center border-b border-slate-200/60 pb-2">
-                  <span className="text-slate-600">Cuota Total (C+I+S):</span>
-                  <span className="font-extrabold text-slate-800">$ {formatCurrency(C_total)}</span>
-                </div>
-                <div className="flex justify-between items-center border-b border-slate-200/60 pb-2">
-                  <span className="text-slate-600">Precio Final a Plazos:</span>
-                  <span className="font-extrabold text-slate-800">$ {formatCurrency(precioFinalPlazos)}</span>
-                </div>
-                <div className="flex justify-between items-center border-b border-slate-200/60 pb-2">
-                  <span className="text-slate-600">Saldo Capital Actual:</span>
-                  <span className="font-extrabold text-blue-600">$ {formatCurrency(P_actual)}</span>
-                </div>
-              </div>
-              {error && (
-                 <div className="mt-3 text-xs font-bold text-red-500 flex items-center"><AlertTriangle className="w-3.5 h-3.5 mr-1" /> {error}</div>
-              )}
-            </div>
+                      {/* INYECCIÓN DE LA FILA DE AMORTIZACIÓN */}
+                      {esMesAmortizacion && parseFloat(params.montoAmortizar) > 0 && (
+                        <tr className="bg-amber-50 border-b-2 border-amber-200">
+                          <td className="p-1.5 border-r border-amber-200 text-center font-bold text-amber-700 bg-amber-100" colSpan={5}>
+                            AMORTIZACIÓN A CAPITAL APLICADA
+                          </td>
+                          <td className="p-1.5 border-r border-amber-200 text-right font-black text-amber-700 bg-amber-100">
+                            {fD(params.montoAmortizar)}
+                          </td>
+                          <td className="p-1.5 border-r border-amber-200 text-right font-black text-blue-800 bg-amber-100">
+                            {fD(calculos.balanceDespuesAmortizacion)}
+                          </td>
+                          <td className="p-1.5 text-center font-bold text-amber-700 bg-amber-100">SI</td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-
-          {/* Impacto Dashboard */}
-          <div className="bg-[#171b36] rounded-2xl p-6 text-white shadow-xl shadow-slate-900/10 relative overflow-hidden">
-            <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
-            
-            <h3 className="text-sm font-bold text-white mb-6 flex items-center"><TrendingUp className="w-4 h-4 mr-2 text-indigo-400" /> Impacto de la Amortización</h3>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-              <div className="bg-[#24294a] rounded-xl p-5 border border-white/5">
-                <p className="text-[10px] text-indigo-200 mb-1 font-bold uppercase tracking-wider">Cuotas Restantes</p>
-                <p className="text-3xl font-black text-white">{cuotasRestantesOrig} <span className="text-xs font-medium text-indigo-200/70">meses</span></p>
-              </div>
-              <div className="bg-[#143e46] rounded-xl p-5 border border-[#1e5860] relative overflow-hidden">
-                <p className="text-[10px] text-emerald-200 mb-1 font-bold uppercase tracking-wider relative z-10">Nuevas Cuotas</p>
-                <p className="text-3xl font-black text-emerald-400 relative z-10">{n_new} <span className="text-xs font-medium text-emerald-500/70">meses</span></p>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t border-white/10 pt-5">
-              <div>
-                <p className="text-[10px] text-indigo-300 mb-1 font-bold uppercase tracking-wider">Tiempo Ahorrado</p>
-                <p className="text-lg font-bold text-white">{tiempoAhorrado} meses</p>
-              </div>
-              <div>
-                <p className="text-[10px] text-indigo-300 mb-1 font-bold uppercase tracking-wider">Ahorro ($ Estimado)</p>
-                <p className="text-lg font-bold text-emerald-400">$ {formatCurrency(ahorrado)}</p>
-              </div>
-            </div>
-          </div>
-
         </div>
 
-        {/* RESULTADO DERECHA */}
-        <div className="w-full min-w-0">
-          <ResultCard 
-            title="Resumen para el Cliente" 
-            text={textoWhatsApp} 
-            htmlContent={textoHtml} 
-            subject={`Simulación de Abono a Capital`} 
-            hideDestino={true}
-          />
+        {/* COLUMNA DERECHA: RESULTADO DE SIMULACIÓN Y CONTRATO (CLON EXACTO DE LA IMAGEN) */}
+        <div className="w-full xl:w-[40%] bg-[#fafbfc] flex flex-col">
+          
+          <div className="p-4 border-b border-slate-200">
+            <h3 className="text-[14px] text-slate-800 mb-4 font-normal">Resultado de la Simulación</h3>
+            
+            {/* TABS SIMULADOS */}
+            <div className="flex border-b border-slate-200 mb-4">
+              <div className="px-4 py-2 text-blue-600 font-semibold text-[11px] cursor-pointer">Plan de Pago - Original</div>
+              <div className="px-4 py-2 text-slate-800 font-bold border-b-2 border-slate-800 text-[11px] cursor-pointer bg-white">
+                Plan de Pago - Amortizado ({fD(params.montoAmortizar)})
+              </div>
+            </div>
+
+            {/* TABLA DE SALDOS SUPERIOR */}
+            <div className="border border-slate-200 bg-white p-3 mb-4">
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-bold text-slate-800 mb-2 border-b border-slate-100 pb-1">Plan de Pago:</h4>
+                  <div className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 text-[10px]">
+                    <span className="text-slate-600">Moneda del Crédito:</span> <span className="font-bold">DOLARES</span>
+                    <span className="text-slate-600">Total Cancelado:</span> <span>{fD(params.montoAmortizar)}</span>
+                    <span className="text-slate-600">Total Capital Cancelado:</span> <span>{fD(params.montoAmortizar)}</span>
+                    <span className="text-slate-600">Total Plusvalía Cancelada:</span> <span>{fD(0)}</span>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-800 mb-2 border-b border-slate-100 pb-1">Saldos a Cancelar</h4>
+                  <div className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 text-[10px]">
+                    <span className="text-slate-600">Penalidades a Cancelar:</span> <span>0.00</span>
+                    <span className="text-slate-600">Saldo Total a Cancelar:</span> <span>{fD(calculos.balanceDespuesAmortizacion)}</span>
+                    <span className="text-slate-600">Saldo Capital a Cancelar:</span> <span>{fD(calculos.balanceDespuesAmortizacion)}</span>
+                    <span className="text-slate-600">Saldo Plusvalía a Cancelar:</span> <span>Calculado en Cuotas</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* EL ARGUMENTO DE VENTA (LO MÁS IMPORTANTE PARA EL ASESOR) */}
+            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-2 flex items-start">
+              <Clock className="w-5 h-5 text-emerald-600 mr-3 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-xs font-black text-emerald-800 mb-1">¡Poderoso Argumento Comercial!</p>
+                <p className="text-[11px] text-emerald-700 leading-relaxed">
+                  Con esta amortización, el cliente cancela su lote en <strong className="bg-emerald-200 px-1 rounded text-emerald-900">{calculos.cuotasRestantes} meses restantes</strong>.<br/>
+                  Se ahorra <strong className="text-emerald-900">{calculos.cuotasAhorradas} meses</strong> de tiempo y <strong className="text-emerald-900">{fD(calculos.ahorroIntereses)}</strong> en intereses de plusvalía.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* TABS DE CONTRATO INFERIORES */}
+          <div className="flex px-4 border-b border-slate-200 overflow-x-auto whitespace-nowrap bg-white pt-2">
+            <span className="px-3 py-1.5 text-blue-600 font-semibold border-b-2 border-blue-600 text-[10px] cursor-pointer">Básicos</span>
+            <span className="px-3 py-1.5 text-blue-500 hover:text-blue-700 text-[10px] cursor-pointer">Doc. Adjuntos</span>
+            <span className="px-3 py-1.5 text-blue-500 hover:text-blue-700 text-[10px] cursor-pointer">Plan de Pagos</span>
+            <span className="px-3 py-1.5 text-blue-500 hover:text-blue-700 text-[10px] cursor-pointer">Penalidades</span>
+            <span className="px-3 py-1.5 text-blue-500 hover:text-blue-700 text-[10px] cursor-pointer">Penalidades Diferidas</span>
+            <span className="px-3 py-1.5 text-blue-500 hover:text-blue-700 text-[10px] cursor-pointer">Histórico de Pagos</span>
+          </div>
+
+          {/* DETALLES DEL CONTRATO (CLON VISUAL) */}
+          <div className="p-4 bg-white flex-1 overflow-y-auto">
+            <div className="grid grid-cols-2 gap-8">
+              
+              {/* Básicos de Contrato */}
+              <div>
+                <h4 className="font-bold text-slate-800 border-b border-slate-100 pb-1 mb-2 text-[11px]">Básicos de Contrato</h4>
+                <div className="space-y-1.5 text-[10px]">
+                  <div className="flex justify-between border-b border-slate-50 pb-1">
+                    <span className="text-slate-500 font-medium w-1/3">Cliente:</span>
+                    <span className="text-blue-600 font-semibold w-2/3 text-left cursor-pointer hover:underline">CLIENTE DEMOSTRACIÓN</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 pb-1">
+                    <span className="text-slate-500 font-medium w-1/3">Cliente Titular:</span>
+                    <span className="text-blue-600 font-semibold w-2/3 text-left cursor-pointer hover:underline">CLIENTE DEMOSTRACIÓN</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 pb-1">
+                    <span className="text-slate-500 font-medium w-1/3">Realizado Por:</span>
+                    <span className="text-slate-700 w-2/3 text-left uppercase">ADMINISTRADOR CRM</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 pb-1">
+                    <span className="text-slate-500 font-medium w-1/3">Fecha Contrato:</span>
+                    <span className="text-slate-700 w-2/3 text-left">Hoy</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 pb-1">
+                    <span className="text-slate-500 font-medium w-1/3">Proyecto:</span>
+                    <span className="text-slate-700 w-2/3 text-left">{params.proyecto}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 pb-1">
+                    <span className="text-slate-500 font-medium w-1/3">Lote:</span>
+                    <span className="text-slate-700 w-2/3 text-left">UV: {params.uv} MZN: {params.mzn} LOTE: {params.lote}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 pb-1">
+                    <span className="text-slate-500 font-medium w-1/3">M2 Lote:</span>
+                    <span className="text-slate-700 w-2/3 text-left">{params.superficie}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 pb-1">
+                    <span className="text-slate-500 font-medium w-1/3">Tipo de Contrato:</span>
+                    <span className="text-slate-700 w-2/3 text-left">CONTRATO DE VENTA CON RESERVA DE DERECHO...</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 pb-1">
+                    <span className="text-slate-500 font-medium w-1/3">Nro Contrato:</span>
+                    <span className="text-slate-700 w-2/3 text-left">C20240000000</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 pb-1 items-center">
+                    <span className="text-slate-500 font-medium w-1/3">Estado Contrato:</span>
+                    <div className="w-2/3 text-left"><span className="text-[9px] font-bold text-emerald-600 border border-emerald-300 bg-emerald-50 px-1.5 py-0.5 rounded">VIGENTE</span></div>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 pb-1 items-center">
+                    <span className="text-slate-500 font-medium w-1/3">Procesado?:</span>
+                    <div className="w-2/3 text-left"><span className="text-[9px] font-bold text-red-600 border border-red-300 bg-red-50 px-1.5 py-0.5 rounded">NO</span></div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 font-medium w-1/3">Validado?:</span>
+                    <div className="w-2/3 text-left"><span className="text-[9px] font-bold text-emerald-600 border border-emerald-300 bg-emerald-50 px-1.5 py-0.5 rounded">SI</span></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Financiamiento de Contrato */}
+              <div>
+                <h4 className="font-bold text-slate-800 border-b border-slate-100 pb-1 mb-2 text-[11px]">Financiamiento de Contrato</h4>
+                <div className="space-y-1.5 text-[10px]">
+                  <div className="flex justify-between border-b border-slate-50 pb-1">
+                    <span className="text-slate-500 font-medium">Total Contrato:</span>
+                    <span className="text-slate-700">{fD(params.precioTotal)}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 pb-1">
+                    <span className="text-slate-500 font-medium">Tipo de Pago:</span>
+                    <span className="text-slate-700">MENSUAL</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 pb-1">
+                    <span className="text-slate-500 font-medium">Total Cuotas:</span>
+                    <span className="text-slate-700">{fD(calculos.totalFinanciado)}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 pb-1">
+                    <span className="text-slate-500 font-medium">Cuota Inicial:</span>
+                    <span className="text-slate-700">{fD(params.cuotaInicial)}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 pb-1">
+                    <span className="text-slate-500 font-medium">Cuota Periódica:</span>
+                    <span className="text-slate-700">{fD(calculos.cuotaBase)}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 pb-1">
+                    <span className="text-slate-500 font-medium">Cuota Periódica por Seguro:</span>
+                    <span className="text-slate-700">{fD(params.seguroMensual)}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 pb-1">
+                    <span className="text-slate-500 font-medium">Plazo en Años:</span>
+                    <span className="text-slate-700">{params.plazoMeses / 12}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 pb-1">
+                    <span className="text-slate-500 font-medium">Cantidad de Períodos:</span>
+                    <span className="text-slate-700">{params.plazoMeses}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 pb-1">
+                    <span className="text-slate-500 font-medium">Ultima Cuota:</span>
+                    <span className="text-slate-700">{fD(calculos.cuotaTotalMes)}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 pb-1">
+                    <span className="text-slate-500 font-medium">Fecha Primera Cuota:</span>
+                    <span className="text-slate-700">Automático</span>
+                  </div>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+          
         </div>
       </div>
     </div>
   );
 }
-
-
