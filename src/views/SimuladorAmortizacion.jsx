@@ -15,14 +15,14 @@ export default function SimuladorAmortizacion() {
     montoAmortizar: 2494.56
   });
 
-  // CONSTANTES FIJAS (Blindadas según indicación)
+  // CONSTANTES FIJAS (Blindadas)
   const TASA_ANUAL = 12.1133; 
   const SEGURO_MENSUAL = 23.80;
 
   // ESTADOS DE LA INTERFAZ
   const [calculado, setCalculado] = useState(false);
   const [ocultarDetalles, setOcultarDetalles] = useState(false);
-  const [vistaActual, setVistaActual] = useState('ORIGINAL'); // 'ORIGINAL' o 'AMORTIZADO'
+  const [vistaActual, setVistaActual] = useState('ORIGINAL'); 
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -34,13 +34,11 @@ export default function SimuladorAmortizacion() {
     const n_meses = (parseInt(form.plazoAnios) || 0) * 12;
     const pagadas = parseInt(form.cuotasPagadas) || 0;
     
-    // --- LÓGICA DEL PLAN ORIGINAL ---
     const Total_Cuotas_Original = P_total - Enganche;
     const Cuota_Total_Mes = n_meses > 0 ? (Total_Cuotas_Original / n_meses) : 0;
     const Cuota_Base = Cuota_Total_Mes - SEGURO_MENSUAL;
     const r_mensual = TASA_ANUAL / 100 / 12;
 
-    // Cálculo del Capital Verdadero escondido (Valor Presente)
     let Capital_Verdadero = 0;
     if (r_mensual > 0 && n_meses > 0) {
       Capital_Verdadero = Cuota_Base * (1 - Math.pow(1 + r_mensual, -n_meses)) / r_mensual;
@@ -51,7 +49,6 @@ export default function SimuladorAmortizacion() {
     let balanceDeudaOriginal = Total_Cuotas_Original;
     let capitalRestanteOri = Capital_Verdadero;
 
-    // Llenado Plan Original Puro
     for (let i = 1; i <= n_meses; i++) {
       const interes = capitalRestanteOri * r_mensual;
       const capital = Cuota_Base - interes;
@@ -70,12 +67,10 @@ export default function SimuladorAmortizacion() {
       });
     }
 
-    // --- LÓGICA DEL PLAN AMORTIZADO ---
     let tablaAmortizada = [];
     let balanceDeudaAmortizada = Total_Cuotas_Original;
     let Capital_Restante = Capital_Verdadero;
 
-    // 1. Copiar historial hasta las cuotas pagadas
     for (let i = 1; i <= pagadas; i++) {
       const interes = Capital_Restante * r_mensual;
       const capital = Cuota_Base - interes;
@@ -94,7 +89,6 @@ export default function SimuladorAmortizacion() {
       });
     }
 
-    // 2. Aplicar la Amortización en el mes actual
     let cuotasRestantes = 0;
     let Nueva_Deuda_Total = 0;
     let ahorroIntereses = 0;
@@ -104,11 +98,9 @@ export default function SimuladorAmortizacion() {
       Capital_Restante -= Amortizacion;
       if (Capital_Restante < 0) Capital_Restante = 0;
 
-      // Calcular nuevo plazo
       cuotasRestantes = -Math.log(1 - (Capital_Restante * r_mensual) / Cuota_Base) / Math.log(1 + r_mensual);
       cuotasRestantes = Math.ceil(cuotasRestantes) || 0;
 
-      // Proyectar la nueva deuda total (Capital + Intereses Nuevos + Seguro)
       let capTemp = Capital_Restante;
       for (let i = 1; i <= cuotasRestantes; i++) {
         const int = capTemp * r_mensual;
@@ -120,15 +112,13 @@ export default function SimuladorAmortizacion() {
 
       balanceDeudaAmortizada = Nueva_Deuda_Total;
 
-      // Insertar Fila del Abono a Capital
       tablaAmortizada.push({
-        periodo: pagadas, // Se ancla al último mes pagado
+        periodo: pagadas, 
         esAbono: true,
         capital: Amortizacion,
         balance: balanceDeudaAmortizada
       });
 
-      // 3. Llenar el resto de la tabla con el nuevo escenario
       for (let i = 1; i <= cuotasRestantes; i++) {
         const interes = Capital_Restante * r_mensual;
         let capital = Cuota_Base - interes;
@@ -149,13 +139,11 @@ export default function SimuladorAmortizacion() {
         });
       }
 
-      // 4. Cálculos comerciales para el asesor
       const cuotasRestantesOriginales = n_meses - pagadas;
       mesesAhorrados = cuotasRestantesOriginales - cuotasRestantes;
       const deudaRestanteOriginal = Total_Cuotas_Original - (pagadas * Cuota_Total_Mes);
       ahorroIntereses = (deudaRestanteOriginal - Amortizacion) - Nueva_Deuda_Total;
     } else {
-      // Si no hay amortización, la tabla es igual a la original
       tablaAmortizada = [...tablaOriginal];
       cuotasRestantes = n_meses - pagadas;
       Nueva_Deuda_Total = Total_Cuotas_Original - (pagadas * Cuota_Total_Mes);
@@ -172,11 +160,10 @@ export default function SimuladorAmortizacion() {
 
   const tablaActiva = vistaActual === 'ORIGINAL' ? calculos.tablaOriginal : calculos.tablaAmortizada;
 
-  // ================= 3. RENDER DE LA PANTALLA =================
+  // ================= 3. RENDER =================
   return (
     <div className="font-sans bg-[#f4f6f8] min-h-screen p-4 pb-12">
       
-      {/* PANEL DE FORMULARIO - SIEMPRE VISIBLE */}
       <div className="bg-white rounded-xl border border-slate-200 p-5 mb-5 shadow-md">
         <div className="flex justify-between items-center mb-5 border-b border-slate-100 pb-3">
           <h2 className="text-sm font-black text-slate-800 flex items-center">
@@ -189,7 +176,7 @@ export default function SimuladorAmortizacion() {
           )}
         </div>
 
-        <div className={\`grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 \${calculado ? 'opacity-60 pointer-events-none' : ''}\`}>
+        <div className={"grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 " + (calculado ? 'opacity-60 pointer-events-none' : '')}>
           <div className="col-span-2 md:col-span-1">
             <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Cliente Titular</label>
             <input type="text" name="cliente" value={form.cliente} onChange={handleChange} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-semibold text-slate-700" />
@@ -216,7 +203,6 @@ export default function SimuladorAmortizacion() {
             <input type="number" name="plazoAnios" value={form.plazoAnios} onChange={handleChange} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:border-blue-500 font-bold text-slate-800" />
           </div>
           
-          {/* LÍNEA 2 DE INPUTS */}
           <div>
             <label className="block text-[10px] font-bold text-indigo-600 uppercase mb-1">Cuotas Pagadas</label>
             <input type="number" name="cuotasPagadas" value={form.cuotasPagadas} onChange={handleChange} className="w-full px-3 py-2 border-2 border-indigo-200 bg-indigo-50 rounded-lg text-xs outline-none focus:border-indigo-500 font-black text-indigo-800" placeholder="Ej. 12" />
@@ -235,7 +221,6 @@ export default function SimuladorAmortizacion() {
           </div>
         </div>
 
-        {/* BOTÓN PROCESAR */}
         {!calculado && (
           <div className="mt-6 flex justify-end">
             <button 
@@ -248,25 +233,22 @@ export default function SimuladorAmortizacion() {
         )}
       </div>
 
-      {/* ================= RESULTADOS (SOLO VISIBLES SI SE PRESIONA CALCULAR) ================= */}
       {calculado && (
         <div className="animate-in slide-in-from-bottom-8 duration-700 fade-in flex flex-col xl:flex-row gap-5">
           
-          {/* COLUMNA IZQUIERDA: TABLA */}
+          {/* COLUMNA TABLA */}
           <div className="w-full xl:w-[48%] bg-white border border-slate-200 shadow-xl rounded-xl flex flex-col overflow-hidden">
-            
-            {/* HERRAMIENTAS DE TABLA */}
             <div className="bg-slate-50 border-b border-slate-200 p-3 flex justify-between items-center">
               <div className="flex gap-2">
                 <button 
                   onClick={() => setVistaActual('ORIGINAL')}
-                  className={\`px-4 py-1.5 rounded-lg text-[10px] font-bold transition-all \${vistaActual === 'ORIGINAL' ? 'bg-slate-800 text-white shadow-md' : 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-100'}\`}
+                  className={"px-4 py-1.5 rounded-lg text-[10px] font-bold transition-all " + (vistaActual === 'ORIGINAL' ? 'bg-slate-800 text-white shadow-md' : 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-100')}
                 >
                   Plan Original
                 </button>
                 <button 
                   onClick={() => setVistaActual('AMORTIZADO')}
-                  className={\`px-4 py-1.5 rounded-lg text-[10px] font-bold transition-all \${vistaActual === 'AMORTIZADO' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-100'}\`}
+                  className={"px-4 py-1.5 rounded-lg text-[10px] font-bold transition-all " + (vistaActual === 'AMORTIZADO' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-100')}
                 >
                   Plan Amortizado
                 </button>
@@ -296,7 +278,6 @@ export default function SimuladorAmortizacion() {
                   </tr>
                 </thead>
                 <tbody>
-                  {/* FILA MES 0 (ENGANCHE) */}
                   <tr className="border-b border-slate-100 hover:bg-slate-50 text-slate-700">
                     <td className="p-2 text-center text-slate-400">0</td>
                     <td className="p-2 text-right">{fD(form.cuotaInicial)}</td>
@@ -308,7 +289,6 @@ export default function SimuladorAmortizacion() {
                     <td className="p-2 text-center text-emerald-500 font-bold">SI</td>
                   </tr>
 
-                  {/* FILAS DINÁMICAS */}
                   {tablaActiva.map((row, idx) => {
                     if (row.esAbono) {
                       return (
@@ -325,7 +305,7 @@ export default function SimuladorAmortizacion() {
 
                     const isPagada = row.pagada === 'SI';
                     return (
-                      <tr key={idx} className={\`border-b border-slate-50 hover:bg-slate-50 transition-colors \${isPagada ? 'text-slate-400 opacity-80' : 'text-slate-700'}\`}>
+                      <tr key={idx} className={"border-b border-slate-50 hover:bg-slate-50 transition-colors " + (isPagada ? 'text-slate-400 opacity-80' : 'text-slate-700')}>
                         <td className="p-2 text-center">{row.periodo}</td>
                         <td className="p-2 text-right">{fD(row.capital)}</td>
                         {!ocultarDetalles && <td className="p-2 text-right bg-slate-50/30">{fD(row.plusvalia)}</td>}
@@ -333,7 +313,7 @@ export default function SimuladorAmortizacion() {
                         {!ocultarDetalles && <td className="p-2 text-right bg-slate-50/30">{fD(row.seguro)}</td>}
                         <td className="p-2 text-right font-bold bg-slate-50/50 text-slate-800">{fD(row.pagoTotal)}</td>
                         <td className="p-2 text-right">{fD(row.balance)}</td>
-                        <td className={\`p-2 text-center font-bold \${isPagada ? 'text-emerald-500' : 'text-slate-300'}\`}>{row.pagada}</td>
+                        <td className={"p-2 text-center font-bold " + (isPagada ? 'text-emerald-500' : 'text-slate-300')}>{row.pagada}</td>
                       </tr>
                     );
                   })}
@@ -342,10 +322,9 @@ export default function SimuladorAmortizacion() {
             </div>
           </div>
 
-          {/* COLUMNA DERECHA: CONTRATO Y RESULTADOS */}
+          {/* COLUMNA DERECHA */}
           <div className="w-full xl:w-[52%] flex flex-col space-y-4">
             
-            {/* ARGUMENTO COMERCIAL (Aparece si hay amortización) */}
             {vistaActual === 'AMORTIZADO' && parseFloat(form.montoAmortizar) > 0 && (
               <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 rounded-xl p-5 text-white shadow-xl flex items-center justify-between transform transition-all hover:scale-[1.01]">
                 <div className="flex items-center">
@@ -361,7 +340,6 @@ export default function SimuladorAmortizacion() {
               </div>
             )}
 
-            {/* TABLAS ESTILO CRM */}
             <div className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden flex-1">
               <div className="flex px-4 border-b border-slate-200 overflow-x-auto whitespace-nowrap pt-4 bg-slate-50">
                 <span className="px-3 py-2 text-slate-800 font-bold border-b-2 border-slate-800 text-[11px] cursor-pointer">Básicos y Plan de Pagos</span>
@@ -372,7 +350,6 @@ export default function SimuladorAmortizacion() {
               <div className="p-6">
                 <div className="grid grid-cols-2 gap-x-10 gap-y-8">
                   
-                  {/* Básicos */}
                   <div>
                     <h4 className="font-bold text-slate-800 border-b-2 border-slate-100 pb-2 mb-3 text-[11px] uppercase tracking-wider">Básicos de Contrato</h4>
                     <div className="space-y-2.5 text-[10px]">
@@ -386,7 +363,6 @@ export default function SimuladorAmortizacion() {
                     </div>
                   </div>
 
-                  {/* Financiero */}
                   <div>
                     <h4 className="font-bold text-slate-800 border-b-2 border-slate-100 pb-2 mb-3 text-[11px] uppercase tracking-wider">Financiero de Contrato</h4>
                     <div className="space-y-2.5 text-[10px]">
@@ -401,7 +377,6 @@ export default function SimuladorAmortizacion() {
                     </div>
                   </div>
 
-                  {/* Resultados Dinámicos */}
                   <div className="col-span-2 mt-2">
                     <h4 className="font-bold text-slate-800 border-b-2 border-slate-800 pb-2 mb-3 text-[11px] uppercase tracking-wider flex justify-between">
                       <span>Proyección {vistaActual === 'ORIGINAL' ? 'Original' : 'Amortizada'}</span>
