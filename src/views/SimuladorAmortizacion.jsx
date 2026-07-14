@@ -8,10 +8,10 @@ export default function SimuladorAmortizacion() {
     uv: '49', mzn: '30', lote: '31', superficie: '300.01',
     precioTotal: 52781.21,
     cuotaInicial: 2870.00,
-    tasaAnual: 7.17, // Tasa de plusvalía anual
-    plazoMeses: 120, // 10 años
+    tasaAnual: 7.17,
+    plazoMeses: 120,
     seguroMensual: 23.80,
-    cuotasPagadas: 12, // En qué mes hace la amortización
+    cuotasPagadas: 12,
     montoAmortizar: 2494.56
   });
 
@@ -28,7 +28,6 @@ export default function SimuladorAmortizacion() {
     const pagadas = parseInt(params.cuotasPagadas) || 0;
     const amortizacionExtra = parseFloat(params.montoAmortizar) || 0;
 
-    // Cálculo de la Cuota Base (Sistema Francés)
     const cuotaBase = (CapitalInicial * r_mensual * Math.pow(1 + r_mensual, n_meses)) / (Math.pow(1 + r_mensual, n_meses) - 1);
     const cuotaTotalMes = cuotaBase + seguro;
 
@@ -36,7 +35,6 @@ export default function SimuladorAmortizacion() {
     let tabla = [];
     let interesesTotales = 0;
 
-    // FASE 1: Cuotas normales hasta el mes de la amortización
     for (let i = 1; i <= pagadas; i++) {
       const interes = balanceActual * r_mensual;
       const capital = cuotaBase - interes;
@@ -55,25 +53,21 @@ export default function SimuladorAmortizacion() {
       });
     }
 
-    // APLICACIÓN DE LA AMORTIZACIÓN (Inyección de capital directo)
     const balanceAntesAmortizacion = balanceActual;
     balanceActual -= amortizacionExtra;
     const balanceDespuesAmortizacion = Math.max(0, balanceActual);
 
-    // FASE 2: Recálculo de cuotas restantes (Mantiene la cuota, reduce el plazo)
     let cuotasRestantes = 0;
     let interesesNuevos = 0;
     
     if (balanceActual > 0) {
-      // Fórmula matemática para hallar nuevo "n" (períodos restantes) manteniendo la misma cuota
       cuotasRestantes = -Math.log(1 - (balanceActual * r_mensual) / cuotaBase) / Math.log(1 + r_mensual);
-      cuotasRestantes = Math.ceil(cuotasRestantes); // Redondeamos hacia arriba para la última cuota pequeña
+      cuotasRestantes = Math.ceil(cuotasRestantes);
 
       for (let i = 1; i <= cuotasRestantes; i++) {
         const interes = balanceActual * r_mensual;
         let capital = cuotaBase - interes;
         
-        // Ajuste de la última cuota
         if (balanceActual - capital < 0) {
           capital = balanceActual;
         }
@@ -104,13 +98,12 @@ export default function SimuladorAmortizacion() {
     };
   }, [params]);
 
-  // Formateador de moneda
   const fD = (num) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num || 0);
 
   return (
     <div className="animate-in fade-in duration-500 font-sans">
       
-      {/* ================= PANEL DE CONTROL SUPERIOR (HERRAMIENTA PARA ASESORES) ================= */}
+      {/* ================= PANEL DE CONTROL ================= */}
       <div className="bg-[#0f172a] rounded-xl p-5 mb-6 shadow-xl text-white">
         <h2 className="text-lg font-black flex items-center mb-4 text-emerald-400">
           <Calculator className="w-5 h-5 mr-2" /> Motor de Amortización a Capital
@@ -143,10 +136,8 @@ export default function SimuladorAmortizacion() {
         </div>
       </div>
 
-      {/* ================= CONTENEDOR PRINCIPAL ESTILO CRM (Fondo Blanco) ================= */}
       <div className="bg-white border border-slate-200 shadow-sm flex flex-col xl:flex-row min-h-[700px] text-[11px] text-slate-700">
         
-        {/* COLUMNA IZQUIERDA: TABLA DE AMORTIZACIÓN */}
         <div className="w-full xl:w-[60%] border-r border-slate-200 flex flex-col">
           <div className="bg-slate-50 border-b border-slate-200 p-2.5 font-bold text-slate-800 flex justify-between items-center">
             <span>Plan de Pagos Detallado</span>
@@ -168,7 +159,6 @@ export default function SimuladorAmortizacion() {
                 </tr>
               </thead>
               <tbody>
-                {/* FILA CERO (ENGANCHE) */}
                 <tr className="border-b border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors">
                   <td className="p-1.5 border-r border-slate-100 text-center text-slate-500">0</td>
                   <td className="p-1.5 border-r border-slate-100 text-right">{fD(params.cuotaInicial)}</td>
@@ -180,12 +170,11 @@ export default function SimuladorAmortizacion() {
                   <td className="p-1.5 border-r border-slate-100 text-center font-bold text-emerald-600">SI</td>
                 </tr>
 
-                {/* FILAS DE MESES */}
                 {calculos.tabla.map((row, idx) => {
                   const esMesAmortizacion = row.periodo === parseInt(params.cuotasPagadas);
                   return (
                     <React.Fragment key={idx}>
-                      <tr className={\`border-b border-slate-100 hover:bg-slate-50 transition-colors \${row.pagada === 'SI' ? 'text-slate-500' : 'text-slate-800'}\`}>
+                      <tr className={"border-b border-slate-100 hover:bg-slate-50 transition-colors " + (row.pagada === 'SI' ? 'text-slate-500' : 'text-slate-800')}>
                         <td className="p-1.5 border-r border-slate-100 text-center">{row.periodo}</td>
                         <td className="p-1.5 border-r border-slate-100 text-right">{fD(row.capital)}</td>
                         <td className="p-1.5 border-r border-slate-100 text-right">{fD(row.plusvalia)}</td>
@@ -193,13 +182,12 @@ export default function SimuladorAmortizacion() {
                         <td className="p-1.5 border-r border-slate-100 text-right">{fD(row.seguro)}</td>
                         <td className="p-1.5 border-r border-slate-100 text-right">{fD(row.pagoTotal)}</td>
                         <td className="p-1.5 border-r border-slate-100 text-right font-bold text-blue-700">{fD(row.balance)}</td>
-                        <td className={\`p-1.5 border-r border-slate-100 text-center font-bold \${row.pagada === 'SI' ? 'text-emerald-600' : 'text-slate-300'}\`}>{row.pagada}</td>
+                        <td className={"p-1.5 border-r border-slate-100 text-center font-bold " + (row.pagada === 'SI' ? 'text-emerald-600' : 'text-slate-300')}>{row.pagada}</td>
                       </tr>
 
-                      {/* INYECCIÓN DE LA FILA DE AMORTIZACIÓN */}
                       {esMesAmortizacion && parseFloat(params.montoAmortizar) > 0 && (
                         <tr className="bg-amber-50 border-b-2 border-amber-200">
-                          <td className="p-1.5 border-r border-amber-200 text-center font-bold text-amber-700 bg-amber-100" colSpan={5}>
+                          <td className="p-1.5 border-r border-amber-200 text-center font-bold text-amber-700 bg-amber-100" colSpan="5">
                             AMORTIZACIÓN A CAPITAL APLICADA
                           </td>
                           <td className="p-1.5 border-r border-amber-200 text-right font-black text-amber-700 bg-amber-100">
@@ -219,13 +207,11 @@ export default function SimuladorAmortizacion() {
           </div>
         </div>
 
-        {/* COLUMNA DERECHA: RESULTADO DE SIMULACIÓN Y CONTRATO (CLON EXACTO DE LA IMAGEN) */}
         <div className="w-full xl:w-[40%] bg-[#fafbfc] flex flex-col">
           
           <div className="p-4 border-b border-slate-200">
             <h3 className="text-[14px] text-slate-800 mb-4 font-normal">Resultado de la Simulación</h3>
             
-            {/* TABS SIMULADOS */}
             <div className="flex border-b border-slate-200 mb-4">
               <div className="px-4 py-2 text-blue-600 font-semibold text-[11px] cursor-pointer">Plan de Pago - Original</div>
               <div className="px-4 py-2 text-slate-800 font-bold border-b-2 border-slate-800 text-[11px] cursor-pointer bg-white">
@@ -233,7 +219,6 @@ export default function SimuladorAmortizacion() {
               </div>
             </div>
 
-            {/* TABLA DE SALDOS SUPERIOR */}
             <div className="border border-slate-200 bg-white p-3 mb-4">
               <div className="grid grid-cols-2 gap-6">
                 <div>
@@ -257,7 +242,6 @@ export default function SimuladorAmortizacion() {
               </div>
             </div>
 
-            {/* EL ARGUMENTO DE VENTA (LO MÁS IMPORTANTE PARA EL ASESOR) */}
             <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-2 flex items-start">
               <Clock className="w-5 h-5 text-emerald-600 mr-3 mt-0.5 flex-shrink-0" />
               <div>
@@ -270,7 +254,6 @@ export default function SimuladorAmortizacion() {
             </div>
           </div>
 
-          {/* TABS DE CONTRATO INFERIORES */}
           <div className="flex px-4 border-b border-slate-200 overflow-x-auto whitespace-nowrap bg-white pt-2">
             <span className="px-3 py-1.5 text-blue-600 font-semibold border-b-2 border-blue-600 text-[10px] cursor-pointer">Básicos</span>
             <span className="px-3 py-1.5 text-blue-500 hover:text-blue-700 text-[10px] cursor-pointer">Doc. Adjuntos</span>
@@ -280,11 +263,9 @@ export default function SimuladorAmortizacion() {
             <span className="px-3 py-1.5 text-blue-500 hover:text-blue-700 text-[10px] cursor-pointer">Histórico de Pagos</span>
           </div>
 
-          {/* DETALLES DEL CONTRATO (CLON VISUAL) */}
           <div className="p-4 bg-white flex-1 overflow-y-auto">
             <div className="grid grid-cols-2 gap-8">
               
-              {/* Básicos de Contrato */}
               <div>
                 <h4 className="font-bold text-slate-800 border-b border-slate-100 pb-1 mb-2 text-[11px]">Básicos de Contrato</h4>
                 <div className="space-y-1.5 text-[10px]">
@@ -339,7 +320,6 @@ export default function SimuladorAmortizacion() {
                 </div>
               </div>
 
-              {/* Financiamiento de Contrato */}
               <div>
                 <h4 className="font-bold text-slate-800 border-b border-slate-100 pb-1 mb-2 text-[11px]">Financiamiento de Contrato</h4>
                 <div className="space-y-1.5 text-[10px]">
