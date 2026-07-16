@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Calculator, EyeOff, Eye, PlayCircle, RotateCcw, Clock } from 'lucide-react';
 
 export default function SimuladorAmortizacion() {
-  // ================= 1. ESTADO DEL FORMULARIO (VACÍO POR DEFECTO) =================
+  // ================= 1. ESTADO DEL FORMULARIO =================
   const [form, setForm] = useState({
     cliente: '',
     proyecto: '',
@@ -14,20 +14,17 @@ export default function SimuladorAmortizacion() {
     montoAmortizar: ''
   });
 
-  // CONSTANTES MATEMÁTICAS DEL CRM BOLIVIANO
   const TASA_ANUAL = 12.1133; 
   const TASA_MENSUAL = 0.0101444; 
-  const TASA_SEGURO_EFECTIVA = 0.000877571; // Extraída con ingeniería inversa para hacer el seguro dinámico
+  const TASA_SEGURO_EFECTIVA = 0.000877571;
 
-  // ESTADOS DE LA INTERFAZ
   const [calculado, setCalculado] = useState(false);
   const [ocultarDetalles, setOcultarDetalles] = useState(false);
   const [vistaActual, setVistaActual] = useState('ORIGINAL'); 
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
-  // ================= 2. CÁLCULO DINÁMICO EN TIEMPO REAL =================
-  // CORREGIDO: "metricasEnVivo" sin espacios
+  // ================= 2. CÁLCULO DINÁMICO DE SEGURO =================
   const metricasEnVivo = useMemo(() => {
     const P_total = parseFloat(form.precioTotal) || 0;
     const Enganche = parseFloat(form.cuotaInicial) || 0;
@@ -39,18 +36,15 @@ export default function SimuladorAmortizacion() {
     if (P_total > 0 && n_meses > 0 && P_total > Enganche) {
       const Deuda_Programada = P_total - Enganche;
       cuotaTotalMes = Deuda_Programada / n_meses;
-      
-      // Fórmula algebraica para despejar el seguro basándose en el capital real (PV)
       const K = (1 - Math.pow(1 + TASA_MENSUAL, -n_meses)) / TASA_MENSUAL;
       const Cuota_Pura = cuotaTotalMes / (1 + K * TASA_SEGURO_EFECTIVA);
-      
       seguroDinamico = cuotaTotalMes - Cuota_Pura;
     }
 
     return { seguroDinamico };
   }, [form.precioTotal, form.cuotaInicial, form.plazoAnios]);
 
-  // ================= 3. MOTOR MATEMÁTICO (TABLAS DE AMORTIZACIÓN) =================
+  // ================= 3. MOTOR MATEMÁTICO INTACTO =================
   const calculos = useMemo(() => {
     const P_total = parseFloat(form.precioTotal) || 0;
     const Enganche = parseFloat(form.cuotaInicial) || 0;
@@ -151,7 +145,8 @@ export default function SimuladorAmortizacion() {
         periodo: pagadas, 
         esAbono: true,
         capital: Amortizacion,
-        balance: balanceDeudaAmortizada
+        balance: balanceDeudaAmortizada,
+        pagada: 'SI'
       });
 
       for (let i = 1; i <= cuotasRestantes; i++) {
@@ -184,10 +179,31 @@ export default function SimuladorAmortizacion() {
       Nueva_Deuda_Total = Total_Cuotas_Original - (pagadas * Cuota_Total_Mes);
     }
 
+    // --- NUEVAS EXTRACCIONES DE SALDOS RESTANTES ---
+    let Saldo_Capital_Original = 0;
+    let Saldo_Plusvalia_Original = 0;
+    tablaOriginal.forEach(r => {
+      if (r.pagada === 'NO') {
+        Saldo_Capital_Original += r.capital;
+        Saldo_Plusvalia_Original += r.plusvalia;
+      }
+    });
+
+    let Saldo_Capital_Amortizado = 0;
+    let Saldo_Plusvalia_Amortizado = 0;
+    tablaAmortizada.forEach(r => {
+      if (r.pagada === 'NO' && !r.esAbono) {
+        Saldo_Capital_Amortizado += r.capital;
+        Saldo_Plusvalia_Amortizado += r.plusvalia;
+      }
+    });
+
     return {
       SEGURO_MENSUAL, Capital_Verdadero, Total_Plusvalia_Original, Total_Cuotas_Original,
       Cuota_Total_Mes, tablaOriginal, tablaAmortizada, n_meses,
-      Nueva_Deuda_Total, cuotasRestantes, ahorroIntereses, mesesAhorrados
+      Nueva_Deuda_Total, cuotasRestantes, ahorroIntereses, mesesAhorrados,
+      Saldo_Capital_Original, Saldo_Plusvalia_Original, 
+      Saldo_Capital_Amortizado, Saldo_Plusvalia_Amortizado
     };
   }, [form, metricasEnVivo]);
 
@@ -380,15 +396,15 @@ export default function SimuladorAmortizacion() {
               </div>
             )}
 
-            <div className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden flex-1">
+            <div className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden flex-1 flex flex-col">
               <div className="flex px-4 border-b border-slate-200 overflow-x-auto whitespace-nowrap pt-4 bg-slate-50">
                 <span className="px-3 py-2 text-slate-800 font-bold border-b-2 border-slate-800 text-[11px] cursor-pointer">Básicos y Plan de Pagos</span>
                 <span className="px-3 py-2 text-blue-600 font-medium text-[11px] hover:text-blue-800 cursor-not-allowed opacity-50">Doc. Adjuntos</span>
                 <span className="px-3 py-2 text-blue-600 font-medium text-[11px] hover:text-blue-800 cursor-not-allowed opacity-50">Histórico de Pagos</span>
               </div>
 
-              <div className="p-6">
-                <div className="grid grid-cols-2 gap-x-10 gap-y-8">
+              <div className="p-6 overflow-auto">
+                <div className="grid grid-cols-2 gap-x-10 gap-y-6">
                   
                   <div>
                     <h4 className="font-bold text-slate-800 border-b-2 border-slate-100 pb-2 mb-3 text-[11px] uppercase tracking-wider">Básicos de Contrato</h4>
@@ -415,18 +431,60 @@ export default function SimuladorAmortizacion() {
                     </div>
                   </div>
 
-                  <div className="col-span-2 mt-2">
-                    <h4 className="font-bold text-slate-800 border-b-2 border-slate-800 pb-2 mb-3 text-[11px] uppercase tracking-wider flex justify-between">
-                      <span>Proyección {vistaActual === 'ORIGINAL' ? 'Original' : 'Amortizada'}</span>
-                      {vistaActual === 'AMORTIZADO' && <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded text-[9px]">Calculado al Mes {form.cuotasPagadas || 0}</span>}
-                    </h4>
-                    <div className="grid grid-cols-2 gap-x-10">
-                      <div className="space-y-2.5 text-[10px]">
-                        <div className="flex justify-between border-b border-slate-50 pb-1"><span className="text-slate-500 font-medium">Total Deuda Futura Proyectada:</span><span className="text-slate-800 font-bold">{vistaActual === 'ORIGINAL' ? fD(calculos.Total_Deuda_Original_Futura) : fD(calculos.Nueva_Deuda_Total)}</span></div>
-                        <div className="flex justify-between border-b border-slate-50 pb-1"><span className="text-slate-500 font-medium">Capital Puro a Financiar:</span><span className="text-slate-800">{vistaActual === 'ORIGINAL' ? fD(calculos.Capital_Verdadero) : "Recalculado"}</span></div>
+                  {/* ================= BENTO UI PARA RESULTADOS DINÁMICOS ================= */}
+                  <div className="col-span-2 mt-2 pt-4 border-t border-slate-100">
+                    <div className="flex justify-between items-center mb-4">
+                      <h4 className="font-black text-slate-800 text-[12px] uppercase tracking-wider flex items-center">
+                        <div className="w-1.5 h-4 bg-blue-600 rounded-full mr-2"></div>
+                        Proyección {vistaActual === 'ORIGINAL' ? 'Original' : 'Amortizada'}
+                      </h4>
+                      {vistaActual === 'AMORTIZADO' && (
+                        <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded text-[9px] font-black uppercase tracking-widest shadow-sm">
+                          Calculado al Mes {form.cuotasPagadas || 0}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Cajas Izquierdas */}
+                      <div className="md:col-span-2 grid grid-cols-2 gap-3">
+                        <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.05)] hover:shadow-md transition-all">
+                          <span className="block text-slate-400 text-[9px] font-bold uppercase tracking-wider mb-1">Deuda Futura Proyectada</span>
+                          <span className="block text-slate-800 font-black text-sm">
+                            {vistaActual === 'ORIGINAL' ? fD(calculos.Total_Deuda_Original_Futura) : fD(calculos.Nueva_Deuda_Total)}
+                          </span>
+                        </div>
+                        <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.05)] hover:shadow-md transition-all">
+                          <span className="block text-slate-400 text-[9px] font-bold uppercase tracking-wider mb-1">Capital Puro (PV)</span>
+                          <span className="block text-slate-600 font-bold text-sm">
+                            {vistaActual === 'ORIGINAL' ? fD(calculos.Capital_Verdadero) : "Dinámico en Tabla"}
+                          </span>
+                        </div>
+                        <div className="bg-white border-l-4 border-blue-500 rounded-r-xl p-3 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.08)]">
+                          <span className="block text-slate-400 text-[9px] font-bold uppercase tracking-wider mb-1">Saldo Capital a Cancelar</span>
+                          <span className="block text-blue-700 font-black text-sm">
+                            {vistaActual === 'ORIGINAL' ? fD(calculos.Saldo_Capital_Original) : fD(calculos.Saldo_Capital_Amortizado)}
+                          </span>
+                        </div>
+                        <div className="bg-white border-l-4 border-amber-500 rounded-r-xl p-3 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.08)]">
+                          <span className="block text-slate-400 text-[9px] font-bold uppercase tracking-wider mb-1">Saldo Plusvalía a Cancelar</span>
+                          <span className="block text-amber-600 font-black text-sm">
+                            {vistaActual === 'ORIGINAL' ? fD(calculos.Saldo_Plusvalia_Original) : fD(calculos.Saldo_Plusvalia_Amortizado)}
+                          </span>
+                        </div>
                       </div>
-                      <div className="space-y-2.5 text-[10px]">
-                        <div className="flex justify-between border-b border-slate-50 pb-1 bg-blue-50/50 p-1 rounded"><span className="text-slate-700 font-bold">Cuotas Restantes a Pagar:</span><span className="text-blue-700 font-black text-sm">{vistaActual === 'ORIGINAL' ? calculos.n_meses - parseInt(form.cuotasPagadas || 0) : calculos.cuotasRestantes}</span></div>
+
+                      {/* Caja Derecha: Cuotas Restantes Destacadas */}
+                      <div className="bg-gradient-to-br from-blue-700 to-indigo-800 rounded-xl p-4 flex flex-col justify-center items-center shadow-lg transform hover:scale-[1.03] transition-transform duration-300">
+                        <span className="text-blue-200 text-[9px] font-bold uppercase tracking-widest text-center mb-1">
+                          Cuotas Restantes
+                        </span>
+                        <span className="text-white font-black text-5xl drop-shadow-md tracking-tighter">
+                          {vistaActual === 'ORIGINAL' ? calculos.n_meses - parseInt(form.cuotasPagadas || 0) : calculos.cuotasRestantes}
+                        </span>
+                        <span className="text-blue-100 text-[9px] mt-1 font-medium bg-blue-900/40 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                          Meses a pagar
+                        </span>
                       </div>
                     </div>
                   </div>
