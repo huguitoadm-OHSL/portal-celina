@@ -26,8 +26,9 @@ export default function SimuladorAmortizacion() {
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
-  // ================= 2. CÁLCULO DINÁMICO EN TIEMPO REAL (ANTES DE PROCESAR) =================
-  const metricasEn Vivo = useMemo(() => {
+  // ================= 2. CÁLCULO DINÁMICO EN TIEMPO REAL =================
+  // CORREGIDO: "metricasEnVivo" sin espacios
+  const metricasEnVivo = useMemo(() => {
     const P_total = parseFloat(form.precioTotal) || 0;
     const Enganche = parseFloat(form.cuotaInicial) || 0;
     const n_meses = (parseInt(form.plazoAnios) || 0) * 12;
@@ -250,7 +251,6 @@ export default function SimuladorAmortizacion() {
             <input type="text" value={TASA_ANUAL + "%"} readOnly className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-400 font-bold cursor-not-allowed" />
           </div>
           <div>
-            {/* EL SEGURO AHORA ES DINÁMICO E INTELIGENTE */}
             <label className="block text-[10px] font-bold text-blue-600 uppercase mb-1">Seguro Mensual ($) [Auto]</label>
             <input type="text" value={fD(metricasEnVivo.seguroDinamico)} readOnly className="w-full px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-600 font-bold cursor-not-allowed transition-all" />
           </div>
@@ -422,7 +422,7 @@ export default function SimuladorAmortizacion() {
                     </h4>
                     <div className="grid grid-cols-2 gap-x-10">
                       <div className="space-y-2.5 text-[10px]">
-                        <div className="flex justify-between border-b border-slate-50 pb-1"><span className="text-slate-500 font-medium">Total Deuda Futura Proyectada:</span><span className="text-slate-800 font-bold">{vistaActual === 'ORIGINAL' ? fD(calculos.Total_Cuotas_Original) : fD(calculos.Nueva_Deuda_Total)}</span></div>
+                        <div className="flex justify-between border-b border-slate-50 pb-1"><span className="text-slate-500 font-medium">Total Deuda Futura Proyectada:</span><span className="text-slate-800 font-bold">{vistaActual === 'ORIGINAL' ? fD(calculos.Total_Deuda_Original_Futura) : fD(calculos.Nueva_Deuda_Total)}</span></div>
                         <div className="flex justify-between border-b border-slate-50 pb-1"><span className="text-slate-500 font-medium">Capital Puro a Financiar:</span><span className="text-slate-800">{vistaActual === 'ORIGINAL' ? fD(calculos.Capital_Verdadero) : "Recalculado"}</span></div>
                       </div>
                       <div className="space-y-2.5 text-[10px]">
@@ -441,5 +441,3 @@ export default function SimuladorAmortizacion() {
     </div>
   );
 }
-
-
