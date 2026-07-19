@@ -15,7 +15,7 @@ export default function RecalcularPlan() {
     nuevoPlazoMeses: '168' 
   });
 
-  const TASA_MENSUAL = 0.0101444; 
+  const TASA_MENSUAL = 0.0101444; // 1.01444% Exacto
 
   const [calculado, setCalculado] = useState(false);
   const [tabActiva, setTabActiva] = useState('RESUMEN'); 
@@ -23,85 +23,97 @@ export default function RecalcularPlan() {
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
-  // ================= 2. MOTOR MATEMÁTICO (CLON 100% EXACTO DEL CRM) =================
+  // ================= 2. MOTOR MATEMÁTICO (CLON BANCARIO 100% EXACTO) =================
   const calculos = useMemo(() => {
     const P_total_Orig = parseFloat(form.precioTotalOriginal) || 0;
     const Enganche = parseFloat(form.cuotaInicial) || 0;
-    const Seguro = parseFloat(form.seguroMensual) || 0;
+    const Seguro_Num = parseFloat(form.seguroMensual) || 0;
     const pagadas = parseInt(form.cuotasPagadas) || 0;
     const n_orig = parseInt(form.plazoMesesOriginal) || 120;
     const n_nuevo_total = parseInt(form.nuevoPlazoMeses) || 168;
 
     const Cuota_Total_Orig = n_orig > 0 ? (P_total_Orig - Enganche) / n_orig : 0; 
-    let Capital_Actual = parseFloat(form.saldoCapital);
+    let Capital_Actual_Num = parseFloat(form.saldoCapital);
     
-    if (!Capital_Actual) {
-      const Cuota_Pura_Orig = Math.max(0, Cuota_Total_Orig - Seguro);
+    if (!Capital_Actual_Num) {
+      const Cuota_Pura_Orig = Math.max(0, Cuota_Total_Orig - Seguro_Num);
       let PV_Original = 0;
       if (TASA_MENSUAL > 0 && n_orig > 0) {
         PV_Original = Cuota_Pura_Orig * (1 - Math.pow(1 + TASA_MENSUAL, -n_orig)) / TASA_MENSUAL;
       }
-      Capital_Actual = Math.round(PV_Original / 10) * 10; 
+      Capital_Actual_Num = Math.round(PV_Original / 10) * 10; 
     }
 
     const cuotasRestantesNuevas = n_nuevo_total - pagadas;
+    
     let Cuota_Pura_Nueva = 0;
+    let Cuota_Total_Nueva = 0;
     
-    if (cuotasRestantesNuevas > 0 && Capital_Actual > 0) {
-      Cuota_Pura_Nueva = Capital_Actual * (TASA_MENSUAL * Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas)) / (Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas) - 1);
+    if (cuotasRestantesNuevas > 0 && Capital_Actual_Num > 0) {
+      // 1. Calcular Cuota Exacta
+      const Cuota_Pura_Exacta = Capital_Actual_Num * (TASA_MENSUAL * Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas)) / (Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas) - 1);
+      const Cuota_Total_Exacta = Cuota_Pura_Exacta + Seguro_Num;
       
-      // EL SECRETO REVELADO: El sistema de Celina trunca/elimina los decimales de la Cuota Pura (ej. de 337.06 a 337.00)
-      Cuota_Pura_Nueva = Math.floor(Cuota_Pura_Nueva); 
+      // 2. REGLA CELINA: Redondear Cuota Total a la decena de centavos más cercana (Ej: 360.78 -> 360.80)
+      Cuota_Total_Nueva = Math.round(Cuota_Total_Exacta * 10) / 10; 
+      
+      // 3. Obtener Cuota Pura Final basándose en el total redondeado
+      Cuota_Pura_Nueva = Math.round((Cuota_Total_Nueva - Seguro_Num) * 100) / 100;
     }
-    
-    const Cuota_Total_Nueva = Cuota_Pura_Nueva + Seguro;
 
+    // ================= PROCESAMIENTO EN CENTAVOS (EVITA DERIVA DECIMAL) =================
+    const SeguroCents = Math.round(Seguro_Num * 100);
+    const CuotaPuraCents = Math.round(Cuota_Pura_Nueva * 100);
+    let CapTempCents = Math.round(Capital_Actual_Num * 100);
+    
+    let Suma_Absoluta_PagosCents = 0;
     let tabla = [];
-    let CapTemp = Capital_Actual;
-    let Suma_Absoluta_Pagos = 0;
 
     for (let i = 1; i <= cuotasRestantesNuevas; i++) {
-      let interes = Math.round(CapTemp * TASA_MENSUAL * 100) / 100;
-      let capital = Math.round((Cuota_Pura_Nueva - interes) * 100) / 100;
-      let seguroAplicado = Seguro;
+      let interesCents = Math.round(CapTempCents * TASA_MENSUAL);
+      let capitalCents = CuotaPuraCents - interesCents;
+      let seguroAplicadoCents = SeguroCents;
       
-      // REGLA: La última cuota cobra todo el saldo remanente y anula el seguro para cuadrar al centavo
+      // REGLA: Última Cuota liquida capital restante e INCLUYE el Seguro
       if (i === cuotasRestantesNuevas) {
-        capital = CapTemp;
-        interes = Math.round(CapTemp * TASA_MENSUAL * 100) / 100; 
-        seguroAplicado = 0; 
+        capitalCents = CapTempCents; 
+        interesCents = Math.round(CapTempCents * TASA_MENSUAL); 
+        seguroAplicadoCents = SeguroCents; 
       }
       
-      CapTemp -= capital;
-      CapTemp = Math.round(CapTemp * 100) / 100;
-
-      const pagoMes = Math.round((capital + interes + seguroAplicado) * 100) / 100;
-      Suma_Absoluta_Pagos += pagoMes;
+      CapTempCents -= capitalCents;
+      let pagoMesCents = capitalCents + interesCents + seguroAplicadoCents;
+      
+      Suma_Absoluta_PagosCents += pagoMesCents;
 
       tabla.push({
         periodo: pagadas + i,
-        capital: capital,
-        plusvalia: interes,
+        capital: capitalCents / 100,
+        plusvalia: interesCents / 100,
         cuotaBase: Cuota_Pura_Nueva, 
-        seguro: seguroAplicado,
-        pagoTotal: pagoMes,
+        seguro: seguroAplicadoCents / 100,
+        pagoTotal: pagoMesCents / 100,
         balance: 0, 
         pagada: 'NO'
       });
     }
 
-    // GENERAR BALANCE PRINCIPAL EXACTO
-    let balanceDescendente = Math.round(Suma_Absoluta_Pagos * 100) / 100;
+    // CALCULAR BALANCE DECRECIENTE EXACTO
+    let balanceDescendenteCents = Suma_Absoluta_PagosCents;
     tabla = tabla.map(row => {
-      balanceDescendente -= row.pagoTotal;
-      return { ...row, balance: Math.max(0, Math.round(balanceDescendente * 100) / 100) };
+      balanceDescendenteCents -= Math.round(row.pagoTotal * 100);
+      return { 
+        ...row, 
+        balance: Math.max(0, balanceDescendenteCents / 100) 
+      };
     });
 
-    const Monto_Total_Plan_Pago = Suma_Absoluta_Pagos;
+    // MÉTIRICAS FINALES
+    const Monto_Total_Plan_Pago = Suma_Absoluta_PagosCents / 100;
     const Monto_Total_Contrato = Monto_Total_Plan_Pago + Enganche;
 
     return {
-      Cuota_Total_Orig, Cuota_Total_Nueva, Seguro, Capital_Actual,
+      Cuota_Total_Orig, Cuota_Total_Nueva, Seguro: Seguro_Num, Capital_Actual: Capital_Actual_Num,
       Monto_Total_Contrato, Monto_Total_Plan_Pago, Enganche,
       n_nuevo_total, cuotasRestantesNuevas, tabla,
       ultimaCuota: tabla.length > 0 ? tabla[tabla.length - 1].pagoTotal : 0
@@ -203,12 +215,12 @@ export default function RecalcularPlan() {
             {!calculado && (
               <button 
                 onClick={() => {
-                  if(!form.precioTotalOriginal || !form.plazoMesesOriginal || !form.saldoCapital) {
-                    alert("Por favor ingrese el Total Original, Plazo Original y Saldo Capital para continuar.");
+                  if(!form.precioTotalOriginal || !form.plazoMesesOriginal || !form.saldoCapital || !form.seguroMensual) {
+                    alert("Por favor ingrese el Total Original, Plazo Original, Seguro y Saldo Capital para continuar.");
                     return;
                   }
                   setCalculado(true);
-                  setTabActiva('TABLA'); 
+                  setTabActiva('RESUMEN'); 
                 }}
                 className="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-3.5 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center transition-all shadow-lg hover:shadow-emerald-600/30 transform hover:-translate-y-0.5"
               >
@@ -311,6 +323,10 @@ export default function RecalcularPlan() {
                           <span className="text-[10px] text-slate-400 font-medium">Cuota Mensual por Seguro:</span>
                           <span className="text-xs font-bold">{fD(calculos.Seguro)}</span>
                         </div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-[10px] text-slate-400 font-medium">Cuota Mensual por CBDI:</span>
+                          <span className="text-xs font-bold">$0.00</span>
+                        </div>
                         <div className="flex justify-between items-center pt-2 border-t border-slate-700">
                           <span className="text-[11px] text-emerald-400 font-bold uppercase tracking-wider">Última Cuota a Pagar:</span>
                           <span className="text-sm font-black text-emerald-400">{fD(calculos.ultimaCuota)}</span>
@@ -322,7 +338,7 @@ export default function RecalcularPlan() {
                 </div>
               )}
 
-              {/* TABLA 100% WIDTH - CLONADA EXACTAMENTE */}
+              {/* TABLA 100% WIDTH */}
               {tabActiva === 'TABLA' && (
                 <div className="animate-in fade-in duration-300 overflow-hidden border border-slate-200 rounded-xl w-full">
                   <div className="overflow-auto max-h-[700px] w-full">
