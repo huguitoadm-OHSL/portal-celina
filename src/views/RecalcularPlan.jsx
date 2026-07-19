@@ -2,18 +2,18 @@ import React, { useState, useMemo } from 'react';
 import { Calculator, RefreshCw, Calendar, DollarSign, FileText, CheckCircle2, ChevronRight, Clock } from 'lucide-react';
 
 export default function RecalcularPlan() {
-  // ================= 1. ESTADO DEL FORMULARIO =================
+ // ================= 1. ESTADO DEL FORMULARIO =================
   const [form, setForm] = useState({
-    cliente: 'JHONATAN VILLANUEVA APURI',
-    nroContrato: 'C2603500573',
-    precioTotalOriginal: 52761.21,
-    cuotaInicial: 2870.00,
-    plazoMesesOriginal: 120,
-    seguroMensual: 23.80,
-    cuotasPagadas: 0,
-    nuevoPlazoMeses: 168 // Extraído del video
+    cliente: '',
+    nroContrato: '',
+    precioTotalOriginal: '',
+    cuotaInicial: '',
+    plazoMesesOriginal: '',
+    seguroMensual: '',
+    cuotasPagadas: '', // Inicia vacío, el asesor lo llena si hay cuotas pagadas
+    nuevoPlazoMeses: '168' // Este puede quedar por defecto o vacío
   });
-
+  
   const TASA_MENSUAL = 0.0101444; // 1.01444% Exacto del CRM
 
   const [calculado, setCalculado] = useState(false);
