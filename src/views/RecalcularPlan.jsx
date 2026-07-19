@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { Calculator, RefreshCw, Calendar, DollarSign, FileText, CheckCircle2, ChevronRight, Clock } from 'lucide-react';
+// ¡AQUÍ ESTÁ EL ÍCONO "RotateCcw" AGREGADO PARA QUE NO FALLE!
+import { Calculator, RefreshCw, Calendar, DollarSign, FileText, CheckCircle2, ChevronRight, Clock, RotateCcw } from 'lucide-react';
 
 export default function RecalcularPlan() {
   // ================= 1. ESTADO DEL FORMULARIO =================
@@ -11,7 +12,7 @@ export default function RecalcularPlan() {
     plazoMesesOriginal: '',
     seguroMensual: '',
     cuotasPagadas: '', 
-    nuevoPlazoMeses: '168' 
+    nuevoPlazoMeses: '168' // Por defecto 14 años
   });
 
   const TASA_MENSUAL = 0.0101444; // 1.01444% Exacto del CRM
@@ -173,23 +174,34 @@ export default function RecalcularPlan() {
             <div className="flex gap-5 w-full md:w-auto">
               <div className="w-full md:w-48">
                 <label className="block text-[10px] font-black text-emerald-700 uppercase mb-1">Cuotas Ya Pagadas</label>
-                <input type="number" name="cuotasPagadas" value={form.cuotasPagadas} onChange={handleChange} className="w-full px-3 py-3 border-2 border-emerald-200 rounded-lg text-sm outline-none focus:border-emerald-500 font-black text-emerald-800 bg-white shadow-sm" />
+                <input type="number" name="cuotasPagadas" value={form.cuotasPagadas} onChange={handleChange} placeholder="Ej. 12 (Vacío = 0)" className="w-full px-3 py-3 border-2 border-emerald-200 rounded-lg text-sm outline-none focus:border-emerald-500 font-black text-emerald-800 bg-white shadow-sm" />
               </div>
-              <div className="w-full md:w-48">
-                <label className="block text-[10px] font-black text-blue-700 uppercase mb-1">Nuevo Plazo Total (Meses)</label>
+              <div className="w-full md:w-64">
+                <label className="block text-[10px] font-black text-blue-700 uppercase mb-1">Nuevo Plazo Total</label>
+                {/* SELECTOR DINÁMICO DE 1 A 14 AÑOS */}
                 <select name="nuevoPlazoMeses" value={form.nuevoPlazoMeses} onChange={handleChange} className="w-full px-3 py-3 border-2 border-blue-300 rounded-lg text-sm outline-none focus:border-blue-500 font-black text-blue-800 bg-white shadow-sm cursor-pointer">
-                  <option value="60">60 Meses (5 Años)</option>
-                  <option value="84">84 Meses (7 Años)</option>
-                  <option value="120">120 Meses (10 Años)</option>
-                  <option value="168">168 Meses (14 Años)</option>
-                  <option value="180">180 Meses (15 Años)</option>
+                  {[...Array(14)].map((_, index) => {
+                    const anios = index + 1;
+                    const meses = anios * 12;
+                    return (
+                      <option key={meses} value={meses}>
+                        {meses} Meses ({anios} {anios === 1 ? 'Año' : 'Años'})
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
             </div>
 
             {!calculado && (
               <button 
-                onClick={() => setCalculado(true)}
+                onClick={() => {
+                  if(!form.precioTotalOriginal || !form.plazoMesesOriginal) {
+                    alert("Por favor ingrese el Total Original y el Plazo Original para recalcular.");
+                    return;
+                  }
+                  setCalculado(true);
+                }}
                 className="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-3.5 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center transition-all shadow-lg hover:shadow-emerald-600/30 transform hover:-translate-y-0.5"
               >
                 <Calculator className="w-5 h-5 mr-2" /> Calcular Nuevo Plan
@@ -202,7 +214,7 @@ export default function RecalcularPlan() {
         {calculado && (
           <div className="animate-in slide-in-from-bottom-8 duration-500 fade-in bg-white border border-slate-200 shadow-xl rounded-2xl overflow-hidden">
             
-            {/* TABS ESTILO CRM (LIBRE DE COMILLAS INVERTIDAS) */}
+            {/* TABS ESTILO CRM */}
             <div className="flex border-b border-slate-200 bg-slate-50 px-2 pt-2">
               <button 
                 onClick={() => setTabActiva('RESUMEN')}
@@ -245,12 +257,12 @@ export default function RecalcularPlan() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 shadow-sm">
                           <Clock className="w-5 h-5 text-blue-500 mb-2" />
-                          <span className="block text-[10px] font-bold text-blue-600 uppercase mb-1">Plazo del Préstamo</span>
+                          <span className="block text-[10px] font-bold text-blue-600 uppercase mb-1">Nuevo Plazo del Préstamo</span>
                           <span className="block text-xl font-black text-blue-900">{calculos.n_nuevo_total / 12} Años</span>
                         </div>
                         <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 shadow-sm">
                           <Calendar className="w-5 h-5 text-amber-500 mb-2" />
-                          <span className="block text-[10px] font-bold text-amber-600 uppercase mb-1">Nro. de Períodos</span>
+                          <span className="block text-[10px] font-bold text-amber-600 uppercase mb-1">Nro. de Períodos Totales</span>
                           <span className="block text-xl font-black text-amber-900">{calculos.n_nuevo_total} Meses</span>
                         </div>
                       </div>
