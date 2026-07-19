@@ -34,7 +34,7 @@ export default function RecalcularPlan() {
 
     const Cuota_Total_Orig = n_orig > 0 ? (P_total_Orig - Enganche) / n_orig : 0; 
     
-    // --- INTELIGENCIA DE DEDUCCIÓN DE CAPITAL ---
+    // CAPITAL EXACTO DEL CRM
     let Capital_Actual = parseFloat(form.saldoCapital);
     
     if (!Capital_Actual) {
@@ -43,7 +43,6 @@ export default function RecalcularPlan() {
       if (TASA_MENSUAL > 0 && n_orig > 0) {
         PV_Original = Cuota_Pura_Orig * (1 - Math.pow(1 + TASA_MENSUAL, -n_orig)) / TASA_MENSUAL;
       }
-      // Redondeo inteligente a la decena más cercana para igualar el precio real del lote del CRM
       Capital_Actual = Math.round(PV_Original / 10) * 10; 
     }
 
@@ -52,7 +51,7 @@ export default function RecalcularPlan() {
     
     if (cuotasRestantesNuevas > 0 && Capital_Actual > 0) {
       Cuota_Pura_Nueva = Capital_Actual * (TASA_MENSUAL * Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas)) / (Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas) - 1);
-      // REGLA DEL SISTEMA: Redondeo a 2 decimales para la cuota fija
+      // REGLA 1: Redondeo bancario a 2 decimales
       Cuota_Pura_Nueva = Math.round(Cuota_Pura_Nueva * 100) / 100; 
     }
     
@@ -60,31 +59,31 @@ export default function RecalcularPlan() {
 
     let tabla = [];
     let CapTemp = Capital_Actual;
-    let Total_Nuevo_Financiado = 0;
+    let Suma_Absoluta_Pagos = 0;
 
+    // GENERACIÓN DE TABLA PASO A PASO
     for (let i = 1; i <= cuotasRestantesNuevas; i++) {
       let interes = Math.round(CapTemp * TASA_MENSUAL * 100) / 100;
       let capital = Math.round((Cuota_Pura_Nueva - interes) * 100) / 100;
       let seguroAplicado = Seguro;
       
-      // REGLA DEL SISTEMA: Última cuota ajusta centavos y elimina seguro
+      // REGLA 2: Ajuste de última cuota
       if (i === cuotasRestantesNuevas) {
         capital = CapTemp;
         interes = Math.round(CapTemp * TASA_MENSUAL * 100) / 100; 
-        seguroAplicado = 0; 
       }
       
       CapTemp -= capital;
       CapTemp = Math.round(CapTemp * 100) / 100;
 
       const pagoMes = Math.round((capital + interes + seguroAplicado) * 100) / 100;
-      Total_Nuevo_Financiado += pagoMes;
+      Suma_Absoluta_Pagos += pagoMes;
 
       tabla.push({
         periodo: pagadas + i,
         capital: capital,
         plusvalia: interes,
-        cuotaBase: Math.round((capital + interes) * 100) / 100,
+        cuotaBase: Cuota_Pura_Nueva, // Se mantiene estático como en la imagen
         seguro: seguroAplicado,
         pagoTotal: pagoMes,
         balance: 0, 
@@ -92,14 +91,19 @@ export default function RecalcularPlan() {
       });
     }
 
-    // Balance Decreciente exacto (Deuda Total Restante)
-    let balanceDescendente = Total_Nuevo_Financiado;
+    // REGLA 3: EL SECRETO DEL BALANCE PRINCIPAL
+    // El balance inicial parte de la SUMA EXACTA de todas las cuotas generadas
+    let balanceDescendente = Math.round(Suma_Absoluta_Pagos * 100) / 100;
+    
     tabla = tabla.map(row => {
       balanceDescendente -= row.pagoTotal;
-      return { ...row, balance: Math.max(0, Math.round(balanceDescendente * 100) / 100) };
+      return { 
+        ...row, 
+        balance: Math.max(0, Math.round(balanceDescendente * 100) / 100) 
+      };
     });
 
-    const Monto_Total_Plan_Pago = Total_Nuevo_Financiado;
+    const Monto_Total_Plan_Pago = Suma_Absoluta_Pagos;
     const Monto_Total_Contrato = Monto_Total_Plan_Pago + Enganche;
 
     return {
@@ -139,7 +143,7 @@ export default function RecalcularPlan() {
           )}
         </div>
 
-        {/* PANEL DE CONFIGURACIÓN LIMPIO (SIN PROYECTO) */}
+        {/* PANEL DE CONFIGURACIÓN */}
         <div className={"bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all " + (calculado ? "opacity-70 pointer-events-none" : "")}>
           <div className="bg-slate-800 p-4 border-b border-slate-700">
             <h2 className="text-xs font-bold text-white flex items-center tracking-widest uppercase">
@@ -154,11 +158,6 @@ export default function RecalcularPlan() {
             </div>
             
             <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nro Contrato</label>
-              <input type="text" name="nroContrato" value={form.nroContrato} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs outline-none focus:border-emerald-500 font-bold text-slate-700 bg-slate-50" />
-            </div>
-
-            <div>
               <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Total Orig. ($)</label>
               <input type="number" name="precioTotalOriginal" value={form.precioTotalOriginal} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs outline-none focus:border-emerald-500 font-black text-slate-800" />
             </div>
@@ -169,7 +168,7 @@ export default function RecalcularPlan() {
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Plazo (Meses)</label>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Plazo Orig. (Meses)</label>
               <input type="number" name="plazoMesesOriginal" value={form.plazoMesesOriginal} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs outline-none focus:border-emerald-500 font-bold text-slate-800" />
             </div>
 
@@ -178,9 +177,9 @@ export default function RecalcularPlan() {
               <input type="number" name="seguroMensual" value={form.seguroMensual} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs outline-none focus:border-emerald-500 font-bold text-slate-800" />
             </div>
             
-            <div className="bg-blue-50 p-2.5 rounded-lg border border-blue-200">
+            <div className="md:col-span-2 bg-blue-50 p-2.5 rounded-lg border border-blue-200">
               <label className="block text-[10px] font-black text-blue-700 uppercase mb-1">Saldo Capital a Cancelar</label>
-              <input type="number" name="saldoCapital" value={form.saldoCapital} onChange={handleChange} placeholder="Opcional: Dato exacto del CRM" className="w-full px-3 py-2 border border-blue-300 rounded text-xs outline-none focus:border-blue-600 font-black text-blue-900 bg-white shadow-inner" />
+              <input type="number" name="saldoCapital" value={form.saldoCapital} onChange={handleChange} placeholder="Dato exacto del CRM" className="w-full px-3 py-2 border border-blue-300 rounded text-xs outline-none focus:border-blue-600 font-black text-blue-900 bg-white shadow-inner" />
             </div>
 
           </div>
@@ -210,11 +209,12 @@ export default function RecalcularPlan() {
             {!calculado && (
               <button 
                 onClick={() => {
-                  if(!form.precioTotalOriginal || !form.plazoMesesOriginal) {
-                    alert("Por favor ingrese el Total Original y el Plazo Original para continuar.");
+                  if(!form.precioTotalOriginal || !form.plazoMesesOriginal || !form.saldoCapital) {
+                    alert("Por favor ingrese el Total Original, Plazo Original y Saldo Capital para continuar.");
                     return;
                   }
                   setCalculado(true);
+                  setTabActiva('TABLA'); // Mostrar la tabla directo
                 }}
                 className="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-3.5 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center transition-all shadow-lg hover:shadow-emerald-600/30 transform hover:-translate-y-0.5"
               >
@@ -317,10 +317,6 @@ export default function RecalcularPlan() {
                           <span className="text-[10px] text-slate-400 font-medium">Cuota Mensual por Seguro:</span>
                           <span className="text-xs font-bold">{fD(calculos.Seguro)}</span>
                         </div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-[10px] text-slate-400 font-medium">Cuota Mensual por CBDI:</span>
-                          <span className="text-xs font-bold">$0.00</span>
-                        </div>
                         <div className="flex justify-between items-center pt-2 border-t border-slate-700">
                           <span className="text-[11px] text-emerald-400 font-bold uppercase tracking-wider">Última Cuota a Pagar:</span>
                           <span className="text-sm font-black text-emerald-400">{fD(calculos.ultimaCuota)}</span>
@@ -332,50 +328,39 @@ export default function RecalcularPlan() {
                 </div>
               )}
 
+              {/* TABLA 100% WIDTH - SIN CUADRO LATERAL */}
               {tabActiva === 'TABLA' && (
-                <div className="animate-in fade-in duration-300 overflow-hidden border border-slate-200 rounded-xl flex flex-col xl:flex-row">
-                  
-                  <div className="w-full xl:w-[60%] overflow-auto max-h-[600px] border-r border-slate-200">
+                <div className="animate-in fade-in duration-300 overflow-hidden border border-slate-200 rounded-xl w-full">
+                  <div className="overflow-auto max-h-[700px] w-full">
                     <table className="w-full border-collapse text-[11px]">
                       <thead className="bg-slate-100 sticky top-0 shadow-sm z-10">
                         <tr>
-                          <th className="p-3 border-b border-slate-200 font-bold text-slate-600 text-center uppercase tracking-wider">Período</th>
-                          <th className="p-3 border-b border-slate-200 font-bold text-slate-600 text-right uppercase tracking-wider">Capital</th>
-                          {!ocultarDetalles && <th className="p-3 border-b border-slate-200 font-bold text-slate-600 text-right uppercase tracking-wider bg-slate-50">Plusvalía</th>}
-                          {!ocultarDetalles && <th className="p-3 border-b border-slate-200 font-bold text-slate-600 text-right uppercase tracking-wider bg-slate-50">Cuota Pura</th>}
-                          {!ocultarDetalles && <th className="p-3 border-b border-slate-200 font-bold text-slate-600 text-right uppercase tracking-wider bg-slate-50">Seguro</th>}
-                          <th className="p-3 border-b border-slate-200 font-black text-blue-700 text-right uppercase tracking-wider">Total Pago</th>
-                          <th className="p-3 border-b border-slate-200 font-bold text-slate-600 text-right uppercase tracking-wider">Balance Principal</th>
-                          <th className="p-3 border-b border-slate-200 font-bold text-slate-600 text-center uppercase tracking-wider">Pagada</th>
+                          <th className="p-3 border-b border-r border-slate-200 font-bold text-slate-800 text-center uppercase tracking-wider">PERÍODO</th>
+                          <th className="p-3 border-b border-r border-slate-200 font-bold text-slate-800 text-right uppercase tracking-wider">CAPITAL</th>
+                          {!ocultarDetalles && <th className="p-3 border-b border-r border-slate-200 font-bold text-slate-800 text-right uppercase tracking-wider bg-slate-50">PLUSVALÍA</th>}
+                          {!ocultarDetalles && <th className="p-3 border-b border-r border-slate-200 font-bold text-slate-800 text-right uppercase tracking-wider bg-slate-50">CUOTA PURA</th>}
+                          {!ocultarDetalles && <th className="p-3 border-b border-r border-slate-200 font-bold text-slate-800 text-right uppercase tracking-wider bg-slate-50">SEGURO</th>}
+                          <th className="p-3 border-b border-r border-slate-200 font-black text-blue-700 text-right uppercase tracking-wider">TOTAL PAGO</th>
+                          <th className="p-3 border-b border-r border-slate-200 font-bold text-slate-800 text-right uppercase tracking-wider">BALANCE PRINCIPAL</th>
+                          <th className="p-3 border-b border-slate-200 font-bold text-slate-800 text-center uppercase tracking-wider">PAGADA</th>
                         </tr>
                       </thead>
                       <tbody>
                         {calculos.tabla.map((row, idx) => (
                           <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50 transition-colors text-slate-700">
-                            <td className="p-2.5 text-center font-medium">{row.periodo}</td>
-                            <td className="p-2.5 text-right">{fD(row.capital)}</td>
-                            {!ocultarDetalles && <td className="p-2.5 text-right bg-slate-50/50">{fD(row.plusvalia)}</td>}
-                            {!ocultarDetalles && <td className="p-2.5 text-right bg-slate-50/50">{fD(row.cuotaBase)}</td>}
-                            {!ocultarDetalles && <td className="p-2.5 text-right bg-slate-50/50">{fD(row.seguro)}</td>}
-                            <td className="p-2.5 text-right font-bold text-slate-800">{fD(row.pagoTotal)}</td>
-                            <td className="p-2.5 text-right font-medium">{fD(row.balance)}</td>
-                            <td className="p-2.5 text-center font-bold text-slate-300">{row.pagada}</td>
+                            <td className="p-3 border-r border-slate-100 text-center font-black text-slate-800">{row.periodo}</td>
+                            <td className="p-3 border-r border-slate-100 text-right">{fD(row.capital)}</td>
+                            {!ocultarDetalles && <td className="p-3 border-r border-slate-100 text-right bg-slate-50/50">{fD(row.plusvalia)}</td>}
+                            {!ocultarDetalles && <td className="p-3 border-r border-slate-100 text-right bg-slate-50/50">{fD(row.cuotaBase)}</td>}
+                            {!ocultarDetalles && <td className="p-3 border-r border-slate-100 text-right bg-slate-50/50">{fD(row.seguro)}</td>}
+                            <td className="p-3 border-r border-slate-100 text-right font-black text-slate-800">{fD(row.pagoTotal)}</td>
+                            <td className="p-3 border-r border-slate-100 text-right font-medium">{fD(row.balance)}</td>
+                            <td className="p-3 text-center font-bold text-slate-300">{row.pagada}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
-                  
-                  <div className="w-full xl:w-[40%] bg-slate-50 p-5">
-                    <h4 className="font-bold text-slate-800 border-b-2 border-slate-200 pb-2 mb-4 text-[11px] uppercase tracking-wider">Básicos de Contrato</h4>
-                    <div className="space-y-3 text-[10px]">
-                      <div className="flex justify-between border-b border-slate-100 pb-1.5"><span className="text-slate-500 font-medium w-1/3">Cliente(s):</span><span className="text-blue-600 font-bold w-2/3 uppercase text-right">{form.cliente || '---'}</span></div>
-                      <div className="flex justify-between border-b border-slate-100 pb-1.5"><span className="text-slate-500 font-medium w-1/3">Realizado Por:</span><span className="text-slate-800 w-2/3 uppercase text-right">ADMINISTRADOR CRM</span></div>
-                      <div className="flex justify-between border-b border-slate-100 pb-1.5"><span className="text-slate-500 font-medium w-1/3">Fecha Contrato:</span><span className="text-slate-800 w-2/3 text-right">HOY</span></div>
-                      <div className="flex justify-between border-b border-slate-100 pb-1.5"><span className="text-slate-500 font-medium w-1/3">Capital Base:</span><span className="text-slate-800 font-bold w-2/3 uppercase text-right">{fD(calculos.Capital_Actual)}</span></div>
-                    </div>
-                  </div>
-
                 </div>
               )}
 
