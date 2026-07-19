@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-// ¡AQUÍ ESTÁ EL ÍCONO "RotateCcw" AGREGADO PARA QUE NO FALLE!
 import { Calculator, RefreshCw, Calendar, DollarSign, FileText, CheckCircle2, ChevronRight, Clock, RotateCcw } from 'lucide-react';
 
 export default function RecalcularPlan() {
@@ -12,23 +11,25 @@ export default function RecalcularPlan() {
     plazoMesesOriginal: '',
     seguroMensual: '',
     cuotasPagadas: '', 
-    nuevoPlazoMeses: '168' // Por defecto 14 años
+    nuevoPlazoMeses: '168' 
   });
 
-  const TASA_MENSUAL = 0.0101444; // 1.01444% Exacto del CRM
+  const TASA_MENSUAL = 0.0101444; 
 
   const [calculado, setCalculado] = useState(false);
   const [tabActiva, setTabActiva] = useState('RESUMEN'); 
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
-  // ================= 2. MOTOR DE RECÁLCULO =================
+  // ================= 2. MOTOR MATEMÁTICO (CLON EXACTO DEL CRM) =================
   const calculos = useMemo(() => {
     const P_total_Orig = parseFloat(form.precioTotalOriginal) || 0;
     const Enganche = parseFloat(form.cuotaInicial) || 0;
     const n_orig = parseInt(form.plazoMesesOriginal) || 120;
     const pagadas = parseInt(form.cuotasPagadas) || 0;
     const n_nuevo_total = parseInt(form.nuevoPlazoMeses) || 168;
+    
+    // REGLA 1: Para reestructuraciones, el seguro se congela al valor original
     const Seguro = parseFloat(form.seguroMensual) || 0;
 
     const Total_Financiado_Orig = P_total_Orig - Enganche;
@@ -41,14 +42,12 @@ export default function RecalcularPlan() {
     }
 
     let Capital_Restante = PV_Original;
-    let Total_Pagado_Hasta_Ahora = Enganche;
 
     for (let i = 1; i <= pagadas; i++) {
       const interes = Capital_Restante * TASA_MENSUAL;
       let capital = Cuota_Pura_Orig - interes;
       if (Capital_Restante - capital < 0) capital = Capital_Restante;
       Capital_Restante -= capital;
-      Total_Pagado_Hasta_Ahora += Cuota_Total_Orig;
     }
 
     const cuotasRestantesNuevas = n_nuevo_total - pagadas;
@@ -56,26 +55,27 @@ export default function RecalcularPlan() {
     
     if (cuotasRestantesNuevas > 0 && Capital_Restante > 0) {
       Cuota_Pura_Nueva = Capital_Restante * (TASA_MENSUAL * Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas)) / (Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas) - 1);
+      // REGLA 2: Redondeo bancario a 2 decimales para la cuota pura, igual que el sistema base
+      Cuota_Pura_Nueva = Math.round(Cuota_Pura_Nueva * 100) / 100;
     }
     
     const Cuota_Total_Nueva = Cuota_Pura_Nueva + Seguro;
 
     let tabla = [];
     let CapTemp = Capital_Restante;
-    let InteresesNuevosTotales = 0;
     let Total_Nuevo_Financiado = 0;
 
     for (let i = 1; i <= cuotasRestantesNuevas; i++) {
       let interes = CapTemp * TASA_MENSUAL;
       let capital = Cuota_Pura_Nueva - interes;
       
+      // REGLA 3: En la última cuota se perdona el interés de centavos y se liquida el capital
       if (i === cuotasRestantesNuevas) {
         capital = CapTemp;
         interes = 0; 
       }
       
       CapTemp -= capital;
-      InteresesNuevosTotales += interes;
       const pagoMes = capital + interes + Seguro;
       Total_Nuevo_Financiado += pagoMes;
 
@@ -91,6 +91,7 @@ export default function RecalcularPlan() {
       });
     }
 
+    // Ajuste de balance decreciente
     let balanceDescendente = Total_Nuevo_Financiado;
     tabla = tabla.map(row => {
       balanceDescendente -= row.pagoTotal;
@@ -115,7 +116,6 @@ export default function RecalcularPlan() {
     <div className="font-sans bg-[#f0f2f5] min-h-screen p-4 xl:p-8 pb-12">
       
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* ENCABEZADO */}
         <div className="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
           <div className="flex items-center">
             <div className="bg-emerald-100 p-2.5 rounded-xl mr-4">
@@ -136,7 +136,6 @@ export default function RecalcularPlan() {
           )}
         </div>
 
-        {/* PANEL DE CONFIGURACIÓN */}
         <div className={"bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all " + (calculado ? "opacity-70 pointer-events-none" : "")}>
           <div className="bg-slate-800 p-4 border-b border-slate-700">
             <h2 className="text-xs font-bold text-white flex items-center tracking-widest uppercase">
@@ -174,11 +173,10 @@ export default function RecalcularPlan() {
             <div className="flex gap-5 w-full md:w-auto">
               <div className="w-full md:w-48">
                 <label className="block text-[10px] font-black text-emerald-700 uppercase mb-1">Cuotas Ya Pagadas</label>
-                <input type="number" name="cuotasPagadas" value={form.cuotasPagadas} onChange={handleChange} placeholder="Ej. 12 (Vacío = 0)" className="w-full px-3 py-3 border-2 border-emerald-200 rounded-lg text-sm outline-none focus:border-emerald-500 font-black text-emerald-800 bg-white shadow-sm" />
+                <input type="number" name="cuotasPagadas" value={form.cuotasPagadas} onChange={handleChange} className="w-full px-3 py-3 border-2 border-emerald-200 rounded-lg text-sm outline-none focus:border-emerald-500 font-black text-emerald-800 bg-white shadow-sm" />
               </div>
               <div className="w-full md:w-64">
                 <label className="block text-[10px] font-black text-blue-700 uppercase mb-1">Nuevo Plazo Total</label>
-                {/* SELECTOR DINÁMICO DE 1 A 14 AÑOS */}
                 <select name="nuevoPlazoMeses" value={form.nuevoPlazoMeses} onChange={handleChange} className="w-full px-3 py-3 border-2 border-blue-300 rounded-lg text-sm outline-none focus:border-blue-500 font-black text-blue-800 bg-white shadow-sm cursor-pointer">
                   {[...Array(14)].map((_, index) => {
                     const anios = index + 1;
@@ -210,11 +208,9 @@ export default function RecalcularPlan() {
           </div>
         </div>
 
-        {/* ================= RESULTADOS (BENTO UI) ================= */}
         {calculado && (
           <div className="animate-in slide-in-from-bottom-8 duration-500 fade-in bg-white border border-slate-200 shadow-xl rounded-2xl overflow-hidden">
             
-            {/* TABS ESTILO CRM */}
             <div className="flex border-b border-slate-200 bg-slate-50 px-2 pt-2">
               <button 
                 onClick={() => setTabActiva('RESUMEN')}
@@ -230,14 +226,12 @@ export default function RecalcularPlan() {
               </button>
             </div>
 
-            {/* CONTENIDO TABS */}
             <div className="p-6">
               
               {tabActiva === 'RESUMEN' && (
                 <div className="animate-in fade-in duration-300">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     
-                    {/* BENTO BOX: MÉTRICAS FINANCIERAS */}
                     <div className="space-y-4">
                       <div className="bg-slate-50 border border-slate-100 rounded-xl p-5 shadow-sm">
                         <div className="flex justify-between items-center border-b border-slate-200 pb-3 mb-3">
@@ -268,7 +262,6 @@ export default function RecalcularPlan() {
                       </div>
                     </div>
 
-                    {/* BENTO BOX: COMPARATIVA DE CUOTAS */}
                     <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
                       <div className="absolute -right-10 -top-10 opacity-10">
                         <DollarSign className="w-48 h-48" />
