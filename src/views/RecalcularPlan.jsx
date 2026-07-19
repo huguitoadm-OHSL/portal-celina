@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Calculator, RefreshCw, Calendar, DollarSign, FileText, CheckCircle2, ChevronRight, Clock } from 'lucide-react';
 
 export default function RecalcularPlan() {
- // ================= 1. ESTADO DEL FORMULARIO =================
+  // ================= 1. ESTADO DEL FORMULARIO =================
   const [form, setForm] = useState({
     cliente: '',
     nroContrato: '',
@@ -10,18 +10,18 @@ export default function RecalcularPlan() {
     cuotaInicial: '',
     plazoMesesOriginal: '',
     seguroMensual: '',
-    cuotasPagadas: '', // Inicia vacío, el asesor lo llena si hay cuotas pagadas
-    nuevoPlazoMeses: '168' // Este puede quedar por defecto o vacío
+    cuotasPagadas: '', 
+    nuevoPlazoMeses: '168' 
   });
-  
+
   const TASA_MENSUAL = 0.0101444; // 1.01444% Exacto del CRM
 
   const [calculado, setCalculado] = useState(false);
-  const [tabActiva, setTabActiva] = useState('RESUMEN'); // 'RESUMEN' o 'TABLA'
+  const [tabActiva, setTabActiva] = useState('RESUMEN'); 
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
-  // ================= 2. MOTOR DE RECÁLCULO (INGENIERÍA INVERSA) =================
+  // ================= 2. MOTOR DE RECÁLCULO =================
   const calculos = useMemo(() => {
     const P_total_Orig = parseFloat(form.precioTotalOriginal) || 0;
     const Enganche = parseFloat(form.cuotaInicial) || 0;
@@ -30,18 +30,15 @@ export default function RecalcularPlan() {
     const n_nuevo_total = parseInt(form.nuevoPlazoMeses) || 168;
     const Seguro = parseFloat(form.seguroMensual) || 0;
 
-    // 1. Desglosar el Plan Original
     const Total_Financiado_Orig = P_total_Orig - Enganche;
     const Cuota_Total_Orig = n_orig > 0 ? (Total_Financiado_Orig / n_orig) : 0;
     const Cuota_Pura_Orig = Math.max(0, Cuota_Total_Orig - Seguro);
 
-    // 2. Hallar el Capital Inicial Real (Valor Presente)
     let PV_Original = 0;
     if (TASA_MENSUAL > 0 && n_orig > 0) {
       PV_Original = Cuota_Pura_Orig * (1 - Math.pow(1 + TASA_MENSUAL, -n_orig)) / TASA_MENSUAL;
     }
 
-    // 3. Simular hasta las cuotas pagadas para hallar el Saldo Actual
     let Capital_Restante = PV_Original;
     let Total_Pagado_Hasta_Ahora = Enganche;
 
@@ -53,7 +50,6 @@ export default function RecalcularPlan() {
       Total_Pagado_Hasta_Ahora += Cuota_Total_Orig;
     }
 
-    // 4. Recalcular sobre el nuevo plazo
     const cuotasRestantesNuevas = n_nuevo_total - pagadas;
     let Cuota_Pura_Nueva = 0;
     
@@ -63,7 +59,6 @@ export default function RecalcularPlan() {
     
     const Cuota_Total_Nueva = Cuota_Pura_Nueva + Seguro;
 
-    // 5. Generar la nueva tabla
     let tabla = [];
     let CapTemp = Capital_Restante;
     let InteresesNuevosTotales = 0;
@@ -73,10 +68,9 @@ export default function RecalcularPlan() {
       let interes = CapTemp * TASA_MENSUAL;
       let capital = Cuota_Pura_Nueva - interes;
       
-      // Ajuste milimétrico de la última cuota (Como en el CRM)
       if (i === cuotasRestantesNuevas) {
         capital = CapTemp;
-        interes = 0; // El CRM de la empresa perdona los centavos de interés en la última cuota para cuadrar a cero
+        interes = 0; 
       }
       
       CapTemp -= capital;
@@ -91,19 +85,17 @@ export default function RecalcularPlan() {
         cuotaBase: capital + interes,
         seguro: Seguro,
         pagoTotal: pagoMes,
-        balance: Math.max(0, Total_Nuevo_Financiado), // Se invierte temporalmente para cuadrar
+        balance: Math.max(0, Total_Nuevo_Financiado), 
         pagada: 'NO'
       });
     }
 
-    // Ajustar los balances para que sean decrecientes
     let balanceDescendente = Total_Nuevo_Financiado;
     tabla = tabla.map(row => {
       balanceDescendente -= row.pagoTotal;
       return { ...row, balance: Math.max(0, balanceDescendente) };
     });
 
-    // 6. Métricas Finales del Nuevo Plan
     const Monto_Total_Plan_Pago = Total_Nuevo_Financiado;
     const Monto_Total_Contrato = Monto_Total_Plan_Pago + Enganche;
 
@@ -210,17 +202,17 @@ export default function RecalcularPlan() {
         {calculado && (
           <div className="animate-in slide-in-from-bottom-8 duration-500 fade-in bg-white border border-slate-200 shadow-xl rounded-2xl overflow-hidden">
             
-            {/* TABS ESTILO CRM */}
+            {/* TABS ESTILO CRM (LIBRE DE COMILLAS INVERTIDAS) */}
             <div className="flex border-b border-slate-200 bg-slate-50 px-2 pt-2">
               <button 
                 onClick={() => setTabActiva('RESUMEN')}
-                className={\`px-6 py-3 text-[11px] uppercase tracking-wider font-black rounded-t-lg transition-colors \${tabActiva === 'RESUMEN' ? 'bg-white text-emerald-600 border-t-2 border-emerald-600 shadow-[0_-2px_10px_rgba(0,0,0,0.03)]' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'}\`}
+                className={"px-6 py-3 text-[11px] uppercase tracking-wider font-black rounded-t-lg transition-colors " + (tabActiva === 'RESUMEN' ? 'bg-white text-emerald-600 border-t-2 border-emerald-600 shadow-[0_-2px_10px_rgba(0,0,0,0.03)]' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100')}
               >
                 Resumen General
               </button>
               <button 
                 onClick={() => setTabActiva('TABLA')}
-                className={\`px-6 py-3 text-[11px] uppercase tracking-wider font-black rounded-t-lg transition-colors \${tabActiva === 'TABLA' ? 'bg-white text-emerald-600 border-t-2 border-emerald-600 shadow-[0_-2px_10px_rgba(0,0,0,0.03)]' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'}\`}
+                className={"px-6 py-3 text-[11px] uppercase tracking-wider font-black rounded-t-lg transition-colors " + (tabActiva === 'TABLA' ? 'bg-white text-emerald-600 border-t-2 border-emerald-600 shadow-[0_-2px_10px_rgba(0,0,0,0.03)]' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100')}
               >
                 Plan de Pagos
               </button>
