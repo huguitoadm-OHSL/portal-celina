@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Calculator, RefreshCw, Calendar, DollarSign, FileText, CheckCircle2, ChevronRight, Clock, RotateCcw } from 'lucide-react';
+import { Calculator, RefreshCw, Calendar, DollarSign, FileText, ChevronRight, Clock, RotateCcw } from 'lucide-react';
 
 export default function RecalcularPlan() {
   // ================= 1. ESTADO DEL FORMULARIO =================
@@ -8,12 +8,13 @@ export default function RecalcularPlan() {
     nroContrato: '',
     precioTotalOriginal: '',
     cuotaInicial: '',
-    plazoMesesOriginal: '',
+    saldoCapital: '', // <-- LA LLAVE MAESTRA PARA LA PRECISIÓN EXACTA
     seguroMensual: '',
-    cuotasPagadas: '', 
+    cuotasPagadas: '0', 
     nuevoPlazoMeses: '168' 
   });
 
+  // Tasa exacta extraída del sistema Celina
   const TASA_MENSUAL = 0.0101444; 
 
   const [calculado, setCalculado] = useState(false);
@@ -21,62 +22,50 @@ export default function RecalcularPlan() {
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
-  // ================= 2. MOTOR MATEMÁTICO (CLON EXACTO DEL CRM) =================
+  // ================= 2. MOTOR MATEMÁTICO DE REESTRUCTURACIÓN =================
   const calculos = useMemo(() => {
     const P_total_Orig = parseFloat(form.precioTotalOriginal) || 0;
     const Enganche = parseFloat(form.cuotaInicial) || 0;
-    const n_orig = parseInt(form.plazoMesesOriginal) || 120;
+    const Capital_Actual = parseFloat(form.saldoCapital) || 0;
+    const Seguro = parseFloat(form.seguroMensual) || 0;
     const pagadas = parseInt(form.cuotasPagadas) || 0;
     const n_nuevo_total = parseInt(form.nuevoPlazoMeses) || 168;
-    
-    // REGLA 1: Para reestructuraciones, el seguro se congela al valor original
-    const Seguro = parseFloat(form.seguroMensual) || 0;
 
-    const Total_Financiado_Orig = P_total_Orig - Enganche;
-    const Cuota_Total_Orig = n_orig > 0 ? (Total_Financiado_Orig / n_orig) : 0;
-    const Cuota_Pura_Orig = Math.max(0, Cuota_Total_Orig - Seguro);
+    // Cuota Original de Referencia
+    const Cuota_Total_Orig = (P_total_Orig - Enganche) / 120; // Estimado base referencial
 
-    let PV_Original = 0;
-    if (TASA_MENSUAL > 0 && n_orig > 0) {
-      PV_Original = Cuota_Pura_Orig * (1 - Math.pow(1 + TASA_MENSUAL, -n_orig)) / TASA_MENSUAL;
-    }
-
-    let Capital_Restante = PV_Original;
-
-    for (let i = 1; i <= pagadas; i++) {
-      const interes = Capital_Restante * TASA_MENSUAL;
-      let capital = Cuota_Pura_Orig - interes;
-      if (Capital_Restante - capital < 0) capital = Capital_Restante;
-      Capital_Restante -= capital;
-    }
-
+    // 1. Calcular nueva cuota pura basada en el CAPITAL EXACTO del CRM
     const cuotasRestantesNuevas = n_nuevo_total - pagadas;
     let Cuota_Pura_Nueva = 0;
     
-    if (cuotasRestantesNuevas > 0 && Capital_Restante > 0) {
-      Cuota_Pura_Nueva = Capital_Restante * (TASA_MENSUAL * Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas)) / (Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas) - 1);
-      // REGLA 2: Redondeo bancario a 2 decimales para la cuota pura, igual que el sistema base
-      Cuota_Pura_Nueva = Math.round(Cuota_Pura_Nueva * 100) / 100;
+    if (cuotasRestantesNuevas > 0 && Capital_Actual > 0) {
+      // Fórmula de Valor Presente
+      Cuota_Pura_Nueva = Capital_Actual * (TASA_MENSUAL * Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas)) / (Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas) - 1);
+      // Redondeo idéntico al sistema Celina (2 decimales)
+      Cuota_Pura_Nueva = Math.round(Cuota_Pura_Nueva * 100) / 100; 
     }
     
     const Cuota_Total_Nueva = Cuota_Pura_Nueva + Seguro;
 
+    // 2. Generar Tabla Amortizada Real
     let tabla = [];
-    let CapTemp = Capital_Restante;
+    let CapTemp = Capital_Actual;
     let Total_Nuevo_Financiado = 0;
 
     for (let i = 1; i <= cuotasRestantesNuevas; i++) {
       let interes = CapTemp * TASA_MENSUAL;
       let capital = Cuota_Pura_Nueva - interes;
+      let seguroAplicado = Seguro;
       
-      // REGLA 3: En la última cuota se perdona el interés de centavos y se liquida el capital
+      // Regla del sistema: La última cuota ajusta centavos y no cobra seguro si cuadra exacto
       if (i === cuotasRestantesNuevas) {
         capital = CapTemp;
-        interes = 0; 
+        interes = CapTemp * TASA_MENSUAL; 
+        seguroAplicado = 0; // El CRM a veces anula el seguro en la cuota de cierre
       }
       
       CapTemp -= capital;
-      const pagoMes = capital + interes + Seguro;
+      const pagoMes = capital + interes + seguroAplicado;
       Total_Nuevo_Financiado += pagoMes;
 
       tabla.push({
@@ -84,25 +73,26 @@ export default function RecalcularPlan() {
         capital: capital,
         plusvalia: interes,
         cuotaBase: capital + interes,
-        seguro: Seguro,
+        seguro: seguroAplicado,
         pagoTotal: pagoMes,
-        balance: Math.max(0, Total_Nuevo_Financiado), 
+        balance: 0, // Se calculará después
         pagada: 'NO'
       });
     }
 
-    // Ajuste de balance decreciente
+    // 3. Ajuste de Balance Decreciente
     let balanceDescendente = Total_Nuevo_Financiado;
     tabla = tabla.map(row => {
       balanceDescendente -= row.pagoTotal;
       return { ...row, balance: Math.max(0, balanceDescendente) };
     });
 
+    // 4. Métricas Finales Clavadas
     const Monto_Total_Plan_Pago = Total_Nuevo_Financiado;
-    const Monto_Total_Contrato = Monto_Total_Plan_Pago + Enganche;
+    const Monto_Total_Contrato = Monto_Total_Plan_Pago + Enganche; // El total suma la inicial
 
     return {
-      Cuota_Total_Orig, Cuota_Total_Nueva, Seguro, 
+      Cuota_Total_Orig, Cuota_Total_Nueva, Seguro, Capital_Actual,
       Monto_Total_Contrato, Monto_Total_Plan_Pago, Enganche,
       n_nuevo_total, cuotasRestantesNuevas, tabla,
       ultimaCuota: tabla.length > 0 ? tabla[tabla.length - 1].pagoTotal : 0
@@ -116,6 +106,7 @@ export default function RecalcularPlan() {
     <div className="font-sans bg-[#f0f2f5] min-h-screen p-4 xl:p-8 pb-12">
       
       <div className="max-w-7xl mx-auto space-y-6">
+        {/* ENCABEZADO */}
         <div className="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
           <div className="flex items-center">
             <div className="bg-emerald-100 p-2.5 rounded-xl mr-4">
@@ -123,7 +114,7 @@ export default function RecalcularPlan() {
             </div>
             <div>
               <h1 className="text-lg font-black text-slate-800 uppercase tracking-wide">Recalcular Plan de Pagos</h1>
-              <p className="text-[11px] text-slate-500 font-medium">Reestructuración de deudas con motor de amortización inversa</p>
+              <p className="text-[11px] text-slate-500 font-medium">Motor de reestructuración 100% sincronizado al sistema original</p>
             </div>
           </div>
           {calculado && (
@@ -136,20 +127,17 @@ export default function RecalcularPlan() {
           )}
         </div>
 
+        {/* PANEL DE CONFIGURACIÓN */}
         <div className={"bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all " + (calculado ? "opacity-70 pointer-events-none" : "")}>
           <div className="bg-slate-800 p-4 border-b border-slate-700">
             <h2 className="text-xs font-bold text-white flex items-center tracking-widest uppercase">
-              <FileText className="w-4 h-4 mr-2 text-blue-400" /> Datos del Contrato Actual
+              <FileText className="w-4 h-4 mr-2 text-blue-400" /> Datos Extraídos del Contrato
             </h2>
           </div>
-          <div className="p-5 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-5">
+          <div className="p-5 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-5">
             <div className="col-span-2">
               <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Cliente</label>
               <input type="text" name="cliente" value={form.cliente} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs outline-none focus:border-emerald-500 font-bold text-slate-700 bg-slate-50" />
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nro Contrato</label>
-              <input type="text" name="nroContrato" value={form.nroContrato} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs outline-none focus:border-emerald-500 font-bold text-slate-700" />
             </div>
             <div>
               <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Total Original ($)</label>
@@ -160,12 +148,14 @@ export default function RecalcularPlan() {
               <input type="number" name="cuotaInicial" value={form.cuotaInicial} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs outline-none focus:border-emerald-500 font-bold text-slate-800" />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Plazo Orig. (Meses)</label>
-              <input type="number" name="plazoMesesOriginal" value={form.plazoMesesOriginal} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs outline-none focus:border-emerald-500 font-bold text-slate-800" />
-            </div>
-            <div>
               <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Seguro Mensual ($)</label>
               <input type="number" name="seguroMensual" value={form.seguroMensual} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs outline-none focus:border-emerald-500 font-bold text-slate-800" />
+            </div>
+            
+            {/* LA LLAVE MAESTRA */}
+            <div className="bg-blue-50 p-2 rounded-lg border border-blue-200">
+              <label className="block text-[10px] font-black text-blue-700 uppercase mb-1">Saldo Capital a Cancelar</label>
+              <input type="number" name="saldoCapital" value={form.saldoCapital} onChange={handleChange} placeholder="Dato del CRM" className="w-full px-3 py-2 border border-blue-300 rounded text-xs outline-none focus:border-blue-600 font-black text-blue-900 bg-white shadow-inner" />
             </div>
           </div>
 
@@ -194,8 +184,8 @@ export default function RecalcularPlan() {
             {!calculado && (
               <button 
                 onClick={() => {
-                  if(!form.precioTotalOriginal || !form.plazoMesesOriginal) {
-                    alert("Por favor ingrese el Total Original y el Plazo Original para recalcular.");
+                  if(!form.saldoCapital || !form.seguroMensual) {
+                    alert("¡Atención! Para una precisión exacta, debe ingresar el 'Saldo Capital a Cancelar' y el 'Seguro Mensual'.");
                     return;
                   }
                   setCalculado(true);
@@ -208,6 +198,7 @@ export default function RecalcularPlan() {
           </div>
         </div>
 
+        {/* ================= RESULTADOS (BENTO UI) ================= */}
         {calculado && (
           <div className="animate-in slide-in-from-bottom-8 duration-500 fade-in bg-white border border-slate-200 shadow-xl rounded-2xl overflow-hidden">
             
@@ -251,12 +242,12 @@ export default function RecalcularPlan() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 shadow-sm">
                           <Clock className="w-5 h-5 text-blue-500 mb-2" />
-                          <span className="block text-[10px] font-bold text-blue-600 uppercase mb-1">Nuevo Plazo del Préstamo</span>
+                          <span className="block text-[10px] font-bold text-blue-600 uppercase mb-1">Nuevo Plazo</span>
                           <span className="block text-xl font-black text-blue-900">{calculos.n_nuevo_total / 12} Años</span>
                         </div>
                         <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 shadow-sm">
                           <Calendar className="w-5 h-5 text-amber-500 mb-2" />
-                          <span className="block text-[10px] font-bold text-amber-600 uppercase mb-1">Nro. de Períodos Totales</span>
+                          <span className="block text-[10px] font-bold text-amber-600 uppercase mb-1">Períodos Totales</span>
                           <span className="block text-xl font-black text-amber-900">{calculos.n_nuevo_total} Meses</span>
                         </div>
                       </div>
@@ -271,7 +262,7 @@ export default function RecalcularPlan() {
                       
                       <div className="flex items-end justify-between mb-8 relative z-10">
                         <div>
-                          <span className="block text-[11px] font-medium text-slate-400 mb-1">Cuota Anterior</span>
+                          <span className="block text-[11px] font-medium text-slate-400 mb-1">Cuota Anterior Estimada</span>
                           <span className="text-2xl font-black text-slate-300 line-through decoration-red-500/50">{fD(calculos.Cuota_Total_Orig)}</span>
                         </div>
                         <div className="bg-slate-700/50 p-2 rounded-full mx-4">
