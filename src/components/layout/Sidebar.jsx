@@ -1,6 +1,6 @@
 import React from 'react';
 import { 
-  LayoutDashboard, BarChart, CalendarDays, Target, Calculator, Repeat, Tag, 
+  LayoutDashboard, BarChart, CalendarDays, Target, RefreshCw, Calculator, Repeat, Tag, 
   TrendingUp, PhoneCall, FileText, FileSignature, Shield, UserMinus, UserPlus, 
   ClipboardCheck, UserCheck, Building2, X, Lock, PhoneForwarded, AlertOctagon, KeyRound 
 } from 'lucide-react';
@@ -75,6 +75,7 @@ export const Sidebar = ({ activeTab, setActiveTab, isOpen, closeSidebar, setSupe
           <NavItem id="bloqueoLote" icon={Lock} label="Bloqueo de Lote" />
           <NavItem id="liquidacionContado" icon={FileText} label="Liquidación Contado" />
           <NavItem id="solicitudesCodigo" icon={KeyRound} label="Solicitud de Códigos" />
+          <NavItem id="recalcular" icon={RefreshCw} label="Recalcular Plan" /> {/* <--- TU NUEVO BOTÓN AQUÍ */}
 
           <NavSection title="Trámites Generales" />
           <NavItem id="llamada" icon={PhoneCall} label="Validación Llamada" />
