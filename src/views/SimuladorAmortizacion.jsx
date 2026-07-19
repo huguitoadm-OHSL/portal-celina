@@ -1,501 +1,364 @@
 import React, { useState, useMemo } from 'react';
-import { Calculator, EyeOff, Eye, PlayCircle, RotateCcw, Clock } from 'lucide-react';
+import { Calculator, Calendar, DollarSign, FileText, ChevronRight, Clock, RotateCcw, Eye, EyeOff, TrendingDown, CheckCircle2 } from 'lucide-react';
 
 export default function SimuladorAmortizacion() {
   // ================= 1. ESTADO DEL FORMULARIO =================
   const [form, setForm] = useState({
     cliente: '',
-    proyecto: '',
-    uv: '', mzn: '', lote: '',
-    precioTotal: '', 
-    cuotaInicial: '',
-    plazoAnios: '',
-    cuotasPagadas: '', 
-    montoAmortizar: ''
+    cuotaTotalActual: '', // Ej. 415.76
+    seguroMensual: '',    // Ej. 23.80
+    saldoCapital: '',     // Ej. 27130.00
+    montoAmortizar: '',   // Ej. 3000
+    cuotasPagadas: '0', 
   });
 
-  const TASA_ANUAL = 12.1133; 
-  const TASA_MENSUAL = 0.0101444; 
-  const TASA_SEGURO_EFECTIVA = 0.000877571;
+  const TASA_MENSUAL = 0.0101444; // 1.01444% Exacto de Celina
 
   const [calculado, setCalculado] = useState(false);
+  const [tabActiva, setTabActiva] = useState('RESUMEN'); 
   const [ocultarDetalles, setOcultarDetalles] = useState(false);
-  const [vistaActual, setVistaActual] = useState('ORIGINAL'); 
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
-  // ================= 2. CÁLCULO DINÁMICO DE SEGURO =================
-  const metricasEnVivo = useMemo(() => {
-    const P_total = parseFloat(form.precioTotal) || 0;
-    const Enganche = parseFloat(form.cuotaInicial) || 0;
-    const n_meses = (parseInt(form.plazoAnios) || 0) * 12;
-
-    let seguroDinamico = 0;
-    let cuotaTotalMes = 0;
-
-    if (P_total > 0 && n_meses > 0 && P_total > Enganche) {
-      const Deuda_Programada = P_total - Enganche;
-      cuotaTotalMes = Deuda_Programada / n_meses;
-      const K = (1 - Math.pow(1 + TASA_MENSUAL, -n_meses)) / TASA_MENSUAL;
-      const Cuota_Pura = cuotaTotalMes / (1 + K * TASA_SEGURO_EFECTIVA);
-      seguroDinamico = cuotaTotalMes - Cuota_Pura;
-    }
-
-    return { seguroDinamico };
-  }, [form.precioTotal, form.cuotaInicial, form.plazoAnios]);
-
-  // ================= 3. MOTOR MATEMÁTICO INTACTO =================
+  // ================= 2. MOTOR MATEMÁTICO (CLON BANCARIO 100% EXACTO) =================
   const calculos = useMemo(() => {
-    const P_total = parseFloat(form.precioTotal) || 0;
-    const Enganche = parseFloat(form.cuotaInicial) || 0;
-    const Amortizacion = parseFloat(form.montoAmortizar) || 0;
-    const n_anios = parseInt(form.plazoAnios) || 0;
-    const n_meses = n_anios * 12;
+    const Cuota_Total_Actual = parseFloat(form.cuotaTotalActual) || 0;
+    const Seguro_Num = parseFloat(form.seguroMensual) || 0;
+    const Capital_Actual = parseFloat(form.saldoCapital) || 0;
+    const Abono = parseFloat(form.montoAmortizar) || 0;
     const pagadas = parseInt(form.cuotasPagadas) || 0;
+
+    // Cuota Fija Pura extraída matemáticamente
+    const Cuota_Pura_Fija = Math.round((Cuota_Total_Actual - Seguro_Num) * 100) / 100;
     
-    const SEGURO_MENSUAL = metricasEnVivo.seguroDinamico;
+    // Convertimos todo a CENTAVOS para procesar el algoritmo bancario sin perder 1 solo decimal
+    const SeguroCents = Math.round(Seguro_Num * 100);
+    const CuotaPuraFijaCents = Math.round(Cuota_Pura_Fija * 100);
 
-    const Total_Cuotas_Original = P_total - Enganche;
-    const Cuota_Total_Mes = n_meses > 0 ? (Total_Cuotas_Original / n_meses) : 0;
-    const Cuota_Pura = Math.max(0, Cuota_Total_Mes - SEGURO_MENSUAL);
+    // ---------------------------------------------------------
+    // A. PROYECTAR PLAN ORIGINAL (Para calcular ahorros reales)
+    // ---------------------------------------------------------
+    let CapTempOrigCents = Math.round(Capital_Actual * 100);
+    let Suma_Original_Cents = 0;
+    let cuotas_originales = 0;
 
-    let Capital_Verdadero = 0;
-    if (TASA_MENSUAL > 0 && n_meses > 0) {
-      Capital_Verdadero = Cuota_Pura * (1 - Math.pow(1 + TASA_MENSUAL, -n_meses)) / TASA_MENSUAL;
-    }
-    const Total_Plusvalia_Original = (Cuota_Pura * n_meses) - Capital_Verdadero;
-    
-    // --- TABLA ORIGINAL ---
-    let tablaOriginal = [];
-    let balanceDeudaOriginal = Total_Cuotas_Original;
-    let capitalRestanteOri = Capital_Verdadero;
+    if (CapTempOrigCents > 0 && CuotaPuraFijaCents > 0) {
+        while (CapTempOrigCents > 0 && cuotas_originales < 400) {
+          cuotas_originales++;
+          let interesCents = Math.round(CapTempOrigCents * TASA_MENSUAL);
+          let capitalCents = CuotaPuraFijaCents - interesCents;
 
-    for (let i = 1; i <= n_meses; i++) {
-      const interes = capitalRestanteOri * TASA_MENSUAL;
-      let capital = Cuota_Pura - interes;
-      
-      if (capitalRestanteOri - capital < 0) capital = capitalRestanteOri;
-      
-      capitalRestanteOri -= capital;
-      balanceDeudaOriginal -= Cuota_Total_Mes;
-      
-      tablaOriginal.push({
-        periodo: i,
-        capital: capital,
-        plusvalia: interes,
-        cuotaBase: Cuota_Pura,
-        seguro: SEGURO_MENSUAL,
-        pagoTotal: Cuota_Total_Mes,
-        balance: Math.max(0, balanceDeudaOriginal),
-        pagada: i <= pagadas ? 'SI' : 'NO'
-      });
+          if (CapTempOrigCents - capitalCents <= 0) {
+            capitalCents = CapTempOrigCents;
+            interesCents = Math.round(CapTempOrigCents * TASA_MENSUAL);
+          }
+
+          CapTempOrigCents -= capitalCents;
+          Suma_Original_Cents += (capitalCents + interesCents + SeguroCents);
+        }
     }
 
-    // --- TABLA AMORTIZADA ---
-    let tablaAmortizada = [];
-    let balanceDeudaAmortizada = Total_Cuotas_Original;
-    let Capital_Restante = Capital_Verdadero;
+    // ---------------------------------------------------------
+    // B. PROYECTAR PLAN AMORTIZADO (Con reducción de plazo)
+    // ---------------------------------------------------------
+    let CapTempAmortCents = Math.round(Math.max(0, Capital_Actual - Abono) * 100);
+    let Suma_Amortizada_Cents = 0;
+    let cuotas_nuevas = 0;
+    let tabla = [];
 
-    for (let i = 1; i <= pagadas; i++) {
-      const interes = Capital_Restante * TASA_MENSUAL;
-      let capital = Cuota_Pura - interes;
-      if (Capital_Restante - capital < 0) capital = Capital_Restante;
-      
-      Capital_Restante -= capital;
-      balanceDeudaAmortizada -= Cuota_Total_Mes;
-      
-      tablaAmortizada.push({
-        periodo: i,
-        capital: capital,
-        plusvalia: interes,
-        cuotaBase: Cuota_Pura,
-        seguro: SEGURO_MENSUAL,
-        pagoTotal: Cuota_Total_Mes,
-        balance: Math.max(0, balanceDeudaAmortizada),
-        pagada: 'SI'
-      });
+    if (CapTempAmortCents > 0 && CuotaPuraFijaCents > 0) {
+        while (CapTempAmortCents > 0 && cuotas_nuevas < 400) {
+          cuotas_nuevas++;
+          let interesCents = Math.round(CapTempAmortCents * TASA_MENSUAL);
+          let capitalCents = CuotaPuraFijaCents - interesCents;
+
+          // REGLA DE CIERRE BANCARIO: Última cuota absorbe el saldo exacto restante y SÍ cobra seguro
+          if (CapTempAmortCents - capitalCents <= 0) {
+            capitalCents = CapTempAmortCents;
+            interesCents = Math.round(CapTempAmortCents * TASA_MENSUAL);
+          }
+
+          CapTempAmortCents -= capitalCents;
+          let pagoMesCents = capitalCents + interesCents + SeguroCents;
+          Suma_Amortizada_Cents += pagoMesCents;
+
+          tabla.push({
+            periodo: pagadas + cuotas_nuevas,
+            capital: capitalCents / 100,
+            plusvalia: interesCents / 100,
+            cuotaBase: Cuota_Pura_Fija,
+            seguro: Seguro_Num,
+            pagoTotal: pagoMesCents / 100,
+            balance: 0, 
+            pagada: 'NO'
+          });
+        }
     }
 
-    let cuotasRestantes = 0;
-    let Nueva_Deuda_Total = 0;
-    let ahorroIntereses = 0;
-    let mesesAhorrados = 0;
+    // ---------------------------------------------------------
+    // C. CÁLCULO DE BALANCE DESCENDENTE Y FILA DE ABONO
+    // ---------------------------------------------------------
+    let balanceDescendenteCents = Suma_Amortizada_Cents;
 
-    if (Amortizacion > 0 && Capital_Restante > 0) {
-      Capital_Restante -= Amortizacion;
-      if (Capital_Restante < 0) Capital_Restante = 0;
-
-      const factor = 1 - (Capital_Restante * TASA_MENSUAL) / Cuota_Pura;
-      if (factor > 0) {
-        cuotasRestantes = Math.ceil(-Math.log(factor) / Math.log(1 + TASA_MENSUAL));
-      }
-
-      let capTemp = Capital_Restante;
-      for (let i = 1; i <= cuotasRestantes; i++) {
-        const int = capTemp * TASA_MENSUAL;
-        let cap = Cuota_Pura - int;
-        if (capTemp - cap < 0) cap = capTemp;
-        capTemp -= cap;
-        Nueva_Deuda_Total += (cap + int + SEGURO_MENSUAL);
-      }
-
-      balanceDeudaAmortizada = Nueva_Deuda_Total;
-
-      tablaAmortizada.push({
-        periodo: pagadas, 
-        esAbono: true,
-        capital: Amortizacion,
-        balance: balanceDeudaAmortizada,
-        pagada: 'SI'
-      });
-
-      for (let i = 1; i <= cuotasRestantes; i++) {
-        const interes = Capital_Restante * TASA_MENSUAL;
-        let capital = Cuota_Pura - interes;
-        if (Capital_Restante - capital < 0) capital = Capital_Restante;
-        Capital_Restante -= capital;
-        
-        const pagoMes = capital + interes + SEGURO_MENSUAL;
-        balanceDeudaAmortizada -= pagoMes;
-
-        tablaAmortizada.push({
-          periodo: pagadas + i,
-          capital: capital,
-          plusvalia: interes,
-          cuotaBase: Cuota_Pura,
-          seguro: SEGURO_MENSUAL,
-          pagoTotal: pagoMes,
-          balance: Math.max(0, balanceDeudaAmortizada),
-          pagada: 'NO'
+    if (Abono > 0) {
+        tabla.unshift({
+            periodo: pagadas,
+            esAbono: true,
+            capital: Abono,
+            plusvalia: 0,
+            cuotaBase: 0,
+            seguro: 0,
+            pagoTotal: Abono,
+            balance: balanceDescendenteCents / 100, // Inicia con la Deuda Futura Total Proyectada
+            pagada: 'SI'
         });
-      }
-
-      mesesAhorrados = (n_meses - pagadas) - cuotasRestantes;
-      const deudaRestanteOriginal = Total_Cuotas_Original - (pagadas * Cuota_Total_Mes);
-      ahorroIntereses = Math.max(0, (deudaRestanteOriginal - Amortizacion) - Nueva_Deuda_Total);
-    } else {
-      tablaAmortizada = [...tablaOriginal];
-      cuotasRestantes = n_meses - pagadas;
-      Nueva_Deuda_Total = Total_Cuotas_Original - (pagadas * Cuota_Total_Mes);
     }
 
-    // --- NUEVAS EXTRACCIONES DE SALDOS RESTANTES ---
-    let Saldo_Capital_Original = 0;
-    let Saldo_Plusvalia_Original = 0;
-    tablaOriginal.forEach(r => {
-      if (r.pagada === 'NO') {
-        Saldo_Capital_Original += r.capital;
-        Saldo_Plusvalia_Original += r.plusvalia;
-      }
+    tabla = tabla.map(row => {
+      if (row.esAbono) return row;
+      balanceDescendenteCents -= Math.round(row.pagoTotal * 100);
+      return { ...row, balance: Math.max(0, balanceDescendenteCents / 100) };
     });
 
-    let Saldo_Capital_Amortizado = 0;
-    let Saldo_Plusvalia_Amortizado = 0;
-    tablaAmortizada.forEach(r => {
-      if (r.pagada === 'NO' && !r.esAbono) {
-        Saldo_Capital_Amortizado += r.capital;
-        Saldo_Plusvalia_Amortizado += r.plusvalia;
-      }
-    });
+    const Ahorro_Total_Cents = Math.max(0, Suma_Original_Cents - Suma_Amortizada_Cents - Math.round(Abono * 100));
+    const Meses_Ahorrados = Math.max(0, cuotas_originales - cuotas_nuevas);
 
     return {
-      SEGURO_MENSUAL, Capital_Verdadero, Total_Plusvalia_Original, Total_Cuotas_Original,
-      Cuota_Total_Mes, tablaOriginal, tablaAmortizada, n_meses,
-      Nueva_Deuda_Total, cuotasRestantes, ahorroIntereses, mesesAhorrados,
-      Saldo_Capital_Original, Saldo_Plusvalia_Original, 
-      Saldo_Capital_Amortizado, Saldo_Plusvalia_Amortizado
+      Suma_Original: Suma_Original_Cents / 100,
+      Suma_Amortizada: Suma_Amortizada_Cents / 100,
+      Ahorro_Total: Ahorro_Total_Cents / 100,
+      Meses_Ahorrados,
+      cuotas_originales,
+      cuotas_nuevas,
+      tabla,
+      ultimaCuota: tabla.length > 1 ? tabla[tabla.length - 1].pagoTotal : 0
     };
-  }, [form, metricasEnVivo]);
+  }, [form]);
 
   const fD = (num) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num || 0);
 
-  const tablaActiva = vistaActual === 'ORIGINAL' ? calculos.tablaOriginal : calculos.tablaAmortizada;
-
-  // ================= 4. RENDER UI =================
+  // ================= 3. INTERFAZ GRÁFICA =================
   return (
-    <div className="font-sans bg-[#f4f6f8] min-h-screen p-4 pb-12">
+    <div className="font-sans bg-[#f0f2f5] min-h-screen p-4 xl:p-8 pb-12">
       
-      <div className="bg-white rounded-xl border border-slate-200 p-5 mb-5 shadow-md">
-        <div className="flex justify-between items-center mb-5 border-b border-slate-100 pb-3">
-          <h2 className="text-sm font-black text-slate-800 flex items-center">
-            <Calculator className="w-5 h-5 mr-2 text-blue-600" /> Simulador de Amortización Bancaria
-          </h2>
+      <div className="max-w-7xl mx-auto space-y-6">
+        
+        {/* ENCABEZADO */}
+        <div className="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+          <div className="flex items-center">
+            <div className="bg-blue-100 p-2.5 rounded-xl mr-4">
+              <Calculator className="w-6 h-6 text-blue-600" />
+            </div>
+            <div>
+              <h1 className="text-lg font-black text-slate-800 uppercase tracking-wide">Amortización a Capital</h1>
+              <p className="text-[11px] text-slate-500 font-medium">Motor de reducción de plazo con cálculo exacto de ahorros</p>
+            </div>
+          </div>
           {calculado && (
-            <button onClick={() => setCalculado(false)} className="text-[11px] font-bold text-slate-500 hover:text-slate-800 flex items-center transition-colors">
-              <RotateCcw className="w-3 h-3 mr-1" /> Nueva Simulación
+            <button 
+              onClick={() => setCalculado(false)}
+              className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-[11px] font-bold transition-colors flex items-center"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" /> Nueva Amortización
             </button>
           )}
         </div>
 
-        <div className={"grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 " + (calculado ? 'opacity-60 pointer-events-none' : '')}>
-          <div className="col-span-2 md:col-span-1">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Cliente Titular</label>
-            <input type="text" name="cliente" value={form.cliente} onChange={handleChange} placeholder="Nombre del cliente" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:border-blue-500 transition-all font-semibold text-slate-700" />
+        {/* PANEL DE CONFIGURACIÓN */}
+        <div className={"bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all " + (calculado ? "opacity-70 pointer-events-none" : "")}>
+          <div className="bg-slate-800 p-4 border-b border-slate-700">
+            <h2 className="text-xs font-bold text-white flex items-center tracking-widest uppercase">
+              <FileText className="w-4 h-4 mr-2 text-blue-400" /> Datos del Contrato y Abono Extraordinario
+            </h2>
           </div>
-          <div className="col-span-2 md:col-span-1">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Proyecto / Lote</label>
-            <div className="flex gap-1">
-              <input type="text" name="proyecto" value={form.proyecto} onChange={handleChange} className="w-full px-2 py-2 border border-slate-300 rounded-lg text-[10px] outline-none" placeholder="Proyecto" />
-              <input type="text" name="uv" value={form.uv} onChange={handleChange} className="w-12 px-1 py-2 border border-slate-300 rounded-lg text-[10px] text-center outline-none" placeholder="UV" />
-              <input type="text" name="mzn" value={form.mzn} onChange={handleChange} className="w-12 px-1 py-2 border border-slate-300 rounded-lg text-[10px] text-center outline-none" placeholder="MZN" />
-              <input type="text" name="lote" value={form.lote} onChange={handleChange} className="w-12 px-1 py-2 border border-slate-300 rounded-lg text-[10px] text-center outline-none" placeholder="LT" />
+          <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+            
+            <div className="md:col-span-2">
+              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Cliente Titular</label>
+              <input type="text" name="cliente" value={form.cliente} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs outline-none focus:border-blue-500 font-bold text-slate-700 bg-slate-50" />
             </div>
+            
+            <div>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Cuota Total Actual ($)</label>
+              <input type="number" name="cuotaTotalActual" value={form.cuotaTotalActual} onChange={handleChange} placeholder="Ej. 415.76" className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs outline-none focus:border-blue-500 font-black text-slate-800" />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Seguro Mensual ($)</label>
+              <input type="number" name="seguroMensual" value={form.seguroMensual} onChange={handleChange} placeholder="Ej. 23.80" className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs outline-none focus:border-blue-500 font-bold text-slate-800" />
+            </div>
+            
+            <div className="md:col-span-2 bg-blue-50 p-3 rounded-xl border border-blue-200">
+              <label className="block text-[10px] font-black text-blue-700 uppercase mb-1">Saldo Capital a Cancelar (Dato CRM)</label>
+              <input type="number" name="saldoCapital" value={form.saldoCapital} onChange={handleChange} placeholder="Ej. 27130.00" className="w-full px-3 py-2.5 border border-blue-300 rounded-lg text-xs outline-none focus:border-blue-600 font-black text-blue-900 bg-white shadow-inner" />
+            </div>
+
+            <div className="md:col-span-2 bg-emerald-50 p-3 rounded-xl border border-emerald-200">
+              <label className="block text-[10px] font-black text-emerald-700 uppercase mb-1">Monto de Inyección a Capital ($)</label>
+              <input type="number" name="montoAmortizar" value={form.montoAmortizar} onChange={handleChange} placeholder="Ej. 3000.00" className="w-full px-3 py-2.5 border border-emerald-300 rounded-lg text-xs outline-none focus:border-emerald-600 font-black text-emerald-900 bg-white shadow-inner" />
+            </div>
+
           </div>
-          <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Total Contrato ($)</label>
-            <input type="number" name="precioTotal" value={form.precioTotal} onChange={handleChange} placeholder="Valor del contrato" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:border-blue-500 font-black text-slate-800" />
-          </div>
-          <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Cuota Inicial ($)</label>
-            <input type="number" name="cuotaInicial" value={form.cuotaInicial} onChange={handleChange} placeholder="Enganche" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:border-blue-500 font-bold text-slate-800" />
-          </div>
-          <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Plazo (Años)</label>
-            <input type="number" name="plazoAnios" value={form.plazoAnios} onChange={handleChange} placeholder="Años plazo" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:border-blue-500 font-bold text-slate-800" />
-          </div>
-          
-          <div>
-            <label className="block text-[10px] font-bold text-indigo-600 uppercase mb-1">Cuotas Pagadas</label>
-            <input type="number" name="cuotasPagadas" value={form.cuotasPagadas} onChange={handleChange} className="w-full px-3 py-2 border-2 border-indigo-200 bg-indigo-50 rounded-lg text-xs outline-none focus:border-indigo-500 font-black text-indigo-800" placeholder="0 si es nuevo" />
-          </div>
-          <div className="col-span-2 md:col-span-1">
-            <label className="block text-[10px] font-black text-emerald-600 uppercase mb-1">Monto a Amortizar ($)</label>
-            <input type="number" name="montoAmortizar" value={form.montoAmortizar} onChange={handleChange} className="w-full px-3 py-2 border-2 border-emerald-400 bg-emerald-50 rounded-lg text-sm outline-none focus:border-emerald-600 font-black text-emerald-800 shadow-inner" placeholder="Monto extra" />
-          </div>
-          <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Plusvalía (%) [Fija]</label>
-            <input type="text" value={TASA_ANUAL + "%"} readOnly className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-400 font-bold cursor-not-allowed" />
-          </div>
-          <div>
-            <label className="block text-[10px] font-bold text-blue-600 uppercase mb-1">Seguro Mensual ($) [Auto]</label>
-            <input type="text" value={fD(metricasEnVivo.seguroDinamico)} readOnly className="w-full px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-600 font-bold cursor-not-allowed transition-all" />
+
+          <div className="bg-slate-50 p-5 border-t border-slate-100 flex flex-col md:flex-row items-end justify-between gap-4">
+            <div className="w-full md:w-64">
+              <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">Cuotas Ya Pagadas (Opcional)</label>
+              <input type="number" name="cuotasPagadas" value={form.cuotasPagadas} onChange={handleChange} className="w-full px-3 py-3 border border-slate-300 rounded-lg text-sm outline-none focus:border-blue-500 font-bold text-slate-700 bg-white" />
+            </div>
+
+            {!calculado && (
+              <button 
+                onClick={() => {
+                  if(!form.saldoCapital || !form.cuotaTotalActual || !form.montoAmortizar) {
+                    alert("¡Atención! Ingrese la Cuota Actual, el Saldo Capital y el Monto a Amortizar para calcular.");
+                    return;
+                  }
+                  setCalculado(true);
+                  setTabActiva('RESUMEN'); 
+                }}
+                className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-10 py-3.5 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center transition-all shadow-lg hover:shadow-blue-600/30 transform hover:-translate-y-0.5"
+              >
+                <Calculator className="w-5 h-5 mr-2" /> Procesar Amortización
+              </button>
+            )}
           </div>
         </div>
 
-        {!calculado && (
-          <div className="mt-6 flex justify-end">
-            <button 
-              onClick={() => { 
-                if(!form.precioTotal || !form.plazoAnios) {
-                  alert("Por favor, llene Total Contrato y Plazo en Años para procesar.");
-                  return;
-                }
-                setCalculado(true); 
-                setVistaActual('AMORTIZADO'); 
-              }}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center transition-all shadow-lg hover:shadow-blue-600/30 transform hover:-translate-y-0.5"
-            >
-              <PlayCircle className="w-4 h-4 mr-2" /> Procesar Simulación
-            </button>
-          </div>
-        )}
-      </div>
-
-      {calculado && (
-        <div className="animate-in slide-in-from-bottom-8 duration-700 fade-in flex flex-col xl:flex-row gap-5">
-          
-          <div className="w-full xl:w-[48%] bg-white border border-slate-200 shadow-xl rounded-xl flex flex-col overflow-hidden">
-            <div className="bg-slate-50 border-b border-slate-200 p-3 flex justify-between items-center">
-              <div className="flex gap-2">
+        {/* ================= RESULTADOS (BENTO UI) ================= */}
+        {calculado && (
+          <div className="animate-in slide-in-from-bottom-8 duration-500 fade-in bg-white border border-slate-200 shadow-xl rounded-2xl overflow-hidden">
+            
+            <div className="flex border-b border-slate-200 bg-slate-50 px-2 pt-2 justify-between items-center pr-4">
+              <div className="flex">
                 <button 
-                  onClick={() => setVistaActual('ORIGINAL')}
-                  className={"px-4 py-1.5 rounded-lg text-[10px] font-bold transition-all " + (vistaActual === 'ORIGINAL' ? 'bg-slate-800 text-white shadow-md' : 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-100')}
+                  onClick={() => setTabActiva('RESUMEN')}
+                  className={"px-6 py-3 text-[11px] uppercase tracking-wider font-black rounded-t-lg transition-colors " + (tabActiva === 'RESUMEN' ? 'bg-white text-blue-600 border-t-2 border-blue-600 shadow-[0_-2px_10px_rgba(0,0,0,0.03)]' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100')}
                 >
-                  Plan Original
+                  Resumen Estratégico
                 </button>
                 <button 
-                  onClick={() => setVistaActual('AMORTIZADO')}
-                  className={"px-4 py-1.5 rounded-lg text-[10px] font-bold transition-all " + (vistaActual === 'AMORTIZADO' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-100')}
+                  onClick={() => setTabActiva('TABLA')}
+                  className={"px-6 py-3 text-[11px] uppercase tracking-wider font-black rounded-t-lg transition-colors " + (tabActiva === 'TABLA' ? 'bg-white text-blue-600 border-t-2 border-blue-600 shadow-[0_-2px_10px_rgba(0,0,0,0.03)]' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100')}
                 >
-                  Plan Amortizado
+                  Nuevo Plan de Pagos
                 </button>
               </div>
               
-              <button 
-                onClick={() => setOcultarDetalles(!ocultarDetalles)}
-                className="flex items-center text-[10px] font-bold text-slate-500 hover:text-slate-800 transition-colors bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm"
-              >
-                {ocultarDetalles ? <Eye className="w-3.5 h-3.5 mr-1.5" /> : <EyeOff className="w-3.5 h-3.5 mr-1.5" />}
-                {ocultarDetalles ? 'Mostrar Interés/Seguro' : 'Ocultar al Cliente'}
-              </button>
+              {tabActiva === 'TABLA' && (
+                <button 
+                  onClick={() => setOcultarDetalles(!ocultarDetalles)}
+                  className="flex items-center text-[10px] font-bold text-slate-500 hover:text-slate-800 transition-colors bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm"
+                >
+                  {ocultarDetalles ? <Eye className="w-3.5 h-3.5 mr-1.5" /> : <EyeOff className="w-3.5 h-3.5 mr-1.5" />}
+                  {ocultarDetalles ? 'Mostrar Interés/Seguro' : 'Vista Simple Cliente'}
+                </button>
+              )}
             </div>
-            
-            <div className="overflow-auto max-h-[750px]">
-              <table className="w-full border-collapse text-[10px]">
-                <thead className="bg-white sticky top-0 shadow-[0_1px_3px_rgba(0,0,0,0.05)] z-10">
-                  <tr>
-                    <th className="p-2 border-b border-slate-200 font-bold text-slate-500 text-center uppercase tracking-wider">Período</th>
-                    <th className="p-2 border-b border-slate-200 font-bold text-slate-500 text-right uppercase tracking-wider">Capital</th>
-                    {!ocultarDetalles && <th className="p-2 border-b border-slate-200 font-bold text-slate-500 text-right uppercase tracking-wider bg-slate-50/50">Plusvalía</th>}
-                    {!ocultarDetalles && <th className="p-2 border-b border-slate-200 font-bold text-slate-500 text-right uppercase tracking-wider bg-slate-50/50">Cuota</th>}
-                    {!ocultarDetalles && <th className="p-2 border-b border-slate-200 font-bold text-slate-500 text-right uppercase tracking-wider bg-slate-50/50">Seguro</th>}
-                    <th className="p-2 border-b border-slate-200 font-black text-slate-800 text-right uppercase tracking-wider bg-slate-50">Cuota Mes</th>
-                    <th className="p-2 border-b border-slate-200 font-bold text-slate-500 text-right uppercase tracking-wider">Deuda Total</th>
-                    <th className="p-2 border-b border-slate-200 font-bold text-slate-500 text-center uppercase tracking-wider">Pagada</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b border-slate-100 hover:bg-slate-50 text-slate-700">
-                    <td className="p-2 text-center text-slate-400">0</td>
-                    <td className="p-2 text-right">{fD(form.cuotaInicial)}</td>
-                    {!ocultarDetalles && <td className="p-2 text-right bg-slate-50/30">{fD(0)}</td>}
-                    {!ocultarDetalles && <td className="p-2 text-right bg-slate-50/30">{fD(0)}</td>}
-                    {!ocultarDetalles && <td className="p-2 text-right bg-slate-50/30">{fD(0)}</td>}
-                    <td className="p-2 text-right font-bold bg-slate-50/50">{fD(form.cuotaInicial)}</td>
-                    <td className="p-2 text-right font-medium">{fD(calculos.Total_Cuotas_Original)}</td>
-                    <td className="p-2 text-center text-emerald-500 font-bold">SI</td>
-                  </tr>
 
-                  {tablaActiva.map((row, idx) => {
-                    if (row.esAbono) {
-                      return (
-                        <tr key={"abono"+idx} className="bg-emerald-50/80 border-y-2 border-emerald-200 shadow-sm relative z-0">
-                          <td className="p-2 text-center font-black text-emerald-700">{row.periodo}</td>
-                          <td className="p-2 text-right font-black text-emerald-700">{fD(row.capital)}</td>
-                          {!ocultarDetalles && <td className="p-2 text-center text-emerald-600/50 text-[8px] uppercase tracking-widest" colSpan="3">Abono a Capital</td>}
-                          <td className="p-2 text-right font-black text-emerald-700">{fD(row.capital)}</td>
-                          <td className="p-2 text-right font-black text-blue-700">{fD(row.balance)}</td>
-                          <td className="p-2 text-center font-bold text-emerald-600">SI</td>
+            <div className="p-6">
+              
+              {tabActiva === 'RESUMEN' && (
+                <div className="animate-in fade-in duration-300">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    {/* BENTO: IMPACTO DE AMORTIZACIÓN */}
+                    <div className="md:col-span-2 bg-gradient-to-br from-emerald-600 to-teal-800 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden flex flex-col justify-center transform transition-transform hover:scale-[1.01]">
+                        <div className="absolute -right-10 -top-10 opacity-10">
+                            <TrendingDown className="w-48 h-48" />
+                        </div>
+                        <h3 className="text-[11px] text-emerald-100 font-black uppercase tracking-widest mb-2">Impacto Total del Abono Extraordinario</h3>
+                        <div className="flex items-end gap-4 mb-4">
+                            <span className="text-5xl font-black drop-shadow-md">{fD(calculos.Ahorro_Total)}</span>
+                            <span className="text-sm font-medium text-emerald-200 mb-1">Ahorro en Intereses Futuros</span>
+                        </div>
+                        <div className="inline-flex items-center bg-white/20 px-4 py-2.5 rounded-lg w-max backdrop-blur-sm border border-white/20">
+                            <Clock className="w-5 h-5 mr-2 text-emerald-100" />
+                            <span className="font-bold text-sm tracking-wide">¡El cliente se ha ahorrado <strong className="text-xl mx-1">{calculos.Meses_Ahorrados}</strong> meses de tiempo!</span>
+                        </div>
+                    </div>
+
+                    {/* BENTO: MÉTRICAS COMPARATIVAS */}
+                    <div className="space-y-4">
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 shadow-sm relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-1.5 h-full bg-blue-500"></div>
+                            <span className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nueva Deuda Futura Total</span>
+                            <span className="block text-2xl font-black text-slate-800">{fD(calculos.Suma_Amortizada)}</span>
+                            <span className="block text-[10px] font-bold text-slate-400 mt-2 border-t border-slate-200 pt-2">Deuda Original Proyectada: {fD(calculos.Suma_Original)}</span>
+                        </div>
+                        
+                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 shadow-sm relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-1.5 h-full bg-blue-800"></div>
+                            <span className="block text-[10px] font-bold text-blue-700 uppercase mb-1">Nuevo Plazo Restante</span>
+                            <span className="block text-2xl font-black text-blue-900">{calculos.cuotas_nuevas} Meses</span>
+                            <span className="block text-[10px] font-bold text-blue-500 mt-2 border-t border-blue-200 pt-2">Plazo Original Restante: {calculos.cuotas_originales} Meses</span>
+                        </div>
+
+                        <div className="bg-slate-900 rounded-xl p-4 shadow-sm flex items-center justify-between text-white">
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Última Cuota<br/>a Pagar:</span>
+                            <span className="text-xl font-black text-emerald-400">{fD(calculos.ultimaCuota)}</span>
+                        </div>
+                    </div>
+
+                  </div>
+                </div>
+              )}
+
+              {/* TABLA 100% WIDTH - FULL PROTAGONISMO */}
+              {tabActiva === 'TABLA' && (
+                <div className="animate-in fade-in duration-300 overflow-hidden border border-slate-200 rounded-xl w-full">
+                  <div className="overflow-auto max-h-[700px] w-full">
+                    <table className="w-full border-collapse text-[11px]">
+                      <thead className="bg-slate-100 sticky top-0 shadow-sm z-10">
+                        <tr>
+                          <th className="p-3 border-b border-r border-slate-200 font-bold text-slate-800 text-center uppercase tracking-wider">PERÍODO</th>
+                          <th className="p-3 border-b border-r border-slate-200 font-bold text-slate-800 text-right uppercase tracking-wider">CAPITAL</th>
+                          {!ocultarDetalles && <th className="p-3 border-b border-r border-slate-200 font-bold text-slate-800 text-right uppercase tracking-wider bg-slate-50">PLUSVALÍA</th>}
+                          {!ocultarDetalles && <th className="p-3 border-b border-r border-slate-200 font-bold text-slate-800 text-right uppercase tracking-wider bg-slate-50">CUOTA PURA</th>}
+                          {!ocultarDetalles && <th className="p-3 border-b border-r border-slate-200 font-bold text-slate-800 text-right uppercase tracking-wider bg-slate-50">SEGURO</th>}
+                          <th className="p-3 border-b border-r border-slate-200 font-black text-blue-700 text-right uppercase tracking-wider">TOTAL PAGO</th>
+                          <th className="p-3 border-b border-r border-slate-200 font-bold text-slate-800 text-right uppercase tracking-wider">BALANCE PRINCIPAL</th>
+                          <th className="p-3 border-b border-slate-200 font-bold text-slate-800 text-center uppercase tracking-wider">PAGADA</th>
                         </tr>
-                      );
-                    }
+                      </thead>
+                      <tbody>
+                        {calculos.tabla.map((row, idx) => {
+                          // RENDERIZADO ESPECIAL PARA LA FILA DE ABONO
+                          if (row.esAbono) {
+                            return (
+                              <tr key={"abono-"+idx} className="bg-emerald-50/90 border-y-2 border-emerald-300 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] relative z-0">
+                                <td className="p-3 border-r border-emerald-100 text-center font-black text-emerald-800">{row.periodo}</td>
+                                <td className="p-3 border-r border-emerald-100 text-right font-black text-emerald-800">{fD(row.capital)}</td>
+                                {!ocultarDetalles && <td className="p-3 border-r border-emerald-100 text-center text-emerald-600/70 font-black text-[9px] uppercase tracking-widest" colSpan="3">Abono Extraordinario a Capital</td>}
+                                <td className="p-3 border-r border-emerald-100 text-right font-black text-emerald-800">{fD(row.pagoTotal)}</td>
+                                <td className="p-3 border-r border-emerald-100 text-right font-black text-blue-800 bg-white/40">{fD(row.balance)}</td>
+                                <td className="p-3 text-center font-black text-emerald-600">SI</td>
+                              </tr>
+                            );
+                          }
 
-                    const isPagada = row.pagada === 'SI';
-                    return (
-                      <tr key={idx} className={"border-b border-slate-50 hover:bg-slate-50 transition-colors " + (isPagada ? 'text-slate-400 opacity-80' : 'text-slate-700')}>
-                        <td className="p-2 text-center">{row.periodo}</td>
-                        <td className="p-2 text-right">{fD(row.capital)}</td>
-                        {!ocultarDetalles && <td className="p-2 text-right bg-slate-50/30">{fD(row.plusvalia)}</td>}
-                        {!ocultarDetalles && <td className="p-2 text-right bg-slate-50/30">{fD(row.cuotaBase)}</td>}
-                        {!ocultarDetalles && <td className="p-2 text-right bg-slate-50/30">{fD(row.seguro)}</td>}
-                        <td className="p-2 text-right font-bold bg-slate-50/50 text-slate-800">{fD(row.pagoTotal)}</td>
-                        <td className="p-2 text-right">{fD(row.balance)}</td>
-                        <td className={"p-2 text-center font-bold " + (isPagada ? 'text-emerald-500' : 'text-slate-300')}>{row.pagada}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div className="w-full xl:w-[52%] flex flex-col space-y-4">
-            
-            {vistaActual === 'AMORTIZADO' && parseFloat(form.montoAmortizar) > 0 && (
-              <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 rounded-xl p-5 text-white shadow-xl flex items-center justify-between transform transition-all hover:scale-[1.01]">
-                <div className="flex items-center">
-                  <div className="bg-white/20 p-3 rounded-full mr-4"><Clock className="w-6 h-6 text-white" /></div>
-                  <div>
-                    <h3 className="text-[11px] font-black uppercase tracking-widest text-emerald-100 mb-1">Impacto de la Amortización</h3>
-                    <p className="text-sm font-medium leading-tight">
-                      El cliente se acaba de ahorrar <strong className="text-lg font-black bg-white/20 px-2 py-0.5 rounded mx-1">{calculos.mesesAhorrados} meses</strong> de tiempo<br/>
-                      y un total de <strong className="text-lg font-black bg-white/20 px-2 py-0.5 rounded mx-1">{fD(calculos.ahorroIntereses)}</strong> en deudas futuras.
-                    </p>
+                          return (
+                            <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50 transition-colors text-slate-700">
+                              <td className="p-3 border-r border-slate-100 text-center font-black text-slate-800">{row.periodo}</td>
+                              <td className="p-3 border-r border-slate-100 text-right">{fD(row.capital)}</td>
+                              {!ocultarDetalles && <td className="p-3 border-r border-slate-100 text-right bg-slate-50/50">{fD(row.plusvalia)}</td>}
+                              {!ocultarDetalles && <td className="p-3 border-r border-slate-100 text-right bg-slate-50/50">{fD(row.cuotaBase)}</td>}
+                              {!ocultarDetalles && <td className="p-3 border-r border-slate-100 text-right bg-slate-50/50">{fD(row.seguro)}</td>}
+                              <td className="p-3 border-r border-slate-100 text-right font-black text-slate-800">{fD(row.pagoTotal)}</td>
+                              <td className="p-3 border-r border-slate-100 text-right font-medium">{fD(row.balance)}</td>
+                              <td className="p-3 text-center font-bold text-slate-300">{row.pagada}</td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            <div className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden flex-1 flex flex-col">
-              <div className="flex px-4 border-b border-slate-200 overflow-x-auto whitespace-nowrap pt-4 bg-slate-50">
-                <span className="px-3 py-2 text-slate-800 font-bold border-b-2 border-slate-800 text-[11px] cursor-pointer">Básicos y Plan de Pagos</span>
-                <span className="px-3 py-2 text-blue-600 font-medium text-[11px] hover:text-blue-800 cursor-not-allowed opacity-50">Doc. Adjuntos</span>
-                <span className="px-3 py-2 text-blue-600 font-medium text-[11px] hover:text-blue-800 cursor-not-allowed opacity-50">Histórico de Pagos</span>
-              </div>
-
-              <div className="p-6 overflow-auto">
-                <div className="grid grid-cols-2 gap-x-10 gap-y-6">
-                  
-                  <div>
-                    <h4 className="font-bold text-slate-800 border-b-2 border-slate-100 pb-2 mb-3 text-[11px] uppercase tracking-wider">Básicos de Contrato</h4>
-                    <div className="space-y-2.5 text-[10px]">
-                      <div className="flex justify-between border-b border-slate-50 pb-1"><span className="text-slate-500 font-medium w-1/3">Cliente(s):</span><span className="text-blue-600 font-bold w-2/3 uppercase text-right">{form.cliente || '---'}</span></div>
-                      <div className="flex justify-between border-b border-slate-50 pb-1"><span className="text-slate-500 font-medium w-1/3">Realizado Por:</span><span className="text-slate-800 w-2/3 uppercase text-right">ADMINISTRADOR CRM</span></div>
-                      <div className="flex justify-between border-b border-slate-50 pb-1"><span className="text-slate-500 font-medium w-1/3">Fecha Contrato:</span><span className="text-slate-800 w-2/3 text-right">HOY</span></div>
-                      <div className="flex justify-between border-b border-slate-50 pb-1"><span className="text-slate-500 font-medium w-1/3">Proyecto:</span><span className="text-slate-800 w-2/3 uppercase text-right">{form.proyecto || '---'}</span></div>
-                      <div className="flex justify-between border-b border-slate-50 pb-1"><span className="text-slate-500 font-medium w-1/3">Lote:</span><span className="text-slate-800 w-2/3 uppercase text-right">UV: {form.uv} MZN: {form.mzn} LT: {form.lote}</span></div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-bold text-slate-800 border-b-2 border-slate-100 pb-2 mb-3 text-[11px] uppercase tracking-wider">Financiero de Contrato</h4>
-                    <div className="space-y-2.5 text-[10px]">
-                      <div className="flex justify-between border-b border-slate-50 pb-1"><span className="text-slate-500 font-medium">Total Contrato:</span><span className="text-slate-800 font-bold">{fD(form.precioTotal)}</span></div>
-                      <div className="flex justify-between border-b border-slate-50 pb-1"><span className="text-slate-500 font-medium">Tipo de Pago:</span><span className="text-slate-800 font-bold">MENSUAL</span></div>
-                      <div className="flex justify-between border-b border-slate-50 pb-1"><span className="text-slate-500 font-medium">Cuota Inicial:</span><span className="text-slate-800 font-bold">{fD(form.cuotaInicial)}</span></div>
-                      <div className="flex justify-between border-b border-slate-50 pb-1"><span className="text-slate-500 font-medium">Cuota Periódica Base:</span><span className="text-slate-800 font-bold">{fD(calculos.Cuota_Total_Mes - calculos.SEGURO_MENSUAL)}</span></div>
-                      <div className="flex justify-between border-b border-slate-50 pb-1"><span className="text-slate-500 font-medium">Cuota Seguro:</span><span className="text-slate-800 font-bold">{fD(calculos.SEGURO_MENSUAL)}</span></div>
-                      <div className="flex justify-between border-b border-slate-50 pb-1"><span className="text-slate-500 font-medium">Cuota Total Mensual:</span><span className="text-slate-800 font-black text-blue-700">{fD(calculos.Cuota_Total_Mes)}</span></div>
-                      <div className="flex justify-between border-b border-slate-50 pb-1"><span className="text-slate-500 font-medium">Plazo Original (Años):</span><span className="text-slate-800 font-bold">{form.plazoAnios}</span></div>
-                      <div className="flex justify-between border-b border-slate-50 pb-1"><span className="text-slate-500 font-medium">Cuotas Pagadas:</span><span className="text-slate-800 font-bold">{form.cuotasPagadas || 0}</span></div>
-                    </div>
-                  </div>
-
-                  {/* ================= BENTO UI PARA RESULTADOS DINÁMICOS ================= */}
-                  <div className="col-span-2 mt-2 pt-4 border-t border-slate-100">
-                    <div className="flex justify-between items-center mb-4">
-                      <h4 className="font-black text-slate-800 text-[12px] uppercase tracking-wider flex items-center">
-                        <div className="w-1.5 h-4 bg-blue-600 rounded-full mr-2"></div>
-                        Proyección {vistaActual === 'ORIGINAL' ? 'Original' : 'Amortizada'}
-                      </h4>
-                      {vistaActual === 'AMORTIZADO' && (
-                        <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded text-[9px] font-black uppercase tracking-widest shadow-sm">
-                          Calculado al Mes {form.cuotasPagadas || 0}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {/* Cajas Izquierdas */}
-                      <div className="md:col-span-2 grid grid-cols-2 gap-3">
-                        <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.05)] hover:shadow-md transition-all">
-                          <span className="block text-slate-400 text-[9px] font-bold uppercase tracking-wider mb-1">Deuda Futura Proyectada</span>
-                          <span className="block text-slate-800 font-black text-sm">
-                            {vistaActual === 'ORIGINAL' ? fD(calculos.Total_Deuda_Original_Futura) : fD(calculos.Nueva_Deuda_Total)}
-                          </span>
-                        </div>
-                        <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.05)] hover:shadow-md transition-all">
-                          <span className="block text-slate-400 text-[9px] font-bold uppercase tracking-wider mb-1">Capital Puro (PV)</span>
-                          <span className="block text-slate-600 font-bold text-sm">
-                            {vistaActual === 'ORIGINAL' ? fD(calculos.Capital_Verdadero) : "Dinámico en Tabla"}
-                          </span>
-                        </div>
-                        <div className="bg-white border-l-4 border-blue-500 rounded-r-xl p-3 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.08)]">
-                          <span className="block text-slate-400 text-[9px] font-bold uppercase tracking-wider mb-1">Saldo Capital a Cancelar</span>
-                          <span className="block text-blue-700 font-black text-sm">
-                            {vistaActual === 'ORIGINAL' ? fD(calculos.Saldo_Capital_Original) : fD(calculos.Saldo_Capital_Amortizado)}
-                          </span>
-                        </div>
-                        <div className="bg-white border-l-4 border-amber-500 rounded-r-xl p-3 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.08)]">
-                          <span className="block text-slate-400 text-[9px] font-bold uppercase tracking-wider mb-1">Saldo Plusvalía a Cancelar</span>
-                          <span className="block text-amber-600 font-black text-sm">
-                            {vistaActual === 'ORIGINAL' ? fD(calculos.Saldo_Plusvalia_Original) : fD(calculos.Saldo_Plusvalia_Amortizado)}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Caja Derecha: Cuotas Restantes Destacadas */}
-                      <div className="bg-gradient-to-br from-blue-700 to-indigo-800 rounded-xl p-4 flex flex-col justify-center items-center shadow-lg transform hover:scale-[1.03] transition-transform duration-300">
-                        <span className="text-blue-200 text-[9px] font-bold uppercase tracking-widest text-center mb-1">
-                          Cuotas Restantes
-                        </span>
-                        <span className="text-white font-black text-5xl drop-shadow-md tracking-tighter">
-                          {vistaActual === 'ORIGINAL' ? calculos.n_meses - parseInt(form.cuotasPagadas || 0) : calculos.cuotasRestantes}
-                        </span>
-                        <span className="text-blue-100 text-[9px] mt-1 font-medium bg-blue-900/40 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                          Meses a pagar
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
             </div>
-
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
