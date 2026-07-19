@@ -23,7 +23,7 @@ export default function RecalcularPlan() {
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
-  // ================= 2. MOTOR MATEMÁTICO (CLON EXACTO DE CELINA) =================
+  // ================= 2. MOTOR MATEMÁTICO (CLON 100% EXACTO DEL CRM) =================
   const calculos = useMemo(() => {
     const P_total_Orig = parseFloat(form.precioTotalOriginal) || 0;
     const Enganche = parseFloat(form.cuotaInicial) || 0;
@@ -33,8 +33,6 @@ export default function RecalcularPlan() {
     const n_nuevo_total = parseInt(form.nuevoPlazoMeses) || 168;
 
     const Cuota_Total_Orig = n_orig > 0 ? (P_total_Orig - Enganche) / n_orig : 0; 
-    
-    // CAPITAL EXACTO DEL CRM
     let Capital_Actual = parseFloat(form.saldoCapital);
     
     if (!Capital_Actual) {
@@ -51,8 +49,9 @@ export default function RecalcularPlan() {
     
     if (cuotasRestantesNuevas > 0 && Capital_Actual > 0) {
       Cuota_Pura_Nueva = Capital_Actual * (TASA_MENSUAL * Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas)) / (Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas) - 1);
-      // REGLA 1: Redondeo bancario a 2 decimales
-      Cuota_Pura_Nueva = Math.round(Cuota_Pura_Nueva * 100) / 100; 
+      
+      // EL SECRETO REVELADO: El sistema de Celina trunca/elimina los decimales de la Cuota Pura (ej. de 337.06 a 337.00)
+      Cuota_Pura_Nueva = Math.floor(Cuota_Pura_Nueva); 
     }
     
     const Cuota_Total_Nueva = Cuota_Pura_Nueva + Seguro;
@@ -61,16 +60,16 @@ export default function RecalcularPlan() {
     let CapTemp = Capital_Actual;
     let Suma_Absoluta_Pagos = 0;
 
-    // GENERACIÓN DE TABLA PASO A PASO
     for (let i = 1; i <= cuotasRestantesNuevas; i++) {
       let interes = Math.round(CapTemp * TASA_MENSUAL * 100) / 100;
       let capital = Math.round((Cuota_Pura_Nueva - interes) * 100) / 100;
       let seguroAplicado = Seguro;
       
-      // REGLA 2: Ajuste de última cuota
+      // REGLA: La última cuota cobra todo el saldo remanente y anula el seguro para cuadrar al centavo
       if (i === cuotasRestantesNuevas) {
         capital = CapTemp;
         interes = Math.round(CapTemp * TASA_MENSUAL * 100) / 100; 
+        seguroAplicado = 0; 
       }
       
       CapTemp -= capital;
@@ -83,7 +82,7 @@ export default function RecalcularPlan() {
         periodo: pagadas + i,
         capital: capital,
         plusvalia: interes,
-        cuotaBase: Cuota_Pura_Nueva, // Se mantiene estático como en la imagen
+        cuotaBase: Cuota_Pura_Nueva, 
         seguro: seguroAplicado,
         pagoTotal: pagoMes,
         balance: 0, 
@@ -91,16 +90,11 @@ export default function RecalcularPlan() {
       });
     }
 
-    // REGLA 3: EL SECRETO DEL BALANCE PRINCIPAL
-    // El balance inicial parte de la SUMA EXACTA de todas las cuotas generadas
+    // GENERAR BALANCE PRINCIPAL EXACTO
     let balanceDescendente = Math.round(Suma_Absoluta_Pagos * 100) / 100;
-    
     tabla = tabla.map(row => {
       balanceDescendente -= row.pagoTotal;
-      return { 
-        ...row, 
-        balance: Math.max(0, Math.round(balanceDescendente * 100) / 100) 
-      };
+      return { ...row, balance: Math.max(0, Math.round(balanceDescendente * 100) / 100) };
     });
 
     const Monto_Total_Plan_Pago = Suma_Absoluta_Pagos;
@@ -214,7 +208,7 @@ export default function RecalcularPlan() {
                     return;
                   }
                   setCalculado(true);
-                  setTabActiva('TABLA'); // Mostrar la tabla directo
+                  setTabActiva('TABLA'); 
                 }}
                 className="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-3.5 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center transition-all shadow-lg hover:shadow-emerald-600/30 transform hover:-translate-y-0.5"
               >
@@ -328,7 +322,7 @@ export default function RecalcularPlan() {
                 </div>
               )}
 
-              {/* TABLA 100% WIDTH - SIN CUADRO LATERAL */}
+              {/* TABLA 100% WIDTH - CLONADA EXACTAMENTE */}
               {tabActiva === 'TABLA' && (
                 <div className="animate-in fade-in duration-300 overflow-hidden border border-slate-200 rounded-xl w-full">
                   <div className="overflow-auto max-h-[700px] w-full">
