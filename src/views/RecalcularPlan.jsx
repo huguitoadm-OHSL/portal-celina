@@ -5,11 +5,10 @@ export default function RecalcularPlan() {
   // ================= 1. ESTADO DEL FORMULARIO =================
   const [form, setForm] = useState({
     cliente: '',
-    proyecto: '',
-    uv: '', mzn: '', lote: '',
+    nroContrato: '',
     precioTotalOriginal: '',
     cuotaInicial: '',
-    plazoMesesOriginal: '', // <-- ¡RESTAURADO!
+    plazoMesesOriginal: '',
     seguroMensual: '',
     saldoCapital: '', 
     cuotasPagadas: '0', 
@@ -24,24 +23,36 @@ export default function RecalcularPlan() {
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
-  // ================= 2. MOTOR MATEMÁTICO DE REESTRUCTURACIÓN =================
+  // ================= 2. MOTOR MATEMÁTICO (CLON EXACTO DE CELINA) =================
   const calculos = useMemo(() => {
     const P_total_Orig = parseFloat(form.precioTotalOriginal) || 0;
     const Enganche = parseFloat(form.cuotaInicial) || 0;
-    const Capital_Actual = parseFloat(form.saldoCapital) || 0;
     const Seguro = parseFloat(form.seguroMensual) || 0;
     const pagadas = parseInt(form.cuotasPagadas) || 0;
     const n_orig = parseInt(form.plazoMesesOriginal) || 120;
     const n_nuevo_total = parseInt(form.nuevoPlazoMeses) || 168;
 
-    // Cuota Original de Referencia (Necesita el n_orig para calcularse bien)
     const Cuota_Total_Orig = n_orig > 0 ? (P_total_Orig - Enganche) / n_orig : 0; 
+    
+    // --- INTELIGENCIA DE DEDUCCIÓN DE CAPITAL ---
+    let Capital_Actual = parseFloat(form.saldoCapital);
+    
+    if (!Capital_Actual) {
+      const Cuota_Pura_Orig = Math.max(0, Cuota_Total_Orig - Seguro);
+      let PV_Original = 0;
+      if (TASA_MENSUAL > 0 && n_orig > 0) {
+        PV_Original = Cuota_Pura_Orig * (1 - Math.pow(1 + TASA_MENSUAL, -n_orig)) / TASA_MENSUAL;
+      }
+      // Redondeo inteligente a la decena más cercana para igualar el precio real del lote del CRM
+      Capital_Actual = Math.round(PV_Original / 10) * 10; 
+    }
 
     const cuotasRestantesNuevas = n_nuevo_total - pagadas;
     let Cuota_Pura_Nueva = 0;
     
     if (cuotasRestantesNuevas > 0 && Capital_Actual > 0) {
       Cuota_Pura_Nueva = Capital_Actual * (TASA_MENSUAL * Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas)) / (Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas) - 1);
+      // REGLA DEL SISTEMA: Redondeo a 2 decimales para la cuota fija
       Cuota_Pura_Nueva = Math.round(Cuota_Pura_Nueva * 100) / 100; 
     }
     
@@ -52,25 +63,28 @@ export default function RecalcularPlan() {
     let Total_Nuevo_Financiado = 0;
 
     for (let i = 1; i <= cuotasRestantesNuevas; i++) {
-      let interes = CapTemp * TASA_MENSUAL;
-      let capital = Cuota_Pura_Nueva - interes;
+      let interes = Math.round(CapTemp * TASA_MENSUAL * 100) / 100;
+      let capital = Math.round((Cuota_Pura_Nueva - interes) * 100) / 100;
       let seguroAplicado = Seguro;
       
+      // REGLA DEL SISTEMA: Última cuota ajusta centavos y elimina seguro
       if (i === cuotasRestantesNuevas) {
         capital = CapTemp;
-        interes = CapTemp * TASA_MENSUAL; 
+        interes = Math.round(CapTemp * TASA_MENSUAL * 100) / 100; 
         seguroAplicado = 0; 
       }
       
       CapTemp -= capital;
-      const pagoMes = capital + interes + seguroAplicado;
+      CapTemp = Math.round(CapTemp * 100) / 100;
+
+      const pagoMes = Math.round((capital + interes + seguroAplicado) * 100) / 100;
       Total_Nuevo_Financiado += pagoMes;
 
       tabla.push({
         periodo: pagadas + i,
         capital: capital,
         plusvalia: interes,
-        cuotaBase: capital + interes,
+        cuotaBase: Math.round((capital + interes) * 100) / 100,
         seguro: seguroAplicado,
         pagoTotal: pagoMes,
         balance: 0, 
@@ -78,10 +92,11 @@ export default function RecalcularPlan() {
       });
     }
 
+    // Balance Decreciente exacto (Deuda Total Restante)
     let balanceDescendente = Total_Nuevo_Financiado;
     tabla = tabla.map(row => {
       balanceDescendente -= row.pagoTotal;
-      return { ...row, balance: Math.max(0, balanceDescendente) };
+      return { ...row, balance: Math.max(0, Math.round(balanceDescendente * 100) / 100) };
     });
 
     const Monto_Total_Plan_Pago = Total_Nuevo_Financiado;
@@ -102,6 +117,7 @@ export default function RecalcularPlan() {
     <div className="font-sans bg-[#f0f2f5] min-h-screen p-4 xl:p-8 pb-12">
       
       <div className="max-w-7xl mx-auto space-y-6">
+        
         {/* ENCABEZADO */}
         <div className="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
           <div className="flex items-center">
@@ -123,28 +139,23 @@ export default function RecalcularPlan() {
           )}
         </div>
 
-        {/* PANEL DE CONFIGURACIÓN AMPLIADO */}
+        {/* PANEL DE CONFIGURACIÓN LIMPIO (SIN PROYECTO) */}
         <div className={"bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all " + (calculado ? "opacity-70 pointer-events-none" : "")}>
           <div className="bg-slate-800 p-4 border-b border-slate-700">
             <h2 className="text-xs font-bold text-white flex items-center tracking-widest uppercase">
               <FileText className="w-4 h-4 mr-2 text-blue-400" /> Datos Extraídos del Contrato
             </h2>
           </div>
-          <div className="p-5 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-5 items-start">
+          <div className="p-6 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 items-start">
             
-            <div className="col-span-2">
-              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Cliente</label>
+            <div className="md:col-span-2">
+              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Cliente Titular</label>
               <input type="text" name="cliente" value={form.cliente} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs outline-none focus:border-emerald-500 font-bold text-slate-700 bg-slate-50" />
             </div>
             
-            <div className="col-span-2">
-              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Proyecto / Lote</label>
-              <div className="flex gap-1">
-                <input type="text" name="proyecto" value={form.proyecto} onChange={handleChange} className="w-full px-2 py-2.5 border border-slate-300 rounded-lg text-[10px] outline-none focus:border-emerald-500" placeholder="Proyecto" />
-                <input type="text" name="uv" value={form.uv} onChange={handleChange} className="w-12 px-1 py-2.5 border border-slate-300 rounded-lg text-[10px] text-center outline-none focus:border-emerald-500" placeholder="UV" />
-                <input type="text" name="mzn" value={form.mzn} onChange={handleChange} className="w-12 px-1 py-2.5 border border-slate-300 rounded-lg text-[10px] text-center outline-none focus:border-emerald-500" placeholder="MZN" />
-                <input type="text" name="lote" value={form.lote} onChange={handleChange} className="w-12 px-1 py-2.5 border border-slate-300 rounded-lg text-[10px] text-center outline-none focus:border-emerald-500" placeholder="LT" />
-              </div>
+            <div>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nro Contrato</label>
+              <input type="text" name="nroContrato" value={form.nroContrato} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs outline-none focus:border-emerald-500 font-bold text-slate-700 bg-slate-50" />
             </div>
 
             <div>
@@ -157,7 +168,6 @@ export default function RecalcularPlan() {
               <input type="number" name="cuotaInicial" value={form.cuotaInicial} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs outline-none focus:border-emerald-500 font-bold text-slate-800" />
             </div>
 
-            {/* ¡EL PLAZO ORIGINAL HA VUELTO! */}
             <div>
               <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Plazo (Meses)</label>
               <input type="number" name="plazoMesesOriginal" value={form.plazoMesesOriginal} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs outline-none focus:border-emerald-500 font-bold text-slate-800" />
@@ -168,9 +178,9 @@ export default function RecalcularPlan() {
               <input type="number" name="seguroMensual" value={form.seguroMensual} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs outline-none focus:border-emerald-500 font-bold text-slate-800" />
             </div>
             
-            <div className="col-span-2 lg:col-span-3 bg-blue-50 p-2.5 rounded-lg border border-blue-200 mt-2 lg:mt-0">
-              <label className="block text-[10px] font-black text-blue-700 uppercase mb-1">Saldo Capital a Cancelar (Dato del CRM)</label>
-              <input type="number" name="saldoCapital" value={form.saldoCapital} onChange={handleChange} placeholder="Ej. 27130.00" className="w-full px-3 py-2 border border-blue-300 rounded text-xs outline-none focus:border-blue-600 font-black text-blue-900 bg-white shadow-inner" />
+            <div className="bg-blue-50 p-2.5 rounded-lg border border-blue-200">
+              <label className="block text-[10px] font-black text-blue-700 uppercase mb-1">Saldo Capital a Cancelar</label>
+              <input type="number" name="saldoCapital" value={form.saldoCapital} onChange={handleChange} placeholder="Opcional: Dato exacto del CRM" className="w-full px-3 py-2 border border-blue-300 rounded text-xs outline-none focus:border-blue-600 font-black text-blue-900 bg-white shadow-inner" />
             </div>
 
           </div>
@@ -200,8 +210,8 @@ export default function RecalcularPlan() {
             {!calculado && (
               <button 
                 onClick={() => {
-                  if(!form.saldoCapital || !form.seguroMensual || !form.plazoMesesOriginal) {
-                    alert("Por favor ingrese el Plazo Original, el Saldo Capital y el Seguro para continuar.");
+                  if(!form.precioTotalOriginal || !form.plazoMesesOriginal) {
+                    alert("Por favor ingrese el Total Original y el Plazo Original para continuar.");
                     return;
                   }
                   setCalculado(true);
@@ -362,8 +372,7 @@ export default function RecalcularPlan() {
                       <div className="flex justify-between border-b border-slate-100 pb-1.5"><span className="text-slate-500 font-medium w-1/3">Cliente(s):</span><span className="text-blue-600 font-bold w-2/3 uppercase text-right">{form.cliente || '---'}</span></div>
                       <div className="flex justify-between border-b border-slate-100 pb-1.5"><span className="text-slate-500 font-medium w-1/3">Realizado Por:</span><span className="text-slate-800 w-2/3 uppercase text-right">ADMINISTRADOR CRM</span></div>
                       <div className="flex justify-between border-b border-slate-100 pb-1.5"><span className="text-slate-500 font-medium w-1/3">Fecha Contrato:</span><span className="text-slate-800 w-2/3 text-right">HOY</span></div>
-                      <div className="flex justify-between border-b border-slate-100 pb-1.5"><span className="text-slate-500 font-medium w-1/3">Proyecto:</span><span className="text-slate-800 w-2/3 uppercase text-right">{form.proyecto || '---'}</span></div>
-                      <div className="flex justify-between border-b border-slate-100 pb-1.5"><span className="text-slate-500 font-medium w-1/3">Lote:</span><span className="text-slate-800 w-2/3 uppercase text-right">UV: {form.uv} MZN: {form.mzn} LT: {form.lote}</span></div>
+                      <div className="flex justify-between border-b border-slate-100 pb-1.5"><span className="text-slate-500 font-medium w-1/3">Capital Base:</span><span className="text-slate-800 font-bold w-2/3 uppercase text-right">{fD(calculos.Capital_Actual)}</span></div>
                     </div>
                   </div>
 
