@@ -23,97 +23,87 @@ export default function RecalcularPlan() {
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
-  // ================= 2. MOTOR MATEMÁTICO (CLON BANCARIO 100% EXACTO) =================
+  // ================= 2. MOTOR MATEMÁTICO (CLON 100% EXACTO) =================
   const calculos = useMemo(() => {
     const P_total_Orig = parseFloat(form.precioTotalOriginal) || 0;
     const Enganche = parseFloat(form.cuotaInicial) || 0;
-    const Seguro_Num = parseFloat(form.seguroMensual) || 0;
+    const Seguro = parseFloat(form.seguroMensual) || 0;
     const pagadas = parseInt(form.cuotasPagadas) || 0;
     const n_orig = parseInt(form.plazoMesesOriginal) || 120;
     const n_nuevo_total = parseInt(form.nuevoPlazoMeses) || 168;
 
     const Cuota_Total_Orig = n_orig > 0 ? (P_total_Orig - Enganche) / n_orig : 0; 
-    let Capital_Actual_Num = parseFloat(form.saldoCapital);
     
-    if (!Capital_Actual_Num) {
-      const Cuota_Pura_Orig = Math.max(0, Cuota_Total_Orig - Seguro_Num);
+    // CAPITAL EXACTO DEL CRM
+    let Capital_Actual = parseFloat(form.saldoCapital);
+    
+    if (!Capital_Actual) {
+      const Cuota_Pura_Orig = Math.max(0, Cuota_Total_Orig - Seguro);
       let PV_Original = 0;
       if (TASA_MENSUAL > 0 && n_orig > 0) {
         PV_Original = Cuota_Pura_Orig * (1 - Math.pow(1 + TASA_MENSUAL, -n_orig)) / TASA_MENSUAL;
       }
-      Capital_Actual_Num = Math.round(PV_Original / 10) * 10; 
+      Capital_Actual = Math.round(PV_Original / 10) * 10; 
     }
 
     const cuotasRestantesNuevas = n_nuevo_total - pagadas;
-    
     let Cuota_Pura_Nueva = 0;
-    let Cuota_Total_Nueva = 0;
     
-    if (cuotasRestantesNuevas > 0 && Capital_Actual_Num > 0) {
-      // 1. Calcular Cuota Exacta
-      const Cuota_Pura_Exacta = Capital_Actual_Num * (TASA_MENSUAL * Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas)) / (Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas) - 1);
-      const Cuota_Total_Exacta = Cuota_Pura_Exacta + Seguro_Num;
+    if (cuotasRestantesNuevas > 0 && Capital_Actual > 0) {
+      const pmt_exacto = Capital_Actual * (TASA_MENSUAL * Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas)) / (Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas) - 1);
       
-      // 2. REGLA CELINA: Redondear Cuota Total a la decena de centavos más cercana (Ej: 360.78 -> 360.80)
-      Cuota_Total_Nueva = Math.round(Cuota_Total_Exacta * 10) / 10; 
-      
-      // 3. Obtener Cuota Pura Final basándose en el total redondeado
-      Cuota_Pura_Nueva = Math.round((Cuota_Total_Nueva - Seguro_Num) * 100) / 100;
+      // EL SECRETO MAESTRO: Truncamiento al entero inferior (Math.floor)
+      // Esto fuerza los $337.00 exactos que usa la empresa.
+      Cuota_Pura_Nueva = Math.floor(pmt_exacto); 
     }
-
-    // ================= PROCESAMIENTO EN CENTAVOS (EVITA DERIVA DECIMAL) =================
-    const SeguroCents = Math.round(Seguro_Num * 100);
-    const CuotaPuraCents = Math.round(Cuota_Pura_Nueva * 100);
-    let CapTempCents = Math.round(Capital_Actual_Num * 100);
     
-    let Suma_Absoluta_PagosCents = 0;
+    const Cuota_Total_Nueva = Cuota_Pura_Nueva + Seguro;
+
     let tabla = [];
+    let CapTemp = Capital_Actual;
+    let Suma_Absoluta_Pagos = 0;
 
     for (let i = 1; i <= cuotasRestantesNuevas; i++) {
-      let interesCents = Math.round(CapTempCents * TASA_MENSUAL);
-      let capitalCents = CuotaPuraCents - interesCents;
-      let seguroAplicadoCents = SeguroCents;
+      let interes = Math.round(CapTemp * TASA_MENSUAL * 100) / 100;
+      let capital = Math.round((Cuota_Pura_Nueva - interes) * 100) / 100;
+      let seguroAplicado = Seguro;
       
-      // REGLA: Última Cuota liquida capital restante e INCLUYE el Seguro
+      // REGLA: Última cuota absorbe todo el capital sobrante y recalcula su interés
       if (i === cuotasRestantesNuevas) {
-        capitalCents = CapTempCents; 
-        interesCents = Math.round(CapTempCents * TASA_MENSUAL); 
-        seguroAplicadoCents = SeguroCents; 
+        capital = CapTemp;
+        interes = Math.round(CapTemp * TASA_MENSUAL * 100) / 100; 
+        seguroAplicado = Seguro; // El seguro SÍ se cobra en la última
       }
       
-      CapTempCents -= capitalCents;
-      let pagoMesCents = capitalCents + interesCents + seguroAplicadoCents;
+      CapTemp = Math.round((CapTemp - capital) * 100) / 100;
       
-      Suma_Absoluta_PagosCents += pagoMesCents;
+      let pagoMes = Math.round((capital + interes + seguroAplicado) * 100) / 100;
+      Suma_Absoluta_Pagos = Math.round((Suma_Absoluta_Pagos + pagoMes) * 100) / 100;
 
       tabla.push({
         periodo: pagadas + i,
-        capital: capitalCents / 100,
-        plusvalia: interesCents / 100,
+        capital: capital,
+        plusvalia: interes,
         cuotaBase: Cuota_Pura_Nueva, 
-        seguro: seguroAplicadoCents / 100,
-        pagoTotal: pagoMesCents / 100,
+        seguro: seguroAplicado,
+        pagoTotal: pagoMes,
         balance: 0, 
         pagada: 'NO'
       });
     }
 
-    // CALCULAR BALANCE DECRECIENTE EXACTO
-    let balanceDescendenteCents = Suma_Absoluta_PagosCents;
+    // BALANCE DECRECIENTE EXACTO
+    let balanceDescendente = Suma_Absoluta_Pagos;
     tabla = tabla.map(row => {
-      balanceDescendenteCents -= Math.round(row.pagoTotal * 100);
-      return { 
-        ...row, 
-        balance: Math.max(0, balanceDescendenteCents / 100) 
-      };
+      balanceDescendente = Math.round((balanceDescendente - row.pagoTotal) * 100) / 100;
+      return { ...row, balance: Math.max(0, balanceDescendente) };
     });
 
-    // MÉTIRICAS FINALES
-    const Monto_Total_Plan_Pago = Suma_Absoluta_PagosCents / 100;
-    const Monto_Total_Contrato = Monto_Total_Plan_Pago + Enganche;
+    const Monto_Total_Plan_Pago = Suma_Absoluta_Pagos;
+    const Monto_Total_Contrato = Math.round((Monto_Total_Plan_Pago + Enganche) * 100) / 100;
 
     return {
-      Cuota_Total_Orig, Cuota_Total_Nueva, Seguro: Seguro_Num, Capital_Actual: Capital_Actual_Num,
+      Cuota_Total_Orig, Cuota_Total_Nueva, Seguro, Capital_Actual,
       Monto_Total_Contrato, Monto_Total_Plan_Pago, Enganche,
       n_nuevo_total, cuotasRestantesNuevas, tabla,
       ultimaCuota: tabla.length > 0 ? tabla[tabla.length - 1].pagoTotal : 0
