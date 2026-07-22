@@ -8,10 +8,9 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
   const esAndroid = /Android/i.test(navigator.userAgent);
   const esIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-  // ================= 1. DICCIONARIO DE RUTEO ESTRICTO CON JERARQUÍA =================
+  // ================= 1. DICCIONARIO DE RUTEO ESTRICTO (Intacto) =================
   const MAPA_CORREOS = useMemo(() => [
     {
-      // 🟢 PRIORIDAD MÁXIMA: Recompra (Se coloca primero para evitar colisión con la palabra "código")
       pantallas: ["recompra"],
       contactos: [
         { email: 'cbarretto@celina.com.bo', nombre: 'Ing. Charles Barretto', saludo: 'Estimado Ing. Charles' },
@@ -22,7 +21,6 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       ]
     },
     {
-      // GRUPO 1: Recursos Humanos
       pantallas: ["renuncia", "alta", "crm", "evaluación", "evaluacion", "postulante", "memorándum", "memorandum", "rrhh"],
       contactos: [
         { email: 'uklein@grupopaz.com.bo', nombre: 'Ulrich Klein Montano', saludo: 'Estimado Ulrich' },
@@ -32,7 +30,6 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       ]
     },
     {
-      // GRUPO 2: Validaciones de Llamada y Códigos (Generales)
       pantallas: ["llamada", "validación", "validacion", "código", "codigo", "códigos", "codigos", "pend."],
       contactos: [
         { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' },
@@ -41,7 +38,6 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       ]
     },
     {
-      // GRUPO 3: Gestión Estratégica, Operaciones y Trámites Restantes
       pantallas: ["proyección", "proyeccion", "diaria", "semanal", "seguimiento", "físico", "fisico", "reenvío", "reenvio", "firma", "seguro", "descuento", "campaña", "campana", "inc.", "cuota", "bloqueo", "lote", "liquidación", "liquidacion", "contado", "amortización", "amortizacion", "recalcular", "consolidación", "consolidacion"],
       contactos: [
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
@@ -78,9 +74,12 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     const copiasProps = cc ? cc.split(',').map(s => s.trim()).filter(Boolean) : [];
     return [...new Set([...copiasExtra, ...copiasProps])];
   }, [contactosDisponibles, destinatarioEfectivo, cc]);
-  const ccDinamicoStr = ccDinamicoArray.join(', ');
+  
+  // 🟢 CORRECCIÓN OUTLOOK: Separadores independientes para evitar el bloqueo del Nuevo Outlook
+  const ccOutlookStr = ccDinamicoArray.join(';'); 
+  const ccGmailStr = ccDinamicoArray.join(','); 
 
-  // ================= 2. INYECCIÓN DE TOKENS INTELIGENTES =================
+  // ================= 2. PROCESADOR DE TEXTO (A PRUEBA DE FALLOS) =================
   const procesarTextoMutante = (contenido) => {
     if (!contenido) return '';
     const hora = new Date().getHours();
@@ -90,12 +89,18 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     
     const nombreSaludo = objetoDestinatario ? objetoDestinatario.saludo : 'Estimado/a';
     
-    let modificado = contenido
+    let modificado = contenido;
+
+    // 🟢 CORRECCIÓN GREETING: Cacería agresiva de "Buenas" solitarios heredados de plantillas viejas
+    modificado = modificado.replace(/\bBuenas\b\s+(noches|días|tardes|dias)[^<]*?(?=<br>|<\/?p>|\n|,|$)/gi, `${saludoTiempo} ${nombreSaludo},`);
+    modificado = modificado.replace(/\bBuenas\b\s*?(?=<br>|<\/?p>|\n|,|$)/gi, `${saludoTiempo} ${nombreSaludo},`);
+
+    // Inyección de tokens estándar
+    modificado = modificado
       .replace(/\{\{SALUDO_TIEMPO\}\}/g, saludoTiempo)
       .replace(/\{\{NOMBRE_SUPERVISOR\}\}/g, nombreSaludo);
     
     return modificado
-      .replace(/Buenas\s+(noches|días|tardes)/gi, saludoTiempo)
       .replace(/\[SALUDO_AUTO\]/gi, "")
       .replace(/Estimado\s+Mauricio/gi, nombreSaludo).replace(/Estimado\s+Robert/gi, nombreSaludo)
       .replace(/Estimada\s+Verenice/gi, nombreSaludo).replace(/Estimado\s+Ing\.\s+Charles/gi, nombreSaludo)
@@ -129,7 +134,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     ejecutarFlujoSeguro(() => {
       const dest = encodeURIComponent(destinatarioEfectivo || '');
       const asun = encodeURIComponent(subject || '');
-      const copiasCC = encodeURIComponent(ccDinamicoStr || '');
+      const copiasCC = encodeURIComponent(ccOutlookStr || ''); // <-- Usa Punto y Coma (;) para Outlook
       
       if (esAndroid || esIOS) {
         window.location.href = `ms-outlook://compose?to=${dest}&subject=${asun}&cc=${copiasCC}`;
@@ -145,7 +150,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       const miCorreoAuditoria = "ohsaravia@celina.com.bo";
       const dest = encodeURIComponent(destinatarioEfectivo || '');
       const asun = encodeURIComponent(subject || '');
-      const copiasCC = encodeURIComponent((ccDinamicoStr ? ccDinamicoStr + ', ' : '') + miCorreoAuditoria);
+      const copiasCC = encodeURIComponent((ccGmailStr ? ccGmailStr + ',' : '') + miCorreoAuditoria); // Usa Coma (,) para Gmail
 
       if (esAndroid || esIOS) {
         window.location.href = `googlegmail://co?to=${dest}&subject=${asun}&cc=${copiasCC}`;
