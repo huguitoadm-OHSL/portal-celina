@@ -8,10 +8,11 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
   const esAndroid = /Android/i.test(navigator.userAgent);
   const esIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-  // ================= 1. DICCIONARIO BANCARIO BLINDADO =================
+  // ================= 1. DICCIONARIO DE RUTEO ESTRICTO (Según lineamientos oficiales) =================
   const MAPA_CORREOS = useMemo(() => [
     {
-      pantallas: ["postulante", "capacitación", "capacitacion"], // 🟢 CORRECCIÓN 1: Postulante a Ulrich
+      // GRUPO 1: Recursos Humanos (Renuncia, Alta, Evaluación, Postulante, Memorándum)
+      pantallas: ["renuncia", "alta", "crm", "evaluación", "evaluacion", "postulante", "memorándum", "memorandum", "rrhh"],
       contactos: [
         { email: 'uklein@grupopaz.com.bo', nombre: 'Ulrich Klein Montano', saludo: 'Estimado Ulrich' },
         { email: 'mfroca@celina.com.bo', nombre: 'Maria Fernanda Roca', saludo: 'Estimada Maria Fernanda' },
@@ -20,15 +21,17 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       ]
     },
     {
-      pantallas: ["descuento", "campaña", "campana", "liquidación", "liquidacion"], // 🟢 CORRECCIÓN 2: Descuentos
+      // GRUPO 2: Validaciones de Llamada y Códigos
+      pantallas: ["llamada", "validación", "validacion", "código", "codigo", "códigos", "codigos", "pend."],
       contactos: [
-        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
-        { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' },
-        { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
+        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' },
+        { email: 'omendoza@celina.com.bo', nombre: 'Olivia Mendoza Duran', saludo: 'Estimada Olivia' },
+        { email: 'rmartinez@celina.com.bo', nombre: 'Rodolfo Martínez', saludo: 'Estimado Rodolfo' }
       ]
     },
     {
-      pantallas: ["recompra"], // 🟢 CORRECCIÓN 3: Recompra a Ing. Charles + Equipo
+      // GRUPO 3: Solicitud de Recompra
+      pantallas: ["recompra"],
       contactos: [
         { email: 'cbarretto@celina.com.bo', nombre: 'Ing. Charles Barretto', saludo: 'Estimado Ing. Charles' },
         { email: 'csalvatierra@celina.com.bo', nombre: 'Cinthia Salvatierra', saludo: 'Estimada Cinthia' },
@@ -38,37 +41,8 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       ]
     },
     {
-      pantallas: ["código", "codigo", "códigos", "codigos", "llamada", "referido", "validación", "validacion", "pendiente", "pend."],
-      contactos: [
-        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' },
-        { email: 'omendoza@celina.com.bo', nombre: 'Olivia Mendoza Duran', saludo: 'Estimada Olivia' },
-        { email: 'rmartinez@celina.com.bo', nombre: 'Rodolfo Martínez', saludo: 'Estimado Rodolfo' }
-      ]
-    },
-    {
-      pantallas: ["memorándum", "memorandum", "renuncia", "crm", "evaluación", "evaluacion", "rrhh"],
-      contactos: [
-        { email: 'uklein@grupopaz.com.bo', nombre: 'Ulrich Klein Montano', saludo: 'Estimado Ulrich' },
-        { email: 'mfroca@celina.com.bo', nombre: 'Maria Fernanda Roca', saludo: 'Estimada Maria Fernanda' },
-        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' }
-      ]
-    },
-    {
-      pantallas: ["bloqueo", "lote"],
-      contactos: [
-        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
-        { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' },
-        { email: 'lribera@grupopaz.com.bo', nombre: 'Luis Fernando Ribera', saludo: 'Estimado Luis Fernando' }
-      ]
-    },
-    {
-      pantallas: ["amortización", "amortizacion"],
-      contactos: [
-        { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' }
-      ]
-    },
-    {
-      pantallas: ["cuota", "proyección", "proyeccion", "diaria", "semanal", "inc."],
+      // GRUPO 4: Gestión Estratégica, Operaciones y Trámites Restantes (Grupo Robert Vaca)
+      pantallas: ["proyección", "proyeccion", "diaria", "semanal", "seguimiento", "físico", "fisico", "reenvío", "reenvio", "firma", "seguro", "descuento", "campaña", "campana", "inc.", "cuota", "bloqueo", "lote", "liquidación", "liquidacion", "contado", "amortización", "amortizacion", "recalcular", "consolidación", "consolidacion"],
       contactos: [
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
         { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
@@ -76,11 +50,13 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     }
   ], []);
 
+  // Respaldo de seguridad por si alguna pantalla no coincide con ningún token
   const RESPALDO = useMemo(() => [
-    { email: 'uklein@grupopaz.com.bo', nombre: 'Ulrich Klein Montano', saludo: 'Estimado Ulrich' },
-    { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' }
+    { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
+    { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
   ], []);
 
+  // Lógica de detección de grupo
   const contactosDisponibles = useMemo(() => {
     const contextoTotal = [title, subject].join(" ").toLowerCase();
     for (const grupo of MAPA_CORREOS) {
@@ -89,6 +65,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     return RESPALDO;
   }, [title, subject, MAPA_CORREOS, RESPALDO]);
 
+  // El primer contacto del arreglo SIEMPRE es el "PARA" (Destinatario)
   const contactoSeleccionado = contactosDisponibles.find(c => c.email === supervisorDestino);
   const destinatarioEfectivo = contactoSeleccionado ? contactoSeleccionado.email : contactosDisponibles[0].email;
   const objetoDestinatario = contactoSeleccionado || contactosDisponibles[0];
@@ -99,7 +76,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     }
   }, [destinatarioEfectivo, supervisorDestino, setSupervisorDestino]);
 
-  // Construcción de la lista CC
+  // Todos los contactos restantes del arreglo pasan automáticamente a la lista "CC"
   const ccDinamicoArray = useMemo(() => {
     const copiasExtra = contactosDisponibles.filter(c => c.email !== destinatarioEfectivo).map(c => c.email);
     const copiasProps = cc ? cc.split(',').map(s => s.trim()).filter(Boolean) : [];
@@ -107,7 +84,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
   }, [contactosDisponibles, destinatarioEfectivo, cc]);
   const ccDinamicoStr = ccDinamicoArray.join(', ');
 
-  // ================= 2. MOTOR DE TOKENS (NUEVA ARQUITECTURA) =================
+  // ================= 2. INYECCIÓN DE TOKENS INTELIGENTES =================
   const procesarTextoMutante = (contenido) => {
     if (!contenido) return '';
     const hora = new Date().getHours();
@@ -117,7 +94,6 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     
     const nombreSaludo = objetoDestinatario ? objetoDestinatario.saludo : 'Estimado/a';
     
-    // Inyección Perfecta de Tokens
     let modificado = contenido
       .replace(/\{\{SALUDO_TIEMPO\}\}/g, saludoTiempo)
       .replace(/\{\{NOMBRE_SUPERVISOR\}\}/g, nombreSaludo);
@@ -212,7 +188,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
           </span>
         </div>
 
-        {/* SELECTOR DE DESTINATARIO */}
+        {/* SELECTOR DE DESTINATARIO (To) */}
         <div className="mb-4 space-y-1.5">
           <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider pl-1">Enviar A (Destinatario):</label>
           <div className="relative group">
@@ -229,7 +205,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
           </div>
         </div>
 
-        {/* PILLS DE COPIA (DISEÑO CLASE MUNDIAL) */}
+        {/* PILLS DE COPIA (CC) */}
         <div className="mb-5 space-y-1.5">
           <label className="flex items-center text-[10px] font-black text-slate-400 uppercase tracking-wider pl-1">
             <Users className="w-3 h-3 mr-1" /> En Copia Oculta (CC):
