@@ -8,7 +8,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
   const esAndroid = /Android/i.test(navigator.userAgent);
   const esIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-  // ================= 1. DICCIONARIO DE RUTEO ESTRICTO (Intacto) =================
+  // ================= 1. DICCIONARIO DE RUTEO ESTRICTO (Intacto según imágenes) =================
   const MAPA_CORREOS = useMemo(() => [
     {
       pantallas: ["recompra"],
@@ -75,39 +75,43 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     return [...new Set([...copiasExtra, ...copiasProps])];
   }, [contactosDisponibles, destinatarioEfectivo, cc]);
   
-  // 🟢 CORRECCIÓN OUTLOOK: Separadores independientes para evitar el bloqueo del Nuevo Outlook
+  // Separadores independientes para garantizar compatibilidad total
   const ccOutlookStr = ccDinamicoArray.join(';'); 
   const ccGmailStr = ccDinamicoArray.join(','); 
 
-  // ================= 2. PROCESADOR DE TEXTO (A PRUEBA DE FALLOS) =================
+  // ================= 2. PROCESADOR DE TEXTO MUTANTE (SÚPER MEJORADO) =================
   const procesarTextoMutante = (contenido) => {
     if (!contenido) return '';
+    
+    // 1. Detección de la hora para el saludo dinámico
     const hora = new Date().getHours();
     let saludoTiempo = "Buenas noches";
     if (hora >= 5 && hora < 12) saludoTiempo = "Buenos días";
     if (hora >= 12 && hora < 19) saludoTiempo = "Buenas tardes";
     
+    // 2. Extraer el nombre correcto del destinatario seleccionado
     const nombreSaludo = objetoDestinatario ? objetoDestinatario.saludo : 'Estimado/a';
     
     let modificado = contenido;
 
-    // 🟢 CORRECCIÓN GREETING: Cacería agresiva de "Buenas" solitarios heredados de plantillas viejas
-    modificado = modificado.replace(/\bBuenas\b\s+(noches|días|tardes|dias)[^<]*?(?=<br>|<\/?p>|\n|,|$)/gi, `${saludoTiempo} ${nombreSaludo},`);
-    modificado = modificado.replace(/\bBuenas\b\s*?(?=<br>|<\/?p>|\n|,|$)/gi, `${saludoTiempo} ${nombreSaludo},`);
-
-    // Inyección de tokens estándar
-    modificado = modificado
-      .replace(/\{\{SALUDO_TIEMPO\}\}/g, saludoTiempo)
-      .replace(/\{\{NOMBRE_SUPERVISOR\}\}/g, nombreSaludo);
+    // 3. LIMPIEZA PREVIA: Destruimos cualquier token o nombre antiguo para evitar duplicados
+    modificado = modificado.replace(/\{\{SALUDO_TIEMPO\}\}/gi, "Buenas"); 
+    modificado = modificado.replace(/\{\{NOMBRE_SUPERVISOR\}\}/gi, "");
+    modificado = modificado.replace(/\[SALUDO_AUTO\]/gi, "");
     
-    return modificado
-      .replace(/\[SALUDO_AUTO\]/gi, "")
-      .replace(/Estimado\s+Mauricio/gi, nombreSaludo).replace(/Estimado\s+Robert/gi, nombreSaludo)
-      .replace(/Estimada\s+Verenice/gi, nombreSaludo).replace(/Estimado\s+Ing\.\s+Charles/gi, nombreSaludo)
-      .replace(/Estimada\s+Cinthia/gi, nombreSaludo).replace(/Estimado\s+Enrique/gi, nombreSaludo)
-      .replace(/Estimado\s+Luis\s+Fernando/gi, nombreSaludo).replace(/Estimada\s+Olivia/gi, nombreSaludo)
-      .replace(/Estimado\s+Rodolfo/gi, nombreSaludo).replace(/Estimado\s+Alex/gi, nombreSaludo)
-      .replace(/Estimado\s+Ulrich/gi, nombreSaludo).replace(/Estimada\s+Maria\s+Fernanda/gi, nombreSaludo);
+    const nombresQuemados = /Estimad[oa]\s+(Mauricio|Robert|Verenice|Ing\.\s+Charles|Cinthia|Enrique|Luis\s+Fernando|Olivia|Rodolfo|Alex|Ulrich|Maria\s+Fernanda),?/gi;
+    modificado = modificado.replace(nombresQuemados, '');
+
+    // 4. CACERÍA DEL "BUENAS" FANTASMA: 
+    // Buscamos "Buenas", "Buenos días", "Buenas tardes" solos o acompañados y los forzamos
+    // a convertirse en el bloque perfecto: "Buenas tardes Estimado Robert,"
+    modificado = modificado.replace(/\bBuen(?:os|as)\s*(días|dias|tardes|noches)?\b/gi, `${saludoTiempo} ${nombreSaludo},`);
+
+    // 5. Limpieza estética final (por si quedaron comas sueltas de la limpieza)
+    modificado = modificado.replace(/,\s*,/g, ',');
+    modificado = modificado.replace(/,\s*<br>/gi, ',<br>');
+    
+    return modificado;
   };
 
   const htmlFinal = procesarTextoMutante(htmlContent);
@@ -134,7 +138,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     ejecutarFlujoSeguro(() => {
       const dest = encodeURIComponent(destinatarioEfectivo || '');
       const asun = encodeURIComponent(subject || '');
-      const copiasCC = encodeURIComponent(ccOutlookStr || ''); // <-- Usa Punto y Coma (;) para Outlook
+      const copiasCC = encodeURIComponent(ccOutlookStr || ''); 
       
       if (esAndroid || esIOS) {
         window.location.href = `ms-outlook://compose?to=${dest}&subject=${asun}&cc=${copiasCC}`;
@@ -150,7 +154,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       const miCorreoAuditoria = "ohsaravia@celina.com.bo";
       const dest = encodeURIComponent(destinatarioEfectivo || '');
       const asun = encodeURIComponent(subject || '');
-      const copiasCC = encodeURIComponent((ccGmailStr ? ccGmailStr + ',' : '') + miCorreoAuditoria); // Usa Coma (,) para Gmail
+      const copiasCC = encodeURIComponent((ccGmailStr ? ccGmailStr + ',' : '') + miCorreoAuditoria); 
 
       if (esAndroid || esIOS) {
         window.location.href = `googlegmail://co?to=${dest}&subject=${asun}&cc=${copiasCC}`;
