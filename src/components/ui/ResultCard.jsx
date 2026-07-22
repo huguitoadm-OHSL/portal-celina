@@ -8,29 +8,10 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
   const esAndroid = /Android/i.test(navigator.userAgent);
   const esIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-  // ================= 1. DICCIONARIO DE RUTEO ESTRICTO (Según lineamientos oficiales) =================
+  // ================= 1. DICCIONARIO DE RUTEO ESTRICTO CON JERARQUÍA =================
   const MAPA_CORREOS = useMemo(() => [
     {
-      // GRUPO 1: Recursos Humanos (Renuncia, Alta, Evaluación, Postulante, Memorándum)
-      pantallas: ["renuncia", "alta", "crm", "evaluación", "evaluacion", "postulante", "memorándum", "memorandum", "rrhh"],
-      contactos: [
-        { email: 'uklein@grupopaz.com.bo', nombre: 'Ulrich Klein Montano', saludo: 'Estimado Ulrich' },
-        { email: 'mfroca@celina.com.bo', nombre: 'Maria Fernanda Roca', saludo: 'Estimada Maria Fernanda' },
-        { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' },
-        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' }
-      ]
-    },
-    {
-      // GRUPO 2: Validaciones de Llamada y Códigos
-      pantallas: ["llamada", "validación", "validacion", "código", "codigo", "códigos", "codigos", "pend."],
-      contactos: [
-        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' },
-        { email: 'omendoza@celina.com.bo', nombre: 'Olivia Mendoza Duran', saludo: 'Estimada Olivia' },
-        { email: 'rmartinez@celina.com.bo', nombre: 'Rodolfo Martínez', saludo: 'Estimado Rodolfo' }
-      ]
-    },
-    {
-      // GRUPO 3: Solicitud de Recompra
+      // 🟢 PRIORIDAD MÁXIMA: Recompra (Se coloca primero para evitar colisión con la palabra "código")
       pantallas: ["recompra"],
       contactos: [
         { email: 'cbarretto@celina.com.bo', nombre: 'Ing. Charles Barretto', saludo: 'Estimado Ing. Charles' },
@@ -41,7 +22,26 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       ]
     },
     {
-      // GRUPO 4: Gestión Estratégica, Operaciones y Trámites Restantes (Grupo Robert Vaca)
+      // GRUPO 1: Recursos Humanos
+      pantallas: ["renuncia", "alta", "crm", "evaluación", "evaluacion", "postulante", "memorándum", "memorandum", "rrhh"],
+      contactos: [
+        { email: 'uklein@grupopaz.com.bo', nombre: 'Ulrich Klein Montano', saludo: 'Estimado Ulrich' },
+        { email: 'mfroca@celina.com.bo', nombre: 'Maria Fernanda Roca', saludo: 'Estimada Maria Fernanda' },
+        { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' },
+        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' }
+      ]
+    },
+    {
+      // GRUPO 2: Validaciones de Llamada y Códigos (Generales)
+      pantallas: ["llamada", "validación", "validacion", "código", "codigo", "códigos", "codigos", "pend."],
+      contactos: [
+        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' },
+        { email: 'omendoza@celina.com.bo', nombre: 'Olivia Mendoza Duran', saludo: 'Estimada Olivia' },
+        { email: 'rmartinez@celina.com.bo', nombre: 'Rodolfo Martínez', saludo: 'Estimado Rodolfo' }
+      ]
+    },
+    {
+      // GRUPO 3: Gestión Estratégica, Operaciones y Trámites Restantes
       pantallas: ["proyección", "proyeccion", "diaria", "semanal", "seguimiento", "físico", "fisico", "reenvío", "reenvio", "firma", "seguro", "descuento", "campaña", "campana", "inc.", "cuota", "bloqueo", "lote", "liquidación", "liquidacion", "contado", "amortización", "amortizacion", "recalcular", "consolidación", "consolidacion"],
       contactos: [
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
@@ -50,13 +50,11 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     }
   ], []);
 
-  // Respaldo de seguridad por si alguna pantalla no coincide con ningún token
   const RESPALDO = useMemo(() => [
     { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
     { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
   ], []);
 
-  // Lógica de detección de grupo
   const contactosDisponibles = useMemo(() => {
     const contextoTotal = [title, subject].join(" ").toLowerCase();
     for (const grupo of MAPA_CORREOS) {
@@ -65,7 +63,6 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     return RESPALDO;
   }, [title, subject, MAPA_CORREOS, RESPALDO]);
 
-  // El primer contacto del arreglo SIEMPRE es el "PARA" (Destinatario)
   const contactoSeleccionado = contactosDisponibles.find(c => c.email === supervisorDestino);
   const destinatarioEfectivo = contactoSeleccionado ? contactoSeleccionado.email : contactosDisponibles[0].email;
   const objetoDestinatario = contactoSeleccionado || contactosDisponibles[0];
@@ -76,7 +73,6 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     }
   }, [destinatarioEfectivo, supervisorDestino, setSupervisorDestino]);
 
-  // Todos los contactos restantes del arreglo pasan automáticamente a la lista "CC"
   const ccDinamicoArray = useMemo(() => {
     const copiasExtra = contactosDisponibles.filter(c => c.email !== destinatarioEfectivo).map(c => c.email);
     const copiasProps = cc ? cc.split(',').map(s => s.trim()).filter(Boolean) : [];
@@ -98,7 +94,6 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       .replace(/\{\{SALUDO_TIEMPO\}\}/g, saludoTiempo)
       .replace(/\{\{NOMBRE_SUPERVISOR\}\}/g, nombreSaludo);
     
-    // Retrocompatibilidad con plantillas antiguas
     return modificado
       .replace(/Buenas\s+(noches|días|tardes)/gi, saludoTiempo)
       .replace(/\[SALUDO_AUTO\]/gi, "")
