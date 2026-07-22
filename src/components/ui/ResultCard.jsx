@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Copy, Check, ChevronDown, Clock, MousePointerClick, Zap } from 'lucide-react';
+import { Copy, Check, ChevronDown, Clock, MousePointerClick, Zap, Users } from 'lucide-react';
 
 export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDestino, setSupervisorDestino }) {
   const [copiado, setCopiado] = useState(false);
@@ -8,8 +8,35 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
   const esAndroid = /Android/i.test(navigator.userAgent);
   const esIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-  // MANTENEMOS TU LÓGICA DE DICCIONARIO INTACTA
+  // ================= 1. DICCIONARIO BANCARIO BLINDADO =================
   const MAPA_CORREOS = useMemo(() => [
+    {
+      pantallas: ["postulante", "capacitación", "capacitacion"], // 🟢 CORRECCIÓN 1: Postulante a Ulrich
+      contactos: [
+        { email: 'uklein@grupopaz.com.bo', nombre: 'Ulrich Klein Montano', saludo: 'Estimado Ulrich' },
+        { email: 'mfroca@celina.com.bo', nombre: 'Maria Fernanda Roca', saludo: 'Estimada Maria Fernanda' },
+        { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' },
+        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' }
+      ]
+    },
+    {
+      pantallas: ["descuento", "campaña", "campana", "liquidación", "liquidacion"], // 🟢 CORRECCIÓN 2: Descuentos
+      contactos: [
+        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
+        { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' },
+        { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
+      ]
+    },
+    {
+      pantallas: ["recompra"], // 🟢 CORRECCIÓN 3: Recompra a Ing. Charles + Equipo
+      contactos: [
+        { email: 'cbarretto@celina.com.bo', nombre: 'Ing. Charles Barretto', saludo: 'Estimado Ing. Charles' },
+        { email: 'csalvatierra@celina.com.bo', nombre: 'Cinthia Salvatierra', saludo: 'Estimada Cinthia' },
+        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' },
+        { email: 'aperez@celina.com.bo', nombre: 'Alex Pérez', saludo: 'Estimado Alex' },
+        { email: 'omendoza@celina.com.bo', nombre: 'Olivia Mendoza', saludo: 'Estimada Olivia' }
+      ]
+    },
     {
       pantallas: ["código", "codigo", "códigos", "codigos", "llamada", "referido", "validación", "validacion", "pendiente", "pend."],
       contactos: [
@@ -19,20 +46,11 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       ]
     },
     {
-      pantallas: ["memorándum", "memorandum", "renuncia", "crm", "evaluación", "evaluacion", "postulante", "rrhh"],
+      pantallas: ["memorándum", "memorandum", "renuncia", "crm", "evaluación", "evaluacion", "rrhh"],
       contactos: [
         { email: 'uklein@grupopaz.com.bo', nombre: 'Ulrich Klein Montano', saludo: 'Estimado Ulrich' },
-        { email: 'mfroca@celina.com.bo', nombre: 'Maria Fernanda Roca Miranda', saludo: 'Estimada Maria Fernanda' },
-        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
-        { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
-      ]
-    },
-    {
-      pantallas: ["recompra"],
-      contactos: [
-        { email: 'cbarretto@celina.com.bo', nombre: 'Ing. Charles Barretto', saludo: 'Estimado Ing. Charles' },
-        { email: 'csalvatierra@celina.com.bo', nombre: 'Cinthia Salvatierra', saludo: 'Estimada Cinthia' },
-        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' }
+        { email: 'mfroca@celina.com.bo', nombre: 'Maria Fernanda Roca', saludo: 'Estimada Maria Fernanda' },
+        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' }
       ]
     },
     {
@@ -50,22 +68,6 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       ]
     },
     {
-      pantallas: ["campaña", "campana"],
-      contactos: [
-        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
-        { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' },
-        { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' }
-      ]
-    },
-    {
-      pantallas: ["liquidación", "liquidacion", "descuento"],
-      contactos: [
-        { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
-        { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' },
-        { email: 'vchoque@celina.com.bo', nombre: 'Verenice Choque', saludo: 'Estimada Verenice' }
-      ]
-    },
-    {
       pantallas: ["cuota", "proyección", "proyeccion", "diaria", "semanal", "inc."],
       contactos: [
         { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' },
@@ -75,7 +77,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
   ], []);
 
   const RESPALDO = useMemo(() => [
-    { email: 'mreyes@celina.com.bo', nombre: 'Mauricio Reyes Suarez', saludo: 'Estimado Mauricio' },
+    { email: 'uklein@grupopaz.com.bo', nombre: 'Ulrich Klein Montano', saludo: 'Estimado Ulrich' },
     { email: 'rvaca@grupopaz.com.bo', nombre: 'Robert Vaca', saludo: 'Estimado Robert' }
   ], []);
 
@@ -97,24 +99,33 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     }
   }, [destinatarioEfectivo, supervisorDestino, setSupervisorDestino]);
 
-  const ccDinamico = useMemo(() => {
+  // Construcción de la lista CC
+  const ccDinamicoArray = useMemo(() => {
     const copiasExtra = contactosDisponibles.filter(c => c.email !== destinatarioEfectivo).map(c => c.email);
     const copiasProps = cc ? cc.split(',').map(s => s.trim()).filter(Boolean) : [];
-    return [...new Set([...copiasExtra, ...copiasProps])].join(', ');
+    return [...new Set([...copiasExtra, ...copiasProps])];
   }, [contactosDisponibles, destinatarioEfectivo, cc]);
+  const ccDinamicoStr = ccDinamicoArray.join(', ');
 
-  // MUTACIÓN DE TEXTO
+  // ================= 2. MOTOR DE TOKENS (NUEVA ARQUITECTURA) =================
   const procesarTextoMutante = (contenido) => {
     if (!contenido) return '';
     const hora = new Date().getHours();
-    let saludoBase = "Buenas noches";
-    if (hora >= 5 && hora < 12) saludoBase = "Buenos días";
-    if (hora >= 12 && hora < 19) saludoBase = "Buenas tardes";
+    let saludoTiempo = "Buenas noches";
+    if (hora >= 5 && hora < 12) saludoTiempo = "Buenos días";
+    if (hora >= 12 && hora < 19) saludoTiempo = "Buenas tardes";
+    
     const nombreSaludo = objetoDestinatario ? objetoDestinatario.saludo : 'Estimado/a';
     
-    let modificado = contenido.replace(/Buenas\s+(noches|días|tardes)/gi, saludoBase).replace(/\[SALUDO_AUTO\]/gi, "");
+    // Inyección Perfecta de Tokens
+    let modificado = contenido
+      .replace(/\{\{SALUDO_TIEMPO\}\}/g, saludoTiempo)
+      .replace(/\{\{NOMBRE_SUPERVISOR\}\}/g, nombreSaludo);
     
+    // Retrocompatibilidad con plantillas antiguas
     return modificado
+      .replace(/Buenas\s+(noches|días|tardes)/gi, saludoTiempo)
+      .replace(/\[SALUDO_AUTO\]/gi, "")
       .replace(/Estimado\s+Mauricio/gi, nombreSaludo).replace(/Estimado\s+Robert/gi, nombreSaludo)
       .replace(/Estimada\s+Verenice/gi, nombreSaludo).replace(/Estimado\s+Ing\.\s+Charles/gi, nombreSaludo)
       .replace(/Estimada\s+Cinthia/gi, nombreSaludo).replace(/Estimado\s+Enrique/gi, nombreSaludo)
@@ -126,7 +137,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
   const htmlFinal = procesarTextoMutante(htmlContent);
   const textoPlanoFinal = procesarTextoMutante(text);
 
-  // COPIADO Y ALERTA (UI Mejorada)
+  // ================= 3. FLUJO DE COPIADO SEGURO =================
   const ejecutarFlujoSeguro = (callbackApp) => {
     try {
       const blob = new Blob([htmlFinal], { type: 'text/html' });
@@ -147,7 +158,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     ejecutarFlujoSeguro(() => {
       const dest = encodeURIComponent(destinatarioEfectivo || '');
       const asun = encodeURIComponent(subject || '');
-      const copiasCC = encodeURIComponent(ccDinamico || '');
+      const copiasCC = encodeURIComponent(ccDinamicoStr || '');
       
       if (esAndroid || esIOS) {
         window.location.href = `ms-outlook://compose?to=${dest}&subject=${asun}&cc=${copiasCC}`;
@@ -163,7 +174,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       const miCorreoAuditoria = "ohsaravia@celina.com.bo";
       const dest = encodeURIComponent(destinatarioEfectivo || '');
       const asun = encodeURIComponent(subject || '');
-      const copiasCC = encodeURIComponent((ccDinamico ? ccDinamico + ', ' : '') + miCorreoAuditoria);
+      const copiasCC = encodeURIComponent((ccDinamicoStr ? ccDinamicoStr + ', ' : '') + miCorreoAuditoria);
 
       if (esAndroid || esIOS) {
         window.location.href = `googlegmail://co?to=${dest}&subject=${asun}&cc=${copiasCC}`;
@@ -177,7 +188,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
   return (
     <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/80 p-6 flex flex-col justify-between h-full relative overflow-hidden transition-all">
       
-      {/* 🚀 EL ESCUDO VISUAL PREMIUM 🚀 */}
+      {/* 🚀 ESCUDO VISUAL PREMIUM 🚀 */}
       {mostrarAlertaPegar && (
         <div className="absolute inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in duration-300">
           <div className="w-20 h-20 bg-gradient-to-tr from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center mb-5 shadow-[0_0_30px_rgba(52,211,153,0.4)] animate-bounce">
@@ -201,7 +212,8 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
           </span>
         </div>
 
-        <div className="mb-4 space-y-1">
+        {/* SELECTOR DE DESTINATARIO */}
+        <div className="mb-4 space-y-1.5">
           <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider pl-1">Enviar A (Destinatario):</label>
           <div className="relative group">
             <select 
@@ -217,18 +229,27 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
           </div>
         </div>
 
-        <div className="mb-5 space-y-1">
-          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider pl-1">En Copia Oculta (CC):</label>
-          <div className="w-full px-4 py-3 bg-slate-50/50 border border-slate-100 rounded-xl text-[11px] font-medium text-slate-500 truncate">
-            {ccDinamico || "Ninguno"}
+        {/* PILLS DE COPIA (DISEÑO CLASE MUNDIAL) */}
+        <div className="mb-5 space-y-1.5">
+          <label className="flex items-center text-[10px] font-black text-slate-400 uppercase tracking-wider pl-1">
+            <Users className="w-3 h-3 mr-1" /> En Copia Oculta (CC):
+          </label>
+          <div className="flex flex-wrap gap-1.5 p-2 bg-slate-50/80 border border-slate-100 rounded-xl min-h-[42px] items-center">
+            {ccDinamicoArray.length > 0 ? ccDinamicoArray.map((email, i) => (
+              <span key={i} className="inline-flex items-center px-2.5 py-1 rounded-md bg-white border border-slate-200 text-[10px] font-bold text-slate-500 shadow-sm">
+                {email}
+              </span>
+            )) : <span className="text-[11px] font-medium text-slate-400 pl-2">Ninguno</span>}
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-5 max-h-[300px] overflow-y-auto mb-6 shadow-[inset_0_2px_10px_rgba(0,0,0,0.02)] text-xs select-all custom-scrollbar">
-          <div dangerouslySetInnerHTML={{ __html: htmlFinal }} className="prose prose-sm prose-slate" />
+        {/* VISTA PREVIA HTML */}
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-5 max-h-[250px] overflow-y-auto mb-6 shadow-[inset_0_2px_10px_rgba(0,0,0,0.02)] text-xs select-all custom-scrollbar">
+          <div dangerouslySetInnerHTML={{ __html: htmlFinal }} className="prose prose-sm prose-slate max-w-none" />
         </div>
       </div>
 
+      {/* BOTONES DE ACCIÓN */}
       <div className="space-y-3 pt-5 border-t border-slate-100">
         <div className="grid grid-cols-2 gap-3">
           <button onClick={() => {
