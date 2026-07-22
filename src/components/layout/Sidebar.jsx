@@ -92,6 +92,7 @@ export const Sidebar = ({ activeTab, setActiveTab, isOpen, closeSidebar, setSupe
           <NavItem id="liquidacionContado" icon={FileText} label="Liquidación Contado" />
           <NavItem id="solicitudesCodigo" icon={KeyRound} label="Solicitud de Códigos" />
           <NavItem id="recalcular" icon={RefreshCw} label="Recalcular Plan" />
+          <NavItem id="consolidacion" icon={ArrowRightLeft} label="Consolidación de Lotes" />
 
           <NavSection title="Trámites Generales" />
           <NavItem id="llamada" icon={PhoneCall} label="Validación Llamada" />
