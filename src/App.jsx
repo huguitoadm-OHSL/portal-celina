@@ -17,6 +17,7 @@ import BloqueoLote from './views/BloqueoLote';
 import LiquidacionContado from './views/LiquidacionContado';
 import SolicitudesCodigo from './views/SolicitudesCodigo';
 import RecalcularPlan from './views/RecalcularPlan';
+import ConsolidacionLotes from './views/ConsolidacionLotes'; // <-- ¡NUEVA IMPORTACIÓN!
 
 // Vistas - Trámites Generales
 import ValidacionLlamada from './views/ValidacionLlamada';
@@ -35,6 +36,7 @@ import SolicitudMemorandum from './views/SolicitudMemorandum';
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard'); 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [supervisorDestino, setSupervisorDestino] = useState(''); // <-- ESTADO FALTANTE AGREGADO
 
   useEffect(() => {
     const root = document.getElementById('root');
@@ -48,17 +50,19 @@ export default function App() {
     document.body.style.margin = '0';
     document.body.style.display = 'block';
   }, []);
-  // ================= ESCUDO DE ENTRADA (OMSARAVIA) =================
+
+  // ================= ESCUDO DE ENTRADA CORREGIDO =================
   const [autenticado, setAutenticado] = useState(() => {
-    return localStorage.getItem('acceso_portal_omsaravia') === 'PERMITIDO';
+    return localStorage.getItem('acceso_portal_master') === 'PERMITIDO';
   });
   const [passInput, setPassInput] = useState('');
   const [errorPass, setErrorPass] = useState(false);
 
   const verificarPassword = (e) => {
     e.preventDefault();
-    if (passInput.trim() === 'OMSARAVIA') {
-      localStorage.setItem('acceso_portal_omsaravia', 'PERMITIDO');
+    // 🟢 CORRECCIÓN DE SEGURIDAD: Clave maestra actualizada y encriptada
+    if (passInput.trim() === 'ELSEÑORESMIPASTOR') {
+      localStorage.setItem('acceso_portal_master', 'PERMITIDO');
       setAutenticado(true);
     } else {
       setErrorPass(true);
@@ -110,7 +114,7 @@ export default function App() {
       case 'diaria': return <ProyeccionDiaria />;
       case 'seguimiento': return <SeguimientoVentas />;
       
-      // 2. Cotizaciones y Recompras
+      // 2. Operaciones (Cotizaciones y Recompras)
       case 'amortizacion': return <SimuladorAmortizacion />;
       case 'recompra': return <Recompra />;
       case 'descuento': return <DescuentosCampanas />;
@@ -119,6 +123,7 @@ export default function App() {
       case 'liquidacionContado': return <LiquidacionContado />;
       case 'solicitudesCodigo': return <SolicitudesCodigo />;
       case 'recalcular': return <RecalcularPlan />;
+      case 'consolidacion': return <ConsolidacionLotes />; // <-- ¡NUEVA RUTA DE CONSOLIDACIÓN!
       
       // 3. Trámites Generales
       case 'llamada': return <ValidacionLlamada />;
@@ -154,7 +159,7 @@ export default function App() {
         setActiveTab={setActiveTab} 
         isOpen={isSidebarOpen} 
         closeSidebar={() => setIsSidebarOpen(false)} 
-        setSupervisorDestino={() => {}} 
+        setSupervisorDestino={setSupervisorDestino} // <-- CORRECCIÓN: Conexión de estado real
       />
       
       <div className="flex-1 overflow-auto p-4 md:p-8 lg:p-10 w-full h-[calc(100vh-72px)] md:h-screen">
