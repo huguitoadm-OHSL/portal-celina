@@ -2,7 +2,8 @@ import React from 'react';
 import { 
   LayoutDashboard, BarChart, CalendarDays, Target, RefreshCw, Calculator, Repeat, Tag, 
   TrendingUp, PhoneCall, FileText, FileSignature, Shield, UserMinus, UserPlus, 
-  ClipboardCheck, UserCheck, Building2, X, Lock, PhoneForwarded, AlertOctagon, KeyRound 
+  ClipboardCheck, UserCheck, Building2, X, Lock, PhoneForwarded, AlertOctagon, KeyRound,
+  ArrowRightLeft // <--- ¡AQUÍ ESTÁ EL ÍCONO FALTANTE QUE REPARARÁ LA PANTALLA NEGRA!
 } from 'lucide-react';
 
 export const Sidebar = ({ activeTab, setActiveTab, isOpen, closeSidebar, setSupervisorDestino }) => {
