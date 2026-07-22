@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Copy, Check, Mail, ChevronDown, Clock, AlertTriangle } from 'lucide-react';
+import { Copy, Check, ChevronDown, Clock, MousePointerClick, Zap } from 'lucide-react';
 
 export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDestino, setSupervisorDestino }) {
   const [copiado, setCopiado] = useState(false);
@@ -8,7 +8,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
   const esAndroid = /Android/i.test(navigator.userAgent);
   const esIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-  // ================= 1. DICCIONARIO BLINDADO (TÍTULOS Y ASUNTOS) =================
+  // MANTENEMOS TU LÓGICA DE DICCIONARIO INTACTA
   const MAPA_CORREOS = useMemo(() => [
     {
       pantallas: ["código", "codigo", "códigos", "codigos", "llamada", "referido", "validación", "validacion", "pendiente", "pend."],
@@ -82,9 +82,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
   const contactosDisponibles = useMemo(() => {
     const contextoTotal = [title, subject].join(" ").toLowerCase();
     for (const grupo of MAPA_CORREOS) {
-      if (grupo.pantallas.some(p => contextoTotal.includes(p))) {
-        return grupo.contactos;
-      }
+      if (grupo.pantallas.some(p => contextoTotal.includes(p))) return grupo.contactos;
     }
     return RESPALDO;
   }, [title, subject, MAPA_CORREOS, RESPALDO]);
@@ -105,7 +103,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     return [...new Set([...copiasExtra, ...copiasProps])].join(', ');
   }, [contactosDisponibles, destinatarioEfectivo, cc]);
 
-  // ================= 2. MUTACIÓN DE TEXTO Y HTML =================
+  // MUTACIÓN DE TEXTO
   const procesarTextoMutante = (contenido) => {
     if (!contenido) return '';
     const hora = new Date().getHours();
@@ -128,9 +126,8 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
   const htmlFinal = procesarTextoMutante(htmlContent);
   const textoPlanoFinal = procesarTextoMutante(text);
 
-  // ================= 3. EL TRUCO MAESTRO: COPIAR Y ALERTAR =================
+  // COPIADO Y ALERTA (UI Mejorada)
   const ejecutarFlujoSeguro = (callbackApp) => {
-    // 1. Copia el HTML perfecto a la memoria del usuario
     try {
       const blob = new Blob([htmlFinal], { type: 'text/html' });
       const clipboardItem = new ClipboardItem({ 'text/html': blob });
@@ -139,24 +136,19 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       navigator.clipboard.writeText(textoPlanoFinal);
     }
     
-    // 2. Muestra la pantalla de instrucción
     setMostrarAlertaPegar(true);
-
-    // 3. Abre la app de correos (en blanco para evitar crashes) tras 1.5 segundos
     setTimeout(() => {
       setMostrarAlertaPegar(false);
       callbackApp();
     }, 1800);
   };
 
-  // ================= 4. MOTORES DE ENVÍO SIN ERRORES =================
   const abrirAppOutlookEscritorio = () => {
     ejecutarFlujoSeguro(() => {
       const dest = encodeURIComponent(destinatarioEfectivo || '');
       const asun = encodeURIComponent(subject || '');
       const copiasCC = encodeURIComponent(ccDinamico || '');
       
-      // Intentamos forzar Outlook app en celulares. Si falla, usamos el enlace limpio.
       if (esAndroid || esIOS) {
         window.location.href = `ms-outlook://compose?to=${dest}&subject=${asun}&cc=${copiasCC}`;
         setTimeout(() => { window.location.href = `mailto:${dest}?subject=${asun}&cc=${copiasCC}`; }, 1000);
@@ -183,62 +175,62 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between h-full relative overflow-hidden">
+    <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/80 p-6 flex flex-col justify-between h-full relative overflow-hidden transition-all">
       
-      {/* 🚀 EL ESCUDO VISUAL QUE ENSEÑA A PEGAR 🚀 */}
+      {/* 🚀 EL ESCUDO VISUAL PREMIUM 🚀 */}
       {mostrarAlertaPegar && (
-        <div className="absolute inset-0 z-50 bg-slate-900/95 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-200">
-          <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mb-4 animate-bounce">
-            <Check className="w-8 h-8 text-white" />
+        <div className="absolute inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in duration-300">
+          <div className="w-20 h-20 bg-gradient-to-tr from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center mb-5 shadow-[0_0_30px_rgba(52,211,153,0.4)] animate-bounce">
+            <Check className="w-10 h-10 text-white" />
           </div>
-          <h3 className="text-xl font-black text-white mb-2">¡Formato Copiado!</h3>
-          <p className="text-emerald-100 text-sm font-medium">
-            Tu correo se abrirá vacío por seguridad.<br/><br/>
-            Presiona <strong className="text-white bg-slate-800 px-2 py-1 rounded">CTRL + V</strong> (o dale a Pegar en tu celular) para colocar los cuadros y colores perfectos.
+          <h3 className="text-2xl font-black text-white mb-3 tracking-tight">¡Memoria Cargada!</h3>
+          <p className="text-emerald-50 text-sm font-medium leading-relaxed max-w-[250px]">
+            Tu cliente de correo se abrirá en un segundo.<br/><br/>
+            Usa <span className="inline-flex items-center px-2.5 py-1 bg-slate-800 text-white rounded-md border border-slate-700 font-mono text-xs shadow-inner"><MousePointerClick className="w-3 h-3 mr-1"/>Pegar</span> para insertar el formato perfecto.
           </p>
         </div>
       )}
 
       <div>
-        <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
-          <h3 className="font-black text-slate-800 text-base flex items-center">
-            <Check className="w-5 h-5 text-emerald-500 mr-2" /> {title || "Vista Previa"}
+        <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+          <h3 className="font-black text-slate-800 text-base flex items-center tracking-tight">
+            <Zap className="w-5 h-5 text-indigo-500 mr-2 fill-indigo-100" /> {title || "Vista Previa"}
           </h3>
-          <span className="text-[10px] font-bold bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-full border border-indigo-100 flex items-center">
-            <Clock className="w-3 h-3 mr-1" /> Automático ⏱️
+          <span className="text-[10px] font-black bg-indigo-50/80 text-indigo-600 px-3 py-1.5 rounded-lg border border-indigo-100/50 flex items-center shadow-sm">
+            <Clock className="w-3.5 h-3.5 mr-1.5" /> Automatizado
           </span>
         </div>
 
-        <div className="mb-4">
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Destinatario (Enviar a):</label>
-          <div className="relative">
+        <div className="mb-4 space-y-1">
+          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider pl-1">Enviar A (Destinatario):</label>
+          <div className="relative group">
             <select 
               value={destinatarioEfectivo} 
               onChange={(e) => setSupervisorDestino && setSupervisorDestino(e.target.value)} 
-              className="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-black text-slate-800 outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer shadow-inner"
+              className="w-full pl-4 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 appearance-none cursor-pointer transition-all group-hover:bg-white group-hover:shadow-sm"
             >
               {contactosDisponibles.map((c, idx) => (
                 <option key={idx} value={c.email}>{c.nombre} ({c.email})</option>
               ))}
             </select>
-            <ChevronDown className="absolute right-3 top-3.5 w-4 h-4 text-slate-500 pointer-events-none" />
+            <ChevronDown className="absolute right-4 top-4 w-4 h-4 text-slate-400 pointer-events-none transition-transform group-hover:text-indigo-500" />
           </div>
         </div>
 
-        <div className="mb-4">
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">En Copia Automatizada (CC):</label>
-          <div className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-[10px] font-bold text-slate-500 truncate">
+        <div className="mb-5 space-y-1">
+          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider pl-1">En Copia Oculta (CC):</label>
+          <div className="w-full px-4 py-3 bg-slate-50/50 border border-slate-100 rounded-xl text-[11px] font-medium text-slate-500 truncate">
             {ccDinamico || "Ninguno"}
           </div>
         </div>
 
-        <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-4 max-h-[340px] overflow-y-auto mb-6 shadow-inner text-xs select-all">
-          <div dangerouslySetInnerHTML={{ __html: htmlFinal }} />
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-5 max-h-[300px] overflow-y-auto mb-6 shadow-[inset_0_2px_10px_rgba(0,0,0,0.02)] text-xs select-all custom-scrollbar">
+          <div dangerouslySetInnerHTML={{ __html: htmlFinal }} className="prose prose-sm prose-slate" />
         </div>
       </div>
 
-      <div className="space-y-2.5 pt-4 border-t border-slate-100">
-        <div className="grid grid-cols-2 gap-2.5">
+      <div className="space-y-3 pt-5 border-t border-slate-100">
+        <div className="grid grid-cols-2 gap-3">
           <button onClick={() => {
             try {
               const blob = new Blob([htmlFinal], { type: 'text/html' });
@@ -247,19 +239,19 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
             } catch (err) { navigator.clipboard.writeText(textoPlanoFinal); }
             setCopiado(true);
             setTimeout(() => setCopiado(false), 2500);
-          }} className={`py-3 px-3 rounded-xl font-black text-xs flex items-center justify-center transition-all shadow-sm ${copiado ? 'bg-emerald-500 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}>
-            <Copy className="w-4 h-4 mr-1.5" />
-            {copiado ? '¡Copiado! ✅' : 'Copiar Formato PC'}
+          }} className={`py-3.5 px-3 rounded-xl font-black text-xs flex items-center justify-center transition-all duration-300 shadow-sm active:scale-95 ${copiado ? 'bg-emerald-500 text-white shadow-emerald-500/30' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}>
+            <Copy className={`w-4 h-4 mr-2 ${copiado ? 'hidden' : 'block'}`} />
+            {copiado ? <><Check className="w-4 h-4 mr-2"/> ¡Copiado!</> : 'Copiar Formato'}
           </button>
           
-          <button onClick={abrirAppOutlookEscritorio} className="py-2.5 px-3 bg-[#0072c6] hover:bg-[#005a9e] text-white rounded-xl font-black text-xs flex items-center justify-center shadow transition-all active:scale-95">
+          <button onClick={abrirAppOutlookEscritorio} className="py-3.5 px-3 bg-gradient-to-b from-[#0078d4] to-[#005a9e] hover:from-[#0086f0] hover:to-[#006ab8] text-white rounded-xl font-black text-xs flex items-center justify-center shadow-md shadow-blue-500/20 transition-all active:scale-95">
             App Outlook 🖥️
           </button>
         </div>
         
-        <button onClick={abrirEnGmail} className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs flex items-center justify-center shadow transition-colors relative active:scale-95">
+        <button onClick={abrirEnGmail} className="w-full py-3.5 bg-gradient-to-b from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white rounded-xl font-black text-xs flex items-center justify-center shadow-md shadow-red-500/20 transition-all relative active:scale-95 group">
           Abrir en Gmail
-          <span className="absolute right-3 text-[9px] font-semibold bg-red-800 px-2 py-0.5 rounded-md opacity-90">+ CC: ohsaravia</span>
+          <span className="absolute right-3 text-[9px] font-bold bg-white/20 px-2 py-1 rounded-lg transition-colors group-hover:bg-white/30">+ CC Automático</span>
         </button>
       </div>
     </div>
