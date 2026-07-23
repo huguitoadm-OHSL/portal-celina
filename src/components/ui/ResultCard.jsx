@@ -8,7 +8,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
   const esAndroid = /Android/i.test(navigator.userAgent);
   const esIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-  // ================= 1. DICCIONARIO DE RUTEO ESTRICTO (Intacto según imágenes) =================
+  // ================= 1. DICCIONARIO DE RUTEO ESTRICTO (Intacto) =================
   const MAPA_CORREOS = useMemo(() => [
     {
       pantallas: ["recompra"],
@@ -75,40 +75,39 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     return [...new Set([...copiasExtra, ...copiasProps])];
   }, [contactosDisponibles, destinatarioEfectivo, cc]);
   
-  // Separadores independientes para garantizar compatibilidad total
+  // Separadores independientes para garantizar compatibilidad total (Coma vs Punto y Coma)
   const ccOutlookStr = ccDinamicoArray.join(';'); 
   const ccGmailStr = ccDinamicoArray.join(','); 
 
-  // ================= 2. PROCESADOR DE TEXTO MUTANTE (SÚPER MEJORADO) =================
+  // ================= 2. PROCESADOR DE TEXTO (CORRECCIÓN ESTÉTICA) =================
   const procesarTextoMutante = (contenido) => {
     if (!contenido) return '';
     
-    // 1. Detección de la hora para el saludo dinámico
     const hora = new Date().getHours();
     let saludoTiempo = "Buenas noches";
     if (hora >= 5 && hora < 12) saludoTiempo = "Buenos días";
     if (hora >= 12 && hora < 19) saludoTiempo = "Buenas tardes";
     
-    // 2. Extraer el nombre correcto del destinatario seleccionado
     const nombreSaludo = objetoDestinatario ? objetoDestinatario.saludo : 'Estimado/a';
     
     let modificado = contenido;
 
-    // 3. LIMPIEZA PREVIA: Destruimos cualquier token o nombre antiguo para evitar duplicados
+    // Destruimos cualquier token antiguo
     modificado = modificado.replace(/\{\{SALUDO_TIEMPO\}\}/gi, "Buenas"); 
     modificado = modificado.replace(/\{\{NOMBRE_SUPERVISOR\}\}/gi, "");
     modificado = modificado.replace(/\[SALUDO_AUTO\]/gi, "");
     
-    const nombresQuemados = /Estimad[oa]\s+(Mauricio|Robert|Verenice|Ing\.\s+Charles|Cinthia|Enrique|Luis\s+Fernando|Olivia|Rodolfo|Alex|Ulrich|Maria\s+Fernanda),?/gi;
+    // 🟢 CORRECCIÓN: Ahora absorbe la coma y el espacio ([,\s]*) para evitar "Charles, , por favor"
+    const nombresQuemados = /Estimad[oa]\s+(Mauricio|Robert|Verenice|Ing\.\s+Charles|Cinthia|Enrique|Luis\s+Fernando|Olivia|Rodolfo|Alex|Ulrich|Maria\s+Fernanda)[,\s]*/gi;
     modificado = modificado.replace(nombresQuemados, '');
 
-    // 4. CACERÍA DEL "BUENAS" FANTASMA: 
-    // Buscamos "Buenas", "Buenos días", "Buenas tardes" solos o acompañados y los forzamos
-    // a convertirse en el bloque perfecto: "Buenas tardes Estimado Robert,"
-    modificado = modificado.replace(/\bBuen(?:os|as)\s*(días|dias|tardes|noches)?\b/gi, `${saludoTiempo} ${nombreSaludo},`);
+    // Reemplazo final con el saludo perfecto
+    modificado = modificado.replace(/\bBuen(?:os|as)\s*(días|dias|tardes|noches)?\b/gi, `${saludoTiempo} ${nombreSaludo}, `);
 
-    // 5. Limpieza estética final (por si quedaron comas sueltas de la limpieza)
+    // Limpiezas de seguridad por si quedaron comas huérfanas
     modificado = modificado.replace(/,\s*,/g, ',');
+    modificado = modificado.replace(/,\s*<br>\s*,/gi, ',<br>');
+    modificado = modificado.replace(/,\s*\n\s*,/g, ',\n');
     modificado = modificado.replace(/,\s*<br>/gi, ',<br>');
     
     return modificado;
@@ -138,13 +137,15 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     ejecutarFlujoSeguro(() => {
       const dest = encodeURIComponent(destinatarioEfectivo || '');
       const asun = encodeURIComponent(subject || '');
-      const copiasCC = encodeURIComponent(ccOutlookStr || ''); 
       
+      // 🟢 CORRECCIÓN MÓVIL: Se elimina ms-outlook:// en celulares para evitar "Error de redirección".
+      // Se utiliza el mailto: estándar con separador de comas que abre impecable en Android y iPhone.
       if (esAndroid || esIOS) {
-        window.location.href = `ms-outlook://compose?to=${dest}&subject=${asun}&cc=${copiasCC}`;
-        setTimeout(() => { window.location.href = `mailto:${dest}?subject=${asun}&cc=${copiasCC}`; }, 1000);
+        const copiasCCMobile = encodeURIComponent(ccGmailStr || ''); 
+        window.location.href = `mailto:${dest}?subject=${asun}&cc=${copiasCCMobile}`;
       } else {
-        window.location.href = `mailto:${dest}?subject=${asun}&cc=${copiasCC}`;
+        const copiasCCPC = encodeURIComponent(ccOutlookStr || ''); 
+        window.location.href = `mailto:${dest}?subject=${asun}&cc=${copiasCCPC}`;
       }
     });
   };
