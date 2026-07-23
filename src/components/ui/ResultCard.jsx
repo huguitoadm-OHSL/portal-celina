@@ -75,9 +75,6 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     return [...new Set([...copiasExtra, ...copiasProps])];
   }, [contactosDisponibles, destinatarioEfectivo, cc]);
   
-  const ccOutlookStr = ccDinamicoArray.join(';'); 
-  const ccGmailStr = ccDinamicoArray.join(','); 
-
   // ================= 2. PROCESADOR DE TEXTO (Intacto) =================
   const procesarTextoMutante = (contenido) => {
     if (!contenido) return '';
@@ -111,11 +108,10 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
   const htmlFinal = procesarTextoMutante(htmlContent);
   const textoPlanoFinal = procesarTextoMutante(text);
 
-  // ================= 3. FLUJO DE COPIADO HÍBRIDO (SOLUCIÓN MÓVIL) =================
+  // ================= 3. FLUJO DE COPIADO HÍBRIDO (Intacto) =================
   const ejecutarFlujoSeguro = (callbackApp) => {
     try {
       if (typeof ClipboardItem !== 'undefined') {
-        // 🟢 EL TRUCO MÓVIL: Creamos AMBOS formatos para que Android lo reconozca
         const htmlBlob = new Blob([htmlFinal], { type: 'text/html' });
         const textBlob = new Blob([textoPlanoFinal], { type: 'text/plain' });
         const clipboardItem = new ClipboardItem({ 
@@ -140,33 +136,35 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     }, 1800);
   };
 
+  // ================= 4. MANEJADORES DE CORREO RECONSTRUIDOS =================
   const abrirAppOutlookEscritorio = () => {
     ejecutarFlujoSeguro(() => {
-      const dest = encodeURIComponent(destinatarioEfectivo || '');
+      const dest = destinatarioEfectivo || '';
       const asun = encodeURIComponent(subject || '');
       
-      if (esAndroid || esIOS) {
-        const copiasCCMobile = encodeURIComponent(ccGmailStr || ''); 
-        window.location.href = `mailto:${dest}?subject=${asun}&cc=${copiasCCMobile}`;
-      } else {
-        const copiasCCPC = encodeURIComponent(ccOutlookStr || ''); 
-        window.location.href = `mailto:${dest}?subject=${asun}&cc=${copiasCCPC}`;
-      }
+      // 🟢 CORRECCIÓN: Comas literales puras (,) sin espacios y sin codificar.
+      // Esto engaña al Nuevo Outlook y le obliga a aceptar la cadena múltiple sin colgarse.
+      const ccStr = ccDinamicoArray.join(','); 
+      
+      window.location.href = `mailto:${dest}?subject=${asun}&cc=${ccStr}`;
     });
   };
 
   const abrirEnGmail = () => {
     ejecutarFlujoSeguro(() => {
       const miCorreoAuditoria = "ohsaravia@celina.com.bo";
-      const dest = encodeURIComponent(destinatarioEfectivo || '');
+      const dest = destinatarioEfectivo || '';
       const asun = encodeURIComponent(subject || '');
-      const copiasCC = encodeURIComponent((ccGmailStr ? ccGmailStr + ',' : '') + miCorreoAuditoria); 
+      
+      const ccArray = [...ccDinamicoArray, miCorreoAuditoria];
+      const ccStr = ccArray.join(','); 
 
       if (esAndroid || esIOS) {
-        window.location.href = `googlegmail://co?to=${dest}&subject=${asun}&cc=${copiasCC}`;
-        setTimeout(() => { window.location.href = `mailto:${dest}?subject=${asun}&cc=${copiasCC}`; }, 1000);
+        window.location.href = `googlegmail://co?to=${dest}&subject=${asun}&cc=${ccStr}`;
+        setTimeout(() => { window.location.href = `mailto:${dest}?subject=${asun}&cc=${ccStr}`; }, 1000);
       } else {
-        window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${dest}&su=${asun}&cc=${copiasCC}`, '_blank');
+        // En Gmail Web, sí es necesario codificar completamente la URL
+        window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(dest)}&su=${asun}&cc=${encodeURIComponent(ccStr)}`, '_blank');
       }
     });
   };
