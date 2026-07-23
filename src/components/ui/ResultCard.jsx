@@ -75,11 +75,10 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     return [...new Set([...copiasExtra, ...copiasProps])];
   }, [contactosDisponibles, destinatarioEfectivo, cc]);
   
-  // Separadores independientes para garantizar compatibilidad total (Coma vs Punto y Coma)
   const ccOutlookStr = ccDinamicoArray.join(';'); 
   const ccGmailStr = ccDinamicoArray.join(','); 
 
-  // ================= 2. PROCESADOR DE TEXTO (CORRECCIÓN ESTÉTICA) =================
+  // ================= 2. PROCESADOR DE TEXTO (Intacto) =================
   const procesarTextoMutante = (contenido) => {
     if (!contenido) return '';
     
@@ -92,19 +91,15 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     
     let modificado = contenido;
 
-    // Destruimos cualquier token antiguo
     modificado = modificado.replace(/\{\{SALUDO_TIEMPO\}\}/gi, "Buenas"); 
     modificado = modificado.replace(/\{\{NOMBRE_SUPERVISOR\}\}/gi, "");
     modificado = modificado.replace(/\[SALUDO_AUTO\]/gi, "");
     
-    // 🟢 CORRECCIÓN: Ahora absorbe la coma y el espacio ([,\s]*) para evitar "Charles, , por favor"
     const nombresQuemados = /Estimad[oa]\s+(Mauricio|Robert|Verenice|Ing\.\s+Charles|Cinthia|Enrique|Luis\s+Fernando|Olivia|Rodolfo|Alex|Ulrich|Maria\s+Fernanda)[,\s]*/gi;
     modificado = modificado.replace(nombresQuemados, '');
 
-    // Reemplazo final con el saludo perfecto
     modificado = modificado.replace(/\bBuen(?:os|as)\s*(días|dias|tardes|noches)?\b/gi, `${saludoTiempo} ${nombreSaludo}, `);
 
-    // Limpiezas de seguridad por si quedaron comas huérfanas
     modificado = modificado.replace(/,\s*,/g, ',');
     modificado = modificado.replace(/,\s*<br>\s*,/gi, ',<br>');
     modificado = modificado.replace(/,\s*\n\s*,/g, ',\n');
@@ -116,12 +111,24 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
   const htmlFinal = procesarTextoMutante(htmlContent);
   const textoPlanoFinal = procesarTextoMutante(text);
 
-  // ================= 3. FLUJO DE COPIADO SEGURO =================
+  // ================= 3. FLUJO DE COPIADO HÍBRIDO (SOLUCIÓN MÓVIL) =================
   const ejecutarFlujoSeguro = (callbackApp) => {
     try {
-      const blob = new Blob([htmlFinal], { type: 'text/html' });
-      const clipboardItem = new ClipboardItem({ 'text/html': blob });
-      navigator.clipboard.write([clipboardItem]).catch(() => navigator.clipboard.writeText(textoPlanoFinal));
+      if (typeof ClipboardItem !== 'undefined') {
+        // 🟢 EL TRUCO MÓVIL: Creamos AMBOS formatos para que Android lo reconozca
+        const htmlBlob = new Blob([htmlFinal], { type: 'text/html' });
+        const textBlob = new Blob([textoPlanoFinal], { type: 'text/plain' });
+        const clipboardItem = new ClipboardItem({ 
+          'text/html': htmlBlob,
+          'text/plain': textBlob 
+        });
+        
+        navigator.clipboard.write([clipboardItem]).catch(() => {
+          navigator.clipboard.writeText(textoPlanoFinal);
+        });
+      } else {
+        navigator.clipboard.writeText(textoPlanoFinal);
+      }
     } catch (err) {
       navigator.clipboard.writeText(textoPlanoFinal);
     }
@@ -138,8 +145,6 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       const dest = encodeURIComponent(destinatarioEfectivo || '');
       const asun = encodeURIComponent(subject || '');
       
-      // 🟢 CORRECCIÓN MÓVIL: Se elimina ms-outlook:// en celulares para evitar "Error de redirección".
-      // Se utiliza el mailto: estándar con separador de comas que abre impecable en Android y iPhone.
       if (esAndroid || esIOS) {
         const copiasCCMobile = encodeURIComponent(ccGmailStr || ''); 
         window.location.href = `mailto:${dest}?subject=${asun}&cc=${copiasCCMobile}`;
@@ -235,10 +240,17 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
         <div className="grid grid-cols-2 gap-3">
           <button onClick={() => {
             try {
-              const blob = new Blob([htmlFinal], { type: 'text/html' });
-              const clipboardItem = new ClipboardItem({ 'text/html': blob });
-              navigator.clipboard.write([clipboardItem]).catch(() => navigator.clipboard.writeText(textoPlanoFinal));
-            } catch (err) { navigator.clipboard.writeText(textoPlanoFinal); }
+              if (typeof ClipboardItem !== 'undefined') {
+                const htmlBlob = new Blob([htmlFinal], { type: 'text/html' });
+                const textBlob = new Blob([textoPlanoFinal], { type: 'text/plain' });
+                const item = new ClipboardItem({ 'text/html': htmlBlob, 'text/plain': textBlob });
+                navigator.clipboard.write([item]).catch(() => navigator.clipboard.writeText(textoPlanoFinal));
+              } else {
+                navigator.clipboard.writeText(textoPlanoFinal);
+              }
+            } catch (err) {
+              navigator.clipboard.writeText(textoPlanoFinal);
+            }
             setCopiado(true);
             setTimeout(() => setCopiado(false), 2500);
           }} className={`py-3.5 px-3 rounded-xl font-black text-xs flex items-center justify-center transition-all duration-300 shadow-sm active:scale-95 ${copiado ? 'bg-emerald-500 text-white shadow-emerald-500/30' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}>
