@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Calculator, ArrowRightLeft, Building2, Wallet, CalendarCheck, Check, Eye, EyeOff, RotateCcw, AlertTriangle, Info, Calendar } from 'lucide-react';
+import { Calculator, ArrowRightLeft, Building2, Wallet, CalendarCheck, Check, Eye, EyeOff, RotateCcw, AlertTriangle, Info } from 'lucide-react';
 
 export default function ConsolidacionLotes() {
   // ================= 1. ESTADO DEL FORMULARIO =================
@@ -57,7 +57,8 @@ export default function ConsolidacionLotes() {
           let interesCents = Math.round(CapTempCents * TASA_MENSUAL);
           let capitalCents = CuotaPuraFijaCents - interesCents;
           
-          if (CapTempCents - capitalCents <= 0) {
+          // 🟢 ESCUDO ANTI "CENTAVO FANTASMA": Tolerancia de 5 centavos para matar decimales extra
+          if (CapTempCents - capitalCents <= 5) {
             capitalCents = CapTempCents;
             interesCents = Math.round(CapTempCents * TASA_MENSUAL);
           }
@@ -85,7 +86,7 @@ export default function ConsolidacionLotes() {
     let cuotasPagadasCompletas = 0;
     let balanceDescendenteCents = Suma_Total_Plan;
     let pagoSobrante = 0;
-    let Saldo_Capital_Restante = Capital_Actual; // NUEVO: Rastreo exacto del capital
+    let Saldo_Capital_Restante = Capital_Actual; 
 
     tabla = tabla.map(row => {
       let costoCuotaCents = Math.round(row.pagoTotal * 100);
@@ -100,20 +101,20 @@ export default function ConsolidacionLotes() {
         estado = 'PAGADA POR FUSIÓN';
         cubierto = row.pagoTotal;
         cuotasPagadasCompletas++;
-        Saldo_Capital_Restante -= row.capital; // Reduce el capital completo de esta cuota
+        Saldo_Capital_Restante -= row.capital; // Reduce el capital neto
       } else if (billeteraCents > 0) {
-        // La billetera solo cubre una parte de la cuota
+        // La billetera solo cubre una fracción de la cuota
         cubierto = billeteraCents / 100;
         pagoSobrante = (costoCuotaCents - billeteraCents) / 100;
         estado = `PAGO PARCIAL (Resta $${pagoSobrante.toFixed(2)})`;
         
-        // CÁLCULO FINANCIERO: ¿Cuánto de esta fracción pagó realmente Capital?
+        // Desglose matemático: ¿Cuánto de este pico pagó realmente capital?
         let tempBilletera = billeteraCents / 100;
         if (tempBilletera > row.seguro) {
-            tempBilletera -= row.seguro; // Paga seguro primero
+            tempBilletera -= row.seguro; 
             if (tempBilletera > row.plusvalia) {
-                tempBilletera -= row.plusvalia; // Paga interés después
-                Saldo_Capital_Restante -= tempBilletera; // Lo que sobra mata capital
+                tempBilletera -= row.plusvalia; 
+                Saldo_Capital_Restante -= tempBilletera; 
             }
         }
         billeteraCents = 0;
@@ -136,8 +137,8 @@ export default function ConsolidacionLotes() {
       cuotasPagadasCompletas,
       Fondos_Traspaso,
       pagoSobrante,
-      Saldo_Capital_Restante: Math.max(0, Saldo_Capital_Restante), // NUEVO
-      Deuda_Total_Restante, // NUEVO
+      Saldo_Capital_Restante: Math.max(0, Saldo_Capital_Restante), 
+      Deuda_Total_Restante, 
       tabla
     };
   }, [form, calculoLiquidacion.saldoALiquidar]);
@@ -167,6 +168,19 @@ export default function ConsolidacionLotes() {
             </button>
           )}
         </div>
+
+        {/* ALERTA DE POLÍTICA GERENCIAL */}
+        {!calculado && (
+          <div className="bg-blue-50 border-l-4 border-blue-500 rounded-r-2xl p-4 shadow-sm flex items-start">
+            <Info className="w-5 h-5 text-blue-600 mr-3 shrink-0 mt-0.5" />
+            <div>
+              <h3 className="text-xs font-black text-blue-900 uppercase tracking-wide mb-1">Políticas de Transferencia</h3>
+              <p className="text-[11px] text-blue-800/80 leading-relaxed font-medium">
+                El importe reconocido será aplicado estrictamente como <strong>adelanto de cuotas</strong>. No se deben usar las palabras "capital", "interés" o "plusvalía" con el cliente. El descuento de comisión es de uso interno.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* PANEL DE CONFIGURACIÓN */}
         <div className={"transition-all duration-500 " + (calculado ? "opacity-60 pointer-events-none grayscale-[20%]" : "")}>
@@ -209,7 +223,6 @@ export default function ConsolidacionLotes() {
                   </div>
                 </div>
 
-                {/* TABLERO DE RESULTADO DE LIQUIDACIÓN */}
                 <div className="bg-gradient-to-r from-rose-50 to-orange-50 p-4 rounded-2xl border border-rose-200/60 shadow-inner mt-4">
                   <div className="flex justify-between items-center mb-2 border-b border-rose-200/50 pb-2">
                     <span className="text-[10px] font-bold text-rose-800/70 uppercase">Base Reconocida ({form.tipoTransferencia === 'mismo_titular' ? '100%' : '70%'})</span>
@@ -220,17 +233,16 @@ export default function ConsolidacionLotes() {
                     <span className="text-xs font-bold text-rose-600">-{fD(calculoLiquidacion.comision)}</span>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-black text-rose-800 uppercase mb-1">Total Adelanto de Cuotas a Traspasar</label>
+                    <label className="block text-[10px] font-black text-rose-800 uppercase mb-1">Adelanto de Cuotas a Traspasar</label>
                     <div className="w-full px-4 py-2.5 bg-white border-2 border-rose-300 rounded-xl text-xl font-black text-rose-600 text-right shadow-sm">
                       {fD(calculoLiquidacion.saldoALiquidar)}
                     </div>
                   </div>
                 </div>
-
               </div>
             </div>
 
-            {/* POLO DERECHO: LOTE DESTINO Y AMORTIZACIÓN */}
+            {/* POLO DERECHO: LOTE DESTINO */}
             <div className="bg-white border-2 border-emerald-100 rounded-3xl p-5 md:p-6 shadow-sm relative overflow-hidden">
               <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-bl-full pointer-events-none"></div>
               <div className="flex items-center mb-5 border-b border-emerald-100 pb-4">
@@ -325,7 +337,7 @@ export default function ConsolidacionLotes() {
                   {tabActiva === 'RESUMEN' && (
                     <div className="animate-in fade-in zoom-in-95 duration-400">
                       
-                      {/* FILA SUPERIOR (Fusión Completa) */}
+                      {/* FILA SUPERIOR */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
                         <div className="md:col-span-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between group">
                             <div className="absolute -left-10 -bottom-10 opacity-10 group-hover:scale-110 transition-transform duration-700">
@@ -365,10 +377,9 @@ export default function ConsolidacionLotes() {
                         </div>
                       </div>
 
-                      {/* NUEVA FILA INFERIOR: Saldos y Liquidación (Súper Upselling) */}
+                      {/* 🟢 NUEVA FILA INFERIOR: UPSELLING DE LIQUIDACIÓN Y DEUDA TOTAL */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 md:mt-6 border-t border-slate-200 pt-6">
                         
-                        {/* Tarjeta de Liquidación a Capital (Color esmeralda) */}
                         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 md:p-6 shadow-xl relative overflow-hidden group">
                             <div className="absolute top-0 left-0 w-1.5 h-full bg-emerald-400"></div>
                             <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
@@ -379,12 +390,11 @@ export default function ConsolidacionLotes() {
                                 <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1 pl-2">Saldo a Capital Restante</h3>
                                 <span className="block text-3xl md:text-4xl font-black text-emerald-400 pl-2">{fD(calculos.Saldo_Capital_Restante)}</span>
                                 <p className="text-[10px] text-slate-500 font-medium mt-2 pl-2 border-t border-slate-800 pt-2">
-                                    Monto exacto (Capital neto) que el cliente debe abonar si desea liquidar su lote <strong className="text-slate-300">hoy mismo</strong>.
+                                    Monto exacto (Neto) a pagar si el cliente desea liquidar su lote <strong className="text-slate-300">hoy mismo</strong>.
                                 </p>
                             </div>
                         </div>
 
-                        {/* Tarjeta de Nueva Deuda Total (Color índigo claro) */}
                         <div className="bg-white border border-slate-200 rounded-3xl p-5 md:p-6 shadow-sm relative overflow-hidden group">
                             <div className="absolute top-0 left-0 w-1.5 h-full bg-indigo-500"></div>
                             <div className="absolute -right-4 -bottom-4 opacity-[0.03] group-hover:scale-110 transition-transform duration-500">
@@ -392,10 +402,10 @@ export default function ConsolidacionLotes() {
                             </div>
                             <div className="relative z-10">
                                 <span className="inline-flex items-center px-2.5 py-0.5 bg-slate-100 text-slate-500 rounded-md text-[9px] font-black tracking-widest uppercase mb-3 border border-slate-200">Deuda a Plazos</span>
-                                <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1 pl-2">Nuevo Saldo Total (A Plazos)</h3>
+                                <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1 pl-2">Nuevo Saldo Total a Pagar</h3>
                                 <span className="block text-3xl md:text-4xl font-black text-slate-800 pl-2">{fD(calculos.Deuda_Total_Restante)}</span>
                                 <p className="text-[10px] text-slate-500 font-medium mt-2 pl-2 border-t border-slate-100 pt-2">
-                                    Suma total de <strong className="text-slate-700">todas las cuotas futuras restantes</strong> (incluyendo seguro e interés).
+                                    Suma de <strong className="text-slate-700">todas las cuotas futuras restantes</strong> (incluye seguro e interés).
                                 </p>
                             </div>
                         </div>
