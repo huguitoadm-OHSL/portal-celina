@@ -7,7 +7,7 @@ export default function ConsolidacionLotes() {
     cliente: '',
     tipoTransferencia: 'mismo_titular', 
     proyectoOrigen: '', loteOrigen: '', montoAportado: '', comisionAsesor: '', 
-    proyectoDestino: '', loteDestino: '', cuotaDestino: '', seguroDestino: '', saldoDestino: '', pagadasDestino: '0', 
+    proyectoDestino: '', loteDestino: '', cuotaDestino: '', seguroDestino: '', cbdiDestino: '', saldoDestino: '', pagadasDestino: '0', 
   });
 
   const TASA_MENSUAL = 0.0101444; 
@@ -27,22 +27,25 @@ export default function ConsolidacionLotes() {
     return { aportado, porcentajeReconocido, baseReconocida, comision, saldoALiquidar };
   }, [form.montoAportado, form.comisionAsesor, form.tipoTransferencia]);
 
-  // ================= 2. MOTOR MATEMÁTICO: ADELANTO DE CUOTAS =================
+  // ================= 2. MOTOR MATEMÁTICO: RETROCOMPATIBLE CON CBDI =================
   const calculos = useMemo(() => {
     const Cuota_Total_Actual = parseFloat(form.cuotaDestino) || 0;
     const Seguro_Num = parseFloat(form.seguroDestino) || 0;
+    const Cbdi_Num = parseFloat(form.cbdiDestino) || 0; // 🟢 NUEVO: Captura del CBDI
     const Capital_Actual = parseFloat(form.saldoDestino) || 0;
     const Fondos_Traspaso = calculoLiquidacion.saldoALiquidar; 
     const pagadas = parseInt(form.pagadasDestino) || 0;
 
-    const Cuota_Pura_Fija = Math.round((Cuota_Total_Actual - Seguro_Num) * 100) / 100;
+    // 🟢 MATEMÁTICA EXACTA: Se resta Seguro y CBDI para hallar la Cuota Pura
+    const Cuota_Pura_Fija = Math.round((Cuota_Total_Actual - Seguro_Num - Cbdi_Num) * 100) / 100;
     const interesPrimerMes = Math.round(Capital_Actual * 100 * TASA_MENSUAL) / 100;
 
     if (Capital_Actual > 0 && interesPrimerMes >= Cuota_Pura_Fija) {
-        return { errorCritico: "⛔ ERROR DE DATOS: El monto ingresado genera un interés mayor a la cuota pura. Asegúrese de ingresar el 'SALDO CAPITAL' del CRM y NO el 'Saldo Total'." };
+        return { errorCritico: "⛔ ERROR DE DATOS: El monto ingresado genera un interés mayor a la cuota pura. Asegúrese de ingresar el 'SALDO CAPITAL' del CRM y NO el 'Saldo Total'. (Verifique también si ingresó correctamente Seguro y CBDI)." };
     }
 
     const SeguroCents = Math.round(Seguro_Num * 100);
+    const CbdiCents = Math.round(Cbdi_Num * 100); // 🟢 NUEVO
     const CuotaPuraFijaCents = Math.round(Cuota_Pura_Fija * 100);
 
     let CapTempCents = Math.round(Capital_Actual * 100);
@@ -57,14 +60,13 @@ export default function ConsolidacionLotes() {
           let interesCents = Math.round(CapTempCents * TASA_MENSUAL);
           let capitalCents = CuotaPuraFijaCents - interesCents;
           
-          // 🟢 ESCUDO ANTI "CENTAVO FANTASMA": Tolerancia de 5 centavos para matar decimales extra
           if (CapTempCents - capitalCents <= 5) {
             capitalCents = CapTempCents;
             interesCents = Math.round(CapTempCents * TASA_MENSUAL);
           }
           
           CapTempCents -= capitalCents;
-          let pagoMesCents = capitalCents + interesCents + SeguroCents;
+          let pagoMesCents = capitalCents + interesCents + SeguroCents + CbdiCents; // 🟢 NUEVO: Sumamos CBDI al pago mes
           Suma_Total_Plan += pagoMesCents;
 
           tabla.push({
@@ -73,6 +75,7 @@ export default function ConsolidacionLotes() {
             plusvalia: interesCents / 100,
             cuotaBase: Cuota_Pura_Fija,
             seguro: Seguro_Num,
+            cbdi: Cbdi_Num, // 🟢 NUEVO
             pagoTotal: pagoMesCents / 100,
             balance: 0, 
             estadoAdelanto: 'PENDIENTE',
@@ -96,25 +99,26 @@ export default function ConsolidacionLotes() {
       balanceDescendenteCents -= costoCuotaCents;
 
       if (billeteraCents >= costoCuotaCents) {
-        // La billetera cubre la cuota entera
         billeteraCents -= costoCuotaCents;
         estado = 'PAGADA POR FUSIÓN';
         cubierto = row.pagoTotal;
         cuotasPagadasCompletas++;
-        Saldo_Capital_Restante -= row.capital; // Reduce el capital neto
+        Saldo_Capital_Restante -= row.capital; 
       } else if (billeteraCents > 0) {
-        // La billetera solo cubre una fracción de la cuota
         cubierto = billeteraCents / 100;
         pagoSobrante = (costoCuotaCents - billeteraCents) / 100;
         estado = `PAGO PARCIAL (Resta $${pagoSobrante.toFixed(2)})`;
         
-        // Desglose matemático: ¿Cuánto de este pico pagó realmente capital?
+        // 🟢 CÁLCULO FINANCIERO MEJORADO: Desglose de cobro incluyendo CBDI
         let tempBilletera = billeteraCents / 100;
         if (tempBilletera > row.seguro) {
             tempBilletera -= row.seguro; 
-            if (tempBilletera > row.plusvalia) {
-                tempBilletera -= row.plusvalia; 
-                Saldo_Capital_Restante -= tempBilletera; 
+            if (tempBilletera > row.cbdi) { // 🟢 Pago del CBDI
+                tempBilletera -= row.cbdi;
+                if (tempBilletera > row.plusvalia) {
+                    tempBilletera -= row.plusvalia; 
+                    Saldo_Capital_Restante -= tempBilletera; 
+                }
             }
         }
         billeteraCents = 0;
@@ -150,7 +154,6 @@ export default function ConsolidacionLotes() {
     <div className="font-sans bg-[#f0f2f5] min-h-screen p-3 md:p-4 xl:p-8 pb-12">
       <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
         
-        {/* ENCABEZADO */}
         <div className="flex flex-col md:flex-row md:items-center justify-between bg-white p-3 md:p-5 rounded-3xl shadow-sm border border-slate-200 gap-3 md:gap-0 relative overflow-hidden">
           <div className="absolute right-0 top-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
           <div className="flex items-center relative z-10">
@@ -169,7 +172,6 @@ export default function ConsolidacionLotes() {
           )}
         </div>
 
-        {/* ALERTA DE POLÍTICA GERENCIAL */}
         {!calculado && (
           <div className="bg-blue-50 border-l-4 border-blue-500 rounded-r-2xl p-4 shadow-sm flex items-start">
             <Info className="w-5 h-5 text-blue-600 mr-3 shrink-0 mt-0.5" />
@@ -182,7 +184,6 @@ export default function ConsolidacionLotes() {
           </div>
         )}
 
-        {/* PANEL DE CONFIGURACIÓN */}
         <div className={"transition-all duration-500 " + (calculado ? "opacity-60 pointer-events-none grayscale-[20%]" : "")}>
           
           <div className="mb-4">
@@ -262,7 +263,8 @@ export default function ConsolidacionLotes() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3">
+                {/* 🟢 NUEVA GRILLA RESPONSIVA (Incluye CBDI) */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   <div className="col-span-1">
                     <label className="block text-[9px] md:text-[10px] font-bold text-slate-500 uppercase mb-1">Cuota Act. ($)</label>
                     <input type="number" name="cuotaDestino" value={form.cuotaDestino} onChange={handleChange} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-800 outline-none focus:border-emerald-400" />
@@ -270,6 +272,10 @@ export default function ConsolidacionLotes() {
                   <div className="col-span-1">
                     <label className="block text-[9px] md:text-[10px] font-bold text-slate-500 uppercase mb-1">Seguro ($)</label>
                     <input type="number" name="seguroDestino" value={form.seguroDestino} onChange={handleChange} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-emerald-400" />
+                  </div>
+                  <div className="col-span-1">
+                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-500 uppercase mb-1">CBDI ($)</label>
+                    <input type="number" name="cbdiDestino" value={form.cbdiDestino} onChange={handleChange} placeholder="Ej. 24.12" className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-emerald-400" />
                   </div>
                   <div className="col-span-1">
                     <label className="block text-[9px] md:text-[10px] font-bold text-slate-500 uppercase mb-1">Pagadas</label>
@@ -337,7 +343,6 @@ export default function ConsolidacionLotes() {
                   {tabActiva === 'RESUMEN' && (
                     <div className="animate-in fade-in zoom-in-95 duration-400">
                       
-                      {/* FILA SUPERIOR */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
                         <div className="md:col-span-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between group">
                             <div className="absolute -left-10 -bottom-10 opacity-10 group-hover:scale-110 transition-transform duration-700">
@@ -377,7 +382,6 @@ export default function ConsolidacionLotes() {
                         </div>
                       </div>
 
-                      {/* 🟢 NUEVA FILA INFERIOR: UPSELLING DE LIQUIDACIÓN Y DEUDA TOTAL */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 md:mt-6 border-t border-slate-200 pt-6">
                         
                         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 md:p-6 shadow-xl relative overflow-hidden group">
@@ -426,6 +430,8 @@ export default function ConsolidacionLotes() {
                               {!ocultarDetalles && <th className="p-3 border-r border-slate-200 font-black text-rose-500 text-right uppercase bg-rose-50/30" title="Información de Uso Interno">Costos Financieros</th>}
                               {!ocultarDetalles && <th className="p-3 border-r border-slate-200 font-black text-slate-500 text-right uppercase bg-white">Base</th>}
                               {!ocultarDetalles && <th className="p-3 border-r border-slate-200 font-black text-slate-500 text-right uppercase bg-white">Seguro</th>}
+                              {/* 🟢 NUEVA COLUMNA CBDI */}
+                              {!ocultarDetalles && <th className="p-3 border-r border-slate-200 font-black text-slate-500 text-right uppercase bg-white">CBDI</th>}
                               <th className="p-3 border-r border-slate-200 font-black text-indigo-700 text-right uppercase">Total a Pagar</th>
                               <th className="p-3 border-r border-slate-200 font-black text-slate-600 text-right uppercase">Saldo Deudor</th>
                               <th className="p-3 font-black text-slate-600 text-center uppercase">Estado / Fusión</th>
@@ -447,6 +453,9 @@ export default function ConsolidacionLotes() {
                                   {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-slate-100/50 text-right bg-rose-50/20 text-rose-500">{fD(row.plusvalia)}</td>}
                                   {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-slate-100/50 text-right opacity-60">{fD(row.cuotaBase)}</td>}
                                   {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-slate-100/50 text-right opacity-60">{fD(row.seguro)}</td>}
+                                  {/* 🟢 CELDA CBDI */}
+                                  {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-slate-100/50 text-right opacity-60">{fD(row.cbdi)}</td>}
+                                  
                                   <td className={`p-2 md:p-3 border-r border-slate-100/50 text-right font-black ${isPagada ? 'text-emerald-700' : 'text-slate-800'}`}>{fD(row.pagoTotal)}</td>
                                   <td className="p-2 md:p-3 border-r border-slate-100/50 text-right font-medium opacity-80">{fD(row.balance)}</td>
                                   <td className={`p-2 md:p-3 text-center font-bold text-[9px] ${isPagada ? 'text-emerald-600' : isParcial ? 'text-amber-600' : 'text-slate-300'}`}>
