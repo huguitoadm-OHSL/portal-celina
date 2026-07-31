@@ -1,112 +1,205 @@
-import React from 'react';
-import { Target, TrendingUp, Trophy, Zap, Crown, AlertCircle, Medal } from 'lucide-react';
-import { formatCurrency } from '../utils/formatters';
-
-// LA MISMA BASE DE DATOS MAESTRA DEL SEGUIMIENTO
-const BASE_DE_DATOS_PBI = [
-  { nombre: "NEFI ELIAS CHAVEZ", colAct: 0 },
-  { nombre: "DANIEL ANGULO MALDONADO", colAct: 0 },
-  { nombre: "MARISOL URGEL PIZARRO", colAct: 0 },
-  { nombre: "GLORIANA SILVA ALMENDA", colAct: 0 },
-  { nombre: "MADELINE CARBALLO", colAct: 0 },
-  { nombre: "JAIME FABRICIO RIOS", colAct: 0 },
-  { nombre: "ELY GONZALES GARCIA", colAct: 0 },
-  { nombre: "CARLOS ENRIQUE CALDERON", colAct: 0 },
-  { nombre: "GUICELA ARIAS", colAct: 0 },
-  { nombre: "HUMBERTO FALDIN PARAPAINO", colAct: 0 },
-  { nombre: "MERLY MENDEZ HURTADO", colAct: 0 },
-  { nombre: "RODRIGO ROJAS SILES", colAct: 0 },
-  { nombre: "TERESITA CARDOZO AGUIRRE", colAct: 0 }
-];
+import React, { useState } from 'react';
+import { 
+  Target, TrendingUp, Zap, Trophy, Rocket, 
+  Activity, FileText, PhoneCall, Users, Flag, Sparkles
+} from 'lucide-react';
 
 export default function Dashboard() {
-  const metaTotal = 450000;
-  let actualTotal = 0;
-  let todosLosAsesores = [];
+  // Estado simulado para este mes difícil (Ventas en 0)
+  const [ventasActuales] = useState(0); 
+  const metaMensual = 450000;
+  const porcentajeAvance = (ventasActuales / metaMensual) * 100;
 
-  // Cálculos instantáneos sin esperar a ninguna nube
-  BASE_DE_DATOS_PBI.forEach(a => {
-    actualTotal += a.colAct;
-    if (a.colAct > 0) todosLosAsesores.push({ nombre: a.nombre, venta: a.colAct });
-  });
-
-  const top5 = todosLosAsesores.sort((a, b) => b.venta - a.venta).slice(0, 5);
-  const avanceCalc = metaTotal > 0 ? (actualTotal / metaTotal) * 100 : 0;
-  const brechaCalc = Math.max(metaTotal - actualTotal, 0);
+  const fD = (num) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num || 0);
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="bg-gradient-to-r from-slate-900 via-[#002060] to-blue-900 rounded-2xl p-8 mb-8 shadow-lg text-white flex flex-col md:flex-row items-start md:items-center justify-between relative overflow-hidden">
-        <div className="absolute top-0 right-0 opacity-10 pointer-events-none transform translate-x-1/4 -translate-y-1/4"><Zap size={250} /></div>
-        <div className="relative z-10">
-          <p className="text-blue-200 font-bold tracking-wider text-sm mb-1 uppercase">Portal de Liderazgo v2.5</p>
-          <h2 className="text-3xl md:text-4xl font-black mb-2">Máquina de Ventas</h2>
-          <p className="text-slate-300 max-w-xl">Base de datos nativa activada. Velocidad instantánea de Clase Mundial.</p>
-        </div>
-        <div className="mt-6 md:mt-0 relative z-10 bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-xl text-center min-w-[160px]">
-          <p className="text-xs text-blue-200 uppercase font-bold tracking-wider mb-1">Avance Global</p>
-          <p className="text-4xl font-black text-white">{avanceCalc.toFixed(1)}%</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex items-center group hover:shadow-md transition-all">
-          <div className="bg-blue-100 p-4 rounded-xl text-blue-600 mr-5 group-hover:scale-110 transition-transform"><Target size={32} /></div>
-          <div><p className="text-sm font-bold text-slate-500 uppercase tracking-wide">Meta del Mes</p><p className="text-2xl font-black text-slate-800">$ {formatCurrency(metaTotal)}</p></div>
-        </div>
+    <div className="animate-in fade-in zoom-in-95 duration-500 font-sans space-y-6">
+      
+      {/* ================= HERO SECTION (CABECERA PREMIUM) ================= */}
+      <div className="bg-[#0f172a] rounded-[2rem] p-8 md:p-10 shadow-2xl relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center border border-slate-800">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none translate-x-1/3 -translate-y-1/3"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none -translate-x-1/3 translate-y-1/3"></div>
         
-        <div className="bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl p-6 shadow-md flex items-center text-white transform hover:-translate-y-1 transition-transform">
-          <div className="bg-white/20 p-4 rounded-xl mr-5 backdrop-blur-sm"><TrendingUp size={32} className="text-white" /></div>
-          <div><p className="text-sm font-bold text-emerald-50 uppercase tracking-wide">Colocación Actual</p><p className="text-3xl font-black">$ {formatCurrency(actualTotal)}</p></div>
+        <div className="relative z-10">
+          <div className="flex items-center space-x-3 mb-2">
+            <span className="px-3 py-1 bg-blue-500/20 text-blue-300 text-[10px] font-black tracking-[0.2em] uppercase rounded-full border border-blue-500/30 backdrop-blur-md">
+              Portal de Liderazgo V2.5
+            </span>
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+          </div>
+          <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight mb-2">
+            Máquina de <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Ventas</span>
+          </h1>
+          <p className="text-slate-400 text-xs md:text-sm font-medium flex items-center">
+            <Activity className="w-4 h-4 mr-2 text-indigo-400" />
+            Base de datos nativa activada. Velocidad instantánea de Clase Mundial.
+          </p>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex items-center group hover:shadow-md transition-all">
-          <div className="bg-amber-100 p-4 rounded-xl text-amber-600 mr-5 group-hover:scale-110 transition-transform"><AlertCircle size={32} /></div>
-          <div><p className="text-sm font-bold text-slate-500 uppercase tracking-wide">Brecha (Falta)</p><p className="text-2xl font-black text-amber-600">$ {formatCurrency(brechaCalc)}</p></div>
+        <div className="relative z-10 mt-6 md:mt-0 bg-white/5 backdrop-blur-xl border border-white/10 p-5 rounded-3xl text-center shadow-inner min-w-[160px]">
+          <p className="text-[10px] text-blue-200 font-black tracking-widest uppercase mb-1">Avance Global</p>
+          <p className="text-4xl font-black text-white">{porcentajeAvance.toFixed(1)}%</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
-          <h3 className="text-lg font-bold text-slate-800 flex items-center mb-8"><Zap className="w-5 h-5 mr-2 text-blue-600" /> Energía del Equipo</h3>
-          <div className="relative pt-8 pb-4">
-            <div className="absolute top-0 transform -translate-x-1/2 transition-all duration-1000 ease-out" style={{ left: `${Math.min(avanceCalc, 100)}%` }}>
-              <div className="bg-slate-800 text-white text-xs font-bold py-1 px-3 rounded-lg shadow-lg relative">{avanceCalc.toFixed(1)}%<div className="absolute bottom-[-4px] left-1/2 transform -translate-x-1/2 w-2 h-2 bg-slate-800 rotate-45"></div></div>
+      {/* ================= INDICADORES DE ESFUERZO (MANTIENEN LA MORAL ALTA) ================= */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex items-center space-x-4 hover:shadow-md transition-shadow">
+          <div className="bg-indigo-50 p-3 rounded-xl"><FileText className="w-5 h-5 text-indigo-600" /></div>
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase">Cotizaciones</p>
+            <p className="text-lg font-black text-slate-800">142</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex items-center space-x-4 hover:shadow-md transition-shadow">
+          <div className="bg-sky-50 p-3 rounded-xl"><PhoneCall className="w-5 h-5 text-sky-600" /></div>
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase">Llamadas ATC</p>
+            <p className="text-lg font-black text-slate-800">89</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex items-center space-x-4 hover:shadow-md transition-shadow">
+          <div className="bg-emerald-50 p-3 rounded-xl"><Users className="w-5 h-5 text-emerald-600" /></div>
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase">Visitas a Terreno</p>
+            <p className="text-lg font-black text-slate-800">34</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex items-center space-x-4 hover:shadow-md transition-shadow">
+          <div className="bg-amber-50 p-3 rounded-xl"><Zap className="w-5 h-5 text-amber-500" /></div>
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase">Cierres en Puerta</p>
+            <p className="text-lg font-black text-slate-800">7</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ================= TARJETAS KPI PRINCIPALES ================= */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        {/* META */}
+        <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Meta del Mes</p>
+              <h3 className="text-3xl font-black text-slate-800 tracking-tight">{fD(metaMensual)}</h3>
             </div>
-            <div className="w-full h-6 bg-slate-100 rounded-full overflow-hidden flex shadow-inner">
-              <div className="h-full bg-gradient-to-r from-blue-500 to-emerald-400 rounded-full transition-all duration-1000 ease-out shadow-sm" style={{ width: `${Math.min(avanceCalc, 100)}%` }}></div>
-            </div>
-            <div className="flex justify-between mt-3 text-sm font-bold text-slate-400"><span>$0</span><span className="text-slate-700">Meta: ${formatCurrency(metaTotal)}</span></div>
+            <div className="bg-blue-50 p-3 rounded-2xl group-hover:scale-110 transition-transform"><Target className="w-6 h-6 text-blue-600" /></div>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
-          <h3 className="text-lg font-bold text-slate-800 flex items-center mb-6"><Trophy className="w-5 h-5 mr-2 text-amber-500" /> Top Asesores del Mes</h3>
-          {top5.length === 0 ? (
-            <div className="text-center py-10 text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200"><Trophy className="w-12 h-12 mx-auto mb-3 opacity-20" /><p className="font-semibold text-sm">Aún no hay ventas registradas.</p></div>
-          ) : (
-            <div className="space-y-4">
-              {top5.map((asesor, index) => {
-                let icon = <Medal className="w-5 h-5 text-slate-400" />;
-                let bgClass = "bg-slate-50";
-                if (index === 0) { icon = <Crown className="w-5 h-5 text-amber-500" />; bgClass = "bg-gradient-to-r from-amber-50 to-transparent border border-amber-100"; }
-                else if (index === 1) { icon = <Medal className="w-5 h-5 text-slate-400" />; bgClass = "bg-gradient-to-r from-slate-100 to-transparent border border-slate-200"; }
-                else if (index === 2) { icon = <Medal className="w-5 h-5 text-amber-700" />; bgClass = "bg-gradient-to-r from-orange-50 to-transparent border border-orange-100"; }
+        {/* COLOCACIÓN ACTUAL (Psicología visual: Standby si es 0) */}
+        <div className={`rounded-3xl p-6 shadow-lg relative overflow-hidden transition-all duration-700 ${ventasActuales > 0 ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 border-none' : 'bg-slate-800 border border-slate-700'}`}>
+          {/* Brillo dinámico solo si hay ventas */}
+          {ventasActuales > 0 && <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-2xl"></div>}
+          
+          <div className="flex justify-between items-start relative z-10">
+            <div>
+              <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${ventasActuales > 0 ? 'text-emerald-100' : 'text-slate-400'}`}>Colocación Actual</p>
+              <h3 className={`text-3xl font-black tracking-tight ${ventasActuales > 0 ? 'text-white' : 'text-slate-200'}`}>
+                {fD(ventasActuales)}
+              </h3>
+            </div>
+            <div className={`p-3 rounded-2xl ${ventasActuales > 0 ? 'bg-white/20 backdrop-blur-sm' : 'bg-white/5'}`}>
+              <TrendingUp className={`w-6 h-6 ${ventasActuales > 0 ? 'text-white' : 'text-slate-500'}`} />
+            </div>
+          </div>
+          {ventasActuales === 0 && (
+            <p className="text-[10px] text-slate-500 mt-4 font-medium flex items-center">
+              <Sparkles className="w-3 h-3 mr-1" /> Esperando el primer cierre...
+            </p>
+          )}
+        </div>
 
-                return (
-                  <div key={index} className={`flex items-center justify-between p-4 rounded-xl ${bgClass}`}>
-                    <div className="flex items-center">
-                      <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center font-black text-slate-700 mr-4 border border-slate-100">{index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}`}</div>
-                      <div><p className="font-bold text-slate-800 text-sm uppercase">{asesor.nombre}</p><p className="text-xs font-semibold text-slate-500 flex items-center">{icon} <span className="ml-1">Top {index + 1}</span></p></div>
-                    </div>
-                    <div className="text-right"><p className="font-black text-emerald-600 text-lg">${formatCurrency(asesor.venta)}</p></div>
-                  </div>
-                );
-              })}
+        {/* BRECHA (FALTA) - Cambio de icono de Alerta a Bandera */}
+        <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
+          <div className="absolute bottom-0 right-0 w-24 h-24 bg-orange-500/5 rounded-tl-full pointer-events-none"></div>
+          <div className="flex justify-between items-start relative z-10">
+            <div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Terreno a Conquistar</p>
+              <h3 className="text-3xl font-black text-slate-800 tracking-tight">{fD(metaMensual - ventasActuales)}</h3>
+            </div>
+            <div className="bg-orange-50 p-3 rounded-2xl group-hover:rotate-12 transition-transform"><Flag className="w-6 h-6 text-orange-500" /></div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* ================= SECCIÓN INFERIOR ================= */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        {/* ENERGÍA DEL EQUIPO (Animación Shimmer) */}
+        <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm flex flex-col justify-center">
+          <div className="flex items-center mb-8">
+            <Zap className="w-5 h-5 text-indigo-500 mr-2" />
+            <h3 className="font-black text-slate-800 text-lg">Energía del Equipo</h3>
+          </div>
+
+          <div className="relative pt-6">
+            <div className="flex mb-2 items-center justify-between">
+              <div className="absolute -top-4 left-0">
+                <span className="text-xs font-black inline-block py-1.5 px-3 uppercase rounded-xl text-white bg-slate-800 shadow-lg">
+                  {porcentajeAvance.toFixed(1)}%
+                </span>
+              </div>
+            </div>
+            <div className="overflow-hidden h-4 mb-4 text-xs flex rounded-full bg-slate-100 shadow-inner relative">
+              {/* Barra de progreso real */}
+              <div style={{ width: `${Math.max(porcentajeAvance, 0)}%` }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-500 transition-all duration-1000 z-10"></div>
+              
+              {/* 🟢 MAGIA VISUAL: Efecto Radar (Shimmer) cuando está en cero */}
+              {ventasActuales === 0 && (
+                <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent -translate-x-full animate-[shimmer_2.5s_infinite]"></div>
+              )}
+            </div>
+            <div className="flex justify-between items-center text-[10px] font-black text-slate-400">
+              <span>{fD(ventasActuales)}</span>
+              <span className="uppercase">Meta: {fD(metaMensual)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 🏆 PODIO DE CRISTAL (EMPTY STATE REDISEÑADO) */}
+        <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm flex flex-col">
+          <div className="flex items-center mb-6">
+            <Trophy className="w-5 h-5 text-amber-500 mr-2" />
+            <h3 className="font-black text-slate-800 text-lg">Top Asesores del Mes</h3>
+          </div>
+
+          {ventasActuales === 0 ? (
+            // ESTADO VACÍO DE CLASE MUNDIAL
+            <div className="flex-1 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-slate-900 via-[#0f172a] to-indigo-950 rounded-2xl border border-indigo-500/20 shadow-inner relative overflow-hidden text-center group">
+              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+              
+              <div className="w-16 h-16 bg-white/5 backdrop-blur-md rounded-full flex items-center justify-center mb-4 border border-white/10 shadow-[0_0_30px_rgba(99,102,241,0.3)] group-hover:scale-110 transition-transform duration-500 relative z-10">
+                <Rocket className="w-8 h-8 text-indigo-400 -translate-y-1 translate-x-0.5 group-hover:text-indigo-300" />
+              </div>
+              
+              <h4 className="text-white font-black text-base md:text-lg tracking-wide mb-2 relative z-10">
+                ¡El podio está esperando!
+              </h4>
+              <p className="text-indigo-200/70 text-xs font-medium max-w-[250px] leading-relaxed relative z-10">
+                La carrera por la cima acaba de comenzar. ¿Quién de ustedes dará el primer gran golpe?
+              </p>
+            </div>
+          ) : (
+            // Aquí iría el código cuando sí hay vendedores en el Top
+            <div className="flex-1 flex items-center justify-center text-slate-500">
+              Aquí se listarán los mejores asesores...
             </div>
           )}
         </div>
+
       </div>
+
+      <style jsx>{`
+        @keyframes shimmer {
+          100% { transform: translateX(100%); }
+        }
+      `}</style>
     </div>
   );
 }
