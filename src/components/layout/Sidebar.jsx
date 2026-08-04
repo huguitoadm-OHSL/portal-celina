@@ -3,7 +3,7 @@ import {
   LayoutDashboard, BarChart, CalendarDays, Target, RefreshCw, Calculator, Repeat, Tag, 
   TrendingUp, PhoneCall, FileText, FileSignature, Shield, UserMinus, UserPlus, 
   ClipboardCheck, UserCheck, Building2, X, Lock, PhoneForwarded, AlertOctagon, KeyRound,
-  ArrowRightLeft // <--- ¡AQUÍ ESTÁ EL ÍCONO FALTANTE QUE REPARARÁ LA PANTALLA NEGRA!
+  ArrowRightLeft, Ban // <--- ¡AQUÍ ESTÁ EL ÍCONO FALTANTE QUE REPARARÁ LA PANTALLA NEGRA!
 } from 'lucide-react';
 
 export const Sidebar = ({ activeTab, setActiveTab, isOpen, closeSidebar, setSupervisorDestino }) => {
@@ -94,6 +94,7 @@ export const Sidebar = ({ activeTab, setActiveTab, isOpen, closeSidebar, setSupe
           <NavItem id="solicitudesCodigo" icon={KeyRound} label="Solicitud de Códigos" />
           <NavItem id="recalcular" icon={RefreshCw} label="Recalcular Plan" />
           <NavItem id="consolidacion" icon={ArrowRightLeft} label="Consolidación de Lotes" />
+          <NavItem id="penalidades" icon={Ban} label="Eliminación Penalidades" />
 
           <NavSection title="Trámites Generales" />
           <NavItem id="llamada" icon={PhoneCall} label="Validación Llamada" />
