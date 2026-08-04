@@ -17,7 +17,8 @@ import BloqueoLote from './views/BloqueoLote';
 import LiquidacionContado from './views/LiquidacionContado';
 import SolicitudesCodigo from './views/SolicitudesCodigo';
 import RecalcularPlan from './views/RecalcularPlan';
-import ConsolidacionLotes from './views/ConsolidacionLotes'; // <-- ¡NUEVA IMPORTACIÓN!
+import ConsolidacionLotes from './views/ConsolidacionLotes'; 
+import EliminacionPenalidades from './views/EliminacionPenalidades'; // <-- ¡NUEVA IMPORTACIÓN!
 
 // Vistas - Trámites Generales
 import ValidacionLlamada from './views/ValidacionLlamada';
