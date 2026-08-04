@@ -30,7 +30,7 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
       ]
     },
     {
-      pantallas: ["llamada", "validación", "validacion", "código", "codigo", "códigos", "codigos", "pend."],
+      pantallas: ["llamada", "validación", "validacion", "código", "codigo", "códigos", "codigos", "pend.", "penalidad", "penalidades"],
       contactos: [
         { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' },
         { email: 'omendoza@celina.com.bo', nombre: 'Olivia Mendoza Duran', saludo: 'Estimada Olivia' },
