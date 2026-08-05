@@ -1,54 +1,63 @@
 import React, { useState } from 'react';
-import { ResultCard } from '../components/ui/ResultCard'; // Asegúrate de que la ruta sea correcta
+import { ResultCard } from '../components/ui/ResultCard'; 
 import { Ban, User, Building2, MapPin, FileText, AlertOctagon } from 'lucide-react';
 
 export default function EliminacionPenalidades() {
   const [form, setForm] = useState({
     cliente: '',
-    proyecto: 'CELINA MUYURINA',
+    proyecto: '',
+    uv: '',
+    mzn: '',
     lote: '',
     contrato: ''
   });
 
-  // Estado para el ruteo hacia Enrique Lizarraga
   const [supervisorDestino, setSupervisorDestino] = useState('elizarraga@celina.com.bo');
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
-  // Proyectos Permitidos (Cumpliendo regla estricta: Celina 1, Celina 2 y Paraíso del Norte EXCLUIDOS)
-  const proyectosPermitidos = [
-    "CELINA MUYURINA",
-    "CELINA URUBO",
-    "CELINA NORTE",
-    "CAÑAVERAL",
-    "BRISAS DE PAZ",
-    "CELINA QUANTUM"
-  ];
+  // 🟢 ESCUDO DE SEGURIDAD GERENCIAL (Exclusión de Proyectos)
+  const handleProyectoBlur = (e) => {
+    const valor = e.target.value.toUpperCase();
+    if (
+      valor.includes("CELINA 1") || 
+      valor.includes("CELINA 2") || 
+      valor.includes("PARAÍSO DEL NORTE") || 
+      valor.includes("PARAISO DEL NORTE")
+    ) {
+      alert("⚠️ RESTRICCIÓN DEL SISTEMA: Los proyectos 'Celina 1', 'Celina 2' y 'Paraíso del Norte' están estrictamente excluidos de esta gestión.");
+      setForm(prev => ({ ...prev, proyecto: '' }));
+    }
+  };
 
   // ================= GENERACIÓN DE PLANTILLA =================
-  const subject = `Solicitud de eliminación de penalidades Cliente Titular: ${form.cliente.toUpperCase()} ${form.contrato}`;
+  const subject = `Solicitud de eliminación de penalidades Cliente Titular: ${form.cliente.toUpperCase()} ${form.contrato.toUpperCase()}`;
 
+  // Formato automático de la ubicación
+  const loteCompleto = `UV: ${form.uv} MZN: ${form.mzn} LOTE: ${form.lote}`;
+
+  // Se inicia con un "Buenas" explícito para que el ResultCard lo intercepte y modifique
   const htmlContent = `
-    [SALUDO_AUTO]
+    Buenas tardes Estimado Enrique,
     <br><br>
     por favor tu ayuda con sus multas del siguiente cliente:
     <br><br>
     <b>Cliente Titular:</b> ${form.cliente.toUpperCase() || '[Nombre del Cliente]'}<br>
-    <b>Proyecto:</b> ${form.proyecto || '[Proyecto]'}<br>
-    <b>Lote:</b> ${form.lote.toUpperCase() || '[Ej: UV: 81 MZN: 21 LOTE: 48]'}<br>
+    <b>Proyecto:</b> ${form.proyecto.toUpperCase() || '[Proyecto]'}<br>
+    <b>Lote:</b> ${loteCompleto.toUpperCase()}<br>
     <b>Nro. Contrato:</b> ${form.contrato.toUpperCase() || '[Número de Contrato]'}
     <br><br>
     Muchas gracias de antemano.
   `;
 
   const textContent = `
-    [SALUDO_AUTO]
+    Buenas tardes Estimado Enrique,
 
     por favor tu ayuda con sus multas del siguiente cliente:
 
     Cliente Titular: ${form.cliente.toUpperCase() || '[Nombre del Cliente]'}
-    Proyecto: ${form.proyecto || '[Proyecto]'}
-    Lote: ${form.lote.toUpperCase() || '[Ej: UV: 81 MZN: 21 LOTE: 48]'}
+    Proyecto: ${form.proyecto.toUpperCase() || '[Proyecto]'}
+    Lote: ${loteCompleto.toUpperCase()}
     Nro. Contrato: ${form.contrato.toUpperCase() || '[Número de Contrato]'}
 
     Muchas gracias de antemano.
@@ -99,16 +108,14 @@ export default function EliminacionPenalidades() {
                   </div>
                 </div>
 
-                {/* Proyecto */}
+                {/* Proyecto (Campo Libre + Validación) */}
                 <div className="relative group">
                   <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 pl-1">Proyecto</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                       <Building2 className="w-4 h-4 text-slate-400 group-focus-within:text-rose-500 transition-colors" />
                     </div>
-                    <select name="proyecto" value={form.proyecto} onChange={handleChange} className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 outline-none focus:bg-white focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 transition-all uppercase appearance-none cursor-pointer">
-                      {proyectosPermitidos.map(p => <option key={p} value={p}>{p}</option>)}
-                    </select>
+                    <input type="text" name="proyecto" value={form.proyecto} onChange={handleChange} onBlur={handleProyectoBlur} placeholder="Ej: CELINA MUYURINA" className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 outline-none focus:bg-white focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 transition-all uppercase" />
                   </div>
                 </div>
 
@@ -123,14 +130,30 @@ export default function EliminacionPenalidades() {
                   </div>
                 </div>
 
-                {/* Lote */}
+                {/* Lote Desglosado */}
                 <div className="col-span-1 md:col-span-2 relative group">
-                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 pl-1">Datos del Lote</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                      <MapPin className="w-4 h-4 text-slate-400 group-focus-within:text-rose-500 transition-colors" />
+                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 pl-1">Ubicación del Lote</label>
+                  <div className="flex items-center space-x-2">
+                    <div className="relative flex-1">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                         <span className="text-[10px] font-bold text-slate-400">UV:</span>
+                      </div>
+                      <input type="text" name="uv" value={form.uv} onChange={handleChange} className="w-full pl-9 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 outline-none focus:bg-white focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 transition-all uppercase" />
                     </div>
-                    <input type="text" name="lote" value={form.lote} onChange={handleChange} placeholder="Ej: UV: 81 MZN: 21 LOTE: 48" className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 outline-none focus:bg-white focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 transition-all uppercase" />
+                    
+                    <div className="relative flex-1">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                         <span className="text-[10px] font-bold text-slate-400">MZN:</span>
+                      </div>
+                      <input type="text" name="mzn" value={form.mzn} onChange={handleChange} className="w-full pl-11 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 outline-none focus:bg-white focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 transition-all uppercase" />
+                    </div>
+
+                    <div className="relative flex-1">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                         <span className="text-[10px] font-bold text-slate-400">LT:</span>
+                      </div>
+                      <input type="text" name="lote" value={form.lote} onChange={handleChange} className="w-full pl-9 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 outline-none focus:bg-white focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 transition-all uppercase" />
+                    </div>
                   </div>
                 </div>
               </div>
