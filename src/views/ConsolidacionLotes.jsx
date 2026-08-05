@@ -5,8 +5,7 @@ export default function ConsolidacionLotes() {
   // ================= 1. ESTADO DEL FORMULARIO =================
   const [form, setForm] = useState({
     cliente: '',
-    tipoTransferencia: 'mismo_titular', 
-    proyectoOrigen: '', loteOrigen: '', montoAportado: '', comisionAsesor: '', 
+    proyectoOrigen: '', loteOrigen: '', capitalAportado: '', cuotaInicial: '', comisionAsesor: '', 
     proyectoDestino: '', loteDestino: '', cuotaDestino: '', seguroDestino: '', cbdiDestino: '', saldoDestino: '', pagadasDestino: '0', 
   });
 
@@ -17,15 +16,20 @@ export default function ConsolidacionLotes() {
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
-  // ================= CÁLCULO DE LIQUIDACIÓN =================
+  // ================= NUEVO CÁLCULO DE LIQUIDACIÓN (REGLA ACTUALIZADA) =================
   const calculoLiquidacion = useMemo(() => {
-    const aportado = parseFloat(form.montoAportado) || 0;
+    const capital = parseFloat(form.capitalAportado) || 0;
+    const inicial = parseFloat(form.cuotaInicial) || 0;
     const comision = parseFloat(form.comisionAsesor) || 0;
-    const porcentajeReconocido = form.tipoTransferencia === 'mismo_titular' ? 1 : 0.70;
-    const baseReconocida = aportado * porcentajeReconocido;
+    
+    // Nueva Regla: Solo Capital Aportado + Cuota Inicial
+    const baseReconocida = capital + inicial;
+    
+    // Menos gastos administrativos
     const saldoALiquidar = Math.max(0, baseReconocida - comision);
-    return { aportado, porcentajeReconocido, baseReconocida, comision, saldoALiquidar };
-  }, [form.montoAportado, form.comisionAsesor, form.tipoTransferencia]);
+    
+    return { capital, inicial, baseReconocida, comision, saldoALiquidar };
+  }, [form.capitalAportado, form.cuotaInicial, form.comisionAsesor]);
 
   // ================= 2. MOTOR MATEMÁTICO: DE ATRÁS HACIA ADELANTE =================
   const calculos = useMemo(() => {
@@ -96,14 +100,12 @@ export default function ConsolidacionLotes() {
       let costoCuotaCents = Math.round(row.pagoTotal * 100);
 
       if (billeteraCents >= costoCuotaCents && billeteraCents > 0) {
-        // Alcanza para matar la cuota final completa
         billeteraCents -= costoCuotaCents;
         tabla[i].estadoAdelanto = 'ELIMINADA POR FUSIÓN';
         tabla[i].saldoCubierto = row.pagoTotal;
         cuotasEliminadasCompletas++;
         Saldo_Capital_Restante -= row.capital; 
       } else if (billeteraCents > 0) {
-        // Solo alcanza para pagar una parte de esta cuota
         tabla[i].saldoCubierto = billeteraCents / 100;
         pagoSobrante = (costoCuotaCents - billeteraCents) / 100;
         tabla[i].estadoAdelanto = `PAGO PARCIAL (Resta $${pagoSobrante.toFixed(2)})`;
@@ -124,7 +126,7 @@ export default function ConsolidacionLotes() {
       }
     }
 
-    // C. CÁLCULO DE BALANCE DESCENDENTE NORMAL (Para mantener la vista contable correcta)
+    // C. CÁLCULO DE BALANCE DESCENDENTE
     let balanceDescendenteCents = Suma_Total_Plan;
     for (let i = 0; i < tabla.length; i++) {
         balanceDescendenteCents -= Math.round(tabla[i].pagoTotal * 100);
@@ -173,14 +175,14 @@ export default function ConsolidacionLotes() {
           )}
         </div>
 
-        {/* ALERTA DE POLÍTICA GERENCIAL */}
+        {/* ALERTA DE POLÍTICA GERENCIAL ACTUALIZADA */}
         {!calculado && (
           <div className="bg-blue-50 border-l-4 border-blue-500 rounded-r-2xl p-4 shadow-sm flex items-start">
             <Info className="w-5 h-5 text-blue-600 mr-3 shrink-0 mt-0.5" />
             <div>
-              <h3 className="text-xs font-black text-blue-900 uppercase tracking-wide mb-1">Políticas de Transferencia</h3>
+              <h3 className="text-xs font-black text-blue-900 uppercase tracking-wide mb-1">Nuevas Políticas de Traspaso</h3>
               <p className="text-[11px] text-blue-800/80 leading-relaxed font-medium">
-                El importe reconocido será aplicado como <strong>pago de cuotas desde el final del plan hacia atrás</strong>. No se deben usar las palabras "capital", "interés" o "plusvalía" con el cliente. El descuento de comisión es de uso interno.
+                El importe reconocido será estrictamente la suma del <strong>Capital Aportado más la Cuota Inicial</strong>, descontando gastos administrativos. Este fondo se aplicará como pago de cuotas desde el final del plan hacia atrás.
               </p>
             </div>
           </div>
@@ -196,7 +198,7 @@ export default function ConsolidacionLotes() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
             
-            {/* POLO IZQUIERDO */}
+            {/* POLO IZQUIERDO: LOTE ORIGEN Y LIQUIDACIÓN REDISEÑADA */}
             <div className="bg-white border-2 border-rose-100 rounded-3xl p-5 md:p-6 shadow-sm relative overflow-hidden">
               <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 rounded-bl-full pointer-events-none"></div>
               <div className="flex items-center justify-between mb-5 border-b border-rose-100 pb-4">
@@ -207,21 +209,18 @@ export default function ConsolidacionLotes() {
               </div>
               
               <div className="space-y-4 relative z-10">
-                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                  <label className="block text-[10px] font-bold text-slate-600 uppercase mb-2">Tipo de Traspaso</label>
-                  <select name="tipoTransferencia" value={form.tipoTransferencia} onChange={handleChange} className="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 outline-none focus:border-rose-400">
-                    <option value="mismo_titular">Mismo Titular (Reconoce 100%)</option>
-                    <option value="tercero">Tercero sin vínculo (Reconoce 70%)</option>
-                  </select>
-                </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="col-span-2 md:col-span-1">
-                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-500 uppercase mb-1">Monto Total Aportado ($)</label>
-                    <input type="number" name="montoAportado" value={form.montoAportado} onChange={handleChange} className="w-full px-3 py-2.5 bg-rose-50 border border-rose-200 rounded-xl text-sm font-black text-rose-900 outline-none focus:border-rose-400" />
+                  <div className="col-span-1">
+                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-500 uppercase mb-1">Capital Aportado ($)</label>
+                    <input type="number" name="capitalAportado" value={form.capitalAportado} onChange={handleChange} className="w-full px-3 py-2.5 bg-rose-50 border border-rose-200 rounded-xl text-sm font-black text-rose-900 outline-none focus:border-rose-400" />
                   </div>
-                  <div className="col-span-2 md:col-span-1 relative">
+                  <div className="col-span-1">
+                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-500 uppercase mb-1">Cuota Inicial ($)</label>
+                    <input type="number" name="cuotaInicial" value={form.cuotaInicial} onChange={handleChange} className="w-full px-3 py-2.5 bg-rose-50 border border-rose-200 rounded-xl text-sm font-black text-rose-900 outline-none focus:border-rose-400" />
+                  </div>
+                  <div className="col-span-2 relative">
                     <label className="block text-[9px] md:text-[10px] font-bold text-slate-500 uppercase mb-1 flex items-center gap-1">
-                      Comisión Asesor ($) <AlertTriangle className="w-3 h-3 text-amber-500" title="Uso Interno."/>
+                      Gastos Admin. / Comisión ($) <AlertTriangle className="w-3 h-3 text-amber-500" title="Uso Interno."/>
                     </label>
                     <input type="number" name="comisionAsesor" value={form.comisionAsesor} onChange={handleChange} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 outline-none focus:border-rose-400" />
                   </div>
@@ -229,11 +228,11 @@ export default function ConsolidacionLotes() {
 
                 <div className="bg-gradient-to-r from-rose-50 to-orange-50 p-4 rounded-2xl border border-rose-200/60 shadow-inner mt-4">
                   <div className="flex justify-between items-center mb-2 border-b border-rose-200/50 pb-2">
-                    <span className="text-[10px] font-bold text-rose-800/70 uppercase">Base Reconocida ({form.tipoTransferencia === 'mismo_titular' ? '100%' : '70%'})</span>
+                    <span className="text-[10px] font-bold text-rose-800/70 uppercase">Base Reconocida (Capital + Inicial)</span>
                     <span className="text-xs font-bold text-rose-900">{fD(calculoLiquidacion.baseReconocida)}</span>
                   </div>
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-[10px] font-bold text-rose-800/70 uppercase">Descuento Comisiones</span>
+                    <span className="text-[10px] font-bold text-rose-800/70 uppercase">Gastos Administrativos</span>
                     <span className="text-xs font-bold text-rose-600">-{fD(calculoLiquidacion.comision)}</span>
                   </div>
                   <div>
@@ -246,7 +245,7 @@ export default function ConsolidacionLotes() {
               </div>
             </div>
 
-            {/* POLO DERECHO */}
+            {/* POLO DERECHO: LOTE DESTINO */}
             <div className="bg-white border-2 border-emerald-100 rounded-3xl p-5 md:p-6 shadow-sm relative overflow-hidden">
               <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-bl-full pointer-events-none"></div>
               <div className="flex items-center mb-5 border-b border-emerald-100 pb-4">
@@ -297,8 +296,8 @@ export default function ConsolidacionLotes() {
             {!calculado && (
               <button 
                 onClick={() => {
-                  if(!form.saldoDestino || !form.cuotaDestino || !form.montoAportado) { alert("Complete los montos clave de ambos lotes."); return; }
-                  if(calculoLiquidacion.saldoALiquidar <= 0) { alert("El saldo a liquidar no puede ser cero o negativo. Revise la comisión o el monto aportado."); return; }
+                  if(!form.saldoDestino || !form.cuotaDestino || calculoLiquidacion.baseReconocida <= 0) { alert("Complete los montos clave de ambos lotes."); return; }
+                  if(calculoLiquidacion.saldoALiquidar <= 0) { alert("El saldo a liquidar no puede ser cero o negativo. Revise la comisión o los montos aportados."); return; }
                   setCalculado(true); setTabActiva('RESUMEN'); 
                 }}
                 className="w-full lg:w-auto bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-8 py-4 rounded-2xl font-black text-[11px] md:text-xs uppercase tracking-widest flex items-center justify-center transition-all shadow-[0_8px_20px_rgba(79,70,229,0.3)] active:scale-95"
@@ -345,7 +344,6 @@ export default function ConsolidacionLotes() {
                   {tabActiva === 'RESUMEN' && (
                     <div className="animate-in fade-in zoom-in-95 duration-400">
                       
-                      {/* FILA SUPERIOR */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
                         <div className="md:col-span-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between group">
                             <div className="absolute -left-10 -bottom-10 opacity-10 group-hover:scale-110 transition-transform duration-700">
@@ -385,7 +383,6 @@ export default function ConsolidacionLotes() {
                         </div>
                       </div>
 
-                      {/* FILA INFERIOR: UPSELLING */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 md:mt-6 border-t border-slate-200 pt-6">
                         
                         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 md:p-6 shadow-xl relative overflow-hidden group">
