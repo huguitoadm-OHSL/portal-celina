@@ -15,18 +15,15 @@ export const SUPERVISORES = [
 
 export const EQUIPOS_ASESORES = {
   "Oscar Saravia": [
-    { nombre: "Marisol Urgel Pizarro", colAct: 24384.00, tipo: "Interno", ventas: 1 },
+    { nombre: "Marisol Urgel Pizarro", colAct: 6500.00, tipo: "Interno", ventas: 1 },
     { nombre: "Carlos Enrique Calderon", colAct: 0, tipo: "Interno", ventas: 0 },
-    { nombre: "Ely Gonzales Garcia", colAct: 7200, tipo: "Interno", ventas: 1 },
+    { nombre: "Ely Gonzales Garcia", colAct: 0, tipo: "Interno", ventas: 0 },
     { nombre: "Rodrigo Rojas Siles", colAct: 0, tipo: "Interno", ventas: 0 },
-    { nombre: "Jaime F. Rios Castro", colAct: 7500, tipo: "Interno", ventas: 1 },
+    { nombre: "Jaime F. Rios Castro", colAct: 0, tipo: "Interno", ventas: 0 },
     { nombre: "Merly Mendez Hurtado", colAct: 0, tipo: "Interno", ventas: 0 },
-    { nombre: "Gloriana Silva Almenda", colAct: 13200.00, tipo: "Interno", ventas: 2 },
-    { nombre: "Daniel Angulo Maldonado", colAct: 45000.00, tipo: "Interno", ventas: 6 },
-    { nombre: "Nefi Elias Chavez", colAct: 45278.00, tipo: "Aprendizaje", ventas: 2 },
-    { nombre: "Teresita Cardozo Aguirre", colAct: 0, tipo: "Aprendizaje", ventas: 0 },
+    { nombre: "Gloriana Silva Almenda", colAct: 0, tipo: "Interno", ventas: 0 },
+    { nombre: "Daniel Angulo Maldonado", colAct: 0, tipo: "Interno", ventas: 0 },
     { nombre: "Guicela Arias", colAct: 0, tipo: "Aprendizaje", ventas: 0 },
-    { nombre: "Humberto Faldin Parapaino", colAct: 0, tipo: "Aprendizaje", ventas: 0 }
   ]
 };
 
