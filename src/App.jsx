@@ -124,8 +124,9 @@ export default function App() {
       case 'liquidacionContado': return <LiquidacionContado />;
       case 'solicitudesCodigo': return <SolicitudesCodigo />;
       case 'recalcular': return <RecalcularPlan />;
-      case 'consolidacion': return <ConsolidacionLotes />; // <-- ¡NUEVA RUTA DE CONSOLIDACIÓN!
-      
+      case 'consolidacion': return <ConsolidacionLotes />; 
+      case 'penalidades': return <EliminacionPenalidades/>; // <-- ¡NUEVA RUTA DE CONSOLIDACIÓN!
+        
       // 3. Trámites Generales
       case 'llamada': return <ValidacionLlamada />;
       case 'fisico': return <ContratoFisico />;
