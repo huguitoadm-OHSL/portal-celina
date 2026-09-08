@@ -7,7 +7,7 @@ import {
 export default function Dashboard() {
   // ================= BASE DE DATOS LOCAL (VENTAS DEL MES) =================
   const [asesoresData] = useState([
-    { id: 1, nombre: 'JIMMY GONZALES NUÑEZ', ventas: 5, colocacion: 37944 },
+    { id: 1, nombre: 'JIMMY GONZALES', ventas: 5, colocacion: 37944 },
   ]);
 
   // ================= MOTOR MATEMÁTICO =================
