@@ -16,10 +16,10 @@ const BASE_DE_DATOS_PBI = [
 ];
 
 export default function SeguimientoVentas() {
-  const ventasPorProyecto = [0, 0, 0, 0, 0, 0, 0]; 
+  const ventasPorProyecto = [0, 0, 0, 0, 5, 0, 0]; 
 
   const datosProcesados = BASE_DE_DATOS_PBI.map(asesor => {
-    let totalVentas = 0;
+    let totalVentas = 5;
     asesor.ventasReales.forEach((cant, i) => { 
       ventasPorProyecto[i] += cant; 
       totalVentas += cant;
@@ -36,13 +36,11 @@ export default function SeguimientoVentas() {
     };
   });
 
-  const maxVentaProy = Math.max(...ventasPorProyecto, 1);
+  const maxVentaProy = Math.max(...ventasPorProyecto, 5);
 
   // KPIS EXACTOS DEL PBI DE CELINA
-  const totalAsesores = 9;
-  const totalAntiguos = 8;
-  const totalNuevos = 1;
-  const totalExternos = 0;
+  const totalAsesores = 7;
+  const totalAntiguos = 7;
   
   const productivos = datosProcesados.filter(a => a.colocacion >= 25000).length;
   // Productividad calculada sobre la base de antiguos para igualar el 25% de Power BI
@@ -63,8 +61,6 @@ export default function SeguimientoVentas() {
           <div className="grid grid-cols-4 divide-x divide-slate-100 text-center">
             <div><p className="text-3xl font-black text-slate-800">{totalAsesores}</p><p className="text-[10px] text-slate-400 font-semibold uppercase mt-1">Total</p></div>
             <div><p className="text-3xl font-black text-slate-800">{totalAntiguos}</p><p className="text-[10px] text-slate-400 font-semibold uppercase mt-1">Antiguos</p></div>
-            <div><p className="text-3xl font-black text-sky-600">{totalNuevos}</p><p className="text-[10px] text-sky-500/70 font-semibold uppercase mt-1">Nuevos</p></div>
-            <div><p className="text-3xl font-black text-amber-500">{totalExternos}</p><p className="text-[10px] text-amber-500/70 font-semibold uppercase mt-1">Externos</p></div>
           </div>
           <div className="mt-5 pt-4 border-t border-slate-100 grid grid-cols-2 divide-x divide-slate-100 text-center">
             <div><p className="text-2xl font-black text-slate-700">{productivos}</p><p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Productivos</p></div>
