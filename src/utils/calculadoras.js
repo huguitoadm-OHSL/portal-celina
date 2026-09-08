@@ -35,7 +35,7 @@ export const calcularDescuento = (formDescuento) => {
     if (modalidad === 'Contado') {
       descuentoPorM2 = PROYECTOS_CONVENIO_1.includes(proyecto) ? 3 : 4; 
     } else if (modalidad === 'Crédito') {
-      if (porcentajeCuota >= 5) descuentoPorM2 = 2; 
+      if (porcentajeCuota >= 5) descuentoPorM2 = 1; 
       else if (porcentajeCuota >= 1.5) descuentoPorM2 = 1; 
     }
     descuentoTotal = descuentoPorM2 * m2Num;
@@ -46,13 +46,13 @@ export const calcularDescuento = (formDescuento) => {
     if (modalidad === 'Contado') {
       porcentaje = 30; 
     } else if (modalidad === 'Crédito') {
-      if (porcentajeCuota >= 5) {
-        const maxDesc = 23;
+      if (porcentajeCuota >= 1.5) {
+        const maxDesc = 1$PORM2;
         let inputDesc = parseFloat(descuentoPropiosManual);
         if (isNaN(inputDesc)) inputDesc = maxDesc;
         porcentaje = Math.max(0, Math.min(inputDesc, maxDesc));
       } else if (porcentajeCuota >= 1.5) {
-        const maxDesc = 20;
+        const maxDesc = 1$PORM2;
         let inputDesc = parseFloat(descuentoPropiosManual);
         if (isNaN(inputDesc)) inputDesc = maxDesc;
         porcentaje = Math.max(0, Math.min(inputDesc, maxDesc));
