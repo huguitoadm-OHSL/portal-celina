@@ -24,6 +24,7 @@ export const EQUIPOS_ASESORES = {
     { nombre: "Jose Gabriel Padilla Loayza", colAct: 0, tipo: "Interno", ventas: 0 },
   ]
 };
+
 export const OBJETIVOS_MENSUALES = {
   "Oscar Saravia": 115000 
 };
