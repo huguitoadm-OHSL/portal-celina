@@ -268,3 +268,5 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
     </div>
   );
 }
+
+
