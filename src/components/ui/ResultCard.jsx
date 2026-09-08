@@ -16,7 +16,6 @@ export function ResultCard({ title, text, htmlContent, subject, cc, supervisorDe
         { email: 'cbarretto@celina.com.bo', nombre: 'Ing. Charles Barretto', saludo: 'Estimado Ing. Charles' },
         { email: 'csalvatierra@celina.com.bo', nombre: 'Cinthia Salvatierra', saludo: 'Estimada Cinthia' },
         { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' },
-        { email: 'aperez@celina.com.bo', nombre: 'Alex Pérez', saludo: 'Estimado Alex' },
         { email: 'omendoza@celina.com.bo', nombre: 'Olivia Mendoza', saludo: 'Estimada Olivia' }
       ]
     },
