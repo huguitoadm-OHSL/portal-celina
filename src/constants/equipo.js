@@ -26,6 +26,6 @@ export const EQUIPOS_ASESORES = {
 };
 
 export const OBJETIVOS_MENSUALES = {
-  "Oscar Saravia": 450000 
+  "Oscar Saravia": 115000 
 };
 
