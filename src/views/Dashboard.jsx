@@ -65,9 +65,9 @@ export default function Dashboard() {
       {/* ================= INDICADORES DE ESFUERZO (GLASSMORPHISM Y HOVER FLOTANTE) ================= */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
         {[
-          { icon: FileText, label: 'Cotizaciones', val: '35', color: 'indigo' },
+          { icon: FileText, label: 'Cotizaciones', val: '142', color: 'indigo' },
           { icon: PhoneCall, label: 'Llamadas ATC', val: '89', color: 'sky' },
-          { icon: Users, label: 'Visitas a Terreno', val: '5', color: 'emerald' },
+          { icon: Users, label: 'Visitas a Terreno', val: '34', color: 'emerald' },
           { icon: Zap, label: 'Cierres en Puerta', val: totalCierres, color: 'amber' }
         ].map((item, idx) => (
           <div key={idx} className="bg-white/70 backdrop-blur-xl rounded-[1.5rem] p-5 border border-slate-200/60 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex items-center space-x-4 hover:-translate-y-1.5 hover:shadow-[0_15px_30px_rgba(0,0,0,0.06)] hover:bg-white transition-all duration-300 group">
