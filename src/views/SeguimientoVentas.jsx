@@ -16,7 +16,7 @@ const BASE_DE_DATOS_PBI = [
 ];
 
 export default function SeguimientoVentas() {
-  const ventasPorProyecto = [0, 0, 0, 0, 0, 0, 0]; 
+  const ventasPorProyecto = [0, 0, 0, 0, 5, 0, 0]; 
 
   const datosProcesados = BASE_DE_DATOS_PBI.map(asesor => {
     let totalVentas = 0;
