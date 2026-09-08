@@ -7,14 +7,14 @@ import {
 export default function Dashboard() {
   // ================= BASE DE DATOS LOCAL (VENTAS DEL MES) =================
   const [asesoresData] = useState([
-    { id: 1, nombre: 'MARISOL URGEL PIZARRO', ventas: 1, colocacion: 6300 },
+    { id: 1, nombre: 'JIMMY GONZALES NUÑEZ', ventas: 5, colocacion: 37944 },
   ]);
 
   // ================= MOTOR MATEMÁTICO =================
   const ventasActuales = useMemo(() => asesoresData.reduce((sum, as) => sum + as.colocacion, 0), [asesoresData]);
   const totalCierres = useMemo(() => asesoresData.reduce((sum, as) => sum + as.ventas, 0), [asesoresData]);
   
-  const metaMensual = 450000;
+  const metaMensual = 115000;
   const porcentajeAvance = (ventasActuales / metaMensual) * 100;
 
   const fD = (num) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num || 0);
@@ -65,9 +65,9 @@ export default function Dashboard() {
       {/* ================= INDICADORES DE ESFUERZO (GLASSMORPHISM Y HOVER FLOTANTE) ================= */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
         {[
-          { icon: FileText, label: 'Cotizaciones', val: '142', color: 'indigo' },
+          { icon: FileText, label: 'Cotizaciones', val: '35', color: 'indigo' },
           { icon: PhoneCall, label: 'Llamadas ATC', val: '89', color: 'sky' },
-          { icon: Users, label: 'Visitas a Terreno', val: '34', color: 'emerald' },
+          { icon: Users, label: 'Visitas a Terreno', val: '5', color: 'emerald' },
           { icon: Zap, label: 'Cierres en Puerta', val: totalCierres, color: 'amber' }
         ].map((item, idx) => (
           <div key={idx} className="bg-white/70 backdrop-blur-xl rounded-[1.5rem] p-5 border border-slate-200/60 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex items-center space-x-4 hover:-translate-y-1.5 hover:shadow-[0_15px_30px_rgba(0,0,0,0.06)] hover:bg-white transition-all duration-300 group">
