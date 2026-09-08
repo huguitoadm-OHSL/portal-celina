@@ -7,12 +7,12 @@ import {
 export default function Dashboard() {
   // ================= BASE DE DATOS LOCAL (VENTAS DEL MES) =================
   const [asesoresData] = useState([
-    { id: 1, nombre: 'JIMMY GONZALES', ventas: 5, colocacion: 37944 },
+    { id: 1, nombre: 'JIMMY GONZALES NUÑEZ', ventas: 5, colocacion: 37944 },
   ]);
 
   // ================= MOTOR MATEMÁTICO =================
   const ventasActuales = useMemo(() => asesoresData.reduce((sum, as) => sum + as.colocacion, 0), [asesoresData]);
-  const totalCierres = useMemo(() => asesoresData.reduce((sum, as) => sum + as.ventas, 0), [asesoresData]);
+  const totalCierres = useMemo(() => asesoresData.reduce((sum, as) => sum + as.ventas, 1), [asesoresData]);
   
   const metaMensual = 115000;
   const porcentajeAvance = (ventasActuales / metaMensual) * 100;
