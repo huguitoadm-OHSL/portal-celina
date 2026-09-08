@@ -15,15 +15,13 @@ export const SUPERVISORES = [
 
 export const EQUIPOS_ASESORES = {
   "Oscar Saravia": [
-    { nombre: "Marisol Urgel Pizarro", colAct: 6500.00, tipo: "Interno", ventas: 1 },
+    { nombre: "Marisol Urgel Pizarro", colAct: 0, tipo: "Interno", ventas: 0 },
     { nombre: "Carlos Enrique Calderon", colAct: 0, tipo: "Interno", ventas: 0 },
     { nombre: "Ely Gonzales Garcia", colAct: 0, tipo: "Interno", ventas: 0 },
-    { nombre: "Rodrigo Rojas Siles", colAct: 0, tipo: "Interno", ventas: 0 },
+    { nombre: "Jimmy Gonzales Nuñez", colAct: 37944.44, tipo: "Interno", ventas: 5 },
     { nombre: "Jaime F. Rios Castro", colAct: 0, tipo: "Interno", ventas: 0 },
     { nombre: "Merly Mendez Hurtado", colAct: 0, tipo: "Interno", ventas: 0 },
-    { nombre: "Gloriana Silva Almenda", colAct: 0, tipo: "Interno", ventas: 0 },
-    { nombre: "Daniel Angulo Maldonado", colAct: 0, tipo: "Interno", ventas: 0 },
-    { nombre: "Guicela Arias", colAct: 0, tipo: "Aprendizaje", ventas: 0 },
+    { nombre: "Jose Gabriel Padilla Loayza", colAct: 0, tipo: "Interno", ventas: 0 },
   ]
 };
 
