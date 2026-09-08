@@ -19,7 +19,7 @@ export default function SeguimientoVentas() {
   const ventasPorProyecto = [0, 0, 0, 0, 0, 0, 0]; 
 
   const datosProcesados = BASE_DE_DATOS_PBI.map(asesor => {
-    let totalVentas = 5;
+    let totalVentas = 0;
     asesor.ventasReales.forEach((cant, i) => { 
       ventasPorProyecto[i] += cant; 
       totalVentas += cant;
