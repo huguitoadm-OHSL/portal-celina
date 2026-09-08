@@ -18,7 +18,7 @@ export const EQUIPOS_ASESORES = {
     { nombre: "Marisol Urgel Pizarro", colAct: 0, tipo: "Interno", ventas: 0 },
     { nombre: "Carlos Enrique Calderon", colAct: 0, tipo: "Interno", ventas: 0 },
     { nombre: "Ely Gonzales Garcia", colAct: 0, tipo: "Interno", ventas: 0 },
-    { nombre: "Jimmy Gonzales Nuñez", colAct: 37.944, tipo: "Interno", ventas: 5 },
+    { nombre: "Jimmy Gonzales Nuñez", colAct: 37944.00, tipo: "Interno", ventas: 5 },
     { nombre: "Jaime F. Rios Castro", colAct: 0, tipo: "Interno", ventas: 0 },
     { nombre: "Merly Mendez Hurtado", colAct: 0, tipo: "Interno", ventas: 0 },
     { nombre: "Jose Gabriel Padilla Loayza", colAct: 0, tipo: "Interno", ventas: 0 },
