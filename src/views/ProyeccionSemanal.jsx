@@ -11,15 +11,13 @@ const PROYECTOS_ACTUALIZADOS = ['Muyurina', 'Renacer', 'Santa Fe', 'Rancho Nuevo
 
 // LA BÓVEDA MAESTRA (Intacta y asegurada)
 const BASE_DE_DATOS_PROYECCION = [
-  { nombre: "DANIEL ANGULO MALDONADO", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
-  { nombre: "MARISOL URGEL PIZARRO", colAct: 6300, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }, 
-  { nombre: "GLORIANA SILVA ALMENDA", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
+  { nombre: "JIMMY GONZALES NUÑEZ", colAct: 37944, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
+  { nombre: "MARISOL URGEL PIZARRO", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }, 
   { nombre: "JAIME FABRICIO RIOS", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
   { nombre: "ELY GONZALES GARCIA", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }, 
   { nombre: "CARLOS ENRIQUE CALDERON", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
-  { nombre: "GUICELA ARIAS", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }, 
   { nombre: "MERLY MENDEZ HURTADO", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }, 
-  { nombre: "RODRIGO ROJAS SILES", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
+  { nombre: "JOSE GABRIEL PADILLA", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
 ];
 
 export default function ProyeccionSemanal() {
@@ -27,8 +25,8 @@ export default function ProyeccionSemanal() {
   
   const [formProyeccion, setFormProyeccion] = useState({
     equipo: 'Oscar Saravia', 
-    fechaInicio: '2026-08-03', 
-    objetivoMensual: 450000,
+    fechaInicio: '2026-09-07', 
+    objetivoMensual: 115000,
     asesores: BASE_DE_DATOS_PROYECCION
   });
 
@@ -87,7 +85,7 @@ export default function ProyeccionSemanal() {
                   <th colSpan="7" className="bg-[#eff6ff] text-sky-800 p-2 border border-slate-300 text-center uppercase">Proyectos (Posibles Ventas)</th>
                 </tr>
                 <tr>
-                  {[0,1,2,3,4,5,6].map(d => <th key={d} className="bg-[#f8fafc] text-slate-600 p-2 border border-slate-300 text-center">{formatDiaMes(formProyeccion.fechaInicio, d)}</th>)}
+                  {[1,2,3,4,5,6,7].map(d => <th key={d} className="bg-[#f8fafc] text-slate-600 p-2 border border-slate-300 text-center">{formatDiaMes(formProyeccion.fechaInicio, d)}</th>)}
                   {PROYECTOS_ACTUALIZADOS.map(p => <th key={p} className="bg-[#eff6ff] text-sky-700 p-2 border border-slate-300 text-center">{p.substring(0,6)}.</th>)}
                 </tr>
               </thead>
