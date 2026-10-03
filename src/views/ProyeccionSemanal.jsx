@@ -11,13 +11,13 @@ const PROYECTOS_ACTUALIZADOS = ['Muyurina', 'Renacer', 'Santa Fe', 'Rancho Nuevo
 
 // LA BÓVEDA MAESTRA (Intacta y asegurada)
 const BASE_DE_DATOS_PROYECCION = [
-  { nombre: "JIMMY GONZALES NUÑEZ", colAct: 37944, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
-  { nombre: "MARISOL URGEL PIZARRO", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }, 
+  { nombre: "JIMMY GONZALES", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
+  { nombre: "MARISOL URGEL", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }, 
   { nombre: "JAIME FABRICIO RIOS", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
-  { nombre: "ELY GONZALES GARCIA", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }, 
+  { nombre: "ELY GONZALES", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }, 
   { nombre: "CARLOS ENRIQUE CALDERON", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
-  { nombre: "MERLY MENDEZ HURTADO", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }, 
-  { nombre: "JOSE GABRIEL PADILLA", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
+  { nombre: "MERLY MENDEZ", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }, 
+  { nombre: "GABRIEL PADILLA", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
 ];
 
 export default function ProyeccionSemanal() {
