@@ -7,7 +7,13 @@ import {
 export default function Dashboard() {
   // ================= BASE DE DATOS LOCAL (VENTAS DEL MES) =================
   const [asesoresData] = useState([
-    { id: 1, nombre: 'JIMMY GONZALES NUÑEZ', ventas: 5, colocacion: 37944 },
+    { id: 1, nombre: 'JIMMY GONZALES', ventas: 0, colocacion: 0 },
+    { id: 2, nombre: 'MARISOL URGEL', ventas: 0, colocacion: 0 },
+    { id: 3, nombre: ' JAIME FABRICIO RIOS', ventas: 0, colocacion: 0 },
+    { id: 4, nombre: 'ELY GONZALES', ventas: 0, colocacion: 0 },
+    { id: 5, nombre: 'CARLOS ENRIQUE CALDERON', ventas: 0, colocacion: 0 },
+    { id: 6, nombre: ' MERLY MENDEZ', ventas: 0, colocacion: 0 },
+    { id: 7, nombre: 'JIMMY GONZALES', ventas: 0, colocacion: 0 },
   ]);
 
   // ================= MOTOR MATEMÁTICO =================
@@ -266,7 +272,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
-
-
-
