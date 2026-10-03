@@ -6,13 +6,13 @@ const PROYECTOS_ACTUALIZADOS = ['Muyurina', 'Renacer', 'Santa Fe', 'Rancho Nuevo
 
 // LA BASE DE DATOS MAESTRA - ACTUALÍZALA AQUÍ Y VERCEL LO HARÁ PÚBLICO
 const BASE_DE_DATOS_PBI = [
-  { nombre: "JIMMY GONZALES NUÑEZ", colAct: 37944, ventasReales: [0,0,0,0,5,0,0], tipo: 'INTERNO' },
-  { nombre: "MARISOL URGEL PIZARRO", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
+  { nombre: "JIMMY GONZALES", colAct: 37944, ventasReales: [0,0,0,0,5,0,0], tipo: 'INTERNO' },
+  { nombre: "MARISOL URGEL", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
   { nombre: "JAIME FABRICIO RIOS", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
-  { nombre: "ELY GONZALES GARCIA", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
+  { nombre: "ELY GONZALES", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
   { nombre: "CARLOS ENRIQUE CALDERON", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
-  { nombre: "MERLY MENDEZ HURTADO", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
-  { nombre: "JOSE GABRIEL PADILLA", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
+  { nombre: "MERLY MENDEZ", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
+  { nombre: "GABRIEL PADILLA", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
 ];
 
 export default function SeguimientoVentas() {
