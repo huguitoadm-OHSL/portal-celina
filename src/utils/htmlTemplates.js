@@ -1,6 +1,6 @@
 import { formatCurrency } from './formatters';
 
-export const generarHtmlFisico = (formFisico) => {
+export const generarHtmlFisico = (formFisico = {}) => {
   return `
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 5px; color: #333333;">{{SALUDO_TIEMPO}}</p>
@@ -19,8 +19,13 @@ export const generarHtmlFisico = (formFisico) => {
   </div>`;
 };
 
-export const generarHtmlAmortizacion = (formAmortizacion, calculos) => {
-  const { P, C_pura, n, S, C_total, precioFinalPlazos, P_actual, cuotasRestantesOrig, saldoNuevo, n_new, tiempoAhorrado, ahorrado, error } = calculos;
+export const generarHtmlAmortizacion = (formAmortizacion = {}, calculos = {}) => {
+  const {
+    P = 0, C_pura = 0, n = 0, precioFinalPlazos = 0,
+    P_actual = 0, cuotasRestantesOrig = 0, saldoNuevo = 0,
+    n_new = 0, tiempoAhorrado = 0, ahorrado = 0, error = ''
+  } = calculos;
+
   if (error) return `<div style="color:red; font-weight:bold;">Error: ${error}</div>`;
   const clienteStr = formAmortizacion.cliente ? `Estimado/a <strong>${formAmortizacion.cliente}</strong>` : 'Estimado/a cliente';
 
@@ -70,26 +75,79 @@ export const generarHtmlAmortizacion = (formAmortizacion, calculos) => {
   </div>`;
 };
 
-export const generarHtmlDescuento = (formDescuento, calculos) => {
-  const { vc, descuentoTotal, descuentoTexto, nuevoPrecioTotal, nuevoPrecioM2, porcentajeCuota } = calculos;
-  const nomProyecto = formDescuento.proyecto === 'OTRO...' ? (formDescuento.proyectoManual || 'PROYECTO MANUAL') : formDescuento.proyecto;
-  let condicionTexto = formDescuento.modalidad === 'Crédito' ? `con cuota inicial del ${formatCurrency(porcentajeCuota)}% venta a plazos` : `venta al contado`;
+export const generarHtmlDescuento = (formDescuento = {}, calculos = {}) => {
+  const {
+    vc = 0,
+    descuentoTotal = 0,
+    descuentoTexto = '',
+    nuevoPrecioTotal = 0,
+    nuevoPrecioM2 = 0,
+    porcentajeCuota = 0,
+    tcAplicado = 12.00,
+    plazoTexto = '',
+    nuevoPrecioBs = 0,
+    cuotaInicialBs = 0
+  } = calculos;
 
-  const requiereAutorizacion = formDescuento.modalidad === 'Crédito' && porcentajeCuota >= 1.5 && porcentajeCuota < 1$PORM2;
+  const nomProyecto = formDescuento.proyecto === 'OTRO...'
+    ? (formDescuento.proyectoManual || 'PROYECTO MANUAL')
+    : (formDescuento.proyecto || 'PROYECTO');
+
+  const esCredito = formDescuento.modalidad === 'Crédito';
+  let condicionTexto = "";
+
+  if (esCredito) {
+    condicionTexto = `a crédito con cuota inicial del ${formatCurrency(porcentajeCuota)}% (TC 12,00 Bs) y descuento vigente de ${descuentoTexto}`;
+  } else {
+    condicionTexto = `al contado (${plazoTexto || 'Liquidación'}), aplicando ${descuentoTexto} y TC promocional de ${formatCurrency(tcAplicado)} Bs`;
+  }
+
+  // Alerta de autorización para cuota inicial al 1.5% (menor al 5% estándar)
+  const requiereAutorizacion = esCredito && porcentajeCuota >= 1.5 && porcentajeCuota < 5;
   const badgeHtml = requiereAutorizacion 
      ? `<div style="background-color: #fee2e2; color: #991b1b; padding: 10px 14px; border-radius: 6px; font-size: 13px; font-weight: bold; margin-bottom: 15px; border: 1px solid #f87171;">&#9888; REQUIERE AUTORIZACI&Oacute;N: Bajada de Cuota Inicial al 1.5% (Categor&iacute;a Calle)</div>` 
      : '';
+
+  // Bloque adicional de detalles financieros de Octubre (Bolivianos y TC)
+  const seccionMonedaBsHtml = !esCredito
+    ? `
+      <tr>
+        <td style="padding: 12px 14px; border-bottom: 1px dashed #e2e8f0; font-size: 13px; color: #475569;">Tipo de Cambio Aplicado (TC Hoy)</td>
+        <td align="right" style="padding: 12px 14px; border-bottom: 1px dashed #e2e8f0; font-size: 14px; font-weight: bold; color: #0f172a;">${formatCurrency(tcAplicado)} Bs</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px 14px; border-bottom: 1px dashed #e2e8f0; font-size: 13px; color: #475569;">Total al Contado en Bolivianos (Bs)</td>
+        <td align="right" style="padding: 12px 14px; border-bottom: 1px dashed #e2e8f0; font-size: 15px; font-weight: bold; color: #047857;">Bs ${formatCurrency(nuevoPrecioBs)}</td>
+      </tr>`
+    : `
+      <tr>
+        <td style="padding: 12px 14px; border-bottom: 1px dashed #e2e8f0; font-size: 13px; color: #475569;">TC Cuota Inicial (D&iacute;a de la Venta)</td>
+        <td align="right" style="padding: 12px 14px; border-bottom: 1px dashed #e2e8f0; font-size: 14px; font-weight: bold; color: #0f172a;">12,00 Bs</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px 14px; border-bottom: 1px dashed #e2e8f0; font-size: 13px; color: #475569;">Cuota Inicial en Bolivianos (${formatCurrency(porcentajeCuota)}%)</td>
+        <td align="right" style="padding: 12px 14px; border-bottom: 1px dashed #e2e8f0; font-size: 14px; font-weight: bold; color: #2563eb;">Bs ${formatCurrency(cuotaInicialBs)}</td>
+      </tr>`;
+
+  // Aclaración oficial de política comercial de Octubre
+  const aclaracionOctubreHtml = esCredito
+    ? `<div style="background-color: #f1f5f9; border-left: 4px solid #2563eb; padding: 10px 14px; margin-top: 15px; border-radius: 4px; font-size: 11px; color: #334155; line-height: 1.4;">
+        <strong>Aclaraci&oacute;n Ventas a Cr&eacute;dito (Octubre):</strong> Todas las ventas a cr&eacute;dito son al TC oficial del d&iacute;a de la venta. La cuota inicial se cancela al TC vigente d&iacute;a de la venta (Bs 12,00) y la cuota mes a mes se paga al TC oficial el d&iacute;a del pago de su mensualidad. En ventas nuevas no aplica ning&uacute;n escalonado mensual.
+       </div>`
+    : `<div style="background-color: #f1f5f9; border-left: 4px solid #059669; padding: 10px 14px; margin-top: 15px; border-radius: 4px; font-size: 11px; color: #334155; line-height: 1.4;">
+        <strong>Condici&oacute;n Contado/Liquidaci&oacute;n (Octubre):</strong> Esquema v&aacute;lido seg&uacute;n plazo de pago. TC referencial Bs 12,00 x US$ 1. Ambos esquemas (contado y crédito) no pueden combinarse.
+       </div>`;
 
   return `
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #1e293b; max-width: 650px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 5px; color: #1e293b;">{{SALUDO_TIEMPO}}</p>
     <p style="margin-top: 0; margin-bottom: 20px; color: #1e293b;">{{NOMBRE_SUPERVISOR}},</p>
     ${badgeHtml}
-    <p style="margin-bottom: 20px; color: #1e293b;">Por favor le solicito mediante el presente correo, la aplicaci&oacute;n del descuento correspondiente a la campa&ntilde;a vigente del proyecto ${nomProyecto}: ${descuentoTexto} ${condicionTexto}:</p>
+    <p style="margin-bottom: 20px; color: #1e293b;">Por favor le solicito mediante el presente correo, la aplicaci&oacute;n del descuento correspondiente a la campa&ntilde;a vigente de Octubre para el proyecto <strong>${nomProyecto}</strong>: ${condicionTexto}:</p>
 
     <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-family: Arial, sans-serif; overflow: hidden; text-align: left;">
       <tr><td style="padding: 15px; border-bottom: 1px solid #e2e8f0; background-color: #f8fafc;">
-            <table width="100%" cellpadding="0" cellspacing="0"><tr><td style="color: #334155; font-size: 13px; font-weight: bold; letter-spacing: 1px;">&#128195; RESUMEN DE DESCUENTOS</td><td align="right"><span style="background-color: #d1fae5; color: #047857; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">ACTIVO</span></td></tr></table>
+            <table width="100%" cellpadding="0" cellspacing="0"><tr><td style="color: #334155; font-size: 13px; font-weight: bold; letter-spacing: 1px;">&#128195; RESUMEN DE CAMPAÑA OCTUBRE</td><td align="right"><span style="background-color: #d1fae5; color: #047857; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">ACTIVO</span></td></tr></table>
         </td></tr>
       <tr><td style="padding: 15px;">
           <table width="100%" cellpadding="0" cellspacing="0"><tr>
@@ -113,10 +171,11 @@ export const generarHtmlDescuento = (formDescuento, calculos) => {
                  <td align="right" style="padding: 14px; border-bottom: 1px dashed #e2e8f0;"><span style="background-color: #fef3c7; color: #b45309; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-right: 12px;">${descuentoTexto || '0'}</span><strong style="font-size: 14px; color: #0f172a;">-$${formatCurrency(descuentoTotal)}</strong></td></tr>
               <tr><td style="padding: 14px; border-bottom: 1px dashed #e2e8f0; font-size: 13px; color: #475569;">Total Valor Contrato (VC)</td>
                  <td align="right" style="padding: 14px; border-bottom: 1px dashed #e2e8f0; font-size: 14px; font-weight: bold; color: #0f172a;">$${formatCurrency(vc)}</td></tr>
-              <tr><td style="padding: 14px; border-bottom: 1px dashed #e2e8f0; font-size: 13px; color: #475569;">Total Descuento Campa&ntilde;as</td>
+              <tr><td style="padding: 14px; border-bottom: 1px dashed #e2e8f0; font-size: 13px; color: #475569;">Total Descuento Campa&ntilde;a</td>
                  <td align="right" style="padding: 14px; border-bottom: 1px dashed #e2e8f0; font-size: 14px; font-weight: bold; color: #059669;">-$${formatCurrency(descuentoTotal)}</td></tr>
-              <tr><td style="padding: 18px 14px; font-size: 15px; font-weight: bold; color: #0f172a;">Nuevo Precio Promoci&oacute;n</td>
-                 <td align="right" style="padding: 18px 14px; font-size: 18px; font-weight: bold; color: #2563eb;">$${formatCurrency(nuevoPrecioTotal)}</td></tr>
+              <tr><td style="padding: 16px 14px; font-size: 15px; font-weight: bold; color: #0f172a;">Nuevo Precio Promoci&oacute;n ($us)</td>
+                 <td align="right" style="padding: 16px 14px; font-size: 18px; font-weight: bold; color: #2563eb;">$${formatCurrency(nuevoPrecioTotal)}</td></tr>
+              ${seccionMonedaBsHtml}
            </table>
         </td></tr>
       <tr><td style="padding: 0 15px 15px 15px;">
@@ -132,13 +191,14 @@ export const generarHtmlDescuento = (formDescuento, calculos) => {
            </table>
         </td></tr>
     </table>
+    ${aclaracionOctubreHtml}
     <p style="margin-top: 25px; margin-bottom: 5px; color: #1e293b;">Quedo atento a su aprobaci&oacute;n para continuar con el proceso del cierre de la venta.</p>
     <p style="margin-top: 0; margin-bottom: 2px; color: #1e293b;">Saludos cordiales,</p>
     <p style="margin-top: 0; font-weight: bold; color: #0f172a;">${formDescuento.asesor || 'Asesor'}</p>
   </div>`;
 };
 
-export const generarHtmlRecompra = (formRecompra, beneficio) => {
+export const generarHtmlRecompra = (formRecompra = {}, beneficio = 0) => {
   return `
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 1200px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 5px; color: #333333;">{{SALUDO_TIEMPO}}</p>
@@ -199,7 +259,7 @@ export const generarHtmlRecompra = (formRecompra, beneficio) => {
   </div>`;
 };
 
-export const generarHtmlRenuncia = (formRenuncia) => {
+export const generarHtmlRenuncia = (formRenuncia = {}) => {
   return `
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 20px; color: #333333;">{{SALUDO_TIEMPO}} {{NOMBRE_SUPERVISOR}},</p>
@@ -211,7 +271,7 @@ export const generarHtmlRenuncia = (formRenuncia) => {
   </div>`;
 };
 
-export const generarHtmlAltaCRM = (formAltaCRM) => {
+export const generarHtmlAltaCRM = (formAltaCRM = {}) => {
   return `
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 5px; color: #333333;">{{SALUDO_TIEMPO}}</p>
@@ -233,7 +293,7 @@ export const generarHtmlAltaCRM = (formAltaCRM) => {
   </div>`;
 };
 
-export const generarHtmlEvaluacion = (formEvaluacion) => {
+export const generarHtmlEvaluacion = (formEvaluacion = {}) => {
   return `
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 5px; color: #333333;">{{SALUDO_TIEMPO}}</p>
@@ -251,7 +311,7 @@ export const generarHtmlEvaluacion = (formEvaluacion) => {
   </div>`;
 };
 
-export const generarHtmlPostulante = (formPostulante) => {
+export const generarHtmlPostulante = (formPostulante = {}) => {
   return `
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 5px; color: #333333;">{{SALUDO_TIEMPO}}</p>
@@ -264,7 +324,7 @@ export const generarHtmlPostulante = (formPostulante) => {
   </div>`;
 };
 
-export const generarHtmlCuota = (formCuota) => {
+export const generarHtmlCuota = (formCuota = {}) => {
   return `
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 5px; color: #333333;">{{SALUDO_TIEMPO}}</p>
@@ -274,7 +334,7 @@ export const generarHtmlCuota = (formCuota) => {
     <ul style="margin-bottom: 20px; list-style-type: none; padding-left: 0; color: #333333;">
       <li style="margin-bottom: 5px;">- <strong>Nro. Contrato:</strong> ${formCuota.nroContrato || '[Nro]'}</li>
       <li style="margin-bottom: 5px;">- <strong>Carnet (CI):</strong> ${formCuota.ci || '[CI]'}</li>
-      <li style="margin-bottom: 5px;">- <strong>Ubicaci&oacute;n:</strong> Proyecto ${formCuota.proyecto} | UV ${formCuota.uv || '[X]'} | MZN ${formCuota.manzano || '[X]'} | LOTE ${formCuota.lote || '[X]'}</li>
+      <li style="margin-bottom: 5px;">- <strong>Ubicaci&oacute;n:</strong> Proyecto ${formCuota.proyecto || '---'} | UV ${formCuota.uv || '[X]'} | MZN ${formCuota.manzano || '[X]'} | LOTE ${formCuota.lote || '[X]'}</li>
     </ul>
     <p style="margin-bottom: 5px; color: #333333;"><strong>Motivos del Reingreso / Observaciones:</strong></p>
     <p style="margin-bottom: 20px; color: #333333;">${formCuota.motivo || '[Detalle el motivo del incremento...]'}</p>
@@ -284,12 +344,13 @@ export const generarHtmlCuota = (formCuota) => {
   </div>`;
 };
 
-export const generarHtmlReenvio = (formReenvio) => {
+export const generarHtmlReenvio = (formReenvio = {}) => {
   let filas = "";
-  formReenvio.contratos.forEach(c => {
+  const listaContratos = Array.isArray(formReenvio.contratos) ? formReenvio.contratos : [];
+  listaContratos.forEach(c => {
     filas += `<tr style="background-color: #ffffff;"><td style="border: 1px solid #333333; padding: 6px 8px; font-weight: bold;"><span style="color: #000000;"><font color="#000000">${c.nroContrato || '---'}</font></span></td><td style="border: 1px solid #333333; padding: 6px 8px;"><span style="color: #000000;"><font color="#000000">${c.cliente || '---'}</font></span></td><td style="border: 1px solid #333333; padding: 6px 8px;"><span style="color: #000000;"><font color="#000000">${c.ci || '---'}</font></span></td><td style="border: 1px solid #333333; padding: 6px 8px;"><span style="color: #000000;"><font color="#000000">UV: ${c.uv || 'SN'} - Mzn: ${c.manzano || '-'} - Lote: ${c.lote || '-'}</font></span></td></tr>`;
   });
-  const esMultiple = formReenvio.contratos.length > 1;
+  const esMultiple = listaContratos.length > 1;
   return `
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 5px; color: #333333;">{{SALUDO_TIEMPO}}</p>
@@ -305,7 +366,7 @@ export const generarHtmlReenvio = (formReenvio) => {
   </div>`;
 };
 
-export const generarHtmlLlamada = (formLlamada) => {
+export const generarHtmlLlamada = (formLlamada = {}) => {
   return `
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 5px; color: #333333;">{{SALUDO_TIEMPO}}</p>
@@ -323,10 +384,11 @@ export const generarHtmlLlamada = (formLlamada) => {
   </div>`;
 };
 
-export const generarHtmlSeguro = (formSeguro) => {
-  const cant = formSeguro.beneficiarios.length;
+export const generarHtmlSeguro = (formSeguro = {}) => {
+  const beneficiarios = Array.isArray(formSeguro.beneficiarios) ? formSeguro.beneficiarios : [];
+  const cant = beneficiarios.length;
   let filas = "";
-  formSeguro.beneficiarios.forEach(b => {
+  beneficiarios.forEach(b => {
     filas += `<tr style="background-color: #ffffff;"><td style="border: 1px solid #cbd5e1; padding: 8px 12px; font-weight: bold;"><span style="color: #000000;"><font color="#000000">${b.nombre || '---'}</font></span></td><td style="border: 1px solid #cbd5e1; padding: 8px 12px;"><span style="color: #000000;"><font color="#000000">${b.parentesco || '---'}</font></span></td><td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center;"><span style="color: #000000;"><font color="#000000">${b.porcentaje ? b.porcentaje + '%' : '---'}</font></span></td><td style="border: 1px solid #cbd5e1; padding: 8px 12px;"><span style="color: #000000;"><font color="#000000">${b.ci || '---'}</font></span></td></tr>`;
   });
 
@@ -352,11 +414,12 @@ export const generarHtmlSeguro = (formSeguro) => {
   </div>`;
 };
 
-export const generarHtmlDiaria = (formDiaria) => {
+export const generarHtmlDiaria = (formDiaria = []) => {
   let filas = "";
   let tVisitas = 0, tVentas = 0, tColocacion = 0;
+  const listaDiaria = Array.isArray(formDiaria) ? formDiaria : [];
 
-  formDiaria.forEach((a, i) => {
+  listaDiaria.forEach((a, i) => {
     tVisitas += Number(a.visita) || 0;
     tVentas += Number(a.venta) || 0;
     tColocacion += Number(a.colocacion) || 0;
@@ -415,11 +478,11 @@ export const generarHtmlDiaria = (formDiaria) => {
   </div>`;
 };
 
-export const generarHtmlProyeccion = (formProyeccion) => {
+export const generarHtmlProyeccion = (formProyeccion = {}) => {
   let filasAsesoresHtml = "";
   
   let sumColAct = 0;
-  let sumProyA = [0,0,0,0,0];
+  const sumProyA = [0, 0, 0, 0, 0];
   let sumTotalProySemanal = 0;
   let sumTotalColMes = 0;
 
@@ -433,50 +496,60 @@ export const generarHtmlProyeccion = (formProyeccion) => {
     if (!fechaIso) return `Día ${sumarDias + 1}`;
     const partes = String(fechaIso).split('-');
     if (partes.length !== 3) return `Día ${sumarDias + 1}`;
-    const date = new Date(Date.UTC(partes[0], partes[1] - 1, partes[2])); 
-    date.setDate(date.getDate() + sumarDias);
-    const dia = date.getDate();
+    const date = new Date(Date.UTC(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]) + sumarDias)); 
+    const dia = date.getUTCDate();
     const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-    const mes = meses[date.getMonth()];
+    const mes = meses[date.getUTCMonth()];
     if (!mes) return `Día ${sumarDias + 1}`; 
     return `${dia}-${mes}`;
   };
 
-  if (formProyeccion && Array.isArray(formProyeccion.asesores)) {
-    formProyeccion.asesores.forEach((asesor, i) => {
-      const sumDias = Array.isArray(asesor.dias) ? asesor.dias.reduce((a, b) => a + (Number(b) || 0), 0) : 0;
-      const colActNum = Number(asesor.colAct) || 0;
-      const totalColMes = colActNum + sumDias;
-      
-      sumColAct += colActNum;
-      if (Array.isArray(asesor.proy)) {
-        asesor.proy.forEach((val, idx) => {
-          if (sumProyA[idx] !== undefined) sumProyA[idx] += (Number(val) || 0);
-        });
-      }
-      sumTotalProySemanal += sumDias;
-      sumTotalColMes += totalColMes;
+  const listaAsesores = Array.isArray(formProyeccion.asesores) ? formProyeccion.asesores : [];
+  listaAsesores.forEach((asesor, i) => {
+    const sumDias = Array.isArray(asesor.dias) ? asesor.dias.reduce((a, b) => a + (Number(b) || 0), 0) : 0;
+    const colActNum = Number(asesor.colAct) || 0;
+    const totalColMes = colActNum + sumDias;
+    
+    sumColAct += colActNum;
+    if (Array.isArray(asesor.proy)) {
+      asesor.proy.forEach((val, idx) => {
+        if (sumProyA[idx] !== undefined) sumProyA[idx] += (Number(val) || 0);
+      });
+    }
+    sumTotalProySemanal += sumDias;
+    sumTotalColMes += totalColMes;
 
-      const isProductivo = totalColMes >= 25000;
-      const rowBgStyle = isProductivo ? 'background-color: #ecfdf5;' : 'background-color: #ffffff;';
-      const textColor = isProductivo ? '#059669' : '#0f172a';
+    const isProductivo = totalColMes >= 25000;
+    const rowBgStyle = isProductivo ? 'background-color: #ecfdf5;' : 'background-color: #ffffff;';
+    const textColor = isProductivo ? '#059669' : '#0f172a';
 
-      filasAsesoresHtml += `
-        <tr style="${rowBgStyle}">
-          <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center; color: #64748b;">${i+1}</td>
-          <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: left; color: #0f172a; font-weight: bold; white-space: nowrap;">${String(asesor.nombre || '')}</td>
-          <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: right; color: #334155;">${fVacio(colActNum)}</td>
-          ${Array.isArray(asesor.dias) ? asesor.dias.map(d => `<td style="padding: 8px; border-bottom: 1px solid #e2e8f0; border-left: 1px solid #f1f5f9; text-align: center; color: #475569;">${fDias(Number(d)||0)}</td>`).join('') : ''}
-          ${Array.isArray(asesor.proy) ? asesor.proy.map(p => `<td style="padding: 8px; border-bottom: 1px solid #e2e8f0; border-left: 1px solid #f0f9ff; text-align: center; color: #0369a1; font-weight: bold;">${fDias(Number(p)||0)}</td>`).join('') : ''}
-          <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; border-left: 1px solid #e2e8f0; text-align: right; color: #334155; font-weight: bold;">${fVacio(sumDias)}</td>
-          <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; border-left: 1px solid #e2e8f0; text-align: right; font-weight: bold; color: ${textColor};">${fVacio(totalColMes)}${isProductivo ? ' &#10004;' : ''}</td>
-        </tr>
-      `;
-    });
-  }
+    filasAsesoresHtml += `
+      <tr style="${rowBgStyle}">
+        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center; color: #64748b;">${i + 1}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: left; color: #0f172a; font-weight: bold; white-space: nowrap;">${String(asesor.nombre || '')}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: right; color: #334155;">${fVacio(colActNum)}</td>
+        ${Array.isArray(asesor.dias) ? asesor.dias.map(d => `<td style="padding: 8px; border-bottom: 1px solid #e2e8f0; border-left: 1px solid #f1f5f9; text-align: center; color: #475569;">${fDias(Number(d) || 0)}</td>`).join('') : ''}
+        ${Array.isArray(asesor.proy) ? asesor.proy.map(p => `<td style="padding: 8px; border-bottom: 1px solid #e2e8f0; border-left: 1px solid #f0f9ff; text-align: center; color: #0369a1; font-weight: bold;">${fDias(Number(p) || 0)}</td>`).join('') : ''}
+        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; border-left: 1px solid #e2e8f0; text-align: right; color: #334155; font-weight: bold;">${fVacio(sumDias)}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; border-left: 1px solid #e2e8f0; text-align: right; font-weight: bold; color: ${textColor};">${fVacio(totalColMes)}${isProductivo ? ' &#10004;' : ''}</td>
+      </tr>
+    `;
+  });
 
-  const mesStr = new Date(formProyeccion.fechaInicio || new Date()).toLocaleString('es-ES', { month: 'long' });
-  const capMes = mesStr.charAt(0).toUpperCase() + mesStr.slice(1);
+  const getMesStr = (fechaIso) => {
+    if (!fechaIso) return 'Octubre';
+    const partes = String(fechaIso).split('-');
+    if (partes.length === 3) {
+      const dateUtc = new Date(Date.UTC(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2])));
+      const m = dateUtc.toLocaleString('es-ES', { month: 'long', timeZone: 'UTC' });
+      return m.charAt(0).toUpperCase() + m.slice(1);
+    }
+    const d = new Date(fechaIso);
+    const m = d.toLocaleString('es-ES', { month: 'long' });
+    return m.charAt(0).toUpperCase() + m.slice(1);
+  };
+
+  const capMes = getMesStr(formProyeccion.fechaInicio);
   const objMensual = Number(formProyeccion.objetivoMensual) || 0;
   const porcentajeAvance = objMensual ? (sumColAct / objMensual) * 100 : 0;
   const porcentajeFin = objMensual ? (sumTotalColMes / objMensual) * 100 : 0;
@@ -500,7 +573,7 @@ export const generarHtmlProyeccion = (formProyeccion) => {
           <th style="background-color: #f8fafc; border-bottom: 2px solid #cbd5e1; padding: 8px; color: #64748b; width: 30px; text-align: center;">#</th>
           <th style="background-color: #f8fafc; border-bottom: 2px solid #cbd5e1; padding: 8px; text-align: left; color: #475569; white-space: nowrap;"><b>Asesor</b></th>
           <th style="background-color: #f8fafc; border-bottom: 2px solid #cbd5e1; padding: 8px; text-align: right; color: #475569; white-space: nowrap;"><b>Coloc. Actual</b></th>
-          ${[0,1,2,3,4,5,6].map(d => `<th style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1; border-left: 1px solid #e2e8f0; padding: 8px; text-align: center; color: #64748b; white-space: nowrap;">${formatDiaMesP(formProyeccion.fechaInicio, d)}</th>`).join('')}
+          ${[0, 1, 2, 3, 4, 5, 6].map(d => `<th style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1; border-left: 1px solid #e2e8f0; padding: 8px; text-align: center; color: #64748b; white-space: nowrap;">${formatDiaMesP(formProyeccion.fechaInicio, d)}</th>`).join('')}
           ${NOMBRES_PROYECTOS_PROYECCION.map(p => `<th style="background-color: #eff6ff; border-bottom: 2px solid #bae6fd; border-left: 1px solid #e2e8f0; padding: 8px; text-align: center; color: #0284c7; white-space: nowrap;">${String(p)}</th>`).join('')}
         </tr>
       </thead>
@@ -546,7 +619,7 @@ export const generarHtmlProyeccion = (formProyeccion) => {
   </div>`;
 };
 
-export const generarHtmlPendienteValidacion = (form) => {
+export const generarHtmlPendienteValidacion = (form = {}) => {
   return `
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 20px; color: #333333;">{{SALUDO_TIEMPO}} {{NOMBRE_SUPERVISOR}},</p>
@@ -558,7 +631,7 @@ export const generarHtmlPendienteValidacion = (form) => {
   </div>`;
 };
 
-export const generarHtmlBloqueoLote = (form) => {
+export const generarHtmlBloqueoLote = (form = {}) => {
   return `
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 20px; color: #333333;">{{SALUDO_TIEMPO}} {{NOMBRE_SUPERVISOR}},</p>
@@ -578,10 +651,13 @@ export const generarHtmlBloqueoLote = (form) => {
   </div>`;
 };
 
-export const generarHtmlMemorandum = (form) => {
+export const generarHtmlMemorandum = (form = {}) => {
   let asesoresHtml = "";
-  form.asesores.forEach(a => {
-    if(a.nombre) asesoresHtml += `<li style="margin-bottom: 10px;"><strong>${a.nombre}:</strong> Registra una colocaci&oacute;n actual de <strong>${a.colocacion}</strong>, lo cual representa una brecha cr&iacute;tica frente a su compromiso de <strong>${a.compromiso}</strong>.</li>`;
+  const listaAsesores = Array.isArray(form.asesores) ? form.asesores : [];
+  listaAsesores.forEach(a => {
+    if (a.nombre) {
+      asesoresHtml += `<li style="margin-bottom: 10px;"><strong>${a.nombre}:</strong> Registra una colocaci&oacute;n actual de <strong>${a.colocacion}</strong>, lo cual representa una brecha cr&iacute;tica frente a su compromiso de <strong>${a.compromiso}</strong>.</li>`;
+    }
   });
   return `
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
