@@ -596,4 +596,3 @@ export const generarHtmlMemorandum = (form) => {
     <p style="margin-top: 0; font-weight: bold; color: #333333;">${form.asesor || 'Asesor'}</p>
   </div>`;
 };
-
