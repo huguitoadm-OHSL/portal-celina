@@ -42,7 +42,7 @@ export default function SeguimientoVentas() {
   const totalAsesores = 7;
   const totalAntiguos = 7;
   
-  const productivos = datosProcesados.filter(a => a.colocacion >= 25000).length;
+  const productivos = datosProcesados.filter(a => a.colocacion >= 18000).length;
   // Productividad calculada sobre la base de antiguos para igualar el 25% de Power BI
   const productividad = Math.round((productivos / totalAntiguos) * 100); 
 
