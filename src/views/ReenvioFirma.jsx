@@ -24,13 +24,19 @@ export default function ReenvioFirma() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><FileSignature className="w-6 h-6 mr-2 text-blue-600" /> Reenvío Firma Digital</h2></div>
+            <div className="mb-6">
+        <div className="flex items-center gap-2 mb-1.5">
+          <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></span>
+          <span className="text-[10px] font-black tracking-widest text-cyan-400 uppercase">
+            PORTAL GESTIÓN ESTRATÉGICA • CELINA
+          </span>
+        </div><h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center"><FileSignature className="w-6 h-6 mr-2 text-cyan-400" /> Reenvío Firma Digital</h2></div>
       <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-[1.2fr_1fr] 2xl:grid-cols-[1.5fr_1fr] gap-8 w-full">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
+        <div className="bg-[#070e1c] p-5 sm:p-6 rounded-3xl shadow-2xl border border-[#14233c] text-slate-100 w-full min-w-0">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 border-b border-slate-100 pb-3 gap-3">
-            <h3 className="text-lg font-medium text-slate-800">Listado de Contratos</h3>
+            <h3 className="text-lg font-medium text-white">Listado de Contratos</h3>
             <div className="w-full sm:w-1/2 md:w-1/3">
-              <select value={formReenvio.proyecto} onChange={(e) => setFormReenvio({...formReenvio, proyecto: e.target.value})} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+              <select value={formReenvio.proyecto} onChange={(e) => setFormReenvio({...formReenvio, proyecto: e.target.value})} className="w-full px-3.5 py-2 bg-[#050b18] border border-[#1e3a5f] rounded-xl text-xs font-bold text-white focus:outline-none focus:border-cyan-400 transition-all">
                 {PROYECTOS.map(p => <option key={p} value={p}>{p}</option>)}
               </select>
             </div>
@@ -38,13 +44,13 @@ export default function ReenvioFirma() {
           <div className="mb-4"><Input label="Nombre del Asesor" name="asesor" value={formReenvio.asesor} onChange={(e) => setFormReenvio({...formReenvio, asesor: e.target.value})} placeholder="Ej. Oscar Saravia" /></div>
           <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 w-full">
             {formReenvio.contratos.map((contrato, index) => (
-              <div key={index} className="p-4 bg-slate-50 border border-slate-200 rounded-xl relative group w-full">
+              <div key={index} className="p-4 bg-[#050b18] border border-[#1e3a5f] rounded-2xl relative group w-full">
                 {formReenvio.contratos.length > 1 && (<button onClick={() => eliminarContratoReenvio(index)} className="absolute -top-2 -right-2 bg-red-100 text-red-600 p-1.5 rounded-full z-10"><Trash2 className="w-4 h-4" /></button>)}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3 w-full">
-                  <div className="w-full"><label className="block text-xs font-semibold text-slate-600 mb-1">Nro. Contrato</label><input type="text" value={contrato.nroContrato} onChange={(e) => handleReenvioChange(index, 'nroContrato', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm bg-white" /></div>
-                  <div className="w-full"><label className="block text-xs font-semibold text-slate-600 mb-1">Carnet (CI)</label><input type="text" value={contrato.ci} onChange={(e) => handleReenvioChange(index, 'ci', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm bg-white" /></div>
+                  <div className="w-full"><label className="block text-xs font-semibold text-slate-300 mb-1">Nro. Contrato</label><input type="text" value={contrato.nroContrato} onChange={(e) => handleReenvioChange(index, 'nroContrato', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm bg-white" /></div>
+                  <div className="w-full"><label className="block text-xs font-semibold text-slate-300 mb-1">Carnet (CI)</label><input type="text" value={contrato.ci} onChange={(e) => handleReenvioChange(index, 'ci', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm bg-white" /></div>
                 </div>
-                <div className="mb-3 w-full"><label className="block text-xs font-semibold text-slate-600 mb-1">Nombre del Cliente</label><input type="text" value={contrato.cliente} onChange={(e) => handleReenvioChange(index, 'cliente', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm uppercase bg-white" /></div>
+                <div className="mb-3 w-full"><label className="block text-xs font-semibold text-slate-300 mb-1">Nombre del Cliente</label><input type="text" value={contrato.cliente} onChange={(e) => handleReenvioChange(index, 'cliente', e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-sm uppercase bg-white" /></div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full">
                   <div className="flex flex-col w-full"><label className="text-xs text-slate-500 mb-1">UV:</label><input type="text" value={contrato.uv} onChange={(e) => handleReenvioChange(index, 'uv', e.target.value)} className="w-full px-2.5 py-1 border rounded text-sm bg-white" /></div>
                   <div className="flex flex-col w-full"><label className="text-xs text-slate-500 mb-1">Mzn:</label><input type="text" value={contrato.manzano} onChange={(e) => handleReenvioChange(index, 'manzano', e.target.value)} className="w-full px-2.5 py-1 border rounded text-sm bg-white" /></div>
@@ -53,7 +59,7 @@ export default function ReenvioFirma() {
               </div>
             ))}
           </div>
-          <button onClick={agregarContratoReenvio} className="mt-4 w-full flex items-center justify-center py-3 border-2 border-dashed rounded-xl text-slate-600 hover:text-blue-600 font-medium text-sm transition-colors"><Plus className="w-4 h-4 mr-1" /> Añadir otro contrato</button>
+          <button onClick={agregarContratoReenvio} className="mt-4 w-full flex items-center justify-center py-3 border-2 border-dashed rounded-xl text-slate-300 hover:text-cyan-400 font-medium text-sm transition-colors"><Plus className="w-4 h-4 mr-1" /> Añadir otro contrato</button>
         </div>
         <div className="w-full min-w-0">
           <ResultCard title="Reenvío Firma Digital" text={generarTextoReenvioCelular(formReenvio, supervisorData)} htmlContent={generarHtmlReenvio(formReenvio, supervisorData)} subject={`Solicitud Reenvío de Correo Firma Digital - ${formReenvio.proyecto}`} supervisorDestino={supervisorDestino} setSupervisorDestino={setSupervisorDestino} />
