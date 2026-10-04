@@ -1,6 +1,76 @@
-// --- CONTROL DE VERSIÓN DE DATOS ---
-// Actualizado a v3.0 para cargar la campaña oficial de Octubre 2026,
-// nuevo esquema de Contado/Crédito (TC 12.00 / 8.40 / 9.60 / 10.80), equipo de 7 asesores y meta de $111.000
-export const DATA_VERSION = "v3.0";
+// ============================================================================
+// CONFIGURACIÓN CENTRAL PORTAL GESTIÓN ESTRATÉGICA • CELINA URBANIZACIONES
+// ============================================================================
 
+export const DATA_VERSION = "v3.0 - Octubre 2026";
 
+// Parámetros Financieros Oficiales
+export const TC_OFICIAL_BASE = 12.00;
+export const META_EQUIPO_OCTUBRE_USD = 111000;
+export const CORREO_SUPERVISION_RESPALDO = "ohsaravia@celina.com.bo";
+
+// Directorio de Aprobadores Oficiales (Quienes aplican descuentos en sistema)
+export const DIRECTORES_APROBACION = [
+  { 
+    id: "mreyes", 
+    nombre: "Lic. Mauricio Reyes", 
+    cargo: "Jefe de Ventas", 
+    email: "mreyes@celina.com.bo", 
+    genero: "M" 
+  },
+  { 
+    id: "rvaca", 
+    nombre: "Lic. Robert Vaca", 
+    cargo: "Gerente Regional", 
+    email: "rvaca@grupopaz.com.bo", 
+    genero: "M" 
+  },
+  { 
+    id: "vchoque", 
+    nombre: "Lic. Verenice Choque", 
+    cargo: "Asistente de Inteligencia y Negocios", 
+    email: "vchoque@grupopaz.com.bo", 
+    genero: "F" 
+  }
+];
+
+// Los 7 Asesores del Equipo Oficial
+export const ASESORES_EQUIPO = [
+  "Carlos Enrique Calderon Montano",
+  "Ely Gonzales Garcia",
+  "Jaime Fabricio Rios Castro",
+  "Jimmy Gonzales Nuñez",
+  "Jose Gabriel Padilla Loayza",
+  "Marisol Urgel Pizarro",
+  "Merly Mendez Hurtado"
+];
+
+// Esquema Oficial de Descuentos Contado / Liquidación (Octubre)
+export const ESQUEMA_CONTADO = {
+  "0_30": {
+    dias: "0 a 30 días",
+    descuentoPct: 30,
+    tcEfectivo: 8.40,
+    badge: "CONTADO (0 A 30 DÍAS)"
+  },
+  "30_60": {
+    dias: "30 a 60 días",
+    descuentoPct: 20,
+    tcEfectivo: 9.60,
+    badge: "CONTADO (30 A 60 DÍAS)"
+  },
+  "60_90": {
+    dias: "60 a 90 días",
+    descuentoPct: 10,
+    tcEfectivo: 10.80,
+    badge: "CONTADO (60 A 90 DÍAS)"
+  }
+};
+
+// Esquema Oficial Crédito
+export const ESQUEMA_CREDITO = {
+  descuentoUsdM2: 1.00, // 1 US$ x m2
+  cuotaInicialMinimaPct: 1.5, // 1.50% de cuota inicial
+  tcOficialVenta: 12.00,
+  escalonadoMensual: false // Ventas nuevas no aplica escalonado
+};
