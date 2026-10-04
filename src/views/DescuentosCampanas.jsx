@@ -6,46 +6,24 @@ import {
   Send,
   Copy,
   Mail,
-  Trophy,
   Upload,
   RefreshCw,
   AlertTriangle,
   CreditCard,
   Banknote,
-  ShieldCheck,
-  CheckCircle2,
   Monitor
 } from "lucide-react";
 
-// ============================================================================
-// CONSTANTES Y PARÁMETROS OFICIALES CELINA (OCTUBRE)
-// ============================================================================
 const VENTANAS_CONTADO = {
-  "0_30": {
-    plazo: "0 a 30 días",
-    descuentoPct: 30,
-    tcEfectivo: 8.40,
-    labelBadge: "CONTADO (0 A 30 DÍAS)"
-  },
-  "30_60": {
-    plazo: "30 a 60 días",
-    descuentoPct: 20,
-    tcEfectivo: 9.60,
-    labelBadge: "CONTADO (30 A 60 DÍAS)"
-  },
-  "60_90": {
-    plazo: "60 a 90 días",
-    descuentoPct: 10,
-    tcEfectivo: 10.80,
-    labelBadge: "CONTADO (60 A 90 DÍAS)"
-  }
+  "0_30": { plazo: "0 a 30 días", descuentoPct: 30, tcEfectivo: 8.40, labelBadge: "CONTADO (0 A 30 DÍAS)" },
+  "30_60": { plazo: "30 a 60 días", descuentoPct: 20, tcEfectivo: 9.60, labelBadge: "CONTADO (30 A 60 DÍAS)" },
+  "60_90": { plazo: "60 a 90 días", descuentoPct: 10, tcEfectivo: 10.80, labelBadge: "CONTADO (60 A 90 DÍAS)" }
 };
 
 const TC_OFICIAL_BASE = 12.00;
-const DESCUENTO_CREDITO_M2 = 1.0; // Descuento 1 US$ x m2
+const DESCUENTO_CREDITO_M2 = 1.0;
 const CORREO_RESPALDO_OSCAR = "ohsaravia@celina.com.bo";
 
-// Las tres personas autorizadas para registrar el nuevo precio m2 en sistema
 const DIRECTORES_APROBACION = [
   { nombre: "Lic. Mauricio Reyes", cargo: "Jefe de Ventas", email: "mreyes@celina.com.bo", genero: "M" },
   { nombre: "Lic. Robert Vaca", cargo: "Gerente Regional", email: "rvaca@grupopaz.com.bo", genero: "M" },
@@ -67,34 +45,28 @@ export default function DescuentosCampanas() {
   const [cargandoBD, setCargandoBD] = useState(true);
   const [errorCarga, setErrorCarga] = useState(null);
 
-  // Esquema comercial
   const [modalidad, setModalidad] = useState("CONTADO_LIQUIDACION");
   const [ventanaSeleccionada, setVentanaSeleccionada] = useState("0_30");
 
-  // Filtros en cascada
   const [proyectoSeleccionado, setProyectoSeleccionado] = useState("CAÑAVERAL");
   const [uvSeleccionada, setUvSeleccionada] = useState("");
   const [mznSeleccionada, setMznSeleccionada] = useState("");
   const [loteSeleccionado, setLoteSeleccionado] = useState("");
 
-  // Atributos del lote activo
   const [superficie, setSuperficie] = useState(0);
   const [precioBaseM2, setPrecioBaseM2] = useState(0);
   const [categoria, setCategoria] = useState("");
   const [estadoLote, setEstadoLote] = useState("DISPONIBLE");
 
-  // Ajustes de crédito
   const [cuotaInicialPct, setCuotaInicialPct] = useState(1.5);
   const [plazoAnios, setPlazoAnios] = useState(10);
 
-  // Destinatario y asesor responsable
   const [destinatarioEmail, setDestinatarioEmail] = useState(DIRECTORES_APROBACION[0].email);
   const [asesorSeleccionado, setAsesorSeleccionado] = useState(ASESORES_EQUIPO[0]);
   const [notificacion, setNotificacion] = useState(null);
 
   const fileInputRef = useRef(null);
 
-  // Normalizador numérico
   const parseNumero = (val) => {
     if (val === undefined || val === null || val === "") return 0;
     if (typeof val === "number") return val;
@@ -106,7 +78,7 @@ export default function DescuentosCampanas() {
   const formatMoneda = (val) =>
     new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val || 0);
 
-  // Saludo dinámico según la hora local
+  // Detección horaria exacta
   const getSaludoHorario = () => {
     const hora = new Date().getHours();
     if (hora >= 5 && hora < 12) return "Buenos días";
@@ -114,7 +86,6 @@ export default function DescuentosCampanas() {
     return "Buenas noches";
   };
 
-  // Carga del inventario_lotes.json desde la carpeta public
   const cargarInventario = async () => {
     setCargandoBD(true);
     setErrorCarga(null);
@@ -123,15 +94,14 @@ export default function DescuentosCampanas() {
       try {
         const res = await fetch("/inventario_lotes.json");
         if (res.ok) data = await res.json();
-        else throw new Error("No encontrado");
-      } catch (e) {
+        else throw new Error();
+      } catch {
         const resFallback = await fetch("/lotes.json");
         if (resFallback.ok) data = await resFallback.json();
-        else throw new Error("No accesible");
       }
       procesarDatosLotes(data);
-    } catch (err) {
-      setErrorCarga("Cargue el archivo inventario_lotes.json con el botón superior.");
+    } catch {
+      setErrorCarga("Cargue el archivo inventario_lotes.json.");
       setCargandoBD(false);
     }
   };
@@ -172,9 +142,8 @@ export default function DescuentosCampanas() {
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        const json = JSON.parse(event.target?.result);
-        procesarDatosLotes(json);
-      } catch (err) {
+        procesarDatosLotes(JSON.parse(event.target?.result));
+      } catch {
         setErrorCarga("JSON inválido.");
         setCargandoBD(false);
       }
@@ -182,66 +151,39 @@ export default function DescuentosCampanas() {
     reader.readAsText(file);
   };
 
-  // Opciones dependientes
   const proyectosDisponibles = useMemo(() => Array.from(new Set(lotes.map((l) => l.proyecto))).sort(), [lotes]);
-
   const uvsDisponibles = useMemo(() => {
     if (!proyectoSeleccionado) return [];
-    return Array.from(
-      new Set(lotes.filter((l) => l.proyecto === proyectoSeleccionado).map((l) => l.uv))
-    ).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+    return Array.from(new Set(lotes.filter((l) => l.proyecto === proyectoSeleccionado).map((l) => l.uv))).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
   }, [lotes, proyectoSeleccionado]);
 
   const mznsDisponibles = useMemo(() => {
     if (!proyectoSeleccionado || !uvSeleccionada) return [];
-    return Array.from(
-      new Set(
-        lotes
-          .filter((l) => l.proyecto === proyectoSeleccionado && l.uv === uvSeleccionada)
-          .map((l) => l.mzn)
-      )
-    ).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+    return Array.from(new Set(lotes.filter((l) => l.proyecto === proyectoSeleccionado && l.uv === uvSeleccionada).map((l) => l.mzn))).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
   }, [lotes, proyectoSeleccionado, uvSeleccionada]);
 
   const lotesDisponibles = useMemo(() => {
     if (!proyectoSeleccionado || !uvSeleccionada || !mznSeleccionada) return [];
-    return lotes
-      .filter(
-        (l) =>
-          l.proyecto === proyectoSeleccionado &&
-          l.uv === uvSeleccionada &&
-          l.mzn === mznSeleccionada
-      )
-      .sort((a, b) => a.lote.localeCompare(b.lote, undefined, { numeric: true }));
+    return lotes.filter((l) => l.proyecto === proyectoSeleccionado && l.uv === uvSeleccionada && l.mzn === mznSeleccionada).sort((a, b) => a.lote.localeCompare(b.lote, undefined, { numeric: true }));
   }, [lotes, proyectoSeleccionado, uvSeleccionada, mznSeleccionada]);
 
   useEffect(() => {
-    if (uvsDisponibles.length > 0 && !uvsDisponibles.includes(uvSeleccionada)) {
-      setUvSeleccionada(uvsDisponibles[0]);
-    }
+    if (uvsDisponibles.length > 0 && !uvsDisponibles.includes(uvSeleccionada)) setUvSeleccionada(uvsDisponibles[0]);
   }, [proyectoSeleccionado, uvsDisponibles]);
 
   useEffect(() => {
-    if (mznsDisponibles.length > 0 && !mznsDisponibles.includes(mznSeleccionada)) {
-      setMznSeleccionada(mznsDisponibles[0]);
-    }
+    if (mznsDisponibles.length > 0 && !mznsDisponibles.includes(mznSeleccionada)) setMznSeleccionada(mznsDisponibles[0]);
   }, [uvSeleccionada, mznsDisponibles]);
 
   useEffect(() => {
     if (lotesDisponibles.length > 0) {
-      const primeroDisp = lotesDisponibles.find((l) => l.estado === "DISPONIBLE") || lotesDisponibles[0];
-      setLoteSeleccionado(primeroDisp.lote);
+      const primero = lotesDisponibles.find((l) => l.estado === "DISPONIBLE") || lotesDisponibles[0];
+      setLoteSeleccionado(primero.lote);
     }
   }, [mznSeleccionada, lotesDisponibles]);
 
   useEffect(() => {
-    const item = lotes.find(
-      (l) =>
-        l.proyecto === proyectoSeleccionado &&
-        l.uv === uvSeleccionada &&
-        l.mzn === mznSeleccionada &&
-        l.lote === loteSeleccionado
-    );
+    const item = lotes.find((l) => l.proyecto === proyectoSeleccionado && l.uv === uvSeleccionada && l.mzn === mznSeleccionada && l.lote === loteSeleccionado);
     if (item) {
       setSuperficie(item.superficie);
       setPrecioBaseM2(item.precio);
@@ -250,9 +192,6 @@ export default function DescuentosCampanas() {
     }
   }, [proyectoSeleccionado, uvSeleccionada, mznSeleccionada, loteSeleccionado, lotes]);
 
-  // ============================================================================
-  // CÁLCULOS MATEMÁTICOS DE DOBLE ÓPTICA Y PRECIO M2
-  // ============================================================================
   const calculos = useMemo(() => {
     const capitalBaseUSD = superficie * precioBaseM2;
 
@@ -260,17 +199,14 @@ export default function DescuentosCampanas() {
       const config = VENTANAS_CONTADO[ventanaSeleccionada] || VENTANAS_CONTADO["0_30"];
       const descuentoPct = config.descuentoPct;
 
-      // ÓPTICA 1: DESCUENTO A CAPITAL
       const montoDescuentoUSD = capitalBaseUSD * (descuentoPct / 100);
       const capitalFinalUSD = Math.max(0, capitalBaseUSD - montoDescuentoUSD);
       const totalBsOptica1 = capitalFinalUSD * TC_OFICIAL_BASE;
 
-      // ÓPTICA 2: DESCUENTO A T.C.
       const descuentoTCOficial = TC_OFICIAL_BASE * (descuentoPct / 100);
       const tcEfectivoFinal = TC_OFICIAL_BASE - descuentoTCOficial;
       const totalBsOptica2 = capitalBaseUSD * tcEfectivoFinal;
 
-      // PRECIO POR METRO CUADRADO PARA EL SISTEMA CELINA
       const nuevoPrecioM2 = superficie > 0 ? capitalFinalUSD / superficie : precioBaseM2 * (1 - descuentoPct / 100);
       const reduccionM2 = precioBaseM2 - nuevoPrecioM2;
 
@@ -297,7 +233,6 @@ export default function DescuentosCampanas() {
         optica2_totalBs: totalBsOptica2
       };
     } else {
-      // CRÉDITO: 1 US$ x m2
       const descuentoTotalUSD = superficie * DESCUENTO_CREDITO_M2;
       const capitalFinalUSD = Math.max(0, capitalBaseUSD - descuentoTotalUSD);
       const totalBs = capitalFinalUSD * TC_OFICIAL_BASE;
@@ -313,7 +248,6 @@ export default function DescuentosCampanas() {
         mensualUSD = (saldoUSD * (tasaMensual * Math.pow(1 + tasaMensual, meses))) / (Math.pow(1 + tasaMensual, meses) - 1);
       }
       const mensualBS = mensualUSD * TC_OFICIAL_BASE;
-
       const nuevoPrecioM2 = Math.max(0, precioBaseM2 - DESCUENTO_CREDITO_M2);
 
       return {
@@ -350,23 +284,15 @@ export default function DescuentosCampanas() {
     return DIRECTORES_APROBACION.find((d) => d.email === destinatarioEmail) || DIRECTORES_APROBACION[0];
   }, [destinatarioEmail]);
 
-  // Lista de CC automática (los otros 2 directores + Oscar Saravia de respaldo)
   const correosCC = useMemo(() => {
-    const otros = DIRECTORES_APROBACION
-      .filter((d) => d.email !== destinatarioEmail)
-      .map((d) => d.email);
+    const otros = DIRECTORES_APROBACION.filter((d) => d.email !== destinatarioEmail).map((d) => d.email);
     return [...otros, CORREO_RESPALDO_OSCAR].join(", ");
   }, [destinatarioEmail]);
 
   const asuntoCorreo = `Solicitud Descuento Campañas - ${proyectoSeleccionado} UV:${uvSeleccionada} Mz${mznSeleccionada} Lt${loteSeleccionado} (Nuevo P.M2: $${formatMoneda(calculos.nuevoPrecioM2)})`;
-
-  // Encabezado automático exacto sin paréntesis: "Estimado Lic. Mauricio Reyes," o "Estimada Lic. Verenice Choque,"
   const tratamientoDirecto = destinatarioObj.genero === "F" ? "Estimada" : "Estimado";
-  const saludoInicial = `${getSaludoHorario()}\n\n${tratamientoDirecto} ${destinatarioObj.nombre},`;
 
-  // ============================================================================
-  // GENERADORES DE CORREO FORMAL (HTML Y TEXTO PLANO)
-  // ============================================================================
+  // HTML con estilos inline exactos para Gmail / Outlook
   const generarHTMLCorreo = () => {
     return `
 <div style="font-family: Arial, Helvetica, sans-serif; color: #0f172a; max-width: 650px; margin: 0 auto; line-height: 1.5;">
@@ -377,7 +303,6 @@ export default function DescuentosCampanas() {
     <strong>Campaña Oficial de Octubre</strong> para el proyecto <strong>${proyectoSeleccionado}</strong>.
   </p>
 
-  <!-- BLOQUE PRIORITARIO: NUEVO PRECIO M2 APLICABLE AL SISTEMA -->
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0fdf4; border: 2px solid #16a34a; border-radius: 12px; margin-bottom: 22px;">
     <tr>
       <td style="padding: 18px 20px;">
@@ -402,9 +327,7 @@ export default function DescuentosCampanas() {
     </tr>
   </table>
 
-  <!-- TARJETA VISUAL ESTILO DARK DE LA APLICACIÓN -->
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #060c18; border-radius: 16px; overflow: hidden; border: 1px solid #1e293b; margin-bottom: 25px;">
-    <!-- CABECERA -->
     <tr>
       <td style="padding: 20px; border-bottom: 1px solid #132238;">
         <table width="100%" cellpadding="0" cellspacing="0">
@@ -432,7 +355,6 @@ export default function DescuentosCampanas() {
       </td>
     </tr>
 
-    <!-- HERO VALOR FINAL -->
     <tr>
       <td align="center" style="padding: 28px 20px 18px;">
         <div style="display: inline-block; background-color: #0f2744; border: 1px solid #0284c7; color: #38bdf8; font-size: 11px; font-weight: bold; padding: 4px 14px; border-radius: 20px; text-transform: uppercase; margin-bottom: 10px;">
@@ -450,7 +372,6 @@ export default function DescuentosCampanas() {
       </td>
     </tr>
 
-    <!-- CAJAS MÉTRICAS -->
     <tr>
       <td style="padding: 5px 20px 15px;">
         <table width="100%" cellpadding="0" cellspacing="6">
@@ -472,12 +393,10 @@ export default function DescuentosCampanas() {
       </td>
     </tr>
 
-    <!-- CUADRO DE DOBLE ÓPTICA FINANCIERA -->
     <tr>
       <td style="padding: 10px 20px 20px;">
         <table width="100%" cellpadding="0" cellspacing="8">
           <tr>
-            <!-- ÓPTICA 1 -->
             <td width="50%" valign="top" style="background-color: #081120; border: 1px solid #1e3a5f; border-radius: 12px; padding: 14px;">
               <div style="font-size: 10px; font-weight: bold; color: #38bdf8; margin-bottom: 10px; text-transform: uppercase;">
                 💲 ÓPTICA 1: DESCUENTO A CAPITAL
@@ -506,7 +425,6 @@ export default function DescuentosCampanas() {
               </table>
             </td>
 
-            <!-- ÓPTICA 2 -->
             <td width="50%" valign="top" style="background-color: #081120; border: 1px solid #1e3a5f; border-radius: 12px; padding: 14px;">
               <div style="font-size: 10px; font-weight: bold; color: #34d399; margin-bottom: 10px; text-transform: uppercase;">
                 📈 ÓPTICA 2: DESCUENTO A T.C.
@@ -540,7 +458,6 @@ export default function DescuentosCampanas() {
     </tr>
   </table>
 
-  <!-- CIERRE LIMPIO -->
   <p style="margin: 0 0 16px; font-size: 14px;">Quedo atento a su aprobación y modificación en el sistema para proceder al cierre de venta.</p>
   <p style="margin: 0 0 4px; font-size: 14px;">Saludos cordiales,</p>
   <p style="margin: 0; font-size: 15px; font-weight: bold; color: #0f172a;">${asesorSeleccionado}</p>
@@ -549,7 +466,9 @@ export default function DescuentosCampanas() {
   };
 
   const generarTextoPlano = () => {
-    return `${saludoInicial}
+    return `${getSaludoHorario()}
+
+${tratamientoDirecto} ${destinatarioObj.nombre},
 
 Por favor le solicito la aplicación del descuento de campaña vigente para el proyecto ${proyectoSeleccionado}:
 
@@ -580,7 +499,6 @@ Saludos cordiales,
 ${asesorSeleccionado}`;
   };
 
-  // 1. Botón: Copiar Formato (HTML rico)
   const copiarFormatoHTML = async () => {
     const html = generarHTMLCorreo();
     const texto = generarTextoPlano();
@@ -591,19 +509,18 @@ ${asesorSeleccionado}`;
           "text/plain": new Blob([texto], { type: "text/plain" })
         });
         await navigator.clipboard.write([item]);
-        setNotificacion("¡Cuadro copiado con formato! Pégalo con Ctrl + V en tu correo.");
+        setNotificacion("¡Cuadro copiado con formato! Pégalo con Ctrl + V.");
       } else {
         await navigator.clipboard.writeText(html);
         setNotificacion("¡Formato copiado!");
       }
     } catch {
       await navigator.clipboard.writeText(texto);
-      setNotificacion("¡Texto plano copiado!");
+      setNotificacion("¡Texto copiado!");
     }
-    setTimeout(() => setNotificacion(null), 4000);
+    setTimeout(() => setNotificacion(null), 3500);
   };
 
-  // 2. Botón: App Outlook Desktop
   const enviarAppOutlook = () => {
     copiarFormatoHTML();
     const bodyEncoded = encodeURIComponent(generarTextoPlano());
@@ -611,12 +528,10 @@ ${asesorSeleccionado}`;
     const toEncoded = encodeURIComponent(destinatarioEmail);
     const ccEncoded = encodeURIComponent(correosCC);
 
-    const mailtoUrl = `mailto:${toEncoded}?cc=${ccEncoded}&subject=${subjectEncoded}&body=${bodyEncoded}`;
-    window.location.href = mailtoUrl;
-    setNotificacion("Abriendo Outlook... Además se copió el cuadro visual para pegar (Ctrl+V)");
+    window.location.href = `mailto:${toEncoded}?cc=${ccEncoded}&subject=${subjectEncoded}&body=${bodyEncoded}`;
+    setNotificacion("Abriendo Outlook con To y CC. ¡Pega el cuadro con Ctrl+V!");
   };
 
-  // 3. Botón: Abrir en Gmail con CC Automático
   const abrirEnGmailWeb = () => {
     copiarFormatoHTML();
     const bodyEncoded = encodeURIComponent(generarTextoPlano());
@@ -626,7 +541,7 @@ ${asesorSeleccionado}`;
 
     const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${toEncoded}&cc=${ccEncoded}&su=${subjectEncoded}&body=${bodyEncoded}`;
     window.open(gmailUrl, "_blank");
-    setNotificacion("Gmail abierto con CC a ohsaravia@celina.com.bo. ¡Pega el cuadro con Ctrl+V!");
+    setNotificacion("Gmail abierto con copia a ohsaravia@celina.com.bo. ¡Pega con Ctrl+V!");
   };
 
   const textoWhatsApp = `🔥 *OFERTA CAMPAÑA OCTUBRE - CELINA URBANIZACIONES* 🔥\n\n` +
@@ -641,7 +556,7 @@ ${asesorSeleccionado}`;
     `Asesor: ${asesorSeleccionado}`;
 
   return (
-    <div className="min-h-screen bg-[#030712] text-slate-100 p-3 sm:p-5 md:p-6 font-sans w-full overflow-x-hidden">
+    <div className="w-full text-slate-100 font-sans overflow-x-hidden">
       {/* BARRA SUPERIOR */}
       <div className="max-w-6xl mx-auto mb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-[#14233c] pb-4">
         <div>
@@ -657,7 +572,6 @@ ${asesorSeleccionado}`;
           </h1>
         </div>
 
-        {/* CONTROLES DE MATRIZ DE LOTES */}
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".json" className="hidden" />
           <button
@@ -684,7 +598,7 @@ ${asesorSeleccionado}`;
         </div>
       )}
 
-      {/* SELECTOR DE MODALIDAD EXCLUSIVA */}
+      {/* TABS DE MODALIDAD */}
       <div className="max-w-6xl mx-auto mb-5 flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-3 bg-[#081224] border border-[#14233c] p-2 rounded-2xl">
         <div className="flex p-1 bg-[#050b18] border border-[#14233c] rounded-xl w-full lg:w-auto">
           <button
@@ -713,7 +627,6 @@ ${asesorSeleccionado}`;
           </button>
         </div>
 
-        {/* SELECTOR DE VENTANAS SI ES CONTADO */}
         {modalidad === "CONTADO_LIQUIDACION" && (
           <div className="grid grid-cols-3 gap-1.5 w-full lg:w-auto">
             {Object.keys(VENTANAS_CONTADO).map((vKey) => {
@@ -737,9 +650,9 @@ ${asesorSeleccionado}`;
         )}
       </div>
 
-      {/* GRID PRINCIPAL */}
+      {/* GRID EN 2 COLUMNAS */}
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5">
-        {/* COLUMNA IZQUIERDA: SELECTORES */}
+        {/* COLUMNA IZQUIERDA */}
         <div className="lg:col-span-4 space-y-4">
           <div className="bg-[#070e1c] border border-[#14233c] rounded-2xl p-4 shadow-xl">
             <h3 className="text-xs font-black uppercase text-cyan-400 tracking-wider mb-3 flex items-center gap-1.5">
@@ -812,7 +725,6 @@ ${asesorSeleccionado}`;
             </div>
           </div>
 
-          {/* DESTINATARIOS PARA APROBACIÓN */}
           <div className="bg-[#070e1c] border border-[#14233c] rounded-2xl p-4 shadow-xl space-y-3">
             <div>
               <label className="block text-[10px] text-slate-400 mb-1 font-bold uppercase">
@@ -831,7 +743,6 @@ ${asesorSeleccionado}`;
               </select>
             </div>
 
-            {/* AVISO DE CC AUTOMÁTICO */}
             <div className="bg-[#091426] border border-[#182a46] p-2.5 rounded-xl text-[10px] text-slate-400 space-y-1">
               <span className="font-bold text-cyan-400 block uppercase">CC Automático de Respaldo:</span>
               <div className="text-slate-300 font-mono text-[9px] leading-relaxed break-all">
@@ -854,7 +765,7 @@ ${asesorSeleccionado}`;
           </div>
         </div>
 
-        {/* COLUMNA DERECHA: DASHBOARD IDÉNTICO A LA CAPTURA */}
+        {/* COLUMNA DERECHA: DASHBOARD DE LIQUIDACIÓN */}
         <div className="lg:col-span-8 space-y-4">
           <div className="bg-[#070e1c] border border-[#14233c] rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl relative overflow-hidden">
             {/* Header del lote */}
@@ -872,7 +783,6 @@ ${asesorSeleccionado}`;
                 </div>
               </div>
 
-              {/* 3 Badges de UV, MZN, LOTE */}
               <div className="flex gap-1.5 self-end sm:self-auto">
                 <div className="bg-[#0b172a] border border-[#1c3558] px-2.5 sm:px-3.5 py-1 rounded-xl text-center">
                   <span className="text-[8px] sm:text-[9px] block text-slate-400 font-bold uppercase">UV</span>
@@ -889,7 +799,7 @@ ${asesorSeleccionado}`;
               </div>
             </div>
 
-            {/* SECCIÓN HERO CENTRAL */}
+            {/* HERO CENTRAL */}
             <div className="py-6 sm:py-7 text-center">
               <div className="inline-block bg-[#0e243c] border border-cyan-500/40 text-cyan-300 text-[10px] sm:text-xs font-black px-3 sm:px-4 py-1.5 rounded-full uppercase tracking-wider mb-2 sm:mb-3">
                 🏷️ {calculos.labelBadge}
@@ -904,7 +814,6 @@ ${asesorSeleccionado}`;
                 </span>
               </div>
 
-              {/* 3 Cajas de Métricas */}
               <div className="grid grid-cols-3 gap-2 sm:gap-3 max-w-lg mx-auto mt-5">
                 <div className="bg-[#091426] border border-[#182a46] rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 text-center">
                   <div className="text-[9px] sm:text-[10px] text-slate-400 font-black uppercase">BASE</div>
@@ -933,9 +842,8 @@ ${asesorSeleccionado}`;
               </div>
             </div>
 
-            {/* SECCIÓN DOBLE ÓPTICA FINANCIERA */}
+            {/* DOBLE ÓPTICA FINANCIERA */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 pt-4 border-t border-[#14233c]">
-              {/* ÓPTICA 1: DESCUENTO A CAPITAL */}
               <div className="bg-[#081222] border border-[#192f50] rounded-2xl p-3.5 sm:p-4 text-xs font-mono">
                 <div className="text-[11px] font-black text-cyan-400 mb-2.5 flex items-center gap-1.5 uppercase font-sans">
                   💲 ÓPTICA 1: DESCUENTO A CAPITAL
@@ -964,7 +872,6 @@ ${asesorSeleccionado}`;
                 </div>
               </div>
 
-              {/* ÓPTICA 2: DESCUENTO A T.C. */}
               <div className="bg-[#081222] border border-[#192f50] rounded-2xl p-3.5 sm:p-4 text-xs font-mono">
                 <div className="text-[11px] font-black text-emerald-400 mb-2.5 flex items-center gap-1.5 uppercase font-sans">
                   📈 ÓPTICA 2: DESCUENTO A T.C.
@@ -999,7 +906,7 @@ ${asesorSeleccionado}`;
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
                   <span className="text-[10px] font-black tracking-wider uppercase text-emerald-400 block mb-0.5">
-                    DATO REQUERIDO PARA EL SISTEMA CELINA (APROBADORES)
+                    DATO CLAVE PARA EL SISTEMA CELINA (APROBADORES)
                   </span>
                   <div className="text-xs text-slate-300">
                     Precio Anterior: <span className="line-through text-slate-400 font-mono">${formatMoneda(calculos.precioM2Anterior)}/m²</span>
@@ -1018,9 +925,8 @@ ${asesorSeleccionado}`;
 
             {/* BOTONERA TRIPLE EXACTA + WHATSAPP */}
             <div className="pt-6 mt-4 border-t border-[#14233c] space-y-3">
-              {/* FILA 1: COPIAR FORMATO Y APP OUTLOOK */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* 1. COPIAR FORMATO (BOTÓN TARJETA BLANCA / GRIS CLARA) */}
+                {/* 1. COPIAR FORMATO (TARJETA BLANCA / GRIS CLARA) */}
                 <button
                   type="button"
                   onClick={copiarFormatoHTML}
@@ -1041,7 +947,7 @@ ${asesorSeleccionado}`;
                 </button>
               </div>
 
-              {/* FILA 2: ABRIR EN GMAIL CON BADGE + CC AUTOMÁTICO */}
+              {/* 3. ABRIR EN GMAIL CON BADGE + CC AUTOMÁTICO (ROJO #EA4335) */}
               <button
                 type="button"
                 onClick={abrirEnGmailWeb}
@@ -1054,7 +960,7 @@ ${asesorSeleccionado}`;
                 </span>
               </button>
 
-              {/* FILA 3: ENVIAR POR WHATSAPP */}
+              {/* 4. ENVIAR POR WHATSAPP */}
               <button
                 type="button"
                 onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(textoWhatsApp)}`, "_blank")}
