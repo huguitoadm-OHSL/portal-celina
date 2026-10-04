@@ -17,14 +17,20 @@ export default function EvaluacionFinMes() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
-      <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><ClipboardCheck className="w-6 h-6 mr-2 text-blue-600" /> Evaluación de Desempeño</h2></div>
+            <div className="mb-6">
+        <div className="flex items-center gap-2 mb-1.5">
+          <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></span>
+          <span className="text-[10px] font-black tracking-widest text-cyan-400 uppercase">
+            PORTAL GESTIÓN ESTRATÉGICA • CELINA
+          </span>
+        </div><h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center"><ClipboardCheck className="w-6 h-6 mr-2 text-cyan-400" /> Evaluación de Desempeño</h2></div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full">
+        <div className="bg-[#070e1c] p-5 sm:p-6 rounded-3xl shadow-2xl border border-[#14233c] text-slate-100 w-full">
           <Input label="Nombre del Asesor Evaluado" name="nombre" value={formEvaluacion.nombre} onChange={handleE} placeholder="Ej. Jaime Fabricio Rios" />
           
           {/* BARRAS DE COMPETENCIA DINÁMICAS */}
           <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 my-5">
-            <h3 className="text-sm font-bold text-slate-700 mb-4 uppercase tracking-wider">Scorecard de Competencias</h3>
+            <h3 className="text-sm font-bold text-slate-200 mb-4 uppercase tracking-wider">Scorecard de Competencias</h3>
             <div className="space-y-4">
               {[
                 { id: 'cierre', label: 'Cierre de Ventas', icon: <Target className="w-4 h-4 text-rose-500" />, color: 'bg-rose-500' },
@@ -33,7 +39,7 @@ export default function EvaluacionFinMes() {
                 { id: 'actitud', label: 'Actitud Comercial', icon: <Star className="w-4 h-4 text-emerald-500" />, color: 'bg-emerald-500' }
               ].map(skill => (
                 <div key={skill.id}>
-                  <div className="flex justify-between text-xs font-bold text-slate-600 mb-1 items-center">
+                  <div className="flex justify-between text-xs font-bold text-slate-300 mb-1 items-center">
                     <span className="flex items-center gap-1.5">{skill.icon} {skill.label}</span>
                     <span>{formEvaluacion.habilidades[skill.id]}%</span>
                   </div>
@@ -46,7 +52,7 @@ export default function EvaluacionFinMes() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <Input label="Punteo Total" name="punteo" value={formEvaluacion.punteo} onChange={handleE} type="number" />
-            <div><label className="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">Calificación</label><select name="calificacion" value={formEvaluacion.calificacion} onChange={handleE} className="w-full px-3 py-2.5 border rounded-xl bg-slate-50 text-sm"><option value="Excelente">Excelente</option><option value="Muy Bueno">Muy Bueno</option><option value="Regular">Regular</option><option value="Bajo">Bajo</option></select></div>
+            <div><label className="block text-sm font-bold text-slate-200 mb-1.5 ml-0.5">Calificación</label><select name="calificacion" value={formEvaluacion.calificacion} onChange={handleE} className="w-full px-3.5 py-2.5 bg-[#050b18] border border-[#1e3a5f] rounded-xl text-xs font-bold text-white focus:outline-none focus:border-cyan-400 transition-all"><option value="Excelente">Excelente</option><option value="Muy Bueno">Muy Bueno</option><option value="Regular">Regular</option><option value="Bajo">Bajo</option></select></div>
           </div>
           <div className="grid grid-cols-3 gap-4 mb-4">
             <Input label="Lotes" name="lotes" value={formEvaluacion.lotes} onChange={handleE} type="number" />
