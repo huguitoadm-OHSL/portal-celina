@@ -26,15 +26,21 @@ export default function ContratoFisico() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-800 flex items-center">
-          <FileText className="w-6 h-6 mr-2 text-blue-600" /> Habilitación de Contrato Físico
+            <div className="mb-6">
+        <div className="flex items-center gap-2 mb-1.5">
+          <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></span>
+          <span className="text-[10px] font-black tracking-widest text-cyan-400 uppercase">
+            PORTAL GESTIÓN ESTRATÉGICA • CELINA
+          </span>
+        </div>
+        <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center">
+          <FileText className="w-6 h-6 mr-2 text-cyan-400" /> Habilitación de Contrato Físico
         </h2>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
         {/* FORMULARIO */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
+        <div className="bg-[#070e1c] p-5 sm:p-6 rounded-3xl shadow-2xl border border-[#14233c] text-slate-100 w-full min-w-0">
           <Input label="Nombre del Asesor" name="asesor" value={form.asesor} onChange={handleChange} placeholder="Ej. Oscar Saravia" />
           <Input label="Nombre Completo del Cliente" name="nombre" value={form.nombre} onChange={handleChange} placeholder="Ej. Juan Pérez" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
