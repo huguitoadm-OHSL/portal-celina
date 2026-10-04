@@ -25,8 +25,8 @@ export default function ProyeccionSemanal() {
   
   const [formProyeccion, setFormProyeccion] = useState({
     equipo: 'Oscar Saravia', 
-    fechaInicio: '2026-09-07', 
-    objetivoMensual: 115000,
+    fechaInicio: '2026-10-03', 
+    objetivoMensual: 111000,
     asesores: BASE_DE_DATOS_PROYECCION
   });
 
@@ -132,3 +132,5 @@ export default function ProyeccionSemanal() {
     </div>
   );
 }
+
+
