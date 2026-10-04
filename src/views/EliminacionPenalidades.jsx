@@ -75,7 +75,7 @@ export default function EliminacionPenalidades() {
               <Ban className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-base md:text-xl font-black text-slate-800 uppercase tracking-wide leading-tight">
+              <h1 className="text-base md:text-xl font-black text-white uppercase tracking-wide leading-tight">
                 Eliminación de Penalidades
               </h1>
               <p className="text-[9px] md:text-[11px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">
@@ -91,7 +91,7 @@ export default function EliminacionPenalidades() {
           <div className="lg:col-span-7 bg-white border border-slate-200 rounded-3xl p-5 md:p-8 shadow-sm">
             <div className="flex items-center mb-6 border-b border-slate-100 pb-4">
               <AlertOctagon className="w-5 h-5 text-rose-500 mr-2" />
-              <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider">Datos de la Multa a Eliminar</h2>
+              <h2 className="text-sm font-black text-white uppercase tracking-wider">Datos de la Multa a Eliminar</h2>
             </div>
 
             <div className="space-y-5">
@@ -104,7 +104,7 @@ export default function EliminacionPenalidades() {
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                       <User className="w-4 h-4 text-slate-400 group-focus-within:text-rose-500 transition-colors" />
                     </div>
-                    <input type="text" name="cliente" value={form.cliente} onChange={handleChange} placeholder="Ej: ERICK GONZALES ACOSTA" className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 outline-none focus:bg-white focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 transition-all uppercase" />
+                    <input type="text" name="cliente" value={form.cliente} onChange={handleChange} placeholder="Ej: ERICK GONZALES ACOSTA" className="w-full pl-10 pr-4 py-3 bg-[#050b18] border border-[#1e3a5f] rounded-2xl text-sm font-bold text-white outline-none focus:bg-white focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 transition-all uppercase" />
                   </div>
                 </div>
 
@@ -115,7 +115,7 @@ export default function EliminacionPenalidades() {
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                       <Building2 className="w-4 h-4 text-slate-400 group-focus-within:text-rose-500 transition-colors" />
                     </div>
-                    <input type="text" name="proyecto" value={form.proyecto} onChange={handleChange} onBlur={handleProyectoBlur} placeholder="Ej: CELINA MUYURINA" className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 outline-none focus:bg-white focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 transition-all uppercase" />
+                    <input type="text" name="proyecto" value={form.proyecto} onChange={handleChange} onBlur={handleProyectoBlur} placeholder="Ej: CELINA MUYURINA" className="w-full pl-10 pr-4 py-3 bg-[#050b18] border border-[#1e3a5f] rounded-2xl text-sm font-bold text-white outline-none focus:bg-white focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 transition-all uppercase" />
                   </div>
                 </div>
 
@@ -126,7 +126,7 @@ export default function EliminacionPenalidades() {
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                       <FileText className="w-4 h-4 text-slate-400 group-focus-within:text-rose-500 transition-colors" />
                     </div>
-                    <input type="text" name="contrato" value={form.contrato} onChange={handleChange} placeholder="Ej: C2603500343" className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 outline-none focus:bg-white focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 transition-all uppercase" />
+                    <input type="text" name="contrato" value={form.contrato} onChange={handleChange} placeholder="Ej: C2603500343" className="w-full pl-10 pr-4 py-3 bg-[#050b18] border border-[#1e3a5f] rounded-2xl text-sm font-bold text-white outline-none focus:bg-white focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 transition-all uppercase" />
                   </div>
                 </div>
 
@@ -138,21 +138,21 @@ export default function EliminacionPenalidades() {
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                          <span className="text-[10px] font-bold text-slate-400">UV:</span>
                       </div>
-                      <input type="text" name="uv" value={form.uv} onChange={handleChange} className="w-full pl-9 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 outline-none focus:bg-white focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 transition-all uppercase" />
+                      <input type="text" name="uv" value={form.uv} onChange={handleChange} className="w-full pl-9 pr-3 py-3 bg-[#050b18] border border-[#1e3a5f] rounded-2xl text-sm font-bold text-white outline-none focus:bg-white focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 transition-all uppercase" />
                     </div>
                     
                     <div className="relative flex-1">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                          <span className="text-[10px] font-bold text-slate-400">MZN:</span>
                       </div>
-                      <input type="text" name="mzn" value={form.mzn} onChange={handleChange} className="w-full pl-11 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 outline-none focus:bg-white focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 transition-all uppercase" />
+                      <input type="text" name="mzn" value={form.mzn} onChange={handleChange} className="w-full pl-11 pr-3 py-3 bg-[#050b18] border border-[#1e3a5f] rounded-2xl text-sm font-bold text-white outline-none focus:bg-white focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 transition-all uppercase" />
                     </div>
 
                     <div className="relative flex-1">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                          <span className="text-[10px] font-bold text-slate-400">LT:</span>
                       </div>
-                      <input type="text" name="lote" value={form.lote} onChange={handleChange} className="w-full pl-9 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 outline-none focus:bg-white focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 transition-all uppercase" />
+                      <input type="text" name="lote" value={form.lote} onChange={handleChange} className="w-full pl-9 pr-3 py-3 bg-[#050b18] border border-[#1e3a5f] rounded-2xl text-sm font-bold text-white outline-none focus:bg-white focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 transition-all uppercase" />
                     </div>
                   </div>
                 </div>
