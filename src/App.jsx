@@ -18,7 +18,7 @@ import LiquidacionContado from './views/LiquidacionContado';
 import SolicitudesCodigo from './views/SolicitudesCodigo';
 import RecalcularPlan from './views/RecalcularPlan';
 import ConsolidacionLotes from './views/ConsolidacionLotes'; 
-import EliminacionPenalidades from './views/EliminacionPenalidades'; // <-- ¡NUEVA IMPORTACIÓN!
+import EliminacionPenalidades from './views/EliminacionPenalidades';
 
 // Vistas - Trámites Generales
 import ValidacionLlamada from './views/ValidacionLlamada';
@@ -35,9 +35,9 @@ import PostulanteNuevo from './views/PostulanteNuevo';
 import SolicitudMemorandum from './views/SolicitudMemorandum';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard'); 
+  const [activeTab, setActiveTab] = useState('descuento'); 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [supervisorDestino, setSupervisorDestino] = useState(''); // <-- ESTADO FALTANTE AGREGADO
+  const [supervisorDestino, setSupervisorDestino] = useState('');
 
   useEffect(() => {
     const root = document.getElementById('root');
@@ -47,12 +47,14 @@ export default function App() {
       root.style.padding = '0';
       root.style.margin = '0';
       root.style.textAlign = 'left';
+      root.style.backgroundColor = '#030712';
     }
     document.body.style.margin = '0';
-    document.body.style.display = 'block';
+    document.body.style.backgroundColor = '#030712';
+    document.body.style.overflowX = 'hidden';
   }, []);
 
-  // ================= ESCUDO DE ENTRADA CORREGIDO =================
+  // ================= ESCUDO DE ENTRADA SCI-FI =================
   const [autenticado, setAutenticado] = useState(() => {
     return localStorage.getItem('acceso_portal_master') === 'PERMITIDO';
   });
@@ -61,7 +63,6 @@ export default function App() {
 
   const verificarPassword = (e) => {
     e.preventDefault();
-    // 🟢 CORRECCIÓN DE SEGURIDAD: Clave maestra actualizada y encriptada
     if (passInput.trim() === 'ELSEÑORESMIPASTOR') {
       localStorage.setItem('acceso_portal_master', 'PERMITIDO');
       setAutenticado(true);
@@ -73,13 +74,14 @@ export default function App() {
 
   if (!autenticado) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-[#002060] to-blue-950 p-4">
-        <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/20 shadow-2xl max-w-sm w-full text-center animate-in fade-in zoom-in duration-500">
-          <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-600/50">
+      <div className="flex items-center justify-center min-h-screen bg-[#030712] p-4 relative overflow-hidden font-sans">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[140px] pointer-events-none"></div>
+        <div className="bg-[#070e1c] border border-[#14233c] p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center relative z-10 backdrop-blur-xl">
+          <div className="w-16 h-16 bg-[#0c1a30] border border-cyan-500/40 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-[0_0_20px_rgba(0,229,255,0.2)]">
             <span className="text-2xl">🔒</span>
           </div>
-          <h2 className="text-2xl font-black text-white mb-1">Acceso Restringido</h2>
-          <p className="text-xs text-blue-200 mb-6 uppercase tracking-wider font-semibold">Portal de Liderazgo • Celina</p>
+          <h2 className="text-2xl font-black text-white mb-1 tracking-tight">Acceso Restringido</h2>
+          <p className="text-[10px] text-cyan-400 mb-6 uppercase tracking-widest font-black">Portal de Liderazgo • Celina</p>
           
           <form onSubmit={verificarPassword} className="space-y-4">
             <div>
@@ -89,18 +91,18 @@ export default function App() {
                 value={passInput} 
                 onChange={(e) => setPassInput(e.target.value)} 
                 placeholder="Ingresa la contraseña..." 
-                className={`w-full px-4 py-3 rounded-xl bg-white/20 border ${errorPass ? 'border-red-500 text-red-200 placeholder:text-red-300 bg-red-500/10' : 'border-white/20 text-white placeholder:text-slate-300'} font-bold text-center tracking-widest outline-none focus:ring-2 focus:ring-blue-400 transition-all`}
+                className={`w-full px-4 py-3 rounded-xl bg-[#050b18] border ${errorPass ? 'border-rose-500 text-rose-300' : 'border-[#1e3a5f] text-white focus:border-cyan-400'} font-bold text-center tracking-widest outline-none transition-all text-sm`}
               />
-              {errorPass && <p className="text-xs font-bold text-red-400 mt-2">❌ Contraseña incorrecta</p>}
+              {errorPass && <p className="text-xs font-bold text-rose-400 mt-2">❌ Contraseña incorrecta</p>}
             </div>
             <button 
               type="submit" 
-              className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-black rounded-xl shadow-lg transition-all transform hover:scale-[1.02]"
+              className="w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black rounded-xl shadow-lg shadow-cyan-500/25 transition-all transform active:scale-95 text-sm"
             >
               Entrar al Portal
             </button>
           </form>
-          <p className="text-[10px] text-slate-400 mt-6">Diseñado por Oscar Saravia ©</p>
+          <p className="text-[10px] text-slate-500 mt-6 font-mono">Diseñado por Oscar Saravia ©</p>
         </div>
       </div>
     );
@@ -115,7 +117,7 @@ export default function App() {
       case 'diaria': return <ProyeccionDiaria />;
       case 'seguimiento': return <SeguimientoVentas />;
       
-      // 2. Operaciones (Cotizaciones y Recompras)
+      // 2. Operaciones
       case 'amortizacion': return <SimuladorAmortizacion />;
       case 'recompra': return <Recompra />;
       case 'descuento': return <DescuentosCampanas />;
@@ -125,7 +127,7 @@ export default function App() {
       case 'solicitudesCodigo': return <SolicitudesCodigo />;
       case 'recalcular': return <RecalcularPlan />;
       case 'consolidacion': return <ConsolidacionLotes />; 
-      case 'penalidades': return <EliminacionPenalidades/>; // <-- ¡NUEVA RUTA DE CONSOLIDACIÓN!
+      case 'penalidades': return <EliminacionPenalidades/>;
         
       // 3. Trámites Generales
       case 'llamada': return <ValidacionLlamada />;
@@ -134,7 +136,7 @@ export default function App() {
       case 'seguro': return <SeguroVida />;
       case 'pendienteValidacion': return <PendienteValidacion />;
       
-      // 4. Recursos Humanos (RRHH)
+      // 4. Recursos Humanos
       case 'renuncia': return <CartaRenuncia />;
       case 'altaCrm': return <AltaCRM />;
       case 'evaluacion': return <EvaluacionFinMes />;
@@ -143,17 +145,16 @@ export default function App() {
       
       default: 
         return (
-          <div className="flex flex-col items-center justify-center h-full text-slate-500">
-            <h2 className="text-2xl font-bold mb-2">Vista en construcción</h2>
-            <p>Módulo no encontrado.</p>
+          <div className="flex flex-col items-center justify-center h-full text-slate-500 py-20">
+            <h2 className="text-xl font-bold mb-1 text-slate-300">Vista en optimización</h2>
+            <p className="text-xs">Módulo en proceso de carga.</p>
           </div>
         );
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] flex flex-col md:flex-row font-sans selection:bg-indigo-100 selection:text-indigo-900 overflow-hidden">
-      
+    <div className="min-h-screen bg-[#030712] text-slate-100 flex flex-col md:flex-row font-sans w-full overflow-x-hidden">
       <MobileHeader onMenuClick={() => setIsSidebarOpen(true)} />
       
       <Sidebar 
@@ -161,15 +162,14 @@ export default function App() {
         setActiveTab={setActiveTab} 
         isOpen={isSidebarOpen} 
         closeSidebar={() => setIsSidebarOpen(false)} 
-        setSupervisorDestino={setSupervisorDestino} // <-- CORRECCIÓN: Conexión de estado real
+        setSupervisorDestino={setSupervisorDestino}
       />
       
-      <div className="flex-1 overflow-auto p-4 md:p-8 lg:p-10 w-full h-[calc(100vh-72px)] md:h-screen">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 md:p-8 w-full min-h-[calc(100vh-64px)] md:min-h-screen bg-[#030712]">
         <div className="max-w-[1600px] mx-auto w-full pb-10">
           {renderContent()}
         </div>
-      </div>
-      
+      </main>
     </div>
   );
 }
