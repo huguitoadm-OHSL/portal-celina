@@ -7,6 +7,7 @@ import Dashboard from './views/Dashboard';
 import ProyeccionSemanal from './views/ProyeccionSemanal';
 import ProyeccionDiaria from './views/ProyeccionDiaria';
 import SeguimientoVentas from './views/SeguimientoVentas';
+import IncentivosAsesores from './views/IncentivosAsesores'; // 🟢 HERRAMIENTA OFICIAL DE INCENTIVOS
 
 // Vistas - Cotizaciones y Recompras
 import SimuladorAmortizacion from './views/SimuladorAmortizacion';
@@ -35,7 +36,7 @@ import PostulanteNuevo from './views/PostulanteNuevo';
 import SolicitudMemorandum from './views/SolicitudMemorandum';
 
 export default function App() {
-  // Al iniciar sesión o cargar la aplicación, se inicia en la pestaña 'Inicio' (Dashboard)
+  // Pestaña inicial predeterminada: Inicio (Dashboard)
   const [activeTab, setActiveTab] = useState('dashboard'); 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [supervisorDestino, setSupervisorDestino] = useState('');
@@ -66,7 +67,7 @@ export default function App() {
     e.preventDefault();
     if (passInput.trim() === 'ELSEÑORESMIPASTOR') {
       localStorage.setItem('acceso_portal_master', 'PERMITIDO');
-      setActiveTab('dashboard'); // Asegura la navegación a Inicio al autenticar
+      setActiveTab('dashboard'); // Garantiza que siempre entre a Inicio
       setAutenticado(true);
     } else {
       setErrorPass(true);
@@ -115,6 +116,7 @@ export default function App() {
     switch (activeTab) {
       // 1. Gerencia
       case 'dashboard': return <Dashboard />;
+      case 'incentivos': return <IncentivosAsesores />; // 🟢 RUTA DEL CONCURSO DE INCENTIVOS
       case 'proyeccion': return <ProyeccionSemanal />;
       case 'diaria': return <ProyeccionDiaria />;
       case 'seguimiento': return <SeguimientoVentas />;
