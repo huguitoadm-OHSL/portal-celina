@@ -82,7 +82,7 @@ export default function SolicitudesCodigo() {
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800 flex items-center">
+          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center">
             <KeyRound className="w-6 h-6 mr-2 text-indigo-600" />
             Solicitud de Códigos en Plataforma
           </h2>
@@ -93,13 +93,13 @@ export default function SolicitudesCodigo() {
         <div className="flex bg-slate-100 p-1.5 rounded-xl border border-slate-200 shadow-inner">
           <button
             onClick={() => setTipoSolicitud('liquidacion')}
-            className={`flex items-center px-4 py-2 rounded-lg text-xs font-bold transition-all ${tipoSolicitud === 'liquidacion' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:text-slate-800'}`}
+            className={`flex items-center px-4 py-2 rounded-lg text-xs font-bold transition-all ${tipoSolicitud === 'liquidacion' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:text-white'}`}
           >
             📄 Cód. Liquidación
           </button>
           <button
             onClick={() => setTipoSolicitud('amortizacion')}
-            className={`flex items-center px-4 py-2 rounded-lg text-xs font-bold transition-all ${tipoSolicitud === 'amortizacion' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:text-slate-800'}`}
+            className={`flex items-center px-4 py-2 rounded-lg text-xs font-bold transition-all ${tipoSolicitud === 'amortizacion' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:text-white'}`}
           >
             💰 Cód. Amortización
           </button>
@@ -109,7 +109,7 @@ export default function SolicitudesCodigo() {
       <div className="grid grid-cols-1 xl:grid-cols-[1.5fr_1fr] gap-6">
         {/* FORMULARIO */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
-          <div className="flex items-center justify-between border-b pb-3 text-sm font-bold text-slate-700">
+          <div className="flex items-center justify-between border-b pb-3 text-sm font-bold text-slate-200">
             <span>{tipoSolicitud === 'liquidacion' ? 'Datos para Código de Liquidación' : 'Datos para Código de Amortización'}</span>
             <span className="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded">CC: Olivia Mendoza</span>
           </div>
