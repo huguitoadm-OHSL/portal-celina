@@ -6,7 +6,7 @@ const PROYECTOS_ACTUALIZADOS = ['Muyurina', 'Renacer', 'Santa Fe', 'Rancho Nuevo
 
 // LA BASE DE DATOS MAESTRA - ACTUALÍZALA AQUÍ Y VERCEL LO HARÁ PÚBLICO
 const BASE_DE_DATOS_PBI = [
-  { nombre: "JIMMY GONZALES", colAct: 37944, ventasReales: [0,0,0,0,5,0,0], tipo: 'INTERNO' },
+  { nombre: "JIMMY GONZALES", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
   { nombre: "MARISOL URGEL", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
   { nombre: "JAIME FABRICIO RIOS", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
   { nombre: "ELY GONZALES", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
@@ -16,7 +16,7 @@ const BASE_DE_DATOS_PBI = [
 ];
 
 export default function SeguimientoVentas() {
-  const ventasPorProyecto = [0, 0, 0, 0, 5, 0, 0]; 
+  const ventasPorProyecto = [0, 0, 0, 0, 0, 0, 0]; 
 
   const datosProcesados = BASE_DE_DATOS_PBI.map(asesor => {
     let totalVentas = 0;
@@ -26,13 +26,13 @@ export default function SeguimientoVentas() {
     });
 
     let clusterInfo = { texto: 'Venta Cero', color: 'text-slate-400 font-semibold' };
-    if (asesor.colAct >= 25000) clusterInfo = { texto: 'Comisionan', color: 'text-emerald-600 font-bold' };
+    if (asesor.colAct >= 18000) clusterInfo = { texto: 'Comisionan', color: 'text-emerald-600 font-bold' };
     else if (asesor.colAct > 0) clusterInfo = { texto: 'No Comisionan', color: 'text-amber-600 font-bold' };
 
     return {
       nombre: asesor.nombre, agencia: 'MONTERO', supervisor: 'OSCAR SARAVIA',
       ventas: totalVentas, colocacion: asesor.colAct, tipo: asesor.tipo,
-      minima: 25000, cluster: clusterInfo
+      minima: 18000, cluster: clusterInfo
     };
   });
 
@@ -120,3 +120,5 @@ export default function SeguimientoVentas() {
     </div>
   );
 }
+
+
