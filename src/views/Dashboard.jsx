@@ -20,7 +20,7 @@ export default function Dashboard() {
   const ventasActuales = useMemo(() => asesoresData.reduce((sum, as) => sum + as.colocacion, 0), [asesoresData]);
   const totalCierres = useMemo(() => asesoresData.reduce((sum, as) => sum + as.ventas, 1), [asesoresData]);
   
-  const metaMensual = 115000;
+  const metaMensual = 111000;
   const porcentajeAvance = (ventasActuales / metaMensual) * 100;
 
   const fD = (num) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num || 0);
@@ -44,7 +44,7 @@ export default function Dashboard() {
         <div className="relative z-10">
           <div className="flex items-center space-x-3 mb-4">
             <span className="px-3.5 py-1.5 bg-blue-900/40 text-blue-300 text-[9px] font-black tracking-[0.25em] uppercase rounded-full border border-blue-500/30 backdrop-blur-md shadow-[0_0_15px_rgba(59,130,246,0.2)]">
-              Portal de Liderazgo V2.5
+              Portal de Liderazgo V3.0
             </span>
             <span className="flex h-2.5 w-2.5 relative">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
