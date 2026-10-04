@@ -15,16 +15,20 @@ export const SUPERVISORES = [
 
 export const EQUIPOS_ASESORES = {
   "Oscar Saravia": [
-    { nombre: "Jimmy Gonzales Nuñez", colAct: 37944, tipo: "Interno", ventas: 5 }, 
+    { nombre: "Jimmy Gonzales Nuñez", colAct: 0, tipo: "Interno", ventas: 0 }, 
     { nombre: "Marisol Urgel Pizarro", colAct: 0, tipo: "Interno", ventas: 0 },
-    { nombre: "Jaime F. Rios Castro", colAct: 0, tipo: "Interno", ventas: 0 },
+    { nombre: "Jaime Fabricio Rios Castro", colAct: 0, tipo: "Interno", ventas: 0 },
     { nombre: "Ely Gonzales Garcia", colAct: 0, tipo: "Interno", ventas: 0 },
-    { nombre: "Carlos Enrique Calderon", colAct: 0, tipo: "Interno", ventas: 0 },
+    { nombre: "Carlos Enrique Calderon Montano", colAct: 0, tipo: "Interno", ventas: 0 },
     { nombre: "Merly Mendez Hurtado", colAct: 0, tipo: "Interno", ventas: 0 },
-    { nombre: "Jose Gabriel Padilla Loayza", colAct: 0, tipo: "Interno", ventas: 0 },
+    { nombre: "Jose Gabriel Padilla Loayza", colAct: 0, tipo: "Interno", ventas: 0 }
   ]
 };
 
+// Compatibilidad defensiva por nombre completo
+EQUIPOS_ASESORES["Oscar Hugo Saravia L."] = EQUIPOS_ASESORES["Oscar Saravia"];
+
 export const OBJETIVOS_MENSUALES = {
-  "Oscar Saravia": 115000 
+  "Oscar Saravia": 111000,
+  "Oscar Hugo Saravia L.": 111000
 };
