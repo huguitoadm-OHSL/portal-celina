@@ -157,19 +157,19 @@ export default function ConsolidacionLotes() {
       <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
         
         {/* ENCABEZADO */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between bg-white p-3 md:p-5 rounded-3xl shadow-sm border border-slate-200 gap-3 md:gap-0 relative overflow-hidden">
+        <div className="flex flex-col md:flex-row md:items-center justify-between bg-white p-3 md:p-5 rounded-3xl shadow-sm border border-[#1e3a5f] gap-3 md:gap-0 relative overflow-hidden">
           <div className="absolute right-0 top-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
           <div className="flex items-center relative z-10">
             <div className="bg-gradient-to-tr from-indigo-600 to-purple-600 p-2.5 md:p-3 rounded-2xl mr-3 md:mr-4 shadow-lg shadow-indigo-500/20">
               <ArrowRightLeft className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-base md:text-xl font-black text-slate-800 uppercase tracking-wide leading-tight">Consolidación de Activos</h1>
-              <p className="text-[9px] md:text-[11px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Reconocimiento de Cuotas (Atrás hacia Adelante)</p>
+              <h1 className="text-base md:text-xl font-black text-white uppercase tracking-wide leading-tight">Consolidación de Activos</h1>
+              <p className="text-[9px] md:text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Reconocimiento de Cuotas (Atrás hacia Adelante)</p>
             </div>
           </div>
           {calculado && (
-            <button onClick={() => setCalculado(false)} className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 md:px-5 md:py-2.5 rounded-xl text-[10px] md:text-xs font-bold transition-all flex items-center justify-center shadow-sm w-full md:w-auto relative z-10">
+            <button onClick={() => setCalculado(false)} className="bg-[#070e1c] border border-[#14233c] text-slate-100 hover:bg-[#050b18] text-slate-200 px-4 py-2 md:px-5 md:py-2.5 rounded-xl text-[10px] md:text-xs font-bold transition-all flex items-center justify-center shadow-sm w-full md:w-auto relative z-10">
               <RotateCcw className="w-3 h-3 md:w-4 md:h-4 mr-2" /> Nueva Operación
             </button>
           )}
@@ -177,8 +177,8 @@ export default function ConsolidacionLotes() {
 
         {/* ALERTA DE POLÍTICA GERENCIAL ACTUALIZADA */}
         {!calculado && (
-          <div className="bg-blue-50 border-l-4 border-blue-500 rounded-r-2xl p-4 shadow-sm flex items-start">
-            <Info className="w-5 h-5 text-blue-600 mr-3 shrink-0 mt-0.5" />
+          <div className="bg-[#081528] border-l-4 border-blue-500 rounded-r-2xl p-4 shadow-sm flex items-start">
+            <Info className="w-5 h-5 text-cyan-400 mr-3 shrink-0 mt-0.5" />
             <div>
               <h3 className="text-xs font-black text-blue-900 uppercase tracking-wide mb-1">Nuevas Políticas de Traspaso</h3>
               <p className="text-[11px] text-blue-800/80 leading-relaxed font-medium">
@@ -192,51 +192,51 @@ export default function ConsolidacionLotes() {
         <div className={"transition-all duration-500 " + (calculado ? "opacity-60 pointer-events-none grayscale-[20%]" : "")}>
           
           <div className="mb-4">
-            <label className="block text-[10px] md:text-xs font-black text-slate-500 uppercase tracking-widest mb-1 pl-2">Titular del Nuevo Contrato</label>
-            <input type="text" name="cliente" value={form.cliente} onChange={handleChange} placeholder="Nombre completo del cliente..." className="w-full px-4 py-3 md:py-4 bg-white border border-slate-200 rounded-2xl text-sm md:text-base outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-black text-slate-800 shadow-sm transition-all" />
+            <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-1 pl-2">Titular del Nuevo Contrato</label>
+            <input type="text" name="cliente" value={form.cliente} onChange={handleChange} placeholder="Nombre completo del cliente..." className="w-full px-4 py-3 md:py-4 bg-[#070e1c] border border-[#14233c] text-slate-100 rounded-2xl text-sm md:text-base outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-black text-white shadow-sm transition-all" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
             
             {/* POLO IZQUIERDO: LOTE ORIGEN Y LIQUIDACIÓN REDISEÑADA */}
-            <div className="bg-white border-2 border-rose-100 rounded-3xl p-5 md:p-6 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 rounded-bl-full pointer-events-none"></div>
-              <div className="flex items-center justify-between mb-5 border-b border-rose-100 pb-4">
+            <div className="bg-[#0f0714] border-2 border-rose-500/40 text-slate-100 shadow-2xl rounded-3xl p-5 md:p-6 shadow-sm relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-[#180a14]0/5 rounded-bl-full pointer-events-none"></div>
+              <div className="flex items-center justify-between mb-5 border-b border-rose-500/30 pb-4">
                 <div className="flex items-center">
                   <div className="bg-rose-100 p-2 rounded-lg mr-3"><Wallet className="w-4 h-4 text-rose-600" /></div>
-                  <h2 className="text-xs md:text-sm font-black text-rose-800 uppercase tracking-wider">Lote A Desistir (Origen)</h2>
+                  <h2 className="text-xs md:text-sm font-black text-rose-300 uppercase tracking-wider">Lote A Desistir (Origen)</h2>
                 </div>
               </div>
               
               <div className="space-y-4 relative z-10">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-1">
-                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-500 uppercase mb-1">Capital Aportado ($)</label>
-                    <input type="number" name="capitalAportado" value={form.capitalAportado} onChange={handleChange} className="w-full px-3 py-2.5 bg-rose-50 border border-rose-200 rounded-xl text-sm font-black text-rose-900 outline-none focus:border-rose-400" />
+                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-1">Capital Aportado ($)</label>
+                    <input type="number" name="capitalAportado" value={form.capitalAportado} onChange={handleChange} className="w-full px-3 py-2.5 bg-[#180a14] border border-rose-500/40 rounded-xl text-sm font-black text-rose-200 outline-none focus:border-rose-400" />
                   </div>
                   <div className="col-span-1">
-                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-500 uppercase mb-1">Cuota Inicial ($)</label>
-                    <input type="number" name="cuotaInicial" value={form.cuotaInicial} onChange={handleChange} className="w-full px-3 py-2.5 bg-rose-50 border border-rose-200 rounded-xl text-sm font-black text-rose-900 outline-none focus:border-rose-400" />
+                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-1">Cuota Inicial ($)</label>
+                    <input type="number" name="cuotaInicial" value={form.cuotaInicial} onChange={handleChange} className="w-full px-3 py-2.5 bg-[#180a14] border border-rose-500/40 rounded-xl text-sm font-black text-rose-200 outline-none focus:border-rose-400" />
                   </div>
                   <div className="col-span-2 relative">
-                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-500 uppercase mb-1 flex items-center gap-1">
+                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-1 flex items-center gap-1">
                       Gastos Admin. / Comisión ($) <AlertTriangle className="w-3 h-3 text-amber-500" title="Uso Interno."/>
                     </label>
-                    <input type="number" name="comisionAsesor" value={form.comisionAsesor} onChange={handleChange} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 outline-none focus:border-rose-400" />
+                    <input type="number" name="comisionAsesor" value={form.comisionAsesor} onChange={handleChange} className="w-full px-3 py-2.5 bg-[#050b18] border border-[#1e3a5f] rounded-xl text-sm font-bold text-white outline-none focus:border-rose-400" />
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-r from-rose-50 to-orange-50 p-4 rounded-2xl border border-rose-200/60 shadow-inner mt-4">
-                  <div className="flex justify-between items-center mb-2 border-b border-rose-200/50 pb-2">
-                    <span className="text-[10px] font-bold text-rose-800/70 uppercase">Base Reconocida (Capital + Inicial)</span>
-                    <span className="text-xs font-bold text-rose-900">{fD(calculoLiquidacion.baseReconocida)}</span>
+                <div className="bg-gradient-to-r from-rose-50 to-orange-50 p-4 rounded-2xl border border-rose-500/40/60 shadow-inner mt-4">
+                  <div className="flex justify-between items-center mb-2 border-b border-rose-500/40/50 pb-2">
+                    <span className="text-[10px] font-bold text-rose-300/70 uppercase">Base Reconocida (Capital + Inicial)</span>
+                    <span className="text-xs font-bold text-rose-200">{fD(calculoLiquidacion.baseReconocida)}</span>
                   </div>
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-[10px] font-bold text-rose-800/70 uppercase">Gastos Administrativos</span>
+                    <span className="text-[10px] font-bold text-rose-300/70 uppercase">Gastos Administrativos</span>
                     <span className="text-xs font-bold text-rose-600">-{fD(calculoLiquidacion.comision)}</span>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-black text-rose-800 uppercase mb-1">Fondos Efectivos a Traspasar</label>
+                    <label className="block text-[10px] font-black text-rose-300 uppercase mb-1">Fondos Efectivos a Traspasar</label>
                     <div className="w-full px-4 py-2.5 bg-white border-2 border-rose-300 rounded-xl text-xl font-black text-rose-600 text-right shadow-sm">
                       {fD(calculoLiquidacion.saldoALiquidar)}
                     </div>
@@ -246,47 +246,47 @@ export default function ConsolidacionLotes() {
             </div>
 
             {/* POLO DERECHO: LOTE DESTINO */}
-            <div className="bg-white border-2 border-emerald-100 rounded-3xl p-5 md:p-6 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-bl-full pointer-events-none"></div>
-              <div className="flex items-center mb-5 border-b border-emerald-100 pb-4">
+            <div className="bg-[#051412] border-2 border-emerald-500/40 text-slate-100 shadow-2xl rounded-3xl p-5 md:p-6 shadow-sm relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-[#04241b]0/5 rounded-bl-full pointer-events-none"></div>
+              <div className="flex items-center mb-5 border-b border-emerald-500/30 pb-4">
                 <div className="bg-emerald-100 p-2 rounded-lg mr-3"><Building2 className="w-4 h-4 text-emerald-600" /></div>
-                <h2 className="text-xs md:text-sm font-black text-emerald-800 uppercase tracking-wider">Lote A Conservar (Destino)</h2>
+                <h2 className="text-xs md:text-sm font-black text-emerald-300 uppercase tracking-wider">Lote A Conservar (Destino)</h2>
               </div>
               
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-500 uppercase mb-1">Proyecto Destino</label>
-                    <input type="text" name="proyectoDestino" value={form.proyectoDestino} onChange={handleChange} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-emerald-400" />
+                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-1">Proyecto Destino</label>
+                    <input type="text" name="proyectoDestino" value={form.proyectoDestino} onChange={handleChange} className="w-full px-3 py-2.5 bg-[#050b18] border border-[#1e3a5f] rounded-xl text-xs font-bold text-slate-200 outline-none focus:border-emerald-400" />
                   </div>
                   <div>
-                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-500 uppercase mb-1">UV/MZN/LOTE</label>
-                    <input type="text" name="loteDestino" value={form.loteDestino} onChange={handleChange} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-emerald-400" />
+                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-1">UV/MZN/LOTE</label>
+                    <input type="text" name="loteDestino" value={form.loteDestino} onChange={handleChange} className="w-full px-3 py-2.5 bg-[#050b18] border border-[#1e3a5f] rounded-xl text-xs font-bold text-slate-200 outline-none focus:border-emerald-400" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   <div className="col-span-1">
-                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-500 uppercase mb-1">Cuota Act. ($)</label>
-                    <input type="number" name="cuotaDestino" value={form.cuotaDestino} onChange={handleChange} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-800 outline-none focus:border-emerald-400" />
+                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-1">Cuota Act. ($)</label>
+                    <input type="number" name="cuotaDestino" value={form.cuotaDestino} onChange={handleChange} className="w-full px-3 py-2.5 bg-[#050b18] border border-[#1e3a5f] rounded-xl text-xs font-black text-white outline-none focus:border-emerald-400" />
                   </div>
                   <div className="col-span-1">
-                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-500 uppercase mb-1">Seguro ($)</label>
-                    <input type="number" name="seguroDestino" value={form.seguroDestino} onChange={handleChange} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-emerald-400" />
+                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-1">Seguro ($)</label>
+                    <input type="number" name="seguroDestino" value={form.seguroDestino} onChange={handleChange} className="w-full px-3 py-2.5 bg-[#050b18] border border-[#1e3a5f] rounded-xl text-xs font-bold text-white outline-none focus:border-emerald-400" />
                   </div>
                   <div className="col-span-1">
-                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-500 uppercase mb-1">CBDI ($)</label>
-                    <input type="number" name="cbdiDestino" value={form.cbdiDestino} onChange={handleChange} placeholder="Ej. 24.12" className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-emerald-400" />
+                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-1">CBDI ($)</label>
+                    <input type="number" name="cbdiDestino" value={form.cbdiDestino} onChange={handleChange} placeholder="Ej. 24.12" className="w-full px-3 py-2.5 bg-[#050b18] border border-[#1e3a5f] rounded-xl text-xs font-bold text-white outline-none focus:border-emerald-400" />
                   </div>
                   <div className="col-span-1">
-                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-500 uppercase mb-1">Pagadas</label>
-                    <input type="number" name="pagadasDestino" value={form.pagadasDestino} onChange={handleChange} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-emerald-400" />
+                    <label className="block text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-1">Pagadas</label>
+                    <input type="number" name="pagadasDestino" value={form.pagadasDestino} onChange={handleChange} className="w-full px-3 py-2.5 bg-[#050b18] border border-[#1e3a5f] rounded-xl text-xs font-bold text-white outline-none focus:border-emerald-400" />
                   </div>
                 </div>
                 
-                <div className="bg-red-50/50 p-3 rounded-2xl border-2 border-red-200 mt-[26px]">
+                <div className="bg-[#1e070c] p-3 rounded-2xl border-2 border-red-500/40 mt-[26px]">
                   <label className="block text-[10px] font-black text-red-600 uppercase mb-1 pl-1">SALDO CAPITAL A CANCELAR (⚠️ NO EL SALDO TOTAL)</label>
-                  <input type="number" name="saldoDestino" value={form.saldoDestino} onChange={handleChange} placeholder="Ej. 4919.09" className="w-full px-4 py-3 bg-white border border-red-300 rounded-xl text-sm md:text-base outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/20 font-black text-red-900 shadow-inner transition-all" />
+                  <input type="number" name="saldoDestino" value={form.saldoDestino} onChange={handleChange} placeholder="Ej. 4919.09" className="w-full px-4 py-3 bg-white border border-red-500/50 rounded-xl text-sm md:text-base outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/20 font-black text-red-200 shadow-inner transition-all" />
                 </div>
               </div>
             </div>
@@ -313,33 +313,33 @@ export default function ConsolidacionLotes() {
           <div className="animate-in slide-in-from-bottom-10 duration-500 fade-in mt-8">
             
             {calculos.errorCritico ? (
-              <div className="bg-red-50 border border-red-200 rounded-3xl p-8 text-center shadow-lg">
+              <div className="bg-[#1e070c] border border-red-500/40 rounded-3xl p-8 text-center shadow-lg">
                 <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4 animate-bounce" />
-                <h3 className="text-xl font-black text-red-800 mb-2">¡Cálculo Imposible Detectado!</h3>
+                <h3 className="text-xl font-black text-red-300 mb-2">¡Cálculo Imposible Detectado!</h3>
                 <p className="text-red-700 font-medium max-w-lg mx-auto leading-relaxed">{calculos.errorCritico}</p>
                 <button onClick={() => setCalculado(false)} className="mt-6 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-bold text-sm shadow-md transition-all">Corregir Datos</button>
               </div>
             ) : (
-              <div className="bg-white border border-slate-200 shadow-2xl rounded-3xl overflow-hidden">
-                <div className="flex flex-col md:flex-row border-b border-slate-200 bg-slate-50/80 px-2 pt-2 justify-between items-center md:pr-4 gap-2 md:gap-0">
+              <div className="bg-[#070e1c] border border-[#14233c] text-slate-100 shadow-2xl rounded-3xl overflow-hidden">
+                <div className="flex flex-col md:flex-row border-b border-[#1e3a5f] bg-[#050b18] px-2 pt-2 justify-between items-center md:pr-4 gap-2 md:gap-0">
                   <div className="flex w-full md:w-auto">
-                    <button onClick={() => setTabActiva('RESUMEN')} className={`flex-1 md:flex-none px-3 py-3 md:px-8 md:py-4 text-[9px] md:text-[11px] uppercase tracking-[0.15em] font-black rounded-t-2xl transition-all ${tabActiva === 'RESUMEN' ? 'bg-white text-indigo-600 border-t-2 border-indigo-600 shadow-[0_-4px_15px_rgba(0,0,0,0.03)] relative z-10' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'}`}>
+                    <button onClick={() => setTabActiva('RESUMEN')} className={`flex-1 md:flex-none px-3 py-3 md:px-8 md:py-4 text-[9px] md:text-[11px] uppercase tracking-[0.15em] font-black rounded-t-2xl transition-all ${tabActiva === 'RESUMEN' ? 'bg-white text-cyan-400 border-t-2 border-indigo-600 shadow-[0_-4px_15px_rgba(0,0,0,0.03)] relative z-10' : 'text-slate-400 hover:text-slate-300 hover:bg-[#091426]'}`}>
                       Impacto Estratégico
                     </button>
-                    <button onClick={() => setTabActiva('TABLA')} className={`flex-1 md:flex-none px-3 py-3 md:px-8 md:py-4 text-[9px] md:text-[11px] uppercase tracking-[0.15em] font-black rounded-t-2xl transition-all ${tabActiva === 'TABLA' ? 'bg-white text-indigo-600 border-t-2 border-indigo-600 shadow-[0_-4px_15px_rgba(0,0,0,0.03)] relative z-10' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'}`}>
+                    <button onClick={() => setTabActiva('TABLA')} className={`flex-1 md:flex-none px-3 py-3 md:px-8 md:py-4 text-[9px] md:text-[11px] uppercase tracking-[0.15em] font-black rounded-t-2xl transition-all ${tabActiva === 'TABLA' ? 'bg-white text-cyan-400 border-t-2 border-indigo-600 shadow-[0_-4px_15px_rgba(0,0,0,0.03)] relative z-10' : 'text-slate-400 hover:text-slate-300 hover:bg-[#091426]'}`}>
                       Plan Consolidado
                     </button>
                   </div>
                   
                   {tabActiva === 'TABLA' && (
-                    <button onClick={() => setOcultarDetalles(!ocultarDetalles)} className="flex items-center text-[9px] md:text-[10px] font-bold text-slate-500 bg-white border border-slate-200 px-4 py-2 rounded-xl shadow-sm mb-2 md:mb-0 w-full md:w-auto justify-center hover:bg-slate-50 transition-colors">
+                    <button onClick={() => setOcultarDetalles(!ocultarDetalles)} className="flex items-center text-[9px] md:text-[10px] font-bold text-slate-400 bg-[#070e1c] border border-[#14233c] text-slate-100 px-4 py-2 rounded-xl shadow-sm mb-2 md:mb-0 w-full md:w-auto justify-center hover:bg-[#050b18] transition-colors">
                       {ocultarDetalles ? <Eye className="w-3.5 h-3.5 mr-2" /> : <EyeOff className="w-3.5 h-3.5 mr-2" />}
                       {ocultarDetalles ? 'Vista Interna Completa' : 'Vista Segura Cliente'}
                     </button>
                   )}
                 </div>
 
-                <div className="p-4 md:p-8 bg-slate-50/30">
+                <div className="p-4 md:p-8 bg-[#030712]">
                   
                   {tabActiva === 'RESUMEN' && (
                     <div className="animate-in fade-in zoom-in-95 duration-400">
@@ -360,30 +360,30 @@ export default function ConsolidacionLotes() {
                             </div>
                         </div>
 
-                        <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm relative overflow-hidden flex items-center justify-between">
+                        <div className="bg-[#070e1c] border border-[#14233c] rounded-3xl text-slate-100 shadow-2xl p-5 shadow-sm relative overflow-hidden flex items-center justify-between">
                             <div className="absolute top-0 left-0 w-1.5 h-full bg-slate-800"></div>
                             <div>
                                 <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 pl-2">Total Deuda Futura Original</span>
-                                <span className="block text-2xl font-black text-slate-800 pl-2">{fD(calculos.Suma_Original)}</span>
+                                <span className="block text-2xl font-black text-white pl-2">{fD(calculos.Suma_Original)}</span>
                             </div>
                         </div>
 
-                        <div className="bg-blue-50 border border-blue-200 rounded-3xl p-5 shadow-sm relative overflow-hidden flex items-center justify-between">
-                            <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
+                        <div className="bg-[#081528] border border-blue-200 rounded-3xl p-5 shadow-sm relative overflow-hidden flex items-center justify-between">
+                            <div className="absolute top-0 left-0 w-1.5 h-full bg-[#081528]0"></div>
                             <div>
                                 <span className="block text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1 pl-2">Tiempo Restante (Acortado)</span>
                                 <span className="block text-2xl font-black text-blue-900 pl-2">{calculos.cuotas_originales - calculos.cuotasEliminadasCompletas} Meses</span>
                             </div>
                             {calculos.pagoSobrante > 0 && calculos.cuotaSobrantePeriodo && (
                                 <div className="text-right">
-                                    <span className="block text-[9px] font-bold text-blue-600 uppercase mb-1">Ataque a Cuota {calculos.cuotaSobrantePeriodo}</span>
+                                    <span className="block text-[9px] font-bold text-cyan-400 uppercase mb-1">Ataque a Cuota {calculos.cuotaSobrantePeriodo}</span>
                                     <span className="block text-lg font-black text-blue-700">{fD(calculos.pagoSobrante)} (Resta)</span>
                                 </div>
                             )}
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 md:mt-6 border-t border-slate-200 pt-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 md:mt-6 border-t border-[#1e3a5f] pt-6">
                         
                         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 md:p-6 shadow-xl relative overflow-hidden group">
                             <div className="absolute top-0 left-0 w-1.5 h-full bg-emerald-400"></div>
@@ -391,26 +391,26 @@ export default function ConsolidacionLotes() {
                                 <Wallet className="w-32 h-32 text-emerald-400" />
                             </div>
                             <div className="relative z-10">
-                                <span className="inline-flex items-center px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded-md text-[9px] font-black tracking-widest uppercase mb-3 border border-emerald-500/30">Oportunidad de Liquidación</span>
+                                <span className="inline-flex items-center px-2.5 py-0.5 bg-[#04241b]0/20 text-emerald-400 rounded-md text-[9px] font-black tracking-widest uppercase mb-3 border border-emerald-500/30">Oportunidad de Liquidación</span>
                                 <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1 pl-2">Nuevo Saldo a Capital Restante</h3>
                                 <span className="block text-3xl md:text-4xl font-black text-emerald-400 pl-2">{fD(calculos.Saldo_Capital_Restante)}</span>
-                                <p className="text-[10px] text-slate-500 font-medium mt-2 pl-2 border-t border-slate-800 pt-2">
+                                <p className="text-[10px] text-slate-400 font-medium mt-2 pl-2 border-t border-slate-800 pt-2">
                                     Monto exacto (Neto) a pagar si el cliente desea liquidar su lote <strong className="text-slate-300">hoy mismo</strong>.
                                 </p>
                             </div>
                         </div>
 
-                        <div className="bg-white border border-slate-200 rounded-3xl p-5 md:p-6 shadow-sm relative overflow-hidden group">
+                        <div className="bg-[#070e1c] border border-[#14233c] rounded-3xl text-slate-100 shadow-2xl p-5 md:p-6 shadow-sm relative overflow-hidden group">
                             <div className="absolute top-0 left-0 w-1.5 h-full bg-indigo-500"></div>
                             <div className="absolute -right-4 -bottom-4 opacity-[0.03] group-hover:scale-110 transition-transform duration-500">
                                 <Calculator className="w-32 h-32 text-indigo-900" />
                             </div>
                             <div className="relative z-10">
-                                <span className="inline-flex items-center px-2.5 py-0.5 bg-slate-100 text-slate-500 rounded-md text-[9px] font-black tracking-widest uppercase mb-3 border border-slate-200">Deuda a Plazos Reducida</span>
+                                <span className="inline-flex items-center px-2.5 py-0.5 bg-[#091426] text-slate-400 rounded-md text-[9px] font-black tracking-widest uppercase mb-3 border border-[#1e3a5f]">Deuda a Plazos Reducida</span>
                                 <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1 pl-2">Nuevo Saldo Total a Pagar</h3>
-                                <span className="block text-3xl md:text-4xl font-black text-slate-800 pl-2">{fD(calculos.Deuda_Total_Restante)}</span>
-                                <p className="text-[10px] text-slate-500 font-medium mt-2 pl-2 border-t border-slate-100 pt-2">
-                                    Suma de <strong className="text-slate-700">todas las cuotas pendientes futuras</strong> (incluye seguro, CBDI e interés).
+                                <span className="block text-3xl md:text-4xl font-black text-white pl-2">{fD(calculos.Deuda_Total_Restante)}</span>
+                                <p className="text-[10px] text-slate-400 font-medium mt-2 pl-2 border-t border-slate-100 pt-2">
+                                    Suma de <strong className="text-slate-200">todas las cuotas pendientes futuras</strong> (incluye seguro, CBDI e interés).
                                 </p>
                             </div>
                         </div>
@@ -421,20 +421,20 @@ export default function ConsolidacionLotes() {
                   )}
 
                   {tabActiva === 'TABLA' && (
-                    <div className="animate-in fade-in duration-300 overflow-hidden border border-slate-200 rounded-2xl w-full bg-white shadow-sm">
+                    <div className="animate-in fade-in duration-300 overflow-hidden border border-[#1e3a5f] rounded-2xl w-full bg-white shadow-sm">
                       <div className="overflow-auto max-h-[500px] md:max-h-[700px] w-full custom-scrollbar">
                         <table className="w-full border-collapse text-[9px] md:text-[11px] min-w-[500px] md:min-w-full">
-                          <thead className="bg-slate-50 sticky top-0 z-10 border-b border-slate-200">
+                          <thead className="bg-[#050b18] sticky top-0 z-10 border-b border-[#1e3a5f]">
                             <tr>
-                              <th className="p-3 border-r border-slate-200 font-black text-slate-600 text-center uppercase">Per.</th>
-                              <th className="p-3 border-r border-slate-200 font-black text-slate-600 text-right uppercase">Cuota Mensual</th>
-                              {!ocultarDetalles && <th className="p-3 border-r border-slate-200 font-black text-rose-500 text-right uppercase bg-rose-50/30" title="Información de Uso Interno">Costos Financieros</th>}
-                              {!ocultarDetalles && <th className="p-3 border-r border-slate-200 font-black text-slate-500 text-right uppercase bg-white">Base</th>}
-                              {!ocultarDetalles && <th className="p-3 border-r border-slate-200 font-black text-slate-500 text-right uppercase bg-white">Seguro</th>}
-                              {!ocultarDetalles && <th className="p-3 border-r border-slate-200 font-black text-slate-500 text-right uppercase bg-white">CBDI</th>}
-                              <th className="p-3 border-r border-slate-200 font-black text-indigo-700 text-right uppercase">Total a Pagar</th>
-                              <th className="p-3 border-r border-slate-200 font-black text-slate-600 text-right uppercase">Saldo Deudor</th>
-                              <th className="p-3 font-black text-slate-600 text-center uppercase">Estado / Fusión</th>
+                              <th className="p-3 border-r border-[#1e3a5f] font-black text-slate-300 text-center uppercase">Per.</th>
+                              <th className="p-3 border-r border-[#1e3a5f] font-black text-slate-300 text-right uppercase">Cuota Mensual</th>
+                              {!ocultarDetalles && <th className="p-3 border-r border-[#1e3a5f] font-black text-rose-500 text-right uppercase bg-[#180a14]/30" title="Información de Uso Interno">Costos Financieros</th>}
+                              {!ocultarDetalles && <th className="p-3 border-r border-[#1e3a5f] font-black text-slate-400 text-right uppercase bg-white">Base</th>}
+                              {!ocultarDetalles && <th className="p-3 border-r border-[#1e3a5f] font-black text-slate-400 text-right uppercase bg-white">Seguro</th>}
+                              {!ocultarDetalles && <th className="p-3 border-r border-[#1e3a5f] font-black text-slate-400 text-right uppercase bg-white">CBDI</th>}
+                              <th className="p-3 border-r border-[#1e3a5f] font-black text-indigo-700 text-right uppercase">Total a Pagar</th>
+                              <th className="p-3 border-r border-[#1e3a5f] font-black text-slate-300 text-right uppercase">Saldo Deudor</th>
+                              <th className="p-3 font-black text-slate-300 text-center uppercase">Estado / Fusión</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -442,20 +442,20 @@ export default function ConsolidacionLotes() {
                               const isPagada = row.estadoAdelanto.includes('ELIMINADA');
                               const isParcial = row.estadoAdelanto.includes('PARCIAL');
                               
-                              let rowClass = "border-b border-slate-100 hover:bg-slate-50 text-slate-700 transition-colors";
-                              if (isPagada) rowClass = "bg-emerald-50/70 border-b border-emerald-100 text-emerald-900";
-                              if (isParcial) rowClass = "bg-amber-50/70 border-b border-amber-100 text-amber-900";
+                              let rowClass = "border-b border-slate-100 hover:bg-[#050b18] text-slate-200 transition-colors";
+                              if (isPagada) rowClass = "bg-[#04241b]/70 border-b border-emerald-500/30 text-emerald-200";
+                              if (isParcial) rowClass = "bg-[#201505]/70 border-b border-amber-100 text-amber-900";
 
                               return (
                                 <tr key={idx} className={rowClass}>
                                   <td className="p-2 md:p-3 border-r border-slate-100/50 text-center font-bold">{row.periodo}</td>
                                   <td className="p-2 md:p-3 border-r border-slate-100/50 text-right font-medium">{fD(row.capital)}</td>
-                                  {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-slate-100/50 text-right bg-rose-50/20 text-rose-500">{fD(row.plusvalia)}</td>}
+                                  {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-slate-100/50 text-right bg-[#180a14]/20 text-rose-500">{fD(row.plusvalia)}</td>}
                                   {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-slate-100/50 text-right opacity-60">{fD(row.cuotaBase)}</td>}
                                   {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-slate-100/50 text-right opacity-60">{fD(row.seguro)}</td>}
                                   {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-slate-100/50 text-right opacity-60">{fD(row.cbdi)}</td>}
                                   
-                                  <td className={`p-2 md:p-3 border-r border-slate-100/50 text-right font-black ${isPagada ? 'text-emerald-700' : 'text-slate-800'}`}>{fD(row.pagoTotal)}</td>
+                                  <td className={`p-2 md:p-3 border-r border-slate-100/50 text-right font-black ${isPagada ? 'text-emerald-700' : 'text-white'}`}>{fD(row.pagoTotal)}</td>
                                   <td className="p-2 md:p-3 border-r border-slate-100/50 text-right font-medium opacity-80">{fD(row.balance)}</td>
                                   <td className={`p-2 md:p-3 text-center font-bold text-[9px] ${isPagada ? 'text-emerald-600' : isParcial ? 'text-amber-600' : 'text-slate-300'}`}>
                                     {row.estadoAdelanto}
