@@ -163,39 +163,39 @@ export default function LiquidacionContado() {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-800 flex items-center">
-          <FileText className="w-6 h-6 mr-2 text-indigo-600" />
+        <h2 className="text-2xl font-bold text-white flex items-center">
+          <FileText className="w-6 h-6 mr-2 text-cyan-400" />
           Liquidación al Contado (30 Días)
         </h2>
-        <p className="text-slate-500 text-sm mt-1">Generador automático de tabla de descuentos para aprobaciones de gerencia.</p>
+        <p className="text-slate-400 text-sm mt-1">Generador automático de tabla de descuentos para aprobaciones de gerencia.</p>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-[1.5fr_1fr] gap-6">
         
         {/* PANEL DE FORMULARIO */}
         <div className="space-y-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-            <h3 className="text-lg font-bold text-slate-800 flex items-center mb-4"><Calculator className="w-5 h-5 mr-2 text-blue-500" /> Datos del Contrato</h3>
+          <div className="bg-[#070e1c] rounded-2xl border border-[#14233c] text-slate-100 shadow-xl shadow-sm border border-[#1e3a5f] p-6">
+            <h3 className="text-lg font-bold text-white flex items-center mb-4"><Calculator className="w-5 h-5 mr-2 text-blue-500" /> Datos del Contrato</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Cliente Titular</label>
-                <input type="text" name="cliente" value={form.cliente} onChange={handleChange} className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej. Luis Fernando Moreno Herrera" />
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Cliente Titular</label>
+                <input type="text" name="cliente" value={form.cliente} onChange={handleChange} className="w-full px-4 py-2 border border-[#1e3a5f] rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej. Luis Fernando Moreno Herrera" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nro. de Contrato</label>
-                <input type="text" name="contrato" value={form.contrato} onChange={handleChange} className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej. C2603500529" />
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Nro. de Contrato</label>
+                <input type="text" name="contrato" value={form.contrato} onChange={handleChange} className="w-full px-4 py-2 border border-[#1e3a5f] rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej. C2603500529" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Fecha de Contrato</label>
-                <input type="date" name="fechaContrato" value={form.fechaContrato} onChange={handleChange} className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Fecha de Contrato</label>
+                <input type="date" name="fechaContrato" value={form.fechaContrato} onChange={handleChange} className="w-full px-4 py-2 border border-[#1e3a5f] rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Asesor Comercial</label>
-                <input type="text" name="asesor" value={form.asesor} onChange={handleChange} className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej. Rodrigo Rojas Siles" />
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Asesor Comercial</label>
+                <input type="text" name="asesor" value={form.asesor} onChange={handleChange} className="w-full px-4 py-2 border border-[#1e3a5f] rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej. Rodrigo Rojas Siles" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Proyecto</label>
-                <select name="proyecto" value={form.proyecto} onChange={handleChange} className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Proyecto</label>
+                <select name="proyecto" value={form.proyecto} onChange={handleChange} className="w-full px-4 py-2 border border-[#1e3a5f] rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white">
                   <option value="URBANIZACIÓN MUYURINA">Urbanización Muyurina</option>
                   <option value="URBANIZACIÓN SANTA FE">Urbanización Santa Fe</option>
                   <option value="EL RENACER">El Renacer</option>
@@ -209,54 +209,54 @@ export default function LiquidacionContado() {
             
             <div className="grid grid-cols-3 gap-4 mt-4">
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">UV</label>
-                <input type="text" name="uv" value={form.uv} onChange={handleChange} className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">UV</label>
+                <input type="text" name="uv" value={form.uv} onChange={handleChange} className="w-full px-4 py-2 border border-[#1e3a5f] rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">MZN</label>
-                <input type="text" name="mzn" value={form.mzn} onChange={handleChange} className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">MZN</label>
+                <input type="text" name="mzn" value={form.mzn} onChange={handleChange} className="w-full px-4 py-2 border border-[#1e3a5f] rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">LOTE</label>
-                <input type="text" name="lote" value={form.lote} onChange={handleChange} className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">LOTE</label>
+                <input type="text" name="lote" value={form.lote} onChange={handleChange} className="w-full px-4 py-2 border border-[#1e3a5f] rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-            <h3 className="text-lg font-bold text-slate-800 flex items-center mb-4"><Percent className="w-5 h-5 mr-2 text-emerald-500" /> Matemática Financiera</h3>
+          <div className="bg-[#070e1c] rounded-2xl border border-[#14233c] text-slate-100 shadow-xl shadow-sm border border-[#1e3a5f] p-6">
+            <h3 className="text-lg font-bold text-white flex items-center mb-4"><Percent className="w-5 h-5 mr-2 text-emerald-500" /> Matemática Financiera</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Superficie (m2)</label>
-                <input type="number" name="superficie" value={form.superficie} onChange={handleChange} className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="300" />
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Superficie (m2)</label>
+                <input type="number" name="superficie" value={form.superficie} onChange={handleChange} className="w-full px-4 py-2 border border-[#1e3a5f] rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="300" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Precio Normal / m2 ($)</label>
-                <input type="number" name="precioM2" value={form.precioM2} onChange={handleChange} className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="145" />
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Precio Normal / m2 ($)</label>
+                <input type="number" name="precioM2" value={form.precioM2} onChange={handleChange} className="w-full px-4 py-2 border border-[#1e3a5f] rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="145" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">% Descuento Base</label>
-                <input type="number" name="dsctoBasePorcentaje" value={form.dsctoBasePorcentaje} onChange={handleChange} className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-50" />
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">% Descuento Base</label>
+                <input type="number" name="dsctoBasePorcentaje" value={form.dsctoBasePorcentaje} onChange={handleChange} className="w-full px-4 py-2 border border-[#1e3a5f] rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-[#050b18]" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Cuota Inicial Pagada ($)</label>
-                <input type="number" name="cuotaInicial" value={form.cuotaInicial} onChange={handleChange} className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="522" />
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Cuota Inicial Pagada ($)</label>
+                <input type="number" name="cuotaInicial" value={form.cuotaInicial} onChange={handleChange} className="w-full px-4 py-2 border border-[#1e3a5f] rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="522" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Fecha de Amortización</label>
-                <input type="date" name="fechaAmortizacion" value={form.fechaAmortizacion} onChange={handleChange} className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" />
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Fecha de Amortización</label>
+                <input type="date" name="fechaAmortizacion" value={form.fechaAmortizacion} onChange={handleChange} className="w-full px-4 py-2 border border-[#1e3a5f] rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Monto Amortizado ($)</label>
-                <input type="number" name="montoAmortizacion" value={form.montoAmortizacion} onChange={handleChange} className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="5739" />
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Monto Amortizado ($)</label>
+                <input type="number" name="montoAmortizacion" value={form.montoAmortizacion} onChange={handleChange} className="w-full px-4 py-2 border border-[#1e3a5f] rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="5739" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">% Dscto Contado Extra</label>
-                <input type="number" name="dsctoContadoPorcentaje" value={form.dsctoContadoPorcentaje} onChange={handleChange} className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-50" />
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">% Dscto Contado Extra</label>
+                <input type="number" name="dsctoContadoPorcentaje" value={form.dsctoContadoPorcentaje} onChange={handleChange} className="w-full px-4 py-2 border border-[#1e3a5f] rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-[#050b18]" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Tipo de Cambio (TC)</label>
-                <input type="number" name="tc" value={form.tc} step="0.01" onChange={handleChange} className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-amber-50" />
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Tipo de Cambio (TC)</label>
+                <input type="number" name="tc" value={form.tc} step="0.01" onChange={handleChange} className="w-full px-4 py-2 border border-[#1e3a5f] rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-[#201505]" />
               </div>
             </div>
           </div>
