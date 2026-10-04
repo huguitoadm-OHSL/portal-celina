@@ -212,3 +212,5 @@ export const obtenerDatosSupervisor = (supervisorDestino, SUPERVISORES = []) => 
     nombrePila: (supervisorSeleccionado.nombre || 'Supervisor').split(' ')[0] 
   };
 };
+
+
