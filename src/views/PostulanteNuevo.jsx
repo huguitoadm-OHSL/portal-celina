@@ -92,6 +92,7 @@ export default function PostulanteNuevo() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
+        {/* FORMULARIO */}
         <div className="bg-[#070e1c] p-5 sm:p-6 rounded-3xl shadow-2xl border border-[#14233c] text-slate-100 w-full min-w-0 space-y-4">
           <Input label="Tu Nombre (Supervisor Remitente)" name="asesor" value={form.asesor} onChange={handleChange} placeholder="Ej. Oscar Saravia" />
           
@@ -134,6 +135,7 @@ export default function PostulanteNuevo() {
           <TextArea label="Observaciones / Perfil del Postulante" name="observaciones" value={form.observaciones} onChange={handleChange} placeholder="Detalles de la primera toma de contacto..." rows={3} />
         </div>
 
+        {/* RESULT CARD */}
         <div className="w-full min-w-0">
           <ResultCard
             title="Ficha Postulante Nuevo"
