@@ -19,19 +19,25 @@ export default function SolicitudMemorandum() {
 
   return (
     <div className="animate-in fade-in w-full">
-      <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><AlertOctagon className="w-6 h-6 mr-2 text-rose-600" /> Solicitud de Memorándum</h2></div>
+            <div className="mb-6">
+        <div className="flex items-center gap-2 mb-1.5">
+          <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></span>
+          <span className="text-[10px] font-black tracking-widest text-cyan-400 uppercase">
+            PORTAL GESTIÓN ESTRATÉGICA • CELINA
+          </span>
+        </div><h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center"><AlertOctagon className="w-6 h-6 mr-2 text-rose-600" /> Solicitud de Memorándum</h2></div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div className="bg-[#070e1c] p-5 sm:p-6 rounded-3xl shadow-2xl border border-[#14233c] text-slate-100">
           <Input label="Mes de Evaluación" name="mes" value={form.mes} onChange={handle} placeholder="Ej. Mayo" />
           
           <div className="mt-6 mb-2 flex justify-between items-center">
-            <label className="block text-sm font-bold text-slate-700">Asesores con Incumplimiento</label>
-            <button onClick={addRow} className="text-xs bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg font-bold flex items-center hover:bg-slate-200"><Plus size={14} className="mr-1"/> Agregar Asesor</button>
+            <label className="block text-sm font-bold text-slate-200">Asesores con Incumplimiento</label>
+            <button onClick={addRow} className="text-xs bg-slate-100 text-slate-200 px-3 py-1.5 rounded-lg font-bold flex items-center hover:bg-slate-200"><Plus size={14} className="mr-1"/> Agregar Asesor</button>
           </div>
 
           <div className="space-y-4">
             {form.asesores.map((a, i) => (
-              <div key={i} className="p-4 bg-slate-50 border border-slate-200 rounded-xl relative">
+              <div key={i} className="p-4 bg-[#050b18] border border-[#1e3a5f] rounded-2xl relative">
                 {form.asesores.length > 1 && <button onClick={() => removeRow(i)} className="absolute top-3 right-3 text-red-400 hover:text-red-600"><Trash2 size={16}/></button>}
                 <div className="mb-3"><Input label="Nombre del Asesor" value={a.nombre} onChange={(e) => handleRow(i, 'nombre', e.target.value)} /></div>
                 <div className="grid grid-cols-2 gap-4">
