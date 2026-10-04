@@ -11,11 +11,17 @@ export default function ValidacionLlamada() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><PhoneCall className="w-6 h-6 mr-2 text-blue-600" /> Validación de Llamada (Referidos)</h2></div>
+            <div className="mb-6">
+        <div className="flex items-center gap-2 mb-1.5">
+          <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></span>
+          <span className="text-[10px] font-black tracking-widest text-cyan-400 uppercase">
+            PORTAL GESTIÓN ESTRATÉGICA • CELINA
+          </span>
+        </div><h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center"><PhoneCall className="w-6 h-6 mr-2 text-cyan-400" /> Validación de Llamada (Referidos)</h2></div>
       <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full min-w-0">
+        <div className="bg-[#070e1c] p-5 sm:p-6 rounded-3xl shadow-2xl border border-[#14233c] text-slate-100 w-full min-w-0">
           <Input label="Nombre del Asesor" name="asesor" value={formLlamada.asesor} onChange={handleLlamadaChange} placeholder="Ej. Oscar Saravia" />
-          <div className="mt-6 mb-4 pb-2 border-b border-slate-100"><h3 className="text-sm font-bold text-slate-800">Datos del Cliente Referido</h3></div>
+          <div className="mt-6 mb-4 pb-2 border-b border-[#14233c] pb-2"><h3 className="text-xs font-black uppercase text-cyan-400 tracking-wider">Datos del Cliente Referido</h3></div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
             <Input label="Nombre del Referido" name="nombreReferido" value={formLlamada.nombreReferido} onChange={handleLlamadaChange} placeholder="Ej. Maria Fernanda Ramos" />
             <Input label="Número de Contrato" name="contratoReferido" value={formLlamada.contratoReferido} onChange={handleLlamadaChange} placeholder="Ej. C2604002026" />
@@ -24,7 +30,7 @@ export default function ValidacionLlamada() {
             <Input label="Celular del Referido" name="celularReferido" value={formLlamada.celularReferido} onChange={handleLlamadaChange} placeholder="Ej. 77712345" />
             <Input label="Hora para la llamada" name="horaLlamada" value={formLlamada.horaLlamada} onChange={handleLlamadaChange} placeholder="Ej. 16:00 PM" />
           </div>
-          <div className="mt-6 mb-4 pb-2 border-b border-slate-100"><h3 className="text-sm font-bold text-slate-800">Datos del Cliente Beneficiaria</h3></div>
+          <div className="mt-6 mb-4 pb-2 border-b border-[#14233c] pb-2"><h3 className="text-xs font-black uppercase text-cyan-400 tracking-wider">Datos del Cliente Beneficiaria</h3></div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
             <Input label="Nombre de la Beneficiaria" name="nombreBeneficiario" value={formLlamada.nombreBeneficiario} onChange={handleLlamadaChange} placeholder="Ej. Crispina García" />
             <Input label="Carnet (CI) Beneficiaria" name="ciBeneficiario" value={formLlamada.ciBeneficiario} onChange={handleLlamadaChange} placeholder="Ej. C2604201165" />
