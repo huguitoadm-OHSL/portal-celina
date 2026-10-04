@@ -32,3 +32,5 @@ export const OBJETIVOS_MENSUALES = {
   "Oscar Saravia": 111000,
   "Oscar Hugo Saravia L.": 111000
 };
+
+
