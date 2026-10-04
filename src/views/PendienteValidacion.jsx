@@ -11,9 +11,15 @@ export default function PendienteValidacion() {
 
   return (
     <div className="animate-in fade-in w-full">
-      <div className="mb-6"><h2 className="text-2xl font-bold text-slate-800 flex items-center"><PhoneForwarded className="w-6 h-6 mr-2 text-rose-600" /> Clientes Pendientes de Validación</h2></div>
+            <div className="mb-6">
+        <div className="flex items-center gap-2 mb-1.5">
+          <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></span>
+          <span className="text-[10px] font-black tracking-widest text-cyan-400 uppercase">
+            PORTAL GESTIÓN ESTRATÉGICA • CELINA
+          </span>
+        </div><h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center"><PhoneForwarded className="w-6 h-6 mr-2 text-rose-600" /> Clientes Pendientes de Validación</h2></div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div className="bg-[#070e1c] p-5 sm:p-6 rounded-3xl shadow-2xl border border-[#14233c] text-slate-100">
           <Input label="Nombre del Cliente" name="cliente" value={form.cliente} onChange={handle} />
           <div className="grid grid-cols-2 gap-4 my-4">
             <Input label="Contrato" name="contrato" value={form.contrato} onChange={handle} />
