@@ -35,7 +35,8 @@ import PostulanteNuevo from './views/PostulanteNuevo';
 import SolicitudMemorandum from './views/SolicitudMemorandum';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('descuento'); 
+  // Al iniciar sesión o cargar la aplicación, se inicia en la pestaña 'Inicio' (Dashboard)
+  const [activeTab, setActiveTab] = useState('dashboard'); 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [supervisorDestino, setSupervisorDestino] = useState('');
 
@@ -54,7 +55,7 @@ export default function App() {
     document.body.style.overflowX = 'hidden';
   }, []);
 
-  // ================= ESCUDO DE ENTRADA SCI-FI =================
+  // ================= ESCUDO DE ENTRADA =================
   const [autenticado, setAutenticado] = useState(() => {
     return localStorage.getItem('acceso_portal_master') === 'PERMITIDO';
   });
@@ -65,6 +66,7 @@ export default function App() {
     e.preventDefault();
     if (passInput.trim() === 'ELSEÑORESMIPASTOR') {
       localStorage.setItem('acceso_portal_master', 'PERMITIDO');
+      setActiveTab('dashboard'); // Asegura la navegación a Inicio al autenticar
       setAutenticado(true);
     } else {
       setErrorPass(true);
@@ -117,7 +119,7 @@ export default function App() {
       case 'diaria': return <ProyeccionDiaria />;
       case 'seguimiento': return <SeguimientoVentas />;
       
-      // 2. Operaciones
+      // 2. Operaciones (Cotizaciones y Recompras)
       case 'amortizacion': return <SimuladorAmortizacion />;
       case 'recompra': return <Recompra />;
       case 'descuento': return <DescuentosCampanas />;
@@ -136,7 +138,7 @@ export default function App() {
       case 'seguro': return <SeguroVida />;
       case 'pendienteValidacion': return <PendienteValidacion />;
       
-      // 4. Recursos Humanos
+      // 4. Recursos Humanos (RRHH)
       case 'renuncia': return <CartaRenuncia />;
       case 'altaCrm': return <AltaCRM />;
       case 'evaluacion': return <EvaluacionFinMes />;
