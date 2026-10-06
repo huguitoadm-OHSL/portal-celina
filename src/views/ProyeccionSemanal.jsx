@@ -15,7 +15,7 @@ const BASE_DE_DATOS_PROYECCION = [
   { nombre: "MARISOL URGEL", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }, 
   { nombre: "JAIME FABRICIO RIOS", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
   { nombre: "ELY GONZALES", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }, 
-  { nombre: "CARLOS ENRIQUE CALDERON", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
+  { nombre: "CARLOS ENRIQUE CALDERON", colAct: 6500, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
   { nombre: "MERLY MENDEZ", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] }, 
   { nombre: "GABRIEL PADILLA", colAct: 0, dias: [0,0,0,0,0,0,0], proy: [0,0,0,0,0,0,0] },
 ];
@@ -25,7 +25,7 @@ export default function ProyeccionSemanal() {
   
   const [formProyeccion, setFormProyeccion] = useState({
     equipo: 'Oscar Saravia', 
-    fechaInicio: '2026-10-03', 
+    fechaInicio: '2026-10-05', 
     objetivoMensual: 111000,
     asesores: BASE_DE_DATOS_PROYECCION
   });
