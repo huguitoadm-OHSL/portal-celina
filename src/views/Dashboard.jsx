@@ -5,7 +5,7 @@ import {
 
 export default function Dashboard() {
   const [asesoresData] = useState([
-    { id: 1, nombre: 'Carlos Enrique Calderon', ventas: 0, colocacion: 0 },
+    { id: 1, nombre: 'Carlos Enrique Calderon', ventas: 1, colocacion: 6500 },
     { id: 2, nombre: 'Ely Gonzales Garcia', ventas: 0, colocacion: 0 },
     { id: 3, nombre: 'Jaime Fabricio Rios', ventas: 0, colocacion: 0 },
     { id: 4, nombre: 'Jimmy Gonzales Nuñez', ventas: 0, colocacion: 0 },
