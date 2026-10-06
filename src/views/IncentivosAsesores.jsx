@@ -41,7 +41,7 @@ const ETAPAS_CONCURSO = {
 };
 
 const ASESORES_INICIALES = [
-  { id: 1, nombre: "Carlos Enrique Calderon Montano", ventas: 0, colocacion: 0, carpetasAlDia: true },
+  { id: 1, nombre: "Carlos Enrique Calderon Montano", ventas: 1, colocacion: 6500, carpetasAlDia: true },
   { id: 2, nombre: "Ely Gonzales Garcia", ventas: 0, colocacion: 0, carpetasAlDia: true },
   { id: 3, nombre: "Jaime Fabricio Rios Castro", ventas: 0, colocacion: 0, carpetasAlDia: true },
   { id: 4, nombre: "Jimmy Gonzales Nuñez", ventas: 0, colocacion: 0, carpetasAlDia: true },
