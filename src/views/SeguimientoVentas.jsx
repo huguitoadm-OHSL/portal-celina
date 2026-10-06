@@ -10,13 +10,13 @@ const BASE_DE_DATOS_PBI = [
   { nombre: "MARISOL URGEL", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
   { nombre: "JAIME FABRICIO RIOS", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
   { nombre: "ELY GONZALES", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
-  { nombre: "CARLOS ENRIQUE CALDERON", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
+  { nombre: "CARLOS ENRIQUE CALDERON", colAct: 6500, ventasReales: [0,0,0,0,0,0,1], tipo: 'INTERNO' },
   { nombre: "MERLY MENDEZ", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
   { nombre: "GABRIEL PADILLA", colAct: 0, ventasReales: [0,0,0,0,0,0,0], tipo: 'INTERNO' },
 ];
 
 export default function SeguimientoVentas() {
-  const ventasPorProyecto = [0, 0, 0, 0, 0, 0, 0]; 
+  const ventasPorProyecto = [0, 0, 0, 0, 0, 0, 1]; 
 
   const datosProcesados = BASE_DE_DATOS_PBI.map(asesor => {
     let totalVentas = 0;
