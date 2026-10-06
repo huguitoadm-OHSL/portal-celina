@@ -59,9 +59,9 @@ export default function Dashboard() {
       {/* 4 INDICADORES TÁCTICOS EN MODO OSCURO */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
-          { icon: FileText, label: 'Cotizaciones Activas', val: '142', color: 'cyan' },
+          { icon: FileText, label: 'Cotizaciones Activas', val: '12', color: 'cyan' },
           { icon: PhoneCall, label: 'Llamadas ATC', val: '89', color: 'blue' },
-          { icon: Users, label: 'Visitas a Terreno', val: '34', color: 'emerald' },
+          { icon: Users, label: 'Visitas a Terreno', val: '1', color: 'emerald' },
           { icon: Zap, label: 'Cierres en Puerta', val: totalCierres, color: 'amber' }
         ].map((item, idx) => (
           <div key={idx} className="bg-[#070e1c] border border-[#14233c] rounded-2xl p-4 flex items-center space-x-3.5 shadow-lg">
