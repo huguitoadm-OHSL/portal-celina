@@ -15,13 +15,22 @@ import {
 } from "lucide-react";
 
 const VENTANAS_CONTADO = {
-  "0_30": { plazo: "0 a 30 días", descuentoPct: 30, tcEfectivo: 8.40, labelBadge: "CONTADO (0 A 30 DÍAS)" },
-  "30_60": { plazo: "30 a 60 días", descuentoPct: 20, tcEfectivo: 9.60, labelBadge: "CONTADO (30 A 60 DÍAS)" },
-  "60_90": { plazo: "60 a 90 días", descuentoPct: 10, tcEfectivo: 10.80, labelBadge: "CONTADO (60 A 90 DÍAS)" }
+  "0_5": { plazo: "Primeros 5 días", descuentoPct: 25, labelBadge: "CONTADO (PRIMEROS 5 DÍAS)" },
+  "6_30": { plazo: "6 a 30 días", descuentoPct: 20, labelBadge: "CONTADO (6 A 30 DÍAS)" },
+  "31_60": { plazo: "31 a 60 días", descuentoPct: 10, labelBadge: "CONTADO (31 A 60 DÍAS)" }
 };
 
 const TC_OFICIAL_BASE = 12.00;
-const DESCUENTO_CREDITO_M2 = 1.0;
+
+const obtenerDescuentoCreditoFijo = (valorLoteUSD) => {
+  if (valorLoteUSD <= 0) return 0;
+  if (valorLoteUSD <= 7500) return 300;
+  if (valorLoteUSD <= 15000) return 600;
+  if (valorLoteUSD <= 22500) return 900;
+  if (valorLoteUSD <= 30000) return 1200;
+  if (valorLoteUSD <= 45000) return 1500;
+  return 1800;
+};
 const CORREO_RESPALDO_OSCAR = "ohsaravia@celina.com.bo";
 
 const DIRECTORES_APROBACION = [
@@ -46,7 +55,7 @@ export default function DescuentosCampanas() {
   const [errorCarga, setErrorCarga] = useState(null);
 
   const [modalidad, setModalidad] = useState("CONTADO_LIQUIDACION");
-  const [ventanaSeleccionada, setVentanaSeleccionada] = useState("0_30");
+  const [ventanaSeleccionada, setVentanaSeleccionada] = useState("0_5");
 
   const [proyectoSeleccionado, setProyectoSeleccionado] = useState("CAÑAVERAL");
   const [uvSeleccionada, setUvSeleccionada] = useState("");
@@ -196,16 +205,19 @@ export default function DescuentosCampanas() {
     const capitalBaseUSD = superficie * precioBaseM2;
 
     if (modalidad === "CONTADO_LIQUIDACION") {
-      const config = VENTANAS_CONTADO[ventanaSeleccionada] || VENTANAS_CONTADO["0_30"];
+      const config = VENTANAS_CONTADO[ventanaSeleccionada] || VENTANAS_CONTADO["0_5"];
       const descuentoPct = config.descuentoPct;
 
       const montoDescuentoUSD = capitalBaseUSD * (descuentoPct / 100);
       const capitalFinalUSD = Math.max(0, capitalBaseUSD - montoDescuentoUSD);
       const totalBsOptica1 = capitalFinalUSD * TC_OFICIAL_BASE;
 
-      const descuentoTCOficial = TC_OFICIAL_BASE * (descuentoPct / 100);
-      const tcEfectivoFinal = TC_OFICIAL_BASE - descuentoTCOficial;
-      const totalBsOptica2 = capitalBaseUSD * tcEfectivoFinal;
+      // La segunda óptica es estrictamente equivalente a la primera: mismo total final en Bs.
+      const tcEfectivoFinal = capitalBaseUSD > 0
+        ? totalBsOptica1 / capitalBaseUSD
+        : TC_OFICIAL_BASE * (1 - descuentoPct / 100);
+      const descuentoTCOficial = TC_OFICIAL_BASE - tcEfectivoFinal;
+      const totalBsOptica2 = totalBsOptica1;
 
       const nuevoPrecioM2 = superficie > 0 ? capitalFinalUSD / superficie : precioBaseM2 * (1 - descuentoPct / 100);
       const reduccionM2 = precioBaseM2 - nuevoPrecioM2;
@@ -233,7 +245,8 @@ export default function DescuentosCampanas() {
         optica2_totalBs: totalBsOptica2
       };
     } else {
-      const descuentoTotalUSD = superficie * DESCUENTO_CREDITO_M2;
+      const descuentoTotalUSD = obtenerDescuentoCreditoFijo(capitalBaseUSD);
+      const descuentoEquivalenteM2 = superficie > 0 ? descuentoTotalUSD / superficie : 0;
       const capitalFinalUSD = Math.max(0, capitalBaseUSD - descuentoTotalUSD);
       const totalBs = capitalFinalUSD * TC_OFICIAL_BASE;
 
@@ -248,19 +261,24 @@ export default function DescuentosCampanas() {
         mensualUSD = (saldoUSD * (tasaMensual * Math.pow(1 + tasaMensual, meses))) / (Math.pow(1 + tasaMensual, meses) - 1);
       }
       const mensualBS = mensualUSD * TC_OFICIAL_BASE;
-      const nuevoPrecioM2 = Math.max(0, precioBaseM2 - DESCUENTO_CREDITO_M2);
+      const nuevoPrecioM2 = superficie > 0 ? capitalFinalUSD / superficie : Math.max(0, precioBaseM2 - descuentoEquivalenteM2);
+      const descuentoPctEquivalente = capitalBaseUSD > 0 ? (descuentoTotalUSD / capitalBaseUSD) * 100 : 0;
+      const tcEfectivoFinal = capitalBaseUSD > 0 ? totalBs / capitalBaseUSD : TC_OFICIAL_BASE;
+      const descuentoTCEquivalente = TC_OFICIAL_BASE - tcEfectivoFinal;
 
       return {
         modalidad: "CREDITO",
-        labelBadge: "VENTA A CRÉDITO (1 US$/m²)",
+        labelBadge: `VENTA A CRÉDITO (DESCUENTO FIJO $${descuentoTotalUSD.toFixed(0)})`,
         capitalBaseUSD,
-        descuentoPct: capitalBaseUSD > 0 ? (descuentoTotalUSD / capitalBaseUSD) * 100 : 0,
+        descuentoPct: descuentoPctEquivalente,
+        descuentoFijoUSD: descuentoTotalUSD,
+        descuentoEquivalenteM2,
         montoAhorroUSD: descuentoTotalUSD,
         capitalFinalUSD,
         totalBs,
         precioM2Anterior: precioBaseM2,
         nuevoPrecioM2,
-        reduccionM2: DESCUENTO_CREDITO_M2,
+        reduccionM2: descuentoEquivalenteM2,
         cuotaInicialUSD: inicialUSD,
         cuotaInicialBS: inicialBS,
         cuotaMensualUSD: mensualUSD,
@@ -273,12 +291,19 @@ export default function DescuentosCampanas() {
         optica1_totalBs: totalBs,
         optica2_capitalBase: capitalBaseUSD,
         optica2_tcOficial: TC_OFICIAL_BASE,
-        optica2_descuentoTC: (descuentoTotalUSD / (capitalBaseUSD || 1)) * TC_OFICIAL_BASE,
-        optica2_tcEfectivo: TC_OFICIAL_BASE * (capitalFinalUSD / (capitalBaseUSD || 1)),
+        optica2_descuentoTC: descuentoTCEquivalente,
+        optica2_tcEfectivo: tcEfectivoFinal,
         optica2_totalBs: totalBs
       };
     }
   }, [modalidad, ventanaSeleccionada, superficie, precioBaseM2, cuotaInicialPct, plazoAnios]);
+
+  const descuentoVisual = calculos.modalidad === "CREDITO"
+    ? `$ ${formatMoneda(calculos.montoAhorroUSD)} FIJO`
+    : `${calculos.descuentoPct.toFixed(0)}%`;
+  const descuentoEtiqueta = calculos.modalidad === "CREDITO"
+    ? "DESCUENTO FIJO"
+    : `DESCUENTO (${calculos.descuentoPct.toFixed(0)}%)`;
 
   const destinatarioObj = useMemo(() => {
     return DIRECTORES_APROBACION.find((d) => d.email === destinatarioEmail) || DIRECTORES_APROBACION[0];
@@ -313,7 +338,7 @@ export default function DescuentosCampanas() {
           <tr>
             <td style="font-size: 13px; color: #334155;">
               Precio Anterior de Lista: <strong style="color: #64748b; text-decoration: line-through;">$ ${formatMoneda(calculos.precioM2Anterior)}/m²</strong><br>
-              Reducción directa autorizada: <strong style="color: #dc2626;">-$ ${formatMoneda(calculos.reduccionM2)}/m²</strong>
+              ${calculos.modalidad === "CREDITO" ? "Descuento equivalente por m² (informativo)" : "Reducción directa autorizada"}: <strong style="color: #dc2626;">-$ ${formatMoneda(calculos.reduccionM2)}/m²</strong>
             </td>
             <td align="right">
               <span style="font-size: 11px; color: #15803d; font-weight: bold; display: block;">NUEVO PRECIO M²:</span>
@@ -382,7 +407,7 @@ export default function DescuentosCampanas() {
             </td>
             <td width="33%" align="center" style="background-color: #0b1528; border: 1px solid #1e293b; border-radius: 10px; padding: 10px;">
               <div style="font-size: 10px; color: #38bdf8; font-weight: bold; text-transform: uppercase;">DESCUENTO</div>
-              <div style="font-size: 15px; font-weight: bold; color: #38bdf8; margin-top: 3px;">${calculos.descuentoPct.toFixed(0)}%</div>
+              <div style="font-size: 15px; font-weight: bold; color: #38bdf8; margin-top: 3px;">${descuentoVisual}</div>
             </td>
             <td width="33%" align="center" style="background-color: #04251d; border: 1px solid #065f46; border-radius: 10px; padding: 10px;">
               <div style="font-size: 10px; color: #34d399; font-weight: bold; text-transform: uppercase;">AHORRO</div>
@@ -407,7 +432,7 @@ export default function DescuentosCampanas() {
                   <td align="right" style="color: #ffffff; font-weight: bold;">$ ${formatMoneda(calculos.optica1_capitalBase)}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 3px 0;">DESCUENTO (${calculos.descuentoPct.toFixed(0)}%)</td>
+                  <td style="padding: 3px 0;">${descuentoEtiqueta}</td>
                   <td align="right" style="color: #38bdf8; font-weight: bold;">- $ ${formatMoneda(calculos.optica1_descuentoUSD)}</td>
                 </tr>
                 <tr>
@@ -435,11 +460,11 @@ export default function DescuentosCampanas() {
                   <td align="right" style="color: #ffffff; font-weight: bold;">$ ${formatMoneda(calculos.optica2_capitalBase)}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 3px 0;">TC OFICIAL BASE</td>
+                  <td style="padding: 3px 0;">TC VIGENTE</td>
                   <td align="right" style="color: #ffffff; font-weight: bold;">${calculos.optica2_tcOficial.toFixed(2)}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 3px 0;">DESCUENTO (${calculos.descuentoPct.toFixed(0)}%)</td>
+                  <td style="padding: 3px 0;">${descuentoEtiqueta}</td>
                   <td align="right" style="color: #34d399; font-weight: bold;">- ${calculos.optica2_descuentoTC.toFixed(2)} Bs/$us</td>
                 </tr>
                 <tr>
@@ -474,7 +499,7 @@ Por favor le solicito la aplicación del descuento de campaña vigente para el p
 
 📌 DATO REQUERIDO PARA EL SISTEMA CELINA:
 • Precio m² Anterior de Lista: $ ${formatMoneda(calculos.precioM2Anterior)}/m²
-• Reducción neta por m²: -$ ${formatMoneda(calculos.reduccionM2)}/m²
+• ${calculos.modalidad === "CREDITO" ? "Descuento equivalente por m² (solo informativo)" : "Reducción neta por m²"}: -$ ${formatMoneda(calculos.reduccionM2)}/m²
 • NUEVO PRECIO M² APLICABLE: $ ${formatMoneda(calculos.nuevoPrecioM2)}/m²
 
 UBICACIÓN DEL LOTE:
@@ -485,9 +510,9 @@ UBICACIÓN DEL LOTE:
 
 RESUMEN FINANCIERO (${calculos.labelBadge}):
 • Capital Base: $ ${formatMoneda(calculos.capitalBaseUSD)}
-• Descuento (${calculos.descuentoPct.toFixed(0)}%): -$ ${formatMoneda(calculos.montoAhorroUSD)}
+• ${calculos.modalidad === "CREDITO" ? "Descuento fijo según valor del lote" : `Descuento (${calculos.descuentoPct.toFixed(0)}%)`}: -$ ${formatMoneda(calculos.montoAhorroUSD)}
 • Capital Final a Liquidar: $ ${formatMoneda(calculos.capitalFinalUSD)} USD
-• Total en Bolivianos: Bs. ${formatMoneda(calculos.totalBs)} (TC Oficial 12.00)
+• Total en Bolivianos: Bs. ${formatMoneda(calculos.totalBs)} (TC vigente 12.00)
 • TC Efectivo de Pago: ${calculos.optica2_tcEfectivo.toFixed(2)} Bs/US$
 
 Asesor Responsable: ${asesorSeleccionado}
@@ -548,11 +573,12 @@ ${asesorSeleccionado}`;
     `📍 *Proyecto:* ${proyectoSeleccionado} (UV ${uvSeleccionada} • MZN ${mznSeleccionada} • Lote ${loteSeleccionado})\n` +
     `📐 *Superficie:* ${formatMoneda(superficie)} m² | ${categoria}\n\n` +
     `💵 *Precio Base:* $ ${formatMoneda(calculos.capitalBaseUSD)} ($${formatMoneda(calculos.precioM2Anterior)}/m²)\n` +
-    `🎉 *Descuento Campaña:* *${calculos.descuentoPct.toFixed(0)}%* (-$ ${formatMoneda(calculos.montoAhorroUSD)})\n` +
+    `🎉 *Descuento Campaña:* *${calculos.modalidad === "CREDITO" ? `$ ${formatMoneda(calculos.montoAhorroUSD)} FIJO` : `${calculos.descuentoPct.toFixed(0)}%`}* (-$ ${formatMoneda(calculos.montoAhorroUSD)})\n` +
+    (calculos.modalidad === "CREDITO" ? `📐 *Equivalente informativo:* $ ${formatMoneda(calculos.reduccionM2)}/m²\n` : "") +
     `💎 *PRECIO PROMOCIONAL:* *$ ${formatMoneda(calculos.capitalFinalUSD)} USD*\n` +
     `📊 *Nuevo Precio m²:* *$ ${formatMoneda(calculos.nuevoPrecioM2)}/m²*\n\n` +
     `🇧🇴 *Total en Bolivianos:* *Bs. ${formatMoneda(calculos.totalBs)}*\n` +
-    `👉 *TC Efectivo:* *Bs. ${calculos.optica2_tcEfectivo?.toFixed(2)}* (vs TC 12.00)\n\n` +
+    `👉 *TC Efectivo:* *Bs. ${calculos.optica2_tcEfectivo?.toFixed(2)}* (vs TC vigente 12.00)\n\n` +
     `Asesor: ${asesorSeleccionado}`;
 
   return (
@@ -611,7 +637,7 @@ ${asesorSeleccionado}`;
             }`}
           >
             <Banknote className="w-3.5 h-3.5" />
-            VENTAS CONTADO - LIQUIDACIÓN (30%/20%/10%)
+            VENTAS CONTADO - LIQUIDACIÓN (25%/20%/10%)
           </button>
           <button
             type="button"
@@ -623,7 +649,7 @@ ${asesorSeleccionado}`;
             }`}
           >
             <CreditCard className="w-3.5 h-3.5" />
-            CRÉDITO (1 US$/m²)
+            CRÉDITO (DESCUENTO FIJO POR LOTE)
           </button>
         </div>
 
@@ -825,7 +851,7 @@ ${asesorSeleccionado}`;
                 <div className="bg-[#091426] border border-cyan-500/30 rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 text-center">
                   <div className="text-[9px] sm:text-[10px] text-cyan-400 font-black uppercase">DESCUENTO</div>
                   <div className="text-sm sm:text-base md:text-lg font-black text-cyan-300 mt-0.5">
-                    {calculos.descuentoPct.toFixed(0)}%
+                    {descuentoVisual}
                   </div>
                 </div>
 
@@ -854,7 +880,7 @@ ${asesorSeleccionado}`;
                     <strong className="text-white">$ {formatMoneda(calculos.optica1_capitalBase)}</strong>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">DESCUENTO ({calculos.descuentoPct.toFixed(0)}%)</span>
+                    <span className="text-slate-400">{descuentoEtiqueta}</span>
                     <strong className="text-cyan-400">- $ {formatMoneda(calculos.optica1_descuentoUSD)}</strong>
                   </div>
                   <div className="flex justify-between pt-1.5 border-t border-[#192f50]">
@@ -882,11 +908,11 @@ ${asesorSeleccionado}`;
                     <strong className="text-white">$ {formatMoneda(calculos.optica2_capitalBase)}</strong>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">TC OFICIAL BASE</span>
+                    <span className="text-slate-400">TC VIGENTE</span>
                     <strong className="text-white">{calculos.optica2_tcOficial?.toFixed(2)}</strong>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">DESCUENTO ({calculos.descuentoPct.toFixed(0)}%)</span>
+                    <span className="text-slate-400">{descuentoEtiqueta}</span>
                     <strong className="text-emerald-400">- {calculos.optica2_descuentoTC?.toFixed(2)} Bs/$us</strong>
                   </div>
                   <div className="flex justify-between pt-1.5 border-t border-[#192f50]">
@@ -910,7 +936,7 @@ ${asesorSeleccionado}`;
                   </span>
                   <div className="text-xs text-slate-300">
                     Precio Anterior: <span className="line-through text-slate-400 font-mono">${formatMoneda(calculos.precioM2Anterior)}/m²</span>
-                    <span className="ml-2 text-rose-400 font-mono font-bold">(-${formatMoneda(calculos.reduccionM2)}/m²)</span>
+                    <span className="ml-2 text-rose-400 font-mono font-bold">(-${formatMoneda(calculos.reduccionM2)}/m²{calculos.modalidad === "CREDITO" ? " equiv." : ""})</span>
                   </div>
                 </div>
 
