@@ -20,7 +20,7 @@ const VENTANAS_CONTADO = {
   "31_60": { plazo: "31 a 60 días", descuentoPct: 10, labelBadge: "CONTADO (31 A 60 DÍAS)" }
 };
 
-const TC_OFICIAL_BASE = 12.00;
+const TC_OFICIAL_BASE = 11.97;
 
 const obtenerDescuentoCreditoFijo = (valorLoteUSD) => {
   if (valorLoteUSD <= 0) return 0;
