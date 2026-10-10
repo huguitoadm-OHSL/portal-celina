@@ -7,7 +7,7 @@ const generarHtmlFisicoRaw = (formFisico = {}) => {
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 5px; color: #333333;">{{SALUDO_TIEMPO}}</p>
     <p style="margin-top: 0; margin-bottom: 25px; color: #333333;">{{NOMBRE_SUPERVISOR}},</p>
-    <p style="margin-bottom: 20px; color: #333333;">Por medio de la presente, solicito el cambio de contrato digital a f&iacute;sico para el siguiente cliente:</p>
+    <p style="margin-bottom: 20px; color: #333333;">Solicito el cambio de contrato digital a f&iacute;sico para el siguiente cliente:</p>
     <ul style="margin-bottom: 20px; list-style-type: none; padding-left: 0; color: #333333;">
       <li style="margin-bottom: 5px;">- <strong>Nombre del Cliente:</strong> ${formFisico.nombre || '[Nombre]'}</li>
       <li style="margin-bottom: 5px;">- <strong>N&uacute;mero de Carnet (CI):</strong> ${formFisico.ci || '[CI]'}</li>
@@ -33,7 +33,7 @@ const generarHtmlAmortizacionRaw = (formAmortizacion = {}, calculos = {}) => {
 
   return `
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 650px; line-height: 1.6; text-align: left;">
-    <p style="margin-bottom: 20px; color: #333333;">&#128075; {{SALUDO_TIEMPO}},<br>${clienteStr}, te presento la simulaci&oacute;n de tu abono extraordinario a capital (Sistema Franc&eacute;s):</p>
+    <p style="margin-bottom: 20px; color: #333333;">&#128075; {{SALUDO_TIEMPO}},<br>${clienteStr}, presento la simulaci&oacute;n de su abono extraordinario a capital (Sistema Franc&eacute;s):</p>
 
     <table width="100%" cellpadding="8" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 4px; margin-bottom: 25px; border-collapse: collapse;">
       <thead>
@@ -62,7 +62,7 @@ const generarHtmlAmortizacionRaw = (formAmortizacion = {}, calculos = {}) => {
 
     <table width="100%" cellpadding="8" cellspacing="0" style="background-color: #ffffff; border: 1px solid #bbf7d0; border-radius: 4px; margin-bottom: 25px; border-collapse: collapse;">
       <thead>
-        <tr><th colspan="2" style="background-color: #d1fae5; color: #065f46; font-size: 14px; text-transform: uppercase; text-align: left; padding: 12px; border-bottom: 1px solid #a7f3d0;">&#128640; IMPACTO DE TU ABONO (De $ ${formatCurrency(formAmortizacion.montoAmortizacion)})</th></tr>
+        <tr><th colspan="2" style="background-color: #d1fae5; color: #065f46; font-size: 14px; text-transform: uppercase; text-align: left; padding: 12px; border-bottom: 1px solid #a7f3d0;">&#128640; IMPACTO DEL ABONO (De $ ${formatCurrency(formAmortizacion.montoAmortizacion)})</th></tr>
       </thead>
       <tbody>
         <tr><td width="60%" style="color: #166534; font-weight: bold; border-bottom: 1px solid #d1fae5; padding: 12px;">Nuevo Saldo Capital</td><td width="40%" align="right" style="color: #065f46; font-weight: bold; font-size: 16px; border-bottom: 1px solid #d1fae5; padding: 12px;">$ ${formatCurrency(saldoNuevo)}</td></tr>
@@ -72,7 +72,7 @@ const generarHtmlAmortizacionRaw = (formAmortizacion = {}, calculos = {}) => {
       </tbody>
     </table>
 
-    <p style="margin-bottom: 20px; color: #333333;">Si deseas proceder con este pago o tienes alguna duda, quedo a tu disposici&oacute;n.</p>
+    <p style="margin-bottom: 20px; color: #333333;">Si desea proceder con el pago o requiere informaci&oacute;n adicional, quedo a su disposici&oacute;n.</p>
     <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales.</p>
   </div>`;
 };
@@ -146,7 +146,7 @@ const generarHtmlDescuentoRaw = (formDescuento = {}, calculos = {}) => {
     <p style="margin-bottom: 5px; color: #1e293b;">{{SALUDO_TIEMPO}}</p>
     <p style="margin-top: 0; margin-bottom: 20px; color: #1e293b;">{{NOMBRE_SUPERVISOR}},</p>
     ${badgeHtml}
-    <p style="margin-bottom: 20px; color: #1e293b;">Por favor le solicito mediante el presente correo, la aplicaci&oacute;n del descuento correspondiente a la campa&ntilde;a vigente de Octubre para el proyecto <strong>${nomProyecto}</strong>: ${condicionTexto}:</p>
+    <p style="margin-bottom: 20px; color: #1e293b;">Solicito la aplicaci&oacute;n del descuento de la campa&ntilde;a vigente de octubre para el proyecto <strong>${nomProyecto}</strong>. Condici&oacute;n: ${condicionTexto}.</p>
 
     <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-family: Arial, sans-serif; overflow: hidden; text-align: left;">
       <tr><td style="padding: 15px; border-bottom: 1px solid #e2e8f0; background-color: #f8fafc;">
@@ -195,7 +195,7 @@ const generarHtmlDescuentoRaw = (formDescuento = {}, calculos = {}) => {
         </td></tr>
     </table>
     ${aclaracionOctubreHtml}
-    <p style="margin-top: 25px; margin-bottom: 5px; color: #1e293b;">Quedo atento a su aprobaci&oacute;n para continuar con el proceso del cierre de la venta.</p>
+    <p style="margin-top: 25px; margin-bottom: 5px; color: #1e293b;">Quedo atento a su aprobaci&oacute;n para continuar con el cierre de la venta.</p>
     <p style="margin-top: 0; margin-bottom: 2px; color: #1e293b;">Saludos cordiales,</p>
     <p style="margin-top: 0; font-weight: bold; color: #0f172a;">${formDescuento.asesor || 'Asesor'}</p>
   </div>`;
@@ -266,7 +266,7 @@ const generarHtmlRenunciaRaw = (formRenuncia = {}) => {
   return `
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 20px; color: #333333;">{{SALUDO_TIEMPO}} {{NOMBRE_SUPERVISOR}},</p>
-    <p style="margin-bottom: 20px; color: #333333;">Por medio del presente, hago entrega formal de la carta de renuncia de la Sra./Sr. <strong>${formRenuncia.nombre || '[Nombre]'}</strong>, quien se desempe&ntilde;aba como <strong>${formRenuncia.cargo || 'Asesor de Ventas'}</strong> desde el pasado ${formRenuncia.fechaIngreso || '[Fecha]'}.</p>
+    <p style="margin-bottom: 20px; color: #333333;">Adjunto la carta de renuncia de <strong>${formRenuncia.nombre || '[Nombre]'}</strong>, quien se desempe&ntilde;aba como <strong>${formRenuncia.cargo || 'Asesor de Ventas'}</strong> desde ${formRenuncia.fechaIngreso || '[Fecha]'}.</p>
     <p style="margin-bottom: 20px; color: #333333;">En su nota, con fecha ${formRenuncia.fechaRenuncia || '[Fecha]'}, la persona comunica que su retiro se debe a ${formRenuncia.motivo || '[motivos...]'}. Adjunto el documento escaneado para que se proceda con el tr&aacute;mite correspondiente en el departamento de Recursos Humanos.</p>
     <p style="margin-bottom: 20px; color: #333333;">Quedo atento a cualquier requerimiento adicional para cerrar este proceso.</p>
     <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
@@ -279,7 +279,7 @@ const generarHtmlAltaCRMRaw = (formAltaCRM = {}) => {
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 5px; color: #333333;">{{SALUDO_TIEMPO}}</p>
     <p style="margin-top: 0; margin-bottom: 20px; color: #333333;">{{NOMBRE_SUPERVISOR}},</p>
-    <p style="margin-bottom: 20px; color: #333333;">Solicito la gesti&oacute;n para la creaci&oacute;n del usuario de acceso a los sistemas <strong>CRM y CESI</strong> para el nuevo asesor comercial que se est&aacute; integrando a mi equipo.</p>
+    <p style="margin-bottom: 20px; color: #333333;">Solicito crear el usuario de acceso a los sistemas <strong>CRM y CESI</strong> para el nuevo asesor comercial que se est&aacute; integrando a mi equipo.</p>
     <p style="margin-bottom: 15px; color: #333333;">A continuaci&oacute;n, detallo los datos personales requeridos:</p>
     <ul style="margin-bottom: 20px; list-style-type: none; padding-left: 0; color: #333333;">
       <li style="margin-bottom: 5px;">Nombre: ${formAltaCRM.nombre || '---'}</li>
@@ -289,8 +289,8 @@ const generarHtmlAltaCRMRaw = (formAltaCRM = {}) => {
       <li style="margin-bottom: 5px;">Fecha de Nacimiento: ${formAltaCRM.fechaNacimiento || '---'}</li>
       <li style="margin-bottom: 5px;">Correo Electr&oacute;nico: ${formAltaCRM.correo || '---'}</li>
     </ul>
-    <p style="margin-bottom: 5px; color: #333333;">Quedo atento a la confirmaci&oacute;n de las credenciales para poder facilitarle el acceso.</p>
-    <p style="margin-bottom: 20px; color: #333333;">De antemano, muchas gracias por tu colaboraci&oacute;n.</p>
+    <p style="margin-bottom: 5px; color: #333333;">Agradecer&eacute; confirmar la habilitaci&oacute;n del usuario y el procedimiento de acceso.</p>
+    <p style="margin-bottom: 20px; color: #333333;">Gracias por su colaboraci&oacute;n.</p>
     <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
     <p style="margin-top: 0; font-weight: bold; color: #333333;">${formAltaCRM.asesor || 'Asesor'}</p>
   </div>`;
@@ -319,9 +319,9 @@ const generarHtmlPostulanteRaw = (formPostulante = {}) => {
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 5px; color: #333333;">{{SALUDO_TIEMPO}}</p>
     <p style="margin-top: 0; margin-bottom: 25px; color: #333333;">{{NOMBRE_SUPERVISOR}},</p>
-    <p style="margin-bottom: 20px; color: #333333;">Adjunto el formulario de entrevista de <strong>${formPostulante.nombre || '[Nombre]'}</strong> para el puesto de Asesor de Ventas. &Eacute;l llega a nosotros como referido de la asesora ${formPostulante.referidor || '[Nombre]'}.</p>
-    <p style="margin-bottom: 20px; color: #333333;">Despu&eacute;s de realizarle la entrevista y evaluar su perfil, mi recomendaci&oacute;n es que proceda a la etapa de capacitaci&oacute;n para que se integre a la M&aacute;quina de Ventas en Montero.</p>
-    <p style="margin-bottom: 20px; color: #333333;">En el documento adjunto encontrar&aacute; el detalle completo de su experiencia, evaluaci&oacute;n de competencias y el role play.</p>
+    <p style="margin-bottom: 20px; color: #333333;">Adjunto el formulario de entrevista de <strong>${formPostulante.nombre || '[Nombre]'}</strong> para el puesto de Asesor de Ventas. La postulaci&oacute;n fue referida por ${formPostulante.referidor || '[Nombre]'}.</p>
+    <p style="margin-bottom: 20px; color: #333333;">Tras la entrevista y la evaluaci&oacute;n del perfil, recomiendo continuar con la etapa de capacitaci&oacute;n para su incorporaci&oacute;n al equipo comercial de Montero.</p>
+    <p style="margin-bottom: 20px; color: #333333;">En el documento adjunto encontrar&aacute; el detalle completo de su experiencia, evaluaci&oacute;n de competencias y la simulaci&oacute;n comercial.</p>
     <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
     <p style="margin-top: 0; font-weight: bold; color: #333333;">${formPostulante.asesor || 'Asesor'}</p>
   </div>`;
@@ -332,7 +332,7 @@ const generarHtmlCuotaRaw = (formCuota = {}) => {
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 5px; color: #333333;">{{SALUDO_TIEMPO}}</p>
     <p style="margin-top: 0; margin-bottom: 25px; color: #333333;">{{NOMBRE_SUPERVISOR}},</p>
-    <p style="margin-bottom: 20px; color: #333333;">Por favor su autorizaci&oacute;n para proceder con la anulaci&oacute;n del contrato actual del cliente <strong>${formCuota.cliente || '[Nombre del Cliente]'}</strong> y realizar un reingreso. El motivo de esta gesti&oacute;n es que el cliente desea incrementar significativamente su cuota inicial para reducir sus pagos mensuales.</p>
+    <p style="margin-bottom: 20px; color: #333333;">Solicito su autorizaci&oacute;n para anular del contrato actual del cliente <strong>${formCuota.cliente || '[Nombre del Cliente]'}</strong> y realizar un reingreso. El motivo de esta gesti&oacute;n es que el cliente desea incrementar significativamente su cuota inicial para reducir sus pagos mensuales.</p>
     <p style="margin-bottom: 10px; color: #333333;">A continuaci&oacute;n, detallo los datos de la operaci&oacute;n actual en sistema:</p>
     <ul style="margin-bottom: 20px; list-style-type: none; padding-left: 0; color: #333333;">
       <li style="margin-bottom: 5px;">- <strong>Nro. Contrato:</strong> ${formCuota.nroContrato || '[Nro]'}</li>
@@ -358,7 +358,7 @@ const generarHtmlReenvioRaw = (formReenvio = {}) => {
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 5px; color: #333333;">{{SALUDO_TIEMPO}}</p>
     <p style="margin-top: 0; margin-bottom: 25px; color: #333333;">{{NOMBRE_SUPERVISOR}},</p>
-    <p style="margin-bottom: 20px; color: #333333;">Te escribo para solicitar tu apoyo habilitando nuevamente el env&iacute;o del correo para la firma digital de ${esMultiple ? "los siguientes contratos" : "el siguiente contrato"}. Debido a un error involuntario por parte de ${esMultiple ? "los clientes" : "el cliente"}, el proceso no se pudo completar en la primera instancia.</p>
+    <p style="margin-bottom: 20px; color: #333333;">Solicito habilitar nuevamente el env&iacute;o del correo de firma digital de ${esMultiple ? "los siguientes contratos" : "el siguiente contrato"}. Debido a un error involuntario por parte de ${esMultiple ? "los clientes" : "el cliente"}, el proceso no se pudo completar en la primera instancia.</p>
     <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; border: 1px solid #333333; font-family: Arial, sans-serif; font-size: 13px; margin-bottom: 25px; width: 100%; text-align: left; background-color: #ffffff;">
       <thead><tr style="background-color: #f2f2f2;"><th style="border: 1px solid #333333; padding: 6px 8px;"><span style="color: #000000;"><font color="#000000"><b>Nro. Contrato</b></font></span></th><th style="border: 1px solid #333333; padding: 6px 8px;"><span style="color: #000000;"><font color="#000000"><b>Cliente</b></font></span></th><th style="border: 1px solid #333333; padding: 6px 8px;"><span style="color: #000000;"><font color="#000000"><b>Carnet (CI)</b></font></span></th><th style="border: 1px solid #333333; padding: 6px 8px;"><span style="color: #000000;"><font color="#000000"><b>Ubicaci&oacute;n</b></font></span></th></tr></thead>
       <tbody>${filas}</tbody>
@@ -399,7 +399,7 @@ const generarHtmlSeguroRaw = (formSeguro = {}) => {
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 5px; color: #333333;">{{SALUDO_TIEMPO}}</p>
     <p style="margin-top: 0; margin-bottom: 20px; color: #333333;">{{NOMBRE_SUPERVISOR}},</p>
-    <p style="margin-bottom: 20px; color: #333333;">Solicito la incorporación de los siguientes ${cant} beneficiarios al seguro de vida de esta venta, detallo todo a continuaci&oacute;n:</p>
+    <p style="margin-bottom: 20px; color: #333333;">Solicito incorporar ${cant === 1 ? 'al siguiente beneficiario' : `a los siguientes ${cant} beneficiarios`} al seguro de vida. Detallo los datos a continuaci&oacute;n:</p>
 
     <p style="margin-bottom: 5px; color: #333333;"><strong>Cliente(s):</strong> ${formSeguro.cliente || '[Nombre del Cliente]'}</p>
     <p style="margin-bottom: 5px; margin-top: 0; color: #333333;"><strong>Nro. Contrato:</strong> ${formSeguro.nroContrato || '[Nro]'}</p>
@@ -659,18 +659,18 @@ const generarHtmlMemorandumRaw = (form = {}) => {
   const listaAsesores = Array.isArray(form.asesores) ? form.asesores : [];
   listaAsesores.forEach(a => {
     if (a.nombre) {
-      asesoresHtml += `<li style="margin-bottom: 10px;"><strong>${a.nombre}:</strong> Registra una colocaci&oacute;n actual de <strong>${a.colocacion}</strong>, lo cual representa una brecha cr&iacute;tica frente a su compromiso de <strong>${a.compromiso}</strong>.</li>`;
+      asesoresHtml += `<li style="margin-bottom: 10px;"><strong>${a.nombre}:</strong> Registra una colocaci&oacute;n actual de <strong>${a.colocacion}</strong>, frente a su compromiso de <strong>${a.compromiso}</strong>.</li>`;
     }
   });
   return `
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 20px; color: #333333;">{{SALUDO_TIEMPO}} {{NOMBRE_SUPERVISOR}},</p>
-    <p style="margin-bottom: 20px; color: #333333;">Solicito formalmente la emisi&oacute;n de un <strong>memor&aacute;ndum de llamada de atenci&oacute;n</strong> para los asesores de mi equipo comercial detallados abajo. El motivo de esta solicitud es el incumplimiento reiterado de sus m&eacute;tricas de ventas, ya que llevan dos meses consecutivos sin alcanzar el m&iacute;nimo comisionable establecido.</p>
+    <p style="margin-bottom: 20px; color: #333333;">Solicito formalmente la emisi&oacute;n de un <strong>memor&aacute;ndum de llamada de atenci&oacute;n</strong> para los asesores de mi equipo comercial detallados abajo. El motivo de esta solicitud es el incumplimiento reiterado de sus m&eacute;tricas de ventas, seg&uacute;n los resultados y compromisos detallados a continuaci&oacute;n.</p>
     <p style="margin-bottom: 15px; color: #333333;">De acuerdo con el cierre de proyecciones y resultados del mes de <strong>${form.mes || '[Mes]'}</strong>, el detalle de su rendimiento es el siguiente:</p>
     <ul style="margin-bottom: 20px; color: #333333;">${asesoresHtml}</ul>
-    <p style="margin-bottom: 20px; color: #333333;">Adjunto a este correo el cuadro de proyecci&oacute;n y seguimiento de metas de ${form.mes || '[Mes]'} como respaldo documental, donde podr&aacute;s verificar los datos se&ntilde;alados en rojo.</p>
+    <p style="margin-bottom: 20px; color: #333333;">Adjunto a este correo el cuadro de proyecci&oacute;n y seguimiento de metas de ${form.mes || '[Mes]'} como respaldo documental, para su revisi&oacute;n.</p>
     <p style="margin-bottom: 20px; color: #333333;">Agradezco su apoyo para gestionar estas llamadas de atenci&oacute;n a la brevedad, con el fin de dejar constancia formal en sus expedientes y proceder con las medidas de seguimiento correspondientes.</p>
-    <p style="margin-bottom: 20px; color: #333333;">Quedo atento por si necesitas alguna informaci&oacute;n o informe adicional de mi parte para procesar este requerimiento.</p>
+    <p style="margin-bottom: 20px; color: #333333;">Quedo a su disposici&oacute;n para ampliar la informaci&oacute;n.</p>
     <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
     <p style="margin-top: 0; font-weight: bold; color: #333333;">${form.asesor || 'Asesor'}</p>
   </div>`;

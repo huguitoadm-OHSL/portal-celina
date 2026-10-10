@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { resolveEmail, escapeHtml } from '../src/services/email.js';
-import { generarHtmlProyeccion, generarHtmlAltaCRM, generarHtmlDescuento } from '../src/utils/htmlTemplates.js';
+import { generarHtmlProyeccion, generarHtmlAltaCRM, generarHtmlDescuento, generarHtmlSeguro, generarHtmlPostulante, generarHtmlReenvio } from '../src/utils/htmlTemplates.js';
 import { generarTextoProyeccionCelular, generarTextoPendienteValidacion, generarTextoAltaCRMCelular } from '../src/utils/textTemplates.js';
 import { REFERENCE_ADVISORS } from '../src/constants/commercialReference.js';
 
@@ -38,4 +38,17 @@ test('correo de cotización muestra el TC de la operación, sin monto fijo contr
   const html = generarHtmlDescuento({modalidad:'Crédito'},{tcBase:11.73,tcAplicado:11.73});
   assert.ok(!html.includes('12,00'));
   assert.ok(html.includes('11.73'));
+});
+
+test('plantillas corporativas mantienen concordancia y tratamiento profesional', () => {
+  const one = generarHtmlSeguro({beneficiarios:[{nombre:'Persona',porcentaje:100}]});
+  const many = generarHtmlSeguro({beneficiarios:[{nombre:'A',porcentaje:50},{nombre:'B',porcentaje:50}]});
+  assert.ok(one.includes('al siguiente beneficiario'));
+  assert.ok(many.includes('a los siguientes 2 beneficiarios'));
+  const reenvio = generarHtmlReenvio({contratos:[{}]});
+  assert.ok(reenvio.includes('el siguiente contrato'));
+  assert.ok(!reenvio.includes('tu apoyo'));
+  const applicant = generarHtmlPostulante({});
+  assert.ok(!applicant.includes('M&aacute;quina de Ventas'));
+  assert.ok(applicant.includes('equipo comercial'));
 });

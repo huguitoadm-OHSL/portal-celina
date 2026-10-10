@@ -9,7 +9,7 @@
 - Proyección semanal: importes en Bs; la proyección total se puede editar sin inventar fechas diarias ni atribuir lotes a asesores. Al editar un importe diario, se usa la suma diaria como nueva proyección; al editar el total semanal, se reinicia la distribución diaria. Los cambios son simulaciones en memoria.
 - Correos: sustitución de tokens una sola vez, saludos con hora de Bolivia, corrección de redundancias/gramática, escape de variables, sanitización HTML y copia con manejo de errores. Vista previa también en Incentivos y Campañas. Abrir el cliente de correo continúa siendo una acción manual; no existe envío automático.
 - TC: vigencia comercial centralizada; excepción de fin de semana; TC histórico explícito tiene prioridad. Campañas, utilidades de descuento, textos y liquidación consultan esa configuración para nuevas simulaciones.
-- Corrección del conteo por proyecto en Seguimiento: Cañaveral se sumaba dos veces. La venta de Carlos se conserva como antecedente de la versión anterior; Marisol se identifica como pendiente de conciliación.
+- Corrección del conteo por proyecto en Seguimiento: Cañaveral se sumaba dos veces. La venta de Carlos se conserva como antecedente de la versión anterior; Marisol muestra la venta reportada en Los Jardines el 09/10/2026.
 - Carga diferida de los 25 módulos y límite de errores por módulo. Navegación extraída fuera del render para evitar remontajes.
 - Tailwind compilado localmente, sin CDN ni descarga de tipografías; package-lock reparado; workflow de verificación sin despliegue y con permisos de lectura.
 - Firebase Auth reemplaza contraseña pública y bandera local. Claims de acceso verificadas, cierre de sesión y ausencia del bypass local en producción.
@@ -29,4 +29,12 @@ Las capturas corresponden a la ejecución local de esta rama, con los datos de r
 3. Gerencia: confirmar base vigente fuera del 10–11/10 y cómo se relacionan los umbrales de productividad/comisiones. Los simuladores mantienen esquemas anteriores distintos de contado y crédito, sin sustituir políticas comerciales.
 4. Revisión de negocio: probar escenarios de contratos reales en los simuladores de amortización, consolidación y recálculo. Las pruebas de navegación verifican carga y continuidad; no certifican todas las reglas contractuales posibles.
 
-No hubo cambios en `main`, despliegue, escritura de ventas definitivas, envío de correos ni llamadas a proveedores de IA.
+La rama conserva los cambios recientes de `main` en Campañas (TC y nombre del destinatario). No se escribió en `main`, en ventas definitivas ni se enviaron correos. La vista previa privada se publica por separado. No se llamó a proveedores de IA.
+
+## Revisión final solicitada el 10/10/2026
+
+- Marisol: 1 venta reportada en Los Jardines el 09/10/2026; Incentivos inicializado con USD 11.200. La referencia previa del dashboard en Bs permanece separada hasta conciliar su moneda.
+- Gmail: una sola copia a `ohsaravia@celina.com.bo`, sin otras copias automáticas. Outlook: excluye la copia de supervisión y mantiene las copias operativas originales. Si el destinatario es supervisión, no se duplica como CC.
+- Regla compartida de destinatarios y enlaces para ResultCard, Incentivos y Campañas, incluidos dispositivos móviles. Se eliminó la redirección temporizada de Gmail a un `mailto:` que podía abrir otro cliente.
+- Revisión de redacción en las plantillas HTML/texto y correos independientes: tratamiento de usted, frases directas, singular/plural de beneficiarios, cierre corporativo y eliminación de afirmaciones no respaldadas sobre dos meses de incumplimiento.
+- La autorización de publicar ya fue recibida. Para sustituir el portal vigente aún se necesita identificar su URL/proveedor y verificar una cuenta habilitada en Firebase. El repositorio solo enlaza un editor de StackBlitz, no identifica el destino de producción.

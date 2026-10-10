@@ -42,6 +42,12 @@ test('los 25 módulos se renderizan sin errores y sin perder navegación',async 
     await buttons.nth(i).click();
     await expect(page.locator('main h1, main h2').first()).toBeVisible();
     await expect(page.getByText('No se pudo mostrar este módulo',{exact:true})).toHaveCount(0);
+    const previews = page.locator('.email-preview');
+    for (const preview of await previews.all()) {
+      const content = await preview.innerText();
+      expect(content, labels[i]).not.toMatch(/\{\{(?:SALUDO_TIEMPO|NOMBRE_SUPERVISOR)\}\}|Estimad[oa](?:\/a)?\s+Estimad[oa]|\\vert\{\}|undefined|NaN/);
+      expect(content, labels[i]).not.toMatch(/\b(por favor le solicito|tu colaboración|tu apoyo|por si necesitas|Máquina de Ventas)\b/i);
+    }
   }
   expect(errors).toEqual([]);
 });
@@ -63,7 +69,7 @@ test('saludo, redacción y protección de HTML dinámico en alta de CRM', async 
 
 test('conciliación de Marisol alerta coincidencias sin modificar importes', async ({page}) => {
   await enter(page);
-  await page.locator('input[type=file]').setInputFiles({name:'extracto.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify([{advisor:'Marisol Urgel Pizarro',project:'El Renacer',date:'2026-10-10',amountBs:11200,lots:1,contractId:'ejemplo'}]))});
+  await page.locator('input[type=file]').setInputFiles({name:'extracto.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify([{advisor:'Marisol Urgel Pizarro',project:'Los Jardines',date:'2026-10-09',amountUsd:11200,lots:1,contractId:'ejemplo'}]))});
   await expect(page.locator('.reconciliation-status')).toContainText('1 coincidencia candidata');
   await expect(page.locator('.metric-card.current strong')).toContainText('17.700');
 });
@@ -85,4 +91,42 @@ test('marca antigua en localStorage no concede acceso',async({page})=>{
   await page.goto('/');
   await expect(page.getByRole('heading',{name:'Bienvenido al portal'})).toBeVisible();
   await expect(page.getByRole('heading',{name:'Colocación por asesor'})).toHaveCount(0);
+});
+
+test('Marisol figura en Jardines y en Incentivos una sola vez, sin bonos indebidos', async ({page}) => {
+  await enter(page);
+  await page.getByRole('button', {name:'Seguimiento de Ventas', exact:true}).click();
+  const row = page.locator('main tbody tr').filter({hasText:'Marisol Urgel Pizarro'});
+  await expect(row.locator('td').nth(3)).toHaveText('1');
+  const project = page.locator('main span').filter({hasText:/^Jardines$/}).locator('..');
+  await expect(project.locator('span').last()).toHaveText('1');
+  await page.getByRole('button', {name:/^Incentivos Celina/}).click();
+  const advisor = page.locator('main table tbody tr').filter({hasText:'Marisol Urgel Pizarro'}).filter({has:page.locator('input')});
+  await expect(advisor.locator('input').nth(0)).toHaveValue('1');
+  await expect(advisor.locator('input').nth(1)).toHaveValue('11200');
+  await expect(advisor).toContainText('PENDIENTE');
+  await expect(advisor).toContainText('0 Bs.');
+});
+
+test('Gmail genera una sola copia corporativa en formularios, incentivos y campañas', async ({page}) => {
+  await enter(page);
+  await page.evaluate(() => {
+    window.drafts = [];
+    Object.defineProperty(navigator, 'clipboard', {value:{write:async()=>{},writeText:async()=>{}},configurable:true});
+    window.open = (url) => {
+      const location = {};
+      Object.defineProperty(location, 'href', {set(value){window.drafts.push(value);}});
+      if (url !== 'about:blank') window.drafts.push(url);
+      return {location, close(){}, opener:null};
+    };
+  });
+  for (const [module, button] of [['Alta Usuarios CRM', 'Abrir en Gmail'], ['Incentivos Celina', 'Gmail (+CC)'], ['Descuentos Campañas', 'Abrir en Gmail']]) {
+    await page.getByRole('button', {name:new RegExp('^'+module)}).click();
+    await page.getByRole('button', {name:button, exact:false}).click();
+    await expect.poll(() => page.evaluate(() => window.drafts.length)).toBeGreaterThan(0);
+    const drafts = await page.evaluate(() => window.drafts.splice(0));
+    expect(drafts).toHaveLength(1);
+    expect(new URL(drafts[0]).searchParams.get('cc')).toBe('ohsaravia@celina.com.bo');
+    await page.waitForTimeout(2600);
+  }
 });

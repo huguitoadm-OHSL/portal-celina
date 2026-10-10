@@ -1,12 +1,13 @@
-import { REFERENCE_ADVISORS } from '../constants/commercialReference';
+import { reportedSalesByProject } from '../utils/commercial';
+import { REFERENCE_ADVISORS, REPORTED_SALES } from '../constants/commercialReference';
 import React from 'react';
 import { Target, TrendingUp, Users } from 'lucide-react';
 import { formatCurrency } from '../utils/formatters';
 
 const PROYECTOS_ACTUALIZADOS = ['Muyurina', 'Renacer', 'Santa Fe', 'Rancho Nuevo', 'Jardines', 'Celina VII F3', 'Cañaveral'];
 
-// No se insertan operaciones. Marisol figura solo como referencia pendiente de conciliación.
-const BASE_DE_DATOS_PBI = REFERENCE_ADVISORS.map(a => ({ nombre: a.nombre, colAct: a.actualBs, ventasReales: a.id === 'carlos' ? [0,0,0,0,0,0,1] : [0,0,0,0,0,0,0], tipo: 'INTERNO' }));
+// Ventas reportadas por supervisión; no se escriben registros en el CRM.
+const BASE_DE_DATOS_PBI = REFERENCE_ADVISORS.map(a => ({ nombre: a.nombre, colAct: a.actualBs, ventasReales: reportedSalesByProject(PROYECTOS_ACTUALIZADOS, REPORTED_SALES.filter(sale => sale.advisorId === a.id)), tipo: 'INTERNO' }));
 
 export default function SeguimientoVentas() {
   const ventasPorProyecto = [0, 0, 0, 0, 0, 0, 0];
@@ -41,7 +42,7 @@ export default function SeguimientoVentas() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <p className="source-note">Colocación en Bs: referencia del 10/10/2026. Marisol: 1 lote de El Renacer pendiente de conciliación, excluido de cierres verificados. Umbral heredado 18.000: moneda pendiente de confirmación.</p>
+      <p className="source-note">Ventas reportadas: Marisol, 1 lote en Los Jardines el 09/10/2026, USD 11.200. Colocación de este cuadro: referencia anterior en Bs, conservada sin reconvertir ni sumar nuevamente. Umbral heredado 18.000: moneda pendiente de confirmación.</p>
       <div className="mb-6 flex justify-between items-end">
         <h2 className="text-2xl font-bold text-[var(--text-primary)] flex items-center">
           <Target className="w-6 h-6 mr-2 text-indigo-600" /> Detalle de Asesor Mes en Curso

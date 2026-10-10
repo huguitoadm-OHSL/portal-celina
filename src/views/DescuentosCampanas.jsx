@@ -1,3 +1,5 @@
+import { CORREO_SUPERVISION_RESPALDO as CORREO_RESPALDO_OSCAR } from '../constants/config';
+import { emailCopies, composeEmailUrl } from '../services/emailDelivery';
 import { getExchangeRate } from '../constants/exchangeRates';
 import { escapeHtml, sanitizeEmailHtml, copyEmail, greeting } from '../services/email';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
@@ -41,10 +43,9 @@ const obtenerDescuentoCreditoFijo = (valorLoteUSD) => {
   if (valorLoteUSD <= 45000) return 1500;
   return 1800;
 };
-const CORREO_RESPALDO_OSCAR = "ohsaravia@celina.com.bo";
 
 const DIRECTORES_APROBACION = [
-  { nombre: "Lic. Mauricio Reyes", cargo: "Jefe de Ventas", email: "mreyes@celina.com.bo", genero: "M" },
+  { nombre: "Mauricio Reyes", cargo: "Jefe de Ventas", email: "mreyes@celina.com.bo", genero: "M" },
   { nombre: "Lic. Robert Vaca", cargo: "Gerente Regional", email: "rvaca@grupopaz.com.bo", genero: "M" },
   { nombre: "Lic. Verenice Choque", cargo: "Asistente de Inteligencia y Negocios", email: "vchoque@grupopaz.com.bo", genero: "F" }
 ];
@@ -307,7 +308,7 @@ export default function DescuentosCampanas() {
 
   const correosCC = useMemo(() => {
     const otros = DIRECTORES_APROBACION.filter((d) => d.email !== destinatarioEmail).map((d) => d.email);
-    return [...otros, CORREO_RESPALDO_OSCAR].join(", ");
+    return emailCopies('outlook', otros, destinatarioEmail).join(', ');
   }, [destinatarioEmail]);
 
   const asuntoCorreo = `Solicitud Descuento Campañas - ${proyectoSeleccionado} UV:${uvSeleccionada} Mz${mznSeleccionada} Lt${loteSeleccionado} (Nuevo P.M2: $${formatMoneda(calculos.nuevoPrecioM2)})`;
@@ -320,7 +321,7 @@ export default function DescuentosCampanas() {
   <p style="margin: 0 0 10px; font-size: 15px;">${getSaludoHorario()}</p>
   <p style="margin: 0 0 16px; font-size: 15px;">${tratamientoDirecto} <strong>${destinatarioObj.nombre}</strong>,</p>
   <p style="margin: 0 0 20px; font-size: 14px; color: #334155;">
-    Por favor le solicito mediante el presente correo la aplicación del descuento correspondiente a la
+    Solicito la aplicación del descuento de la
     <strong>Campaña Oficial de Octubre</strong> para el proyecto <strong>${escapeHtml(proyectoSeleccionado)}</strong>.
   </p>
 
@@ -479,7 +480,7 @@ export default function DescuentosCampanas() {
     </tr>
   </table>
 
-  <p style="margin: 0 0 16px; font-size: 14px;">Quedo atento a su aprobación y modificación en el sistema para proceder al cierre de venta.</p>
+  <p style="margin: 0 0 16px; font-size: 14px;">Solicito su aprobación y la aplicación de las condiciones en el sistema para continuar con el cierre de la venta.</p>
   <p style="margin: 0 0 4px; font-size: 14px;">Saludos cordiales,</p>
   <p style="margin: 0; font-size: 15px; font-weight: bold; color: #0f172a;">${escapeHtml(asesorSeleccionado)}</p>
 </div>
@@ -514,7 +515,7 @@ RESUMEN FINANCIERO (${calculos.labelBadge}):
 Asesor Responsable: ${asesorSeleccionado}
 Copia de Respaldo: ${CORREO_RESPALDO_OSCAR}
 
-Quedo atento a su aprobación y modificación en el sistema para proceder al cierre de venta.
+Solicito su aprobación y la aplicación de las condiciones en el sistema para continuar con el cierre de la venta.
 
 Saludos cordiales,
 ${asesorSeleccionado}`;
@@ -535,22 +536,17 @@ ${asesorSeleccionado}`;
     const bodyEncoded = encodeURIComponent(generarTextoPlano());
     const subjectEncoded = encodeURIComponent(asuntoCorreo);
     const toEncoded = encodeURIComponent(destinatarioEmail);
-    const ccEncoded = encodeURIComponent(correosCC);
+    const ccEncoded = encodeURIComponent(emailCopies('outlook', [correosCC], destinatarioEmail).join(','));
 
     window.location.href = `mailto:${toEncoded}?cc=${ccEncoded}&subject=${subjectEncoded}&body=${bodyEncoded}`;
-    setNotificacion("Abriendo Outlook con To y CC. ¡Pega el cuadro con Ctrl+V!");
+    setNotificacion("Outlook: sin copia automática a supervisión. Pegue el formato y revise el borrador.");
   };
 
   const abrirEnGmailWeb = () => {
+    const url = composeEmailUrl({ client: 'gmail', to: destinatarioEmail, subject: asuntoCorreo, body: generarTextoPlano() });
+    window.open(url, '_blank', 'noopener,noreferrer');
     copiarFormatoHTML();
-    const bodyEncoded = encodeURIComponent(generarTextoPlano());
-    const subjectEncoded = encodeURIComponent(asuntoCorreo);
-    const toEncoded = encodeURIComponent(destinatarioEmail);
-    const ccEncoded = encodeURIComponent(correosCC);
-
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${toEncoded}&cc=${ccEncoded}&su=${subjectEncoded}&body=${bodyEncoded}`;
-    window.open(gmailUrl, "_blank");
-    setNotificacion("Gmail abierto con copia a ohsaravia@celina.com.bo. ¡Pega con Ctrl+V!");
+    setNotificacion(`Gmail: copia exclusiva a ${CORREO_RESPALDO_OSCAR}. Revise el borrador antes de enviarlo.`);
   };
 
   const textoWhatsApp = `🔥 *OFERTA CAMPAÑA OCTUBRE - CELINA URBANIZACIONES* 🔥\n\n` +
@@ -755,9 +751,9 @@ ${asesorSeleccionado}`;
             </div>
 
             <div className="bg-[var(--bg-card-inner)] border border-[#182a46] p-2.5 rounded-xl text-[10px] text-[var(--text-muted)] space-y-1">
-              <span className="font-bold text-cyan-400 block uppercase">CC Automático de Respaldo:</span>
+              <span className="font-bold text-cyan-400 block uppercase">Copias por cliente de correo:</span>
               <div className="text-[var(--text-secondary)] font-mono text-[9px] leading-relaxed break-all">
-                {correosCC}
+                Gmail: {CORREO_RESPALDO_OSCAR}. Outlook: {correosCC || 'sin copias'}.
               </div>
             </div>
 

@@ -1,3 +1,6 @@
+import { CORREO_SUPERVISION_RESPALDO as CORREO_RESPALDO_OSCAR } from '../constants/config';
+import { MARISOL_REFERENCE } from '../constants/commercialReference';
+import { emailCopies, composeEmailUrl } from '../services/emailDelivery';
 import { escapeHtml, sanitizeEmailHtml, copyEmail, greeting } from '../services/email';
 import React, { useState, useMemo } from 'react';
 import {
@@ -6,7 +9,6 @@ import {
   Calendar, Flame, ShieldCheck, ChevronRight, FileText, ArrowRight
 } from 'lucide-react';
 
-const CORREO_RESPALDO_OSCAR = "ohsaravia@celina.com.bo";
 
 const DIRECTORES_APROBACION = [
   { nombre: "Lic. Mauricio Reyes", cargo: "Jefe de Ventas", email: "mreyes@celina.com.bo" },
@@ -47,7 +49,7 @@ const ASESORES_INICIALES = [
   { id: 3, nombre: "Jaime Fabricio Rios Castro", ventas: 0, colocacion: 0, carpetasAlDia: true },
   { id: 4, nombre: "Jimmy Gonzales Nuñez", ventas: 0, colocacion: 0, carpetasAlDia: true },
   { id: 5, nombre: "Jose Gabriel Padilla Loayza", ventas: 0, colocacion: 0, carpetasAlDia: true },
-  { id: 6, nombre: "Marisol Urgel Pizarro", ventas: 0, colocacion: 0, carpetasAlDia: true },
+  { id: 6, nombre: MARISOL_REFERENCE.advisor, ventas: MARISOL_REFERENCE.lots, colocacion: MARISOL_REFERENCE.amountUsd, carpetasAlDia: true },
   { id: 7, nombre: "Merly Mendez Hurtado", ventas: 0, colocacion: 0, carpetasAlDia: true }
 ];
 
@@ -180,7 +182,7 @@ export default function IncentivosAsesores() {
 
   const correosCC = useMemo(() => {
     const otros = DIRECTORES_APROBACION.filter(d => d.email !== destinatarioEmail).map(d => d.email);
-    return [...otros, CORREO_RESPALDO_OSCAR].join(", ");
+    return emailCopies('outlook', otros, destinatarioEmail).join(', ');
   }, [destinatarioEmail]);
 
   const asuntoCorreo = `Reporte y Solicitud de Incentivo Celina 2026 (${etapaActual.nombre}) - Equipo Montero Oscar Saravia`;
@@ -191,7 +193,7 @@ export default function IncentivosAsesores() {
   <p style="margin: 0 0 10px; font-size: 15px;">${getSaludoHorario()}</p>
   <p style="margin: 0 0 16px; font-size: 15px;">Estimado <strong>${destinatarioObj.nombre}</strong>,</p>
   <p style="margin: 0 0 20px; font-size: 14px; color: #334155;">
-    Por medio del presente correo, presento el informe de cumplimiento de metas y liquidación del
+    Presento el informe de cumplimiento de metas del
     <strong>CONCURSO INTERNO "INCENTIVO CELINA 2026"</strong> para la etapa <strong>${etapaActual.nombre}</strong>,
     correspondiente a la Supervisión Comercial de Montero (Supervisor: Oscar Hugo Saravia L.):
   </p>
@@ -278,7 +280,7 @@ export default function IncentivosAsesores() {
     </tbody>
   </table>
 
-  <p style="margin: 0 0 16px; font-size: 14px;">Quedo atento a la confirmación y proceso de pago del incentivo grupal.</p>
+  <p style="margin: 0 0 16px; font-size: 14px;">Solicito revisar los resultados y confirmar si corresponde el incentivo, de acuerdo con las bases vigentes.</p>
   <p style="margin: 0 0 4px; font-size: 14px;">Saludos cordiales,</p>
   <p style="margin: 0; font-size: 15px; font-weight: bold; color: #0f172a;">Oscar Hugo Saravia L.</p>
   <p style="margin: 0; font-size: 12px; color: #64748b;">Supervisor Comercial • Celina Urbanizaciones</p>
@@ -291,7 +293,7 @@ export default function IncentivosAsesores() {
 
 Estimado ${destinatarioObj.nombre},
 
-Presento el informe oficial del concurso "INCENTIVO CELINA 2026" (${etapaActual.nombre}):
+Presento el informe de seguimiento del concurso "INCENTIVO CELINA 2026" (${etapaActual.nombre}):
 
 📍 SUPERVISIÓN: Oscar Saravia L. (Montero)
 🎯 META GRUPAL: $ ${formatMoneda(evaluacion.meta)} USD
@@ -304,7 +306,7 @@ ${evaluacion.textoBono}
 • Total liquidación del equipo: ${formatMoneda(evaluacion.totalBonoEquipoBs)} Bs.
 
 RESUMEN POR ASESOR:
-${evaluacion.asesoresEvaluados.map(a => `• ${a.nombre}: ${a.ventasNum} vts \vert{}$${formatMoneda(a.colocacionNum)} \vert{}${a.esProductivo ? 'PRODUCTIVO (Gana ' + formatMoneda(evaluacion.bonoPorAsesorBs) + ' Bs)' : 'NO CUMPLE'}`).join('\n')}
+${evaluacion.asesoresEvaluados.map(a => `• ${a.nombre}: ${a.ventasNum} ventas | USD ${formatMoneda(a.colocacionNum)} | ${a.esProductivo ? 'PRODUCTIVO (Gana ' + formatMoneda(evaluacion.bonoPorAsesorBs) + ' Bs)' : 'NO CUMPLE'}`).join('\n')}
 
 Saludos cordiales,
 Oscar Hugo Saravia L.`;
@@ -325,26 +327,22 @@ Oscar Hugo Saravia L.`;
     const bodyEncoded = encodeURIComponent(generarTextoPlano());
     const subjectEncoded = encodeURIComponent(asuntoCorreo);
     const toEncoded = encodeURIComponent(destinatarioEmail);
-    const ccEncoded = encodeURIComponent(correosCC);
+    const ccEncoded = encodeURIComponent(emailCopies('outlook', [correosCC], destinatarioEmail).join(','));
     window.location.href = `mailto:${toEncoded}?cc=${ccEncoded}&subject=${subjectEncoded}&body=${bodyEncoded}`;
-    setNotificacion("Abriendo Outlook con To y CC. ¡Pega el cuadro con Ctrl+V!");
+    setNotificacion("Outlook: sin copia automática a supervisión. Pegue el formato y revise el borrador.");
   };
 
   const abrirEnGmailWeb = () => {
+    const url = composeEmailUrl({ client: 'gmail', to: destinatarioEmail, subject: asuntoCorreo, body: generarTextoPlano() });
+    window.open(url, '_blank', 'noopener,noreferrer');
     copiarFormatoHTML();
-    const bodyEncoded = encodeURIComponent(generarTextoPlano());
-    const subjectEncoded = encodeURIComponent(asuntoCorreo);
-    const toEncoded = encodeURIComponent(destinatarioEmail);
-    const ccEncoded = encodeURIComponent(correosCC);
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${toEncoded}&cc=${ccEncoded}&su=${subjectEncoded}&body=${bodyEncoded}`;
-    window.open(gmailUrl, "_blank");
-    setNotificacion("Gmail abierto con copia a ohsaravia@celina.com.bo. ¡Pega con Ctrl+V!");
+    setNotificacion(`Gmail: copia exclusiva a ${CORREO_RESPALDO_OSCAR}. Revise el borrador antes de enviarlo.`);
   };
 
   return (
     <div className="w-full text-[var(--text-primary)] font-sans space-y-6 pb-12 antialiased">
       <details className="panel mb-6"><summary>Vista previa del correo · revisar antes de enviar</summary><div className="email-preview" dangerouslySetInnerHTML={{ __html: sanitizeEmailHtml(generarHTMLCorreo()) }}/></details>
-      <p className="source-note">Simulador heredado de incentivos en USD. Sus cifras de ejemplo no corresponden a la referencia comercial en Bs del dashboard. La regla individual se mantiene: 2 ventas o USD 15.000 y carpetas al día. Requiere conciliación de moneda y validación de operaciones antes de liquidar.</p>
+      <p className="source-note">Incentivos en USD. Marisol: 1 venta en Los Jardines, USD 11.200, ingresada el 09/10/2026 y reportada por supervisión. La regla individual se mantiene: 2 ventas o USD 15.000 y carpetas al día; esta venta sola no alcanza el umbral. La meta y el antecedente de Carlos se conservan según el simulador original. No se mezclan con los importes en Bs del dashboard ni se liquida un bono automáticamente.</p>
       {/* ================= HERO PRINCIPAL ================= */}
       <div className={`rounded-3xl p-6 sm:p-8 border shadow-2xl relative overflow-hidden transition-all duration-500 ${evaluacion.claseEstado}`}>
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[140px] pointer-events-none"></div>
@@ -526,6 +524,8 @@ Oscar Hugo Saravia L.`;
                     <input
                       type="number"
                       min="0"
+                      step="1"
+                      aria-label={`Ventas de ${a.nombre}`}
                       value={a.ventas}
                       onChange={(e) => handleAsesorChange(a.id, 'ventas', e.target.value)}
                       className="w-16 px-2 py-1 bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-lg text-center font-black text-[var(--text-primary)] focus:border-cyan-400 outline-none"
@@ -539,7 +539,8 @@ Oscar Hugo Saravia L.`;
                       <input
                         type="number"
                         min="0"
-                        step="500"
+                        step="0.01"
+                        aria-label={`Colocación USD de ${a.nombre}`}
                         value={a.colocacion}
                         onChange={(e) => handleAsesorChange(a.id, 'colocacion', e.target.value)}
                         className="w-28 px-2 py-1 bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-lg text-right font-black text-[var(--text-primary)] font-mono focus:border-cyan-400 outline-none"

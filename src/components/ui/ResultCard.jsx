@@ -1,8 +1,8 @@
+import { emailCopies, composeEmailUrl } from '../../services/emailDelivery';
 import { resolveEmail, sanitizeEmailHtml, copyEmail } from '../../services/email';
 import React, { useState, useMemo } from 'react';
 import { Copy, Check, ChevronDown, Clock, MousePointerClick, Zap, Users, Monitor, Mail } from 'lucide-react';
 
-const MI_CORREO_AUDITORIA = "ohsaravia@celina.com.bo";
 
 export function ResultCard({
   title,
@@ -20,8 +20,6 @@ export function ResultCard({
   const [clipboardError, setClipboardError] = useState('');
   const [mostrarAlertaPegar, setMostrarAlertaPegar] = useState(false);
 
-  const esAndroid = /Android/i.test(navigator.userAgent);
-  const esIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   const MAPA_CORREOS = useMemo(() => [
     {
@@ -84,8 +82,11 @@ export function ResultCard({
     const copiasExtra = fixedDestinoEmail ? [] : contactosDisponibles.filter(c => c.email !== destinatarioEfectivo).map(c => c.email);
     const copiasProps = cc ? cc.split(',').map(s => s.trim()).filter(Boolean) : [];
     const copiasFixed = ccEmails ? ccEmails.split(',').map(s => s.trim()).filter(Boolean) : [];
-    return [...new Set([...copiasExtra, ...copiasProps, ...copiasFixed, MI_CORREO_AUDITORIA])];
+    return [...new Set([...copiasExtra, ...copiasProps, ...copiasFixed])];
   })();
+
+  const gmailCopies = emailCopies('gmail', ccDinamicoArray, destinatarioEfectivo);
+  const outlookCopies = emailCopies('outlook', ccDinamicoArray, destinatarioEfectivo);
 
   const htmlFinal = sanitizeEmailHtml(resolveEmail(htmlContent, objetoDestinatario.saludo));
   const textoPlanoFinal = resolveEmail(text, objetoDestinatario.saludo);
@@ -98,31 +99,25 @@ export function ResultCard({
       setCopiado(true);
       setTimeout(() => { setMostrarAlertaPegar(false); setCopiado(false); }, 2500);
       if (callbackApp) callbackApp();
-    } catch (error) { setClipboardError(error.message || 'No se pudo copiar el correo. Seleccione el texto de la vista previa.'); }
+      return true;
+    } catch (error) { setClipboardError(error.message || 'No se pudo copiar el correo. Seleccione el texto de la vista previa.'); return false; }
   };
 
   const abrirAppOutlookEscritorio = () => {
     ejecutarFlujoSeguro(() => {
-      const dest = destinatarioEfectivo || '';
-      const asun = encodeURIComponent(subject || '');
-      const ccStr = ccDinamicoArray.join(',');
-      window.location.href = `mailto:${dest}?subject=${asun}&cc=${ccStr}`;
+      window.location.href = composeEmailUrl({ client: 'outlook', to: destinatarioEfectivo, subject, copies: ccDinamicoArray });
     });
   };
 
   const abrirEnGmail = () => {
+    // Abrir dentro del clic evita bloqueos de ventanas después de copiar de forma asíncrona.
+    const composer = window.open('about:blank', '_blank');
+    if (composer) composer.opener = null;
     ejecutarFlujoSeguro(() => {
-      const dest = destinatarioEfectivo || '';
-      const asun = encodeURIComponent(subject || '');
-      const ccStr = ccDinamicoArray.join(',');
-
-      if (esAndroid || esIOS) {
-        window.location.href = `googlegmail://co?to=${dest}&subject=${asun}&cc=${ccStr}`;
-        setTimeout(() => { window.location.href = `mailto:${dest}?subject=${asun}&cc=${ccStr}`; }, 1000);
-      } else {
-        window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(dest)}&su=${asun}&cc=${encodeURIComponent(ccStr)}`, '_blank');
-      }
-    });
+      const url = composeEmailUrl({ client: 'gmail', to: destinatarioEfectivo, subject, copies: ccDinamicoArray });
+      if (composer) composer.location.href = url;
+      else window.location.href = url;
+    }).then(success => { if (!success && composer) composer.close(); });
   };
 
   return (
@@ -173,15 +168,16 @@ export function ResultCard({
 
         <div className="mb-4 space-y-1">
           <label className="flex items-center text-[10px] font-black text-[var(--text-muted)] uppercase tracking-wider pl-0.5">
-            <Users className="w-3 h-3 mr-1 text-cyan-400" /> En Copia (CC Automático de Auditoría):
+            <Users className="w-3 h-3 mr-1 text-cyan-400" /> Copias según el cliente de correo:
           </label>
           <div className="flex flex-wrap gap-1 p-2 bg-[var(--bg-card-inner)] border border-[var(--border-glow)] rounded-xl min-h-[38px] items-center">
-            {ccDinamicoArray.map((email, i) => (
+            {gmailCopies.map((email, i) => (
               <span key={i} className="inline-flex items-center px-2 py-0.5 rounded-md bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] text-[9px] font-mono font-bold text-cyan-300">
-                {email}
+                Gmail: {email}
               </span>
             ))}
           </div>
+          <p className="text-xs text-[var(--text-muted)]">Outlook: {outlookCopies.length ? outlookCopies.join(', ') : 'sin copias'}. Sin copia automática a supervisión.</p>
         </div>
 
         <div className="email-preview">

@@ -13,4 +13,10 @@ export const REFERENCE_ADVISORS = Object.freeze([
 export const PROJECT_NAMES = ['Muyurina', 'El Renacer', 'Santa Fe', 'Rancho Nuevo', 'Jardines', 'Celina VII F3', 'Cañaveral'];
 // La asignación individual y las fechas diarias no fueron proporcionadas.
 export const PROJECT_PROJECTION = Object.freeze({ Muyurina: 0, 'El Renacer': 4, 'Rancho Nuevo': 1, Jardines: 2 });
-export const MARISOL_REFERENCE = Object.freeze({ advisor: 'Marisol Urgel Pizarro', project: 'El Renacer', lots: 1, amountBs: 11200, date: REFERENCE_DATE, status: 'pending_reconciliation' });
+// Corrección expresa de supervisión del 10/10: venta ingresada el día anterior.
+// El cuadro anterior en Bs se conserva por separado; este importe USD no se agrega a sus totales.
+export const MARISOL_REFERENCE = Object.freeze({ id: 'supervision-marisol-2026-10-09', advisor: 'Marisol Urgel Pizarro', advisorId: 'marisol', project: 'Los Jardines', lots: 1, amountUsd: 11200, currency: 'USD', date: '2026-10-09', status: 'reported_by_supervisor' });
+export const REPORTED_SALES = Object.freeze([
+  Object.freeze({ id: 'legacy-carlos', advisorId: 'carlos', project: 'Cañaveral', lots: 1, status: 'legacy_reference' }),
+  MARISOL_REFERENCE,
+]);

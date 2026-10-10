@@ -39,9 +39,9 @@ export default function SolicitudesCodigo() {
           <p><strong>Lote:</strong> UV: ${safeForm.uv} MZN: ${safeForm.mzn} LOTE: ${safeForm.lote}</p>
           <p><strong>Nro. Contrato:</strong> ${safeForm.contrato || '___________________'}</p>
           <br/>
-          <p>Muchas gracias de antemano.</p>
+          <p>Gracias por su colaboración.</p>
           <br/>
-          <p>Saludos<br/><strong>Oscar Saravia.</strong></p>
+          <p>Saludos cordiales,<br/><strong>Oscar Saravia.</strong></p>
         </div>
       `;
     } else {
@@ -56,9 +56,9 @@ export default function SolicitudesCodigo() {
           <p><strong>Lote:</strong> UV: ${safeForm.uv} MZN: ${safeForm.mzn} LOTE: ${safeForm.lote}</p>
           <p><strong>Nro. Contrato:</strong> ${safeForm.contrato || '___________________'}</p>
           <br/>
-          <p>Muchas gracias de antemano.</p>
+          <p>Gracias por su colaboración.</p>
           <br/>
-          <p>Saludos<br/><strong>Oscar Saravia.</strong></p>
+          <p>Saludos cordiales,<br/><strong>Oscar Saravia.</strong></p>
         </div>
       `;
     }
@@ -66,16 +66,16 @@ export default function SolicitudesCodigo() {
 
   const generarTextoPlano = () => {
     if (tipoSolicitud === 'liquidacion') {
-      return `Solicito su apoyo para generar el código de liquidación del cliente: ${form.cliente} - Contrato: ${form.contrato}`;
+      return `{{SALUDO_TIEMPO}}\n{{NOMBRE_SUPERVISOR}},\n\nSolicito su apoyo para generar el código de liquidación del cliente: ${form.cliente} - Contrato: ${form.contrato}\n\nSaludos cordiales,\nOscar Saravia.`;
     } else {
-      return `Solicito su apoyo para generar el código de amortización por un monto de $${form.montoAmortizar} para el cliente: ${form.cliente} - Contrato: ${form.contrato}`;
+      return `{{SALUDO_TIEMPO}}\n{{NOMBRE_SUPERVISOR}},\n\nSolicito su apoyo para generar el código de amortización por un monto de $${form.montoAmortizar} para el cliente: ${form.cliente} - Contrato: ${form.contrato}\n\nSaludos cordiales,\nOscar Saravia.`;
     }
   };
 
   // ASUNTOS IDÉNTICOS A TUS CAPTURAS
   const asuntoCorreo = tipoSolicitud === 'liquidacion'
     ? `Solicitud de código de liquidación Cliente Titular: ${form.cliente || '[Cliente]'} ${form.contrato || '[Contrato]'}`
-    : `solicitud de codigo de amortizacion por un monto de $${form.montoAmortizar ? formatCurrency(parseFloat(form.montoAmortizar)) : '0'} Nro. Contrato: ${form.contrato || '[Contrato]'}`;
+    : `Solicitud de código de amortización por un monto de $${form.montoAmortizar ? formatCurrency(parseFloat(form.montoAmortizar)) : '0'} Nro. Contrato: ${form.contrato || '[Contrato]'}`;
 
   // CC idéntico a tus capturas
   const correoCc = "omendoza@celina.com.bo";

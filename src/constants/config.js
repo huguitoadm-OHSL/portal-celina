@@ -1,4 +1,4 @@
-import { getExchangeRate } from './exchangeRates';
+import { getExchangeRate } from './exchangeRates.js';
 // ============================================================================
 // CONFIGURACIÓN CENTRAL PORTAL GESTIÓN ESTRATÉGICA • CELINA URBANIZACIONES
 // ============================================================================

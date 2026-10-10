@@ -24,7 +24,7 @@ En desarrollo (`npm run dev`) hay un botón **Vista de revisión local**, sin ac
 
 ## Datos y condiciones financieras
 
-El dashboard y la proyección semanal usan la referencia entregada por supervisión el 10/10/2026. No son una lectura del CRM. Bs 11.200 de Marisol ya están incluidos en Bs 17.700; no se ha registrado ninguna venta nueva. La conciliación de un extracto JSON ocurre en memoria y solo muestra coincidencias candidatas.
+El dashboard y la proyección semanal usan la referencia entregada por supervisión el 10/10/2026. No son una lectura del CRM. El cuadro original conserva Bs 17.700 sin sumar de nuevo el antecedente de Marisol. La corrección posterior de supervisión identifica Los Jardines, 09/10/2026 y USD 11.200 para Incentivos; Seguimiento muestra una venta reportada. Son referencias separadas hasta conciliar su moneda, sin registrar una operación nueva en el CRM. La conciliación de un extracto JSON ocurre en memoria y solo muestra coincidencias candidatas.
 
 El TC gerencial 11,73 aplica únicamente el 10 y 11 de octubre de 2026, en `America/La_Paz`. Fuera del intervalo se conserva la base heredada 12,00; confirmar su siguiente vigencia con gerencia. Para contratos previos, especificar el TC pactado. Ver [reglas y conciliación](docs/financial-rules.md).
 
@@ -36,3 +36,7 @@ El simulador de incentivos conserva su regla original en USD y se identifica com
 - [Reglas financieras y datos pendientes](docs/financial-rules.md)
 - [Pruebas y limitaciones](docs/validation.md)
 - [Evaluación de IA opcional](docs/ai-evaluation.md)
+
+### Copias de correo
+
+Gmail añade exclusivamente una copia a `ohsaravia@celina.com.bo`. Outlook no añade la copia automática de supervisión y conserva las copias operativas. Abrir el cliente prepara un borrador; el portal no envía mensajes.
