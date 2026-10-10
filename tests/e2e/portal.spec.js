@@ -105,7 +105,10 @@ test('Marisol figura en Jardines y en Incentivos una sola vez, sin bonos indebid
   await expect(advisor.locator('input').nth(0)).toHaveValue('1');
   await expect(advisor.locator('input').nth(1)).toHaveValue('11200');
   await expect(advisor).toContainText('PENDIENTE');
-  await expect(advisor).toContainText('0 USD');
+  await expect(advisor).toContainText('0 Bs.');
+  await expect(page.locator('main')).toContainText('700 Bs.');
+  await expect(page.locator('main')).toContainText('1.100 Bs.');
+  await expect(page.getByRole('columnheader', {name:'Colocación ($ USD)', exact:true})).toBeVisible();
 });
 
 test('Gmail genera una sola copia corporativa en formularios, incentivos y campañas', async ({page}) => {

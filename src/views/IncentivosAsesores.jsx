@@ -111,20 +111,20 @@ export default function IncentivosAsesores() {
 
     // 3. Determinación de Niveles de Premiación Ganados
     let nivelGanado = null;
-    let bonoPorAsesorUsd = 0;
+    let bonoPorAsesorBs = 0;
     let textoBono = "Sin bono alcanzado";
     let claseEstado = "border-slate-800 bg-[var(--bg-card)]";
 
     if (cumpleProductividad) {
       if (porcentajeGrupal >= 120) {
         nivelGanado = "NIVEL 2";
-        bonoPorAsesorUsd = 1100;
-        textoBono = "¡NIVEL 2 ALCANZADO (120%)! Bono de 1.100 USD por asesor productivo";
+        bonoPorAsesorBs = 1100;
+        textoBono = "¡NIVEL 2 ALCANZADO (120%)! Bono de 1.100 Bs. por asesor productivo";
         claseEstado = "border-emerald-500/60 bg-gradient-to-r from-[var(--bg-card-inner)] to-[var(--bg-card)]";
       } else if (porcentajeGrupal >= 110) {
         nivelGanado = "NIVEL 1";
-        bonoPorAsesorUsd = 700;
-        textoBono = "¡NIVEL 1 ALCANZADO (110%)! Bono de 700 USD por asesor productivo";
+        bonoPorAsesorBs = 700;
+        textoBono = "¡NIVEL 1 ALCANZADO (110%)! Bono de 700 Bs. por asesor productivo";
         claseEstado = "border-cyan-500/60 bg-gradient-to-r from-[var(--bg-card-inner)] to-[var(--bg-card)]";
       } else {
         textoBono = `Productividad cumplida (${porcentajeProductividad.toFixed(0)}%), pero falta colocación para el 110% (Avance: ${porcentajeGrupal.toFixed(1)}%)`;
@@ -137,7 +137,7 @@ export default function IncentivosAsesores() {
       }
     }
 
-    const totalBonoEquipoUsd = bonoPorAsesorUsd * totalProductivos;
+    const totalBonoEquipoBs = bonoPorAsesorBs * totalProductivos;
     const faltaPara110Usd = Math.max(0, meta110 - colocacionTotal);
     const faltaPara120Usd = Math.max(0, meta120 - colocacionTotal);
     const faltanProductivos = Math.max(0, minProductivosRequeridos - totalProductivos);
@@ -154,8 +154,8 @@ export default function IncentivosAsesores() {
       minProductivosRequeridos,
       cumpleProductividad,
       nivelGanado,
-      bonoPorAsesorUsd,
-      totalBonoEquipoUsd,
+      bonoPorAsesorBs,
+      totalBonoEquipoBs,
       textoBono,
       claseEstado,
       faltaPara110Usd,
@@ -208,11 +208,11 @@ export default function IncentivosAsesores() {
         <div style="margin: 20px 0 15px; text-align: center; background-color: #050b18; padding: 18px; border-radius: 12px; border: 1px solid #14233c;">
           <span style="font-size: 10px; color: #94a3b8; font-weight: bold; text-transform: uppercase;">BONO INDIVIDUAL POR ASESOR PRODUCTIVO</span>
           <div style="font-size: 42px; font-weight: 900; color: ${evaluacion.nivelGanado ? '#34d399' : '#e2e8f0'}; letter-spacing: -1px; margin: 4px 0;">
-            ${evaluacion.bonoPorAsesorUsd > 0 ? `${formatMoneda(evaluacion.bonoPorAsesorUsd)} USD` : '0 USD'}
+            ${evaluacion.bonoPorAsesorBs > 0 ? `${formatMoneda(evaluacion.bonoPorAsesorBs)} Bs.` : '0 Bs.'}
           </div>
           <div style="font-size: 13px; color: #94a3b8;">
             Total a liquidar equipo (${evaluacion.totalProductivos} asesores calificados):
-            <strong style="color: #ffffff; font-size: 15px;">${formatMoneda(evaluacion.totalBonoEquipoUsd)} USD</strong>
+            <strong style="color: #ffffff; font-size: 15px;">${formatMoneda(evaluacion.totalBonoEquipoBs)} Bs.</strong>
           </div>
         </div>
 
@@ -247,7 +247,7 @@ export default function IncentivosAsesores() {
         <th style="border: 1px solid #cbd5e1; text-align: right;">Colocación ($)</th>
         <th style="border: 1px solid #cbd5e1; text-align: center;">10 Días</th>
         <th style="border: 1px solid #cbd5e1; text-align: center;">Condición</th>
-        <th style="border: 1px solid #cbd5e1; text-align: right;">Bono USD</th>
+        <th style="border: 1px solid #cbd5e1; text-align: right;">Bono Bs.</th>
       </tr>
     </thead>
     <tbody>
@@ -261,8 +261,8 @@ export default function IncentivosAsesores() {
           <td style="border: 1px solid #cbd5e1; text-align: center; font-weight: bold; color: ${a.esProductivo ? '#16a34a' : '#64748b'};">
             ${a.esProductivo ? 'PRODUCTIVO' : 'NO CUMPLE'}
           </td>
-          <td style="border: 1px solid #cbd5e1; text-align: right; font-weight: bold; font-family: monospace; color: ${a.esProductivo && evaluacion.bonoPorAsesorUsd > 0 ? '#16a34a' : '#94a3b8'};">
-            ${a.esProductivo && evaluacion.bonoPorAsesorUsd > 0 ? `${formatMoneda(evaluacion.bonoPorAsesorUsd)} USD` : '0 USD'}
+          <td style="border: 1px solid #cbd5e1; text-align: right; font-weight: bold; font-family: monospace; color: ${a.esProductivo && evaluacion.bonoPorAsesorBs > 0 ? '#16a34a' : '#94a3b8'};">
+            ${a.esProductivo && evaluacion.bonoPorAsesorBs > 0 ? `${formatMoneda(evaluacion.bonoPorAsesorBs)} Bs.` : '0 Bs.'}
           </td>
         </tr>
       `).join('')}
@@ -291,11 +291,11 @@ ${simulation ? 'Presento una simulación, sin registrar ventas, del concurso' : 
 
 🏆 RESULTADO DEL EQUIPO:
 ${evaluacion.textoBono}
-• Bono por asesor calificado: ${formatMoneda(evaluacion.bonoPorAsesorUsd)} USD
-• Total liquidación del equipo: ${formatMoneda(evaluacion.totalBonoEquipoUsd)} USD
+• Bono por asesor calificado: ${formatMoneda(evaluacion.bonoPorAsesorBs)} Bs.
+• Total liquidación del equipo: ${formatMoneda(evaluacion.totalBonoEquipoBs)} Bs.
 
 RESUMEN POR ASESOR:
-${evaluacion.asesoresEvaluados.map(a => `• ${a.nombre}: ${a.ventasNum} ventas | USD ${formatMoneda(a.colocacionNum)} | ${a.esProductivo ? 'PRODUCTIVO (Gana ' + formatMoneda(evaluacion.bonoPorAsesorUsd) + ' USD)' : 'NO CUMPLE'}`).join('\n')}
+${evaluacion.asesoresEvaluados.map(a => `• ${a.nombre}: ${a.ventasNum} ventas | USD ${formatMoneda(a.colocacionNum)} | ${a.esProductivo ? 'PRODUCTIVO (Gana ' + formatMoneda(evaluacion.bonoPorAsesorBs) + ' Bs.)' : 'NO CUMPLE'}`).join('\n')}
 
 Saludos cordiales,
 Oscar Hugo Saravia L.`;
@@ -360,16 +360,16 @@ Oscar Hugo Saravia L.`;
               Bono Por Asesor Productivo
             </span>
             <div className="text-4xl font-black text-[var(--text-primary)] font-mono flex items-center justify-center gap-1.5">
-              <span className={evaluacion.bonoPorAsesorUsd > 0 ? "text-emerald-400" : "text-[var(--text-muted)]"}>
-                {evaluacion.bonoPorAsesorUsd > 0 ? `${formatMoneda(evaluacion.bonoPorAsesorUsd)}` : '0'}
+              <span className={evaluacion.bonoPorAsesorBs > 0 ? "text-emerald-400" : "text-[var(--text-muted)]"}>
+                {evaluacion.bonoPorAsesorBs > 0 ? `${formatMoneda(evaluacion.bonoPorAsesorBs)}` : '0'}
               </span>
-              <span className="text-lg text-[var(--text-muted)]">USD</span>
+              <span className="text-lg text-[var(--text-muted)]">Bs.</span>
             </div>
             <div className="text-[11px] font-bold text-cyan-300 mt-1">
               {evaluacion.nivelGanado ? `${evaluacion.nivelGanado} DESBLOQUEADO` : 'Aún no clasificado'}
             </div>
             <div className="text-[10px] text-slate-500 mt-0.5">
-              Total equipo: USD {formatMoneda(evaluacion.totalBonoEquipoUsd)}
+              Total equipo: Bs. {formatMoneda(evaluacion.totalBonoEquipoBs)}
             </div>
           </div>
         </div>
@@ -419,7 +419,7 @@ Oscar Hugo Saravia L.`;
               <p className="text-xs text-[var(--text-muted)]">+ Productividad {etapaActual.productividadRequeridaPct}% de la etapa</p>
             </div>
             <div className="text-right">
-              <span className="text-2xl font-black text-cyan-300 font-mono">700 USD</span>
+              <span className="text-2xl font-black text-cyan-300 font-mono">700 Bs.</span>
               <span className="block text-[9px] text-[var(--text-muted)] uppercase">Por Asesor</span>
             </div>
           </div>
@@ -444,7 +444,7 @@ Oscar Hugo Saravia L.`;
               <p className="text-xs text-[var(--text-muted)]">+ Productividad {etapaActual.productividadRequeridaPct}% de la etapa</p>
             </div>
             <div className="text-right">
-              <span className="text-2xl font-black text-emerald-400 font-mono">1.100 USD</span>
+              <span className="text-2xl font-black text-emerald-400 font-mono">1.100 Bs.</span>
               <span className="block text-[9px] text-[var(--text-muted)] uppercase">Por Asesor</span>
             </div>
           </div>
@@ -568,10 +568,10 @@ Oscar Hugo Saravia L.`;
 
                   {/* Bono Ganado */}
                   <td className="py-3 px-3 text-right font-mono font-black text-sm">
-                    {a.esProductivo && evaluacion.bonoPorAsesorUsd > 0 ? (
-                      <span className="text-emerald-400">{formatMoneda(evaluacion.bonoPorAsesorUsd)} USD</span>
+                    {a.esProductivo && evaluacion.bonoPorAsesorBs > 0 ? (
+                      <span className="text-emerald-400">{formatMoneda(evaluacion.bonoPorAsesorBs)} Bs.</span>
                     ) : (
-                      <span className="text-slate-600">0 USD</span>
+                      <span className="text-slate-600">0 Bs.</span>
                     )}
                   </td>
                 </tr>
@@ -654,8 +654,8 @@ Oscar Hugo Saravia L.`;
           <div className="bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] p-4 rounded-2xl">
             <span className="text-[10px] font-black text-emerald-400 uppercase block mb-1">4. Cumplan en Equipo</span>
             <p className="text-[var(--text-secondary)] leading-relaxed">
-              <strong>110% de colocación:</strong> 700 USD<br/>
-              <strong>120% de colocación:</strong> 1.100 USD<br/>
+              <strong>110% de colocación:</strong> 700 Bs.<br/>
+              <strong>120% de colocación:</strong> 1.100 Bs.<br/>
               (Exigiendo {etapaActual.productividadRequeridaPct}% del equipo productivo).
             </p>
           </div>

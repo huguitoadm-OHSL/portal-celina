@@ -39,3 +39,7 @@ La publicación del portal vigente está autorizada, pero el destino de alojamie
 - El registro único rechaza moneda distinta de USD, importes inválidos, asesores desconocidos y ventas proyectadas como realizadas.
 
 Las referencias iniciales en Bs fueron sustituidas por USD tras confirmación expresa de supervisión. No se usó TC para cambiar la magnitud de los importes.
+
+## Moneda de premios corregida
+
+ESLint, 20 pruebas unitarias, build y las 10 pruebas de navegador aprobados. La regresión de Incentivos verifica premios de 700 Bs. y 1.100 Bs., bono cero en Bs. y colocación conservada en USD. Se revisaron los importes de bonos en los correos HTML y texto sin enviarlos.

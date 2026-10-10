@@ -39,7 +39,7 @@ El estado es local a la sesión, sin persistencia financiera ni conexión al CRM
 | Incentivos desde diciembre | 2 ventas realizadas **o** USD 21.000; productividad grupal 70 %. |
 | Seguimiento/comisiones | Umbral heredado USD 18.000. Es una regla separada, no se sustituye por el umbral de Incentivos. |
 
-Marisol tiene 1 venta y USD 11.200: no alcanza la regla individual vigente. Las proyecciones, aunque superen el umbral, nunca califican. El escenario opcional editable de Incentivos se marca como SIMULACIÓN y no modifica el registro de ventas ni los otros módulos. Los valores monetarios del simulador se presentan en USD conforme a la instrucción de supervisión; no se liquida ni paga un bono automáticamente.
+Marisol tiene 1 venta y USD 11.200: no alcanza la regla individual vigente. Las proyecciones, aunque superen el umbral, nunca califican. El escenario opcional editable de Incentivos se marca como SIMULACIÓN y no modifica el registro de ventas ni los otros módulos. La colocación y las ventas se expresan en USD. Los premios se expresan en bolivianos: Bs 700 en el nivel 110/60 y Bs 1.100 en el nivel 120/60; los totales de bonos y sus correos también se expresan en Bs. No se convierten estos premios con el tipo de cambio ni se liquida o paga un bono automáticamente.
 
 ## Tipo de cambio: exclusivamente simulaciones de descuentos
 

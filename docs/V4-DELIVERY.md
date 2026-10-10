@@ -46,4 +46,6 @@ Supervisión confirmó USD para colocación, proyecciones y meta. No se convirti
 Los valores realizados de Incentivos son de lectura. Se conserva un escenario editable explícito, separado de la fuente real; sus correos se identifican como simulación. No se añaden operaciones de prueba al CRM. El tipo de cambio solo aparece en las simulaciones de descuentos para clientes.
 
 ![Seguimiento en USD](previews/sales-usd.png)
-![Incentivos en USD](previews/incentives-usd.png)
+![Colocación en USD y premios en bolivianos](previews/incentives-usd.png)
+
+Corrección de moneda de premios: Bs 700 (110/60) y Bs 1.100 (120/60), incluidos bonos individuales, total del equipo y correos. Colocación, ventas y metas permanecen en USD; las reglas de calificación no cambian.
