@@ -12,11 +12,11 @@
 - Corrección del conteo por proyecto en Seguimiento: Cañaveral se sumaba dos veces. La venta de Carlos se conserva como antecedente de la versión anterior; Marisol muestra la venta reportada en Los Jardines el 09/10/2026.
 - Carga diferida de los 25 módulos y límite de errores por módulo. Navegación extraída fuera del render para evitar remontajes.
 - Tailwind compilado localmente, sin CDN ni descarga de tipografías; package-lock reparado; workflow de verificación sin despliegue y con permisos de lectura.
-- Firebase Auth reemplaza contraseña pública y bandera local. Claims de acceso verificadas, cierre de sesión y ausencia del bypass local en producción.
+- Acceso personal con contraseña validada en Vercel, cookie segura y archivos protegidos en servidor. Sin contraseña pública, bandera local ni bypass de revisión en producción.
 
 ## Capturas del portal real
 
-Las capturas se actualizaron tras confirmar USD y corresponden a la ejecución local de esta rama. No representan un inicio de sesión Firebase de producción.
+Las capturas se actualizaron tras confirmar USD y corresponden a la ejecución local de esta rama. No representan un inicio de sesión de producción.
 
 ![Modo claro](previews/portal-light.png)
 ![Modo oscuro](previews/portal-dark.png)
@@ -37,7 +37,7 @@ La rama conserva los cambios recientes de `main` en Campañas (TC y nombre del d
 - Gmail: una sola copia a `ohsaravia@celina.com.bo`, sin otras copias automáticas. Outlook: excluye la copia de supervisión y mantiene las copias operativas originales. Si el destinatario es supervisión, no se duplica como CC.
 - Regla compartida de destinatarios y enlaces para ResultCard, Incentivos y Campañas, incluidos dispositivos móviles. Se eliminó la redirección temporizada de Gmail a un `mailto:` que podía abrir otro cliente.
 - Revisión de redacción en las plantillas HTML/texto y correos independientes: tratamiento de usted, frases directas, singular/plural de beneficiarios, cierre corporativo y eliminación de afirmaciones no respaldadas sobre dos meses de incumplimiento.
-- La autorización de publicar ya fue recibida. Para sustituir el portal vigente aún se necesita identificar su URL/proveedor y verificar una cuenta habilitada en Firebase. El repositorio solo enlaza un editor de StackBlitz, no identifica el destino de producción.
+- Publicación autorizada y destino confirmado: https://portal-celina.vercel.app/. Pendiente de la contraseña nueva introducida por el propietario en Vercel y de verificar acceso real en Preview antes de fusionar.
 
 ## Unificación comercial final en USD
 
