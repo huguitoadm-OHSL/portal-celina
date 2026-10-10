@@ -24,7 +24,7 @@ Las capturas se actualizaron tras confirmar USD y corresponden a la ejecución l
 
 ## Pendientes antes de publicar
 
-1. Administrador de Firebase: habilitar proveedor, dominios y claims para las cuentas autorizadas. No se probó una cuenta real ni se inspeccionaron reglas desplegadas. No fusionar hasta completar esa configuración.
+1. Acceso personal confirmado: configurar PORTAL_PASSWORD como secreto en Vercel (Production y Preview). Validar ingreso y cierre de sesión en Preview antes de fusionar. Firebase ya no interviene en el acceso.
 2. Supervisor/CRM: aportar extracto verificable y contrato de Marisol; confirmar cliente, UV, manzano, lote, comprobante y estado. No hay endpoint de ventas utilizado por el código heredado.
 3. Gerencia: confirmar base vigente fuera del 10–11/10 y cómo se relacionan los umbrales de productividad/comisiones. Los simuladores mantienen esquemas anteriores distintos de contado y crédito, sin sustituir políticas comerciales.
 4. Revisión de negocio: probar escenarios de contratos reales en los simuladores de amortización, consolidación y recálculo. Las pruebas de navegación verifican carga y continuidad; no certifican todas las reglas contractuales posibles.
@@ -62,3 +62,8 @@ Corrección de saludos: todos los correos usan el primer nombre del destinatario
 - Diseño adaptable, navegación por teclado y respeto a movimiento reducido.
 
 Capturas actualizadas de escritorio claro/oscuro, móvil, Seguimiento e Incentivos. No se modificaron cálculos, registros comerciales, premios ni plantillas de correo.
+
+
+## Acceso final elegido por el propietario
+
+Uso individual, una sola contraseña, validada en el servidor de Vercel. Se retiró Firebase del inicio de sesión; se conservó su configuración heredada sin modificar recursos remotos. Cookie firmada de 8 horas, protección de todos los archivos mediante middleware, verificación de origen y rechazo de intentos por instancia. La publicación permanece pendiente únicamente del secreto elegido por el propietario y de la verificación en Vercel. No hay claves predeterminadas ni comerciales enviadas a servicios de IA.

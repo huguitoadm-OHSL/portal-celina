@@ -233,3 +233,24 @@ test('los cinco correos de RRHH saludan a Ulrich por su primer nombre en HTML y 
     expect(text).not.toMatch(/Estimado\/a|Klein Montano|\{\{NOMBRE_SUPERVISOR\}\}/);
   }
 });
+
+
+test('el acceso personal pide solo contraseña y se valida por la API del servidor', async ({page}) => {
+  let loginChecked = false;
+  await page.route('**/api/auth', async route => {
+    if (route.request().method() === 'GET') return route.fulfill({status:401,json:{authorized:false}});
+    const data = route.request().postDataJSON();
+    expect(data.action).toBe('login');
+    expect(data.password).toBe('test-password-only-1234');
+    loginChecked = true;
+    return route.fulfill({status:200,json:{authorized:true}});
+  });
+  await page.goto('/');
+  await expect(page.getByRole('heading',{name:'Bienvenido al portal'})).toBeVisible();
+  await expect(page.locator('input[type=email]')).toHaveCount(0);
+  await page.getByLabel('Contraseña',{exact:true}).fill('test-password-only-1234');
+  await page.getByRole('button',{name:'Ingresar',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Colocación por asesor'})).toBeVisible();
+  expect(loginChecked).toBeTruthy();
+  expect(await page.evaluate(()=>localStorage.getItem('acceso_portal_master'))).toBeNull();
+});

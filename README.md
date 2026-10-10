@@ -16,11 +16,15 @@ npm run test:e2e
 
 `npm run check` ejecuta ESLint, pruebas unitarias y compilación. Las pruebas de navegador abren exclusivamente una vista de revisión local; no escriben en Firebase ni envían correos. `npm run build` genera `dist/` para revisión. No hay despliegue configurado en el workflow de verificación.
 
-## Acceso
+## Acceso personal en Vercel
 
-Se eliminó la contraseña incrustada y la autorización por bandera en localStorage. La versión compilada exige Firebase Authentication y una claim booleana `portalAccess: true` o `admin: true`, asignada por Firebase Admin en un entorno confiable. Habilitar Email/Password, dominio autorizado y cuentas aprobadas **antes de fusionar o publicar**. No se crea automáticamente ningún usuario ni permiso.
+El propietario confirmó uso individual. Se conserva el ingreso con una sola contraseña; no se requiere una cuenta Firebase. `middleware.js` protege el portal, los bundles y los archivos públicos antes de entregarlos. `/api/auth` valida la contraseña exclusivamente en el servidor y crea una cookie firmada de 8 horas, `HttpOnly`, `Secure` y `SameSite=Strict`. La bandera antigua en localStorage no concede acceso.
 
-En desarrollo (`npm run dev`) hay un botón **Vista de revisión local**, sin acceso a operaciones remotas. El botón y el bypass se eliminan de la compilación de producción. Las reglas de Firebase y el acceso al CRM requieren revisión del administrador; el repositorio no contiene reglas desplegadas ni un servicio de registro de ventas. Los archivos estáticos de una web no se vuelven confidenciales por mostrar una pantalla de login.
+Configurar **`PORTAL_PASSWORD` como variable Sensitive** de Vercel en Production y Preview, con una contraseña nueva de 16–256 caracteres. No usar prefijos `VITE_`, no guardar la contraseña en GitHub ni archivos locales. El propietario introduce el valor directamente en Vercel. Si falta configuración, el despliegue bloquea el acceso; no hay contraseña predeterminada. Cambiar el secreto invalida las sesiones anteriores. Cerrar sesión elimina la cookie del navegador; una cookie sustraída previamente sigue siendo válida hasta su vencimiento o la rotación del secreto.
+
+La API rechaza solicitudes POST de otros orígenes y limita intentos por instancia (10 cada 10 minutos). Este límite en memoria no es global: para protección distribuida, complementar con el Firewall de Vercel. No se crea una base de cuentas ni se escriben ventas en CRM. El botón de revisión existe únicamente en desarrollo y no se incluye en producción.
+
+Antes de fusionar: configurar el secreto, verificar la vista previa de Vercel con la contraseña elegida, comprobar bloqueo de archivos sin sesión y validar ingreso/cierre de sesión. Vercel despliega Production al fusionar el PR en `main`. La vista previa de Sites permanece privada e independiente.
 
 ## Datos y condiciones financieras
 

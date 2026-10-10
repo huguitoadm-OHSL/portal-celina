@@ -27,7 +27,7 @@ El recorrido de los 25 módulos verifica renderizado y ausencia de errores JavaS
 - Concordancia singular/plural de seguro y reenvío; redacción profesional y tratamiento de usted en las plantillas auditadas.
 - ESLint, 20 pruebas unitarias y build aprobados. Navegación: 10 pruebas aprobadas.
 
-La publicación del portal vigente está autorizada, pero el destino de alojamiento y una cuenta de Firebase habilitada todavía no están identificados/verificados. La vista previa privada es independiente y no acredita un inicio de sesión de Firebase en producción.
+Nota histórica: esa revisión utilizaba Firebase. El propietario confirmó Vercel y uso personal; el acceso definitivo se describe al final de este documento.
 
 ## Consistencia de las cuatro vistas en USD
 
@@ -52,3 +52,10 @@ ESLint, 20 pruebas unitarias, build y las 10 pruebas de navegador aprobados. La 
 ## Acabado visual claro/oscuro
 
 ESLint, las 21 pruebas unitarias, build y las 11 pruebas de navegador aprobados. Revisión visual de escritorio en claro y oscuro y de móvil a 390 px. Tras ajustar la tabla se repitió la prueba de temas/móvil con los nuevos accesos directos «Revisar proyección» y «Ver ventas». Selector claro/oscuro/automático persistente, seguimiento del dispositivo y ausencia de desbordamiento horizontal del documento comprobados. Las tablas anchas mantienen desplazamiento horizontal propio en móvil.
+
+
+## Acceso personal en Vercel
+
+Pruebas de servidor: secreto ausente/corto; comparación de contraseña; firma, expiración, rotación y dominio de la sesión; cookie segura; bloqueo de bundles y rutas sin sesión; origen de POST; acceso y cierre; límite por instancia. La contraseña usada en pruebas es ficticia y solo existe en esas pruebas. El login definitivo en Vercel requiere la contraseña nueva introducida por el propietario. La comprobación anterior de Firebase se sustituye por este acceso personal. El límite de intentos en memoria es por instancia y no sustituye protección distribuida.
+
+Resultado local final: ESLint, 25 pruebas unitarias, build y 12 pruebas de navegador aprobados. La regresión nueva verifica ingreso solo con contraseña por API, sin campo de correo ni bandera de acceso en localStorage. La verificación de login real en Vercel queda pendiente de configurar PORTAL_PASSWORD por el propietario.

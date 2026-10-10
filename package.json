@@ -13,6 +13,7 @@
     "check": "npm run lint && npm test && npm run build"
   },
   "dependencies": {
+    "@vercel/functions": "^3.9.11",
     "dompurify": "^3.4.16",
     "firebase": "^10.12.2",
     "lucide-react": "^1.8.0",
