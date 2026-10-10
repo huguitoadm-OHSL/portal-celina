@@ -20,7 +20,7 @@ const VENTANAS_CONTADO = {
   "31_60": { plazo: "31 a 60 días", descuentoPct: 10, labelBadge: "CONTADO (31 A 60 DÍAS)" }
 };
 
-const TC_OFICIAL_BASE = 11.97;
+const TC_OFICIAL_BASE = 11.73;
 
 const obtenerDescuentoCreditoFijo = (valorLoteUSD) => {
   if (valorLoteUSD <= 0) return 0;
@@ -34,7 +34,7 @@ const obtenerDescuentoCreditoFijo = (valorLoteUSD) => {
 const CORREO_RESPALDO_OSCAR = "ohsaravia@celina.com.bo";
 
 const DIRECTORES_APROBACION = [
-  { nombre: "Lic. Mauricio Reyes", cargo: "Jefe de Ventas", email: "mreyes@celina.com.bo", genero: "M" },
+  { nombre: "Mauricio Reyes", cargo: "Jefe de Ventas", email: "mreyes@celina.com.bo", genero: "M" },
   { nombre: "Lic. Robert Vaca", cargo: "Gerente Regional", email: "rvaca@grupopaz.com.bo", genero: "M" },
   { nombre: "Lic. Verenice Choque", cargo: "Asistente de Inteligencia y Negocios", email: "vchoque@grupopaz.com.bo", genero: "F" }
 ];
