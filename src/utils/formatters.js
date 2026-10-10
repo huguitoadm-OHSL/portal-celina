@@ -17,12 +17,12 @@ export const formatDiaMes = (fechaIso, sumarDias = 0) => {
   if (!fechaIso) return `Día ${sumarDias + 1}`;
   const partes = String(fechaIso).split('-');
   if (partes.length !== 3) return `Día ${sumarDias + 1}`;
-  const date = new Date(Date.UTC(partes[0], partes[1] - 1, partes[2])); 
-  date.setDate(date.getDate() + sumarDias);
-  const dia = date.getDate();
+  const date = new Date(Date.UTC(partes[0], partes[1] - 1, partes[2]));
+  date.setUTCDate(date.getUTCDate() + sumarDias);
+  const dia = date.getUTCDate();
   const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-  const mes = meses[date.getMonth()];
-  if (!mes) return `Día ${sumarDias + 1}`; 
+  const mes = meses[date.getUTCMonth()];
+  if (!mes) return `Día ${sumarDias + 1}`;
   return `${dia}-${mes}`;
 };
 

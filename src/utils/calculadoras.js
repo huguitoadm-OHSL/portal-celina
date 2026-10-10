@@ -1,7 +1,8 @@
-import { PROYECTOS_CONVENIO_1, PROYECTOS_CONVENIO_2, PROYECTOS_PROPIOS_1 } from '../constants/proyectos';
+import { getExchangeRate } from '../constants/exchangeRates.js';
+import { PROYECTOS_CONVENIO_1, PROYECTOS_CONVENIO_2, PROYECTOS_PROPIOS_1 } from '../constants/proyectos.js';
 
 // Tipo de Cambio Referencial Octubre 2026
-export const TC_REFERENCIAL = 12.00;
+// TC de nuevas cotizaciones; el TC de contrato, cuando existe, tiene prioridad.
 
 export const calcularDescuento = (formDescuento = {}) => {
   const {
@@ -18,6 +19,7 @@ export const calcularDescuento = (formDescuento = {}) => {
     plazoLiquidacion
   } = formDescuento;
 
+  const TC_REFERENCIAL = getExchangeRate(formDescuento.fechaOperacion, formDescuento.tcHistorico);
   const m2Num = parseFloat(m2) || 0;
   const precioM2Num = parseFloat(precioM2) || 0;
   const vc = m2Num * precioM2Num;
@@ -55,10 +57,10 @@ export const calcularDescuento = (formDescuento = {}) => {
   ) {
     let descuentoPorM2 = 0;
     if (modalidad === 'Contado') {
-      descuentoPorM2 = PROYECTOS_CONVENIO_1.includes(proyecto) ? 3 : 4; 
+      descuentoPorM2 = PROYECTOS_CONVENIO_1.includes(proyecto) ? 3 : 4;
     } else if (modalidad === 'Crédito') {
       if (porcentajeCuota >= 1.5) {
-        descuentoPorM2 = 1; 
+        descuentoPorM2 = 1;
       }
     }
     descuentoPorM2Aplicado = descuentoPorM2;
@@ -124,6 +126,7 @@ export const calcularDescuento = (formDescuento = {}) => {
     plazoTexto,
     nuevoPrecioBs,
     cuotaInicialBs,
+    tcBase: TC_REFERENCIAL,
     descuentoPorM2Aplicado
   };
 };
@@ -147,10 +150,10 @@ export const calcularSimulacionAmortizacion = (formAmortizacion = {}) => {
   } else if (n > 0) {
     C_pura = P / n;
   }
-  
+
   const C_total = C_pura + S;
   const precioFinalPlazos = CI + (C_total * n);
-  
+
   let P_actual = 0;
   if (r_mensual > 0 && n > 0 && p > 0) {
     P_actual = P * (Math.pow(1 + r_mensual, n) - Math.pow(1 + r_mensual, p)) / (Math.pow(1 + r_mensual, n) - 1);
@@ -177,17 +180,17 @@ export const calcularSimulacionAmortizacion = (formAmortizacion = {}) => {
     n_new = saldoNuevo / C_pura;
   }
 
-  n_new = Math.ceil(n_new - 0.0001); 
+  n_new = Math.ceil(n_new - 0.0001);
   if (n_new < 0) n_new = 0;
 
   const tiempoAhorrado = Math.max(0, cuotasRestantesOrig - n_new);
-  
+
   const intsOrig = Math.max(0, (C_pura * cuotasRestantesOrig) - P_actual);
   const intsNew = Math.max(0, (C_pura * n_new) - saldoNuevo);
   const ahorrado = Math.max(0, intsOrig - intsNew);
 
   return {
-    P, C_pura, S, C_total, precioFinalPlazos, P_actual, 
+    P, C_pura, S, C_total, precioFinalPlazos, P_actual,
     cuotasRestantesOrig, saldoNuevo, n_new, tiempoAhorrado, ahorrado, n, error
   };
 };
@@ -209,7 +212,7 @@ export const obtenerDatosSupervisor = (supervisorDestino, SUPERVISORES = []) => 
   return {
     saludo: supervisorSeleccionado.genero === 'F' ? 'Estimada' : 'Estimado',
     titulo: supervisorSeleccionado.titulo || 'Supervisor',
-    nombrePila: (supervisorSeleccionado.nombre || 'Supervisor').split(' ')[0] 
+    nombrePila: (supervisorSeleccionado.nombre || 'Supervisor').split(' ')[0]
   };
 };
 

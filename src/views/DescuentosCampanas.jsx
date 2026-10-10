@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import { getExchangeRate } from '../constants/exchangeRates';
+import { escapeHtml, sanitizeEmailHtml, copyEmail, greeting } from '../services/email';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   Tag,
   MapPin,
@@ -14,13 +16,21 @@ import {
   Monitor
 } from "lucide-react";
 
+  const parseNumero = (val) => {
+    if (val === undefined || val === null || val === "") return 0;
+    if (typeof val === "number") return val;
+    const str = String(val).replace(/,/g, "").trim();
+    const num = parseFloat(str);
+    return isNaN(num) ? 0 : num;
+  };
+
 const VENTANAS_CONTADO = {
   "0_5": { plazo: "Primeros 5 días", descuentoPct: 25, labelBadge: "CONTADO (PRIMEROS 5 DÍAS)" },
   "6_30": { plazo: "6 a 30 días", descuentoPct: 20, labelBadge: "CONTADO (6 A 30 DÍAS)" },
   "31_60": { plazo: "31 a 60 días", descuentoPct: 10, labelBadge: "CONTADO (31 A 60 DÍAS)" }
 };
 
-const TC_OFICIAL_BASE = 11.97;
+
 
 const obtenerDescuentoCreditoFijo = (valorLoteUSD) => {
   if (valorLoteUSD <= 0) return 0;
@@ -50,6 +60,7 @@ const ASESORES_EQUIPO = [
 ];
 
 export default function DescuentosCampanas() {
+  const TC_OFICIAL_BASE = getExchangeRate();
   const [lotes, setLotes] = useState([]);
   const [cargandoBD, setCargandoBD] = useState(true);
   const [errorCarga, setErrorCarga] = useState(null);
@@ -65,10 +76,10 @@ export default function DescuentosCampanas() {
   const [superficie, setSuperficie] = useState(0);
   const [precioBaseM2, setPrecioBaseM2] = useState(0);
   const [categoria, setCategoria] = useState("");
-  const [estadoLote, setEstadoLote] = useState("DISPONIBLE");
+  const [, setEstadoLote] = useState("DISPONIBLE");
 
-  const [cuotaInicialPct, setCuotaInicialPct] = useState(1.5);
-  const [plazoAnios, setPlazoAnios] = useState(10);
+  const [cuotaInicialPct] = useState(1.5);
+  const [plazoAnios] = useState(10);
 
   const [destinatarioEmail, setDestinatarioEmail] = useState(DIRECTORES_APROBACION[0].email);
   const [asesorSeleccionado, setAsesorSeleccionado] = useState(ASESORES_EQUIPO[0]);
@@ -76,46 +87,13 @@ export default function DescuentosCampanas() {
 
   const fileInputRef = useRef(null);
 
-  const parseNumero = (val) => {
-    if (val === undefined || val === null || val === "") return 0;
-    if (typeof val === "number") return val;
-    const str = String(val).replace(/,/g, "").trim();
-    const num = parseFloat(str);
-    return isNaN(num) ? 0 : num;
-  };
-
   const formatMoneda = (val) =>
     new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val || 0);
 
   // Detección horaria exacta
-  const getSaludoHorario = () => {
-    const hora = new Date().getHours();
-    if (hora >= 5 && hora < 12) return "Buenos días";
-    if (hora >= 12 && hora < 19) return "Buenas tardes";
-    return "Buenas noches";
-  };
+  const getSaludoHorario = greeting;
 
-  const cargarInventario = async () => {
-    setCargandoBD(true);
-    setErrorCarga(null);
-    try {
-      let data = [];
-      try {
-        const res = await fetch("/inventario_lotes.json");
-        if (res.ok) data = await res.json();
-        else throw new Error();
-      } catch {
-        const resFallback = await fetch("/lotes.json");
-        if (resFallback.ok) data = await resFallback.json();
-      }
-      procesarDatosLotes(data);
-    } catch {
-      setErrorCarga("Cargue el archivo inventario_lotes.json.");
-      setCargandoBD(false);
-    }
-  };
-
-  const procesarDatosLotes = (data) => {
+  const procesarDatosLotes = useCallback((data) => {
     if (!Array.isArray(data)) {
       setCargandoBD(false);
       return;
@@ -135,14 +113,32 @@ export default function DescuentosCampanas() {
     setCargandoBD(false);
 
     const proys = Array.from(new Set(mapeados.map((l) => l.proyecto))).sort();
-    if (proys.length > 0 && !proys.includes(proyectoSeleccionado)) {
-      setProyectoSeleccionado(proys[0]);
+    setProyectoSeleccionado(previous => proys.length > 0 && !proys.includes(previous) ? proys[0] : previous);
+  }, []);
+
+  const cargarInventario = useCallback(async () => {
+    setCargandoBD(true);
+    setErrorCarga(null);
+    try {
+      let data = [];
+      try {
+        const res = await fetch("/inventario_lotes.json");
+        if (res.ok) data = await res.json();
+        else throw new Error();
+      } catch {
+        const resFallback = await fetch("/lotes.json");
+        if (resFallback.ok) data = await resFallback.json();
+      }
+      procesarDatosLotes(data);
+    } catch {
+      setErrorCarga("Cargue el archivo inventario_lotes.json.");
+      setCargandoBD(false);
     }
-  };
+  }, [procesarDatosLotes]);
 
   useEffect(() => {
     cargarInventario();
-  }, []);
+  }, [cargarInventario]);
 
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
@@ -178,11 +174,11 @@ export default function DescuentosCampanas() {
 
   useEffect(() => {
     if (uvsDisponibles.length > 0 && !uvsDisponibles.includes(uvSeleccionada)) setUvSeleccionada(uvsDisponibles[0]);
-  }, [proyectoSeleccionado, uvsDisponibles]);
+  }, [proyectoSeleccionado, uvsDisponibles, uvSeleccionada]);
 
   useEffect(() => {
     if (mznsDisponibles.length > 0 && !mznsDisponibles.includes(mznSeleccionada)) setMznSeleccionada(mznsDisponibles[0]);
-  }, [uvSeleccionada, mznsDisponibles]);
+  }, [uvSeleccionada, mznsDisponibles, mznSeleccionada]);
 
   useEffect(() => {
     if (lotesDisponibles.length > 0) {
@@ -296,7 +292,7 @@ export default function DescuentosCampanas() {
         optica2_totalBs: totalBs
       };
     }
-  }, [modalidad, ventanaSeleccionada, superficie, precioBaseM2, cuotaInicialPct, plazoAnios]);
+  }, [modalidad, ventanaSeleccionada, superficie, precioBaseM2, cuotaInicialPct, plazoAnios, TC_OFICIAL_BASE]);
 
   const descuentoVisual = calculos.modalidad === "CREDITO"
     ? `$ ${formatMoneda(calculos.montoAhorroUSD)} FIJO`
@@ -324,8 +320,8 @@ export default function DescuentosCampanas() {
   <p style="margin: 0 0 10px; font-size: 15px;">${getSaludoHorario()}</p>
   <p style="margin: 0 0 16px; font-size: 15px;">${tratamientoDirecto} <strong>${destinatarioObj.nombre}</strong>,</p>
   <p style="margin: 0 0 20px; font-size: 14px; color: #334155;">
-    Por favor le solicito mediante el presente correo la aplicación del descuento correspondiente a la 
-    <strong>Campaña Oficial de Octubre</strong> para el proyecto <strong>${proyectoSeleccionado}</strong>.
+    Por favor le solicito mediante el presente correo la aplicación del descuento correspondiente a la
+    <strong>Campaña Oficial de Octubre</strong> para el proyecto <strong>${escapeHtml(proyectoSeleccionado)}</strong>.
   </p>
 
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0fdf4; border: 2px solid #16a34a; border-radius: 12px; margin-bottom: 22px;">
@@ -359,20 +355,20 @@ export default function DescuentosCampanas() {
           <tr>
             <td>
               <div style="font-size: 10px; color: #94a3b8; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">PROYECTO</div>
-              <div style="font-size: 22px; font-weight: 900; color: #ffffff; letter-spacing: -0.5px;">${proyectoSeleccionado}</div>
+              <div style="font-size: 22px; font-weight: 900; color: #ffffff; letter-spacing: -0.5px;">${escapeHtml(proyectoSeleccionado)}</div>
               <div style="display: inline-block; background-color: #78350f; color: #fde68a; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 4px; margin-top: 6px;">
                 ${categoria || "LOTE SOBRE AV. ESQ."}
               </div>
             </td>
             <td align="right" valign="top">
               <span style="display: inline-block; background-color: #0c1a30; border: 1px solid #1e3a5f; color: #38bdf8; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: bold; margin-left: 4px;">
-                UV <strong style="color: #ffffff; font-size: 13px;">${uvSeleccionada}</strong>
+                UV <strong style="color: #ffffff; font-size: 13px;">${escapeHtml(uvSeleccionada)}</strong>
               </span>
               <span style="display: inline-block; background-color: #0c1a30; border: 1px solid #1e3a5f; color: #38bdf8; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: bold; margin-left: 4px;">
-                MZN <strong style="color: #ffffff; font-size: 13px;">${mznSeleccionada}</strong>
+                MZN <strong style="color: #ffffff; font-size: 13px;">${escapeHtml(mznSeleccionada)}</strong>
               </span>
               <span style="display: inline-block; background-color: #0c1a30; border: 1px solid #1e3a5f; color: #38bdf8; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: bold; margin-left: 4px;">
-                LT <strong style="color: #ffffff; font-size: 13px;">${loteSeleccionado}</strong>
+                LT <strong style="color: #ffffff; font-size: 13px;">${escapeHtml(loteSeleccionado)}</strong>
               </span>
             </td>
           </tr>
@@ -485,7 +481,7 @@ export default function DescuentosCampanas() {
 
   <p style="margin: 0 0 16px; font-size: 14px;">Quedo atento a su aprobación y modificación en el sistema para proceder al cierre de venta.</p>
   <p style="margin: 0 0 4px; font-size: 14px;">Saludos cordiales,</p>
-  <p style="margin: 0; font-size: 15px; font-weight: bold; color: #0f172a;">${asesorSeleccionado}</p>
+  <p style="margin: 0; font-size: 15px; font-weight: bold; color: #0f172a;">${escapeHtml(asesorSeleccionado)}</p>
 </div>
 `;
   };
@@ -512,7 +508,7 @@ RESUMEN FINANCIERO (${calculos.labelBadge}):
 • Capital Base: $ ${formatMoneda(calculos.capitalBaseUSD)}
 • ${calculos.modalidad === "CREDITO" ? "Descuento fijo según valor del lote" : `Descuento (${calculos.descuentoPct.toFixed(0)}%)`}: -$ ${formatMoneda(calculos.montoAhorroUSD)}
 • Capital Final a Liquidar: $ ${formatMoneda(calculos.capitalFinalUSD)} USD
-• Total en Bolivianos: Bs. ${formatMoneda(calculos.totalBs)} (TC vigente 12.00)
+• Total en Bolivianos: Bs. ${formatMoneda(calculos.totalBs)} (TC vigente ${TC_OFICIAL_BASE.toFixed(2)})
 • TC Efectivo de Pago: ${calculos.optica2_tcEfectivo.toFixed(2)} Bs/US$
 
 Asesor Responsable: ${asesorSeleccionado}
@@ -525,24 +521,12 @@ ${asesorSeleccionado}`;
   };
 
   const copiarFormatoHTML = async () => {
-    const html = generarHTMLCorreo();
+    const html = sanitizeEmailHtml(generarHTMLCorreo());
     const texto = generarTextoPlano();
     try {
-      if (navigator.clipboard && window.ClipboardItem) {
-        const item = new ClipboardItem({
-          "text/html": new Blob([html], { type: "text/html" }),
-          "text/plain": new Blob([texto], { type: "text/plain" })
-        });
-        await navigator.clipboard.write([item]);
-        setNotificacion("¡Cuadro copiado con formato! Pégalo con Ctrl + V.");
-      } else {
-        await navigator.clipboard.writeText(html);
-        setNotificacion("¡Formato copiado!");
-      }
-    } catch {
-      await navigator.clipboard.writeText(texto);
-      setNotificacion("¡Texto copiado!");
-    }
+      await copyEmail(html, texto);
+      setNotificacion("Formato copiado. Revise el correo antes de enviarlo.");
+    } catch (error) { setNotificacion(error.message || "No se pudo copiar. Utilice la vista previa."); }
     setTimeout(() => setNotificacion(null), 3500);
   };
 
@@ -578,13 +562,14 @@ ${asesorSeleccionado}`;
     `💎 *PRECIO PROMOCIONAL:* *$ ${formatMoneda(calculos.capitalFinalUSD)} USD*\n` +
     `📊 *Nuevo Precio m²:* *$ ${formatMoneda(calculos.nuevoPrecioM2)}/m²*\n\n` +
     `🇧🇴 *Total en Bolivianos:* *Bs. ${formatMoneda(calculos.totalBs)}*\n` +
-    `👉 *TC Efectivo:* *Bs. ${calculos.optica2_tcEfectivo?.toFixed(2)}* (vs TC vigente 12.00)\n\n` +
+    `👉 *TC Efectivo:* *Bs. ${calculos.optica2_tcEfectivo?.toFixed(2)}* (vs TC vigente ${TC_OFICIAL_BASE.toFixed(2)})\n\n` +
     `Asesor: ${asesorSeleccionado}`;
 
   return (
-    <div className="w-full text-slate-100 font-sans overflow-x-hidden">
+    <div className="w-full text-[var(--text-primary)] font-sans overflow-x-hidden">
+      <details className="panel mb-6"><summary>Vista previa del correo · revisar antes de enviar</summary><div className="email-preview" dangerouslySetInnerHTML={{ __html: sanitizeEmailHtml(generarHTMLCorreo()) }}/></details>
       {/* BARRA SUPERIOR */}
-      <div className="max-w-6xl mx-auto mb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-[#14233c] pb-4">
+      <div className="max-w-6xl mx-auto mb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-[var(--border-glow)] pb-4">
         <div>
           <div className="flex items-center gap-2 mb-0.5">
             <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></span>
@@ -592,7 +577,7 @@ ${asesorSeleccionado}`;
               PORTAL GESTIÓN ESTRATÉGICA • CELINA URBANIZACIONES
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight flex items-center gap-2">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-[var(--text-primary)] tracking-tight flex items-center gap-2">
             <Tag className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" />
             DESCUENTOS <span className="text-cyan-400">CAMPAÑAS</span>
           </h1>
@@ -602,7 +587,7 @@ ${asesorSeleccionado}`;
           <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".json" className="hidden" />
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex-1 sm:flex-initial px-3 py-1.5 bg-[#091426] border border-[#1e3a5f] hover:border-cyan-400 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 text-slate-300 transition"
+            className="flex-1 sm:flex-initial px-3 py-1.5 bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] hover:border-cyan-400 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 text-[var(--text-secondary)] transition"
           >
             <Upload className="w-3.5 h-3.5 text-cyan-400" />
             Cargar JSON
@@ -625,15 +610,15 @@ ${asesorSeleccionado}`;
       )}
 
       {/* TABS DE MODALIDAD */}
-      <div className="max-w-6xl mx-auto mb-5 flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-3 bg-[#081224] border border-[#14233c] p-2 rounded-2xl">
-        <div className="flex p-1 bg-[#050b18] border border-[#14233c] rounded-xl w-full lg:w-auto">
+      <div className="max-w-6xl mx-auto mb-5 flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-3 bg-[#081224] border border-[var(--border-glow)] p-2 rounded-2xl">
+        <div className="flex p-1 bg-[var(--bg-card-inner)] border border-[var(--border-glow)] rounded-xl w-full lg:w-auto">
           <button
             type="button"
             onClick={() => setModalidad("CONTADO_LIQUIDACION")}
             className={`flex-1 sm:flex-initial px-3 sm:px-5 py-2 rounded-lg text-[11px] sm:text-xs font-black transition flex items-center justify-center gap-1.5 ${
               modalidad === "CONTADO_LIQUIDACION"
                 ? "bg-cyan-500 text-slate-950 shadow-lg shadow-cyan-500/30"
-                : "text-slate-400 hover:text-white"
+                : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
             }`}
           >
             <Banknote className="w-3.5 h-3.5" />
@@ -645,7 +630,7 @@ ${asesorSeleccionado}`;
             className={`flex-1 sm:flex-initial px-3 sm:px-5 py-2 rounded-lg text-[11px] sm:text-xs font-black transition flex items-center justify-center gap-1.5 ${
               modalidad === "CREDITO"
                 ? "bg-cyan-500 text-slate-950 shadow-lg shadow-cyan-500/30"
-                : "text-slate-400 hover:text-white"
+                : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
             }`}
           >
             <CreditCard className="w-3.5 h-3.5" />
@@ -665,7 +650,7 @@ ${asesorSeleccionado}`;
                   className={`px-2.5 py-1.5 text-[10px] sm:text-xs font-bold rounded-lg border text-center transition ${
                     activo
                       ? "bg-cyan-950 border-cyan-400 text-cyan-300 shadow-sm"
-                      : "bg-[#050b18] border-[#14233c] text-slate-400 hover:border-slate-700"
+                      : "bg-[var(--bg-card-inner)] border-[var(--border-glow)] text-[var(--text-muted)] hover:border-slate-700"
                   }`}
                 >
                   {conf.plazo} ({conf.descuentoPct}%)
@@ -680,18 +665,18 @@ ${asesorSeleccionado}`;
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* COLUMNA IZQUIERDA */}
         <div className="lg:col-span-4 space-y-4">
-          <div className="bg-[#070e1c] border border-[#14233c] rounded-2xl p-4 shadow-xl">
+          <div className="bg-[var(--bg-card)] border border-[var(--border-glow)] rounded-2xl p-4 shadow-xl">
             <h3 className="text-xs font-black uppercase text-cyan-400 tracking-wider mb-3 flex items-center gap-1.5">
               <Building2 className="w-4 h-4" /> Terreno Seleccionado
             </h3>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-[10px] text-slate-400 mb-1 font-bold">PROYECTO</label>
+                <label className="block text-[10px] text-[var(--text-muted)] mb-1 font-bold">PROYECTO</label>
                 <select
                   value={proyectoSeleccionado}
                   onChange={(e) => setProyectoSeleccionado(e.target.value)}
-                  className="w-full bg-[#050b18] border border-[#1e3a5f] rounded-xl px-3 py-2 text-xs font-bold text-white focus:outline-none"
+                  className="w-full bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-xl px-3 py-2 text-xs font-bold text-[var(--text-primary)] focus:outline-none"
                 >
                   {proyectosDisponibles.map((p) => <option key={p} value={p}>{p}</option>)}
                 </select>
@@ -699,31 +684,31 @@ ${asesorSeleccionado}`;
 
               <div className="grid grid-cols-3 gap-2">
                 <div>
-                  <label className="block text-[10px] text-slate-400 mb-1 text-center font-bold">UV</label>
+                  <label className="block text-[10px] text-[var(--text-muted)] mb-1 text-center font-bold">UV</label>
                   <select
                     value={uvSeleccionada}
                     onChange={(e) => setUvSeleccionada(e.target.value)}
-                    className="w-full bg-[#050b18] border border-[#1e3a5f] rounded-lg py-1.5 text-xs text-center font-bold text-cyan-300 focus:outline-none"
+                    className="w-full bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-lg py-1.5 text-xs text-center font-bold text-cyan-300 focus:outline-none"
                   >
                     {uvsDisponibles.map((u) => <option key={u} value={u}>{u}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] text-slate-400 mb-1 text-center font-bold">MZN</label>
+                  <label className="block text-[10px] text-[var(--text-muted)] mb-1 text-center font-bold">MZN</label>
                   <select
                     value={mznSeleccionada}
                     onChange={(e) => setMznSeleccionada(e.target.value)}
-                    className="w-full bg-[#050b18] border border-[#1e3a5f] rounded-lg py-1.5 text-xs text-center font-bold text-cyan-300 focus:outline-none"
+                    className="w-full bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-lg py-1.5 text-xs text-center font-bold text-cyan-300 focus:outline-none"
                   >
                     {mznsDisponibles.map((m) => <option key={m} value={m}>{m}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] text-slate-400 mb-1 text-center font-bold">LOTE</label>
+                  <label className="block text-[10px] text-[var(--text-muted)] mb-1 text-center font-bold">LOTE</label>
                   <select
                     value={loteSeleccionado}
                     onChange={(e) => setLoteSeleccionado(e.target.value)}
-                    className="w-full bg-[#050b18] border border-[#1e3a5f] rounded-lg py-1.5 text-xs text-center font-bold text-cyan-300 focus:outline-none"
+                    className="w-full bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-lg py-1.5 text-xs text-center font-bold text-cyan-300 focus:outline-none"
                   >
                     {lotesDisponibles.map((l) => (
                       <option key={l.lote} value={l.lote}>
@@ -734,16 +719,16 @@ ${asesorSeleccionado}`;
                 </div>
               </div>
 
-              <div className="bg-[#050b18] border border-[#14233c] rounded-xl p-3 text-xs">
+              <div className="bg-[var(--bg-card-inner)] border border-[var(--border-glow)] rounded-xl p-3 text-xs">
                 <div className="flex justify-between mb-1">
                   <span className="text-slate-500">Superficie:</span>
-                  <strong className="text-white">{formatMoneda(superficie)} m²</strong>
+                  <strong className="text-[var(--text-primary)]">{formatMoneda(superficie)} m²</strong>
                 </div>
                 <div className="flex justify-between mb-1">
                   <span className="text-slate-500">Precio Lista:</span>
-                  <strong className="text-white">${formatMoneda(precioBaseM2)}/m²</strong>
+                  <strong className="text-[var(--text-primary)]">${formatMoneda(precioBaseM2)}/m²</strong>
                 </div>
-                <div className="flex justify-between pt-1 border-t border-[#14233c] text-[11px]">
+                <div className="flex justify-between pt-1 border-t border-[var(--border-glow)] text-[11px]">
                   <span className="text-slate-500">Categoría:</span>
                   <span className="text-amber-300 font-semibold">{categoria || "LOTE SOBRE AV. ESQ."}</span>
                 </div>
@@ -751,15 +736,15 @@ ${asesorSeleccionado}`;
             </div>
           </div>
 
-          <div className="bg-[#070e1c] border border-[#14233c] rounded-2xl p-4 shadow-xl space-y-3">
+          <div className="bg-[var(--bg-card)] border border-[var(--border-glow)] rounded-2xl p-4 shadow-xl space-y-3">
             <div>
-              <label className="block text-[10px] text-slate-400 mb-1 font-bold uppercase">
+              <label className="block text-[10px] text-[var(--text-muted)] mb-1 font-bold uppercase">
                 SOLICITUD DIRIGIDA A (QUIEN APLICA EN SISTEMA):
               </label>
               <select
                 value={destinatarioEmail}
                 onChange={(e) => setDestinatarioEmail(e.target.value)}
-                className="w-full bg-[#050b18] border border-[#1e3a5f] rounded-xl px-3 py-2 text-xs text-slate-200 font-bold focus:outline-none"
+                className="w-full bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] font-bold focus:outline-none"
               >
                 {DIRECTORES_APROBACION.map((d) => (
                   <option key={d.email} value={d.email}>
@@ -769,21 +754,21 @@ ${asesorSeleccionado}`;
               </select>
             </div>
 
-            <div className="bg-[#091426] border border-[#182a46] p-2.5 rounded-xl text-[10px] text-slate-400 space-y-1">
+            <div className="bg-[var(--bg-card-inner)] border border-[#182a46] p-2.5 rounded-xl text-[10px] text-[var(--text-muted)] space-y-1">
               <span className="font-bold text-cyan-400 block uppercase">CC Automático de Respaldo:</span>
-              <div className="text-slate-300 font-mono text-[9px] leading-relaxed break-all">
+              <div className="text-[var(--text-secondary)] font-mono text-[9px] leading-relaxed break-all">
                 {correosCC}
               </div>
             </div>
 
             <div>
-              <label className="block text-[10px] text-slate-400 mb-1 font-bold uppercase">
+              <label className="block text-[10px] text-[var(--text-muted)] mb-1 font-bold uppercase">
                 ASESOR RESPONSABLE:
               </label>
               <select
                 value={asesorSeleccionado}
                 onChange={(e) => setAsesorSeleccionado(e.target.value)}
-                className="w-full bg-[#050b18] border border-[#1e3a5f] rounded-xl px-3 py-2 text-xs text-slate-200 font-bold focus:outline-none"
+                className="w-full bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] font-bold focus:outline-none"
               >
                 {ASESORES_EQUIPO.map((as) => <option key={as} value={as}>{as}</option>)}
               </select>
@@ -793,16 +778,16 @@ ${asesorSeleccionado}`;
 
         {/* COLUMNA DERECHA: DASHBOARD DE LIQUIDACIÓN */}
         <div className="lg:col-span-8 space-y-4">
-          <div className="bg-[#070e1c] border border-[#14233c] rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl relative overflow-hidden">
+          <div className="bg-[var(--bg-card)] border border-[var(--border-glow)] rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl relative overflow-hidden">
             {/* Header del lote */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-5 border-b border-[#14233c]">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-5 border-b border-[var(--border-glow)]">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#0e1d32] border border-[#1e3a5f] flex items-center justify-center text-cyan-400 shadow-inner shrink-0">
+                <div className="w-10 h-10 rounded-2xl bg-[#0e1d32] border border-[var(--border-highlight)] flex items-center justify-center text-cyan-400 shadow-inner shrink-0">
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-[10px] uppercase font-bold tracking-widest text-slate-400">PROYECTO</div>
-                  <div className="text-xl sm:text-2xl font-black text-white tracking-tight">{proyectoSeleccionado}</div>
+                  <div className="text-[10px] uppercase font-bold tracking-widest text-[var(--text-muted)]">PROYECTO</div>
+                  <div className="text-xl sm:text-2xl font-black text-[var(--text-primary)] tracking-tight">{proyectoSeleccionado}</div>
                   <div className="inline-block bg-[#78350f]/80 text-[#fef08a] border border-[#b45309]/50 text-[10px] font-extrabold px-2 py-0.5 rounded mt-0.5">
                     {categoria || "LOTE SOBRE AV. ESQ."}
                   </div>
@@ -811,15 +796,15 @@ ${asesorSeleccionado}`;
 
               <div className="flex gap-1.5 self-end sm:self-auto">
                 <div className="bg-[#0b172a] border border-[#1c3558] px-2.5 sm:px-3.5 py-1 rounded-xl text-center">
-                  <span className="text-[8px] sm:text-[9px] block text-slate-400 font-bold uppercase">UV</span>
+                  <span className="text-[8px] sm:text-[9px] block text-[var(--text-muted)] font-bold uppercase">UV</span>
                   <strong className="text-sm sm:text-base text-cyan-400 font-black">{uvSeleccionada}</strong>
                 </div>
                 <div className="bg-[#0b172a] border border-[#1c3558] px-2.5 sm:px-3.5 py-1 rounded-xl text-center">
-                  <span className="text-[8px] sm:text-[9px] block text-slate-400 font-bold uppercase">MZN</span>
+                  <span className="text-[8px] sm:text-[9px] block text-[var(--text-muted)] font-bold uppercase">MZN</span>
                   <strong className="text-sm sm:text-base text-cyan-400 font-black">{mznSeleccionada}</strong>
                 </div>
                 <div className="bg-[#0b172a] border border-[#1c3558] px-2.5 sm:px-3.5 py-1 rounded-xl text-center">
-                  <span className="text-[8px] sm:text-[9px] block text-slate-400 font-bold uppercase">LOTE</span>
+                  <span className="text-[8px] sm:text-[9px] block text-[var(--text-muted)] font-bold uppercase">LOTE</span>
                   <strong className="text-sm sm:text-base text-cyan-400 font-black">{loteSeleccionado}</strong>
                 </div>
               </div>
@@ -830,10 +815,10 @@ ${asesorSeleccionado}`;
               <div className="inline-block bg-[#0e243c] border border-cyan-500/40 text-cyan-300 text-[10px] sm:text-xs font-black px-3 sm:px-4 py-1.5 rounded-full uppercase tracking-wider mb-2 sm:mb-3">
                 🏷️ {calculos.labelBadge}
               </div>
-              <div className="text-4xl sm:text-5xl md:text-6xl font-black text-white tracking-tight mb-2">
+              <div className="text-4xl sm:text-5xl md:text-6xl font-black text-[var(--text-primary)] tracking-tight mb-2">
                 $ {formatMoneda(calculos.capitalFinalUSD)}
               </div>
-              <div className="text-lg sm:text-xl md:text-2xl font-black text-slate-300 flex items-center justify-center gap-2">
+              <div className="text-lg sm:text-xl md:text-2xl font-black text-[var(--text-secondary)] flex items-center justify-center gap-2">
                 <span>Bs. {formatMoneda(calculos.totalBs)}</span>
                 <span className="bg-[#172554] text-cyan-400 border border-cyan-500/30 text-xs px-2 py-0.5 rounded font-mono font-bold">
                   TC {TC_OFICIAL_BASE.toFixed(2)}
@@ -841,21 +826,21 @@ ${asesorSeleccionado}`;
               </div>
 
               <div className="grid grid-cols-3 gap-2 sm:gap-3 max-w-lg mx-auto mt-5">
-                <div className="bg-[#091426] border border-[#182a46] rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 text-center">
-                  <div className="text-[9px] sm:text-[10px] text-slate-400 font-black uppercase">BASE</div>
-                  <div className="text-sm sm:text-base md:text-lg font-black text-white mt-0.5">
+                <div className="bg-[var(--bg-card-inner)] border border-[#182a46] rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 text-center">
+                  <div className="text-[9px] sm:text-[10px] text-[var(--text-muted)] font-black uppercase">BASE</div>
+                  <div className="text-sm sm:text-base md:text-lg font-black text-[var(--text-primary)] mt-0.5">
                     $ {formatMoneda(calculos.capitalBaseUSD)}
                   </div>
                 </div>
 
-                <div className="bg-[#091426] border border-cyan-500/30 rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 text-center">
+                <div className="bg-[var(--bg-card-inner)] border border-cyan-500/30 rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 text-center">
                   <div className="text-[9px] sm:text-[10px] text-cyan-400 font-black uppercase">DESCUENTO</div>
                   <div className="text-sm sm:text-base md:text-lg font-black text-cyan-300 mt-0.5">
                     {descuentoVisual}
                   </div>
                 </div>
 
-                <div className="bg-[#04241b] border border-emerald-500/40 rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 text-center">
+                <div className="bg-[var(--bg-card-inner)] border border-emerald-500/40 rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 text-center">
                   <div className="text-[9px] sm:text-[10px] text-emerald-400 font-black uppercase">AHORRO</div>
                   <div className="text-sm sm:text-base md:text-lg font-black text-emerald-300 mt-0.5">
                     $ {formatMoneda(calculos.montoAhorroUSD)}
@@ -869,27 +854,27 @@ ${asesorSeleccionado}`;
             </div>
 
             {/* DOBLE ÓPTICA FINANCIERA */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 pt-4 border-t border-[#14233c]">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 pt-4 border-t border-[var(--border-glow)]">
               <div className="bg-[#081222] border border-[#192f50] rounded-2xl p-3.5 sm:p-4 text-xs font-mono">
                 <div className="text-[11px] font-black text-cyan-400 mb-2.5 flex items-center gap-1.5 uppercase font-sans">
                   💲 ÓPTICA 1: DESCUENTO A CAPITAL
                 </div>
                 <div className="space-y-1.5 sm:space-y-2 text-[11px]">
                   <div className="flex justify-between">
-                    <span className="text-slate-400">CAPITAL BASE ($US)</span>
-                    <strong className="text-white">$ {formatMoneda(calculos.optica1_capitalBase)}</strong>
+                    <span className="text-[var(--text-muted)]">CAPITAL BASE ($US)</span>
+                    <strong className="text-[var(--text-primary)]">$ {formatMoneda(calculos.optica1_capitalBase)}</strong>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">{descuentoEtiqueta}</span>
+                    <span className="text-[var(--text-muted)]">{descuentoEtiqueta}</span>
                     <strong className="text-cyan-400">- $ {formatMoneda(calculos.optica1_descuentoUSD)}</strong>
                   </div>
                   <div className="flex justify-between pt-1.5 border-t border-[#192f50]">
-                    <span className="text-slate-300 font-bold">CAPITAL FINAL ($US)</span>
-                    <strong className="text-white">$ {formatMoneda(calculos.optica1_capitalFinal)}</strong>
+                    <span className="text-[var(--text-secondary)] font-bold">CAPITAL FINAL ($US)</span>
+                    <strong className="text-[var(--text-primary)]">$ {formatMoneda(calculos.optica1_capitalFinal)}</strong>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">TIPO DE CAMBIO</span>
-                    <strong className="text-slate-300">x {calculos.optica1_tc?.toFixed(2)}</strong>
+                    <span className="text-[var(--text-muted)]">TIPO DE CAMBIO</span>
+                    <strong className="text-[var(--text-secondary)]">x {calculos.optica1_tc?.toFixed(2)}</strong>
                   </div>
                   <div className="flex justify-between pt-2 border-t border-[#192f50] text-sm">
                     <span className="text-cyan-400 font-bold">TOTAL (BS.)</span>
@@ -904,20 +889,20 @@ ${asesorSeleccionado}`;
                 </div>
                 <div className="space-y-1.5 sm:space-y-2 text-[11px]">
                   <div className="flex justify-between">
-                    <span className="text-slate-400">CAPITAL BASE ($US)</span>
-                    <strong className="text-white">$ {formatMoneda(calculos.optica2_capitalBase)}</strong>
+                    <span className="text-[var(--text-muted)]">CAPITAL BASE ($US)</span>
+                    <strong className="text-[var(--text-primary)]">$ {formatMoneda(calculos.optica2_capitalBase)}</strong>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">TC VIGENTE</span>
-                    <strong className="text-white">{calculos.optica2_tcOficial?.toFixed(2)}</strong>
+                    <span className="text-[var(--text-muted)]">TC VIGENTE</span>
+                    <strong className="text-[var(--text-primary)]">{calculos.optica2_tcOficial?.toFixed(2)}</strong>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">{descuentoEtiqueta}</span>
+                    <span className="text-[var(--text-muted)]">{descuentoEtiqueta}</span>
                     <strong className="text-emerald-400">- {calculos.optica2_descuentoTC?.toFixed(2)} Bs/$us</strong>
                   </div>
                   <div className="flex justify-between pt-1.5 border-t border-[#192f50]">
-                    <span className="text-slate-300 font-bold">TC EFECTIVO FINAL</span>
-                    <strong className="text-white">x {calculos.optica2_tcEfectivo?.toFixed(2)}</strong>
+                    <span className="text-[var(--text-secondary)] font-bold">TC EFECTIVO FINAL</span>
+                    <strong className="text-[var(--text-primary)]">x {calculos.optica2_tcEfectivo?.toFixed(2)}</strong>
                   </div>
                   <div className="flex justify-between pt-2 border-t border-[#192f50] text-sm">
                     <span className="text-emerald-400 font-bold">TOTAL (BS.)</span>
@@ -934,14 +919,14 @@ ${asesorSeleccionado}`;
                   <span className="text-[10px] font-black tracking-wider uppercase text-emerald-400 block mb-0.5">
                     DATO CLAVE PARA EL SISTEMA CELINA (APROBADORES)
                   </span>
-                  <div className="text-xs text-slate-300">
-                    Precio Anterior: <span className="line-through text-slate-400 font-mono">${formatMoneda(calculos.precioM2Anterior)}/m²</span>
+                  <div className="text-xs text-[var(--text-secondary)]">
+                    Precio Anterior: <span className="line-through text-[var(--text-muted)] font-mono">${formatMoneda(calculos.precioM2Anterior)}/m²</span>
                     <span className="ml-2 text-rose-400 font-mono font-bold">(-${formatMoneda(calculos.reduccionM2)}/m²{calculos.modalidad === "CREDITO" ? " equiv." : ""})</span>
                   </div>
                 </div>
 
                 <div className="text-left sm:text-right bg-[#05130e] border border-emerald-500/50 px-4 py-2 rounded-xl w-full sm:w-auto">
-                  <span className="text-[9px] font-bold text-slate-400 block uppercase">NUEVO PRECIO M² EN SISTEMA:</span>
+                  <span className="text-[9px] font-bold text-[var(--text-muted)] block uppercase">NUEVO PRECIO M² EN SISTEMA:</span>
                   <span className="text-xl sm:text-2xl font-black text-emerald-400 font-mono">
                     $ {formatMoneda(calculos.nuevoPrecioM2)} <span className="text-xs">/ m²</span>
                   </span>
@@ -950,13 +935,13 @@ ${asesorSeleccionado}`;
             </div>
 
             {/* BOTONERA TRIPLE EXACTA + WHATSAPP */}
-            <div className="pt-6 mt-4 border-t border-[#14233c] space-y-3">
+            <div className="pt-6 mt-4 border-t border-[var(--border-glow)] space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* 1. COPIAR FORMATO (TARJETA BLANCA / GRIS CLARA) */}
                 <button
                   type="button"
                   onClick={copiarFormatoHTML}
-                  className="py-3 px-4 bg-slate-100 hover:bg-white text-slate-900 font-black rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-md active:scale-95"
+                  className="py-3 px-4 bg-slate-100 hover:bg-[var(--bg-card)] text-slate-900 font-black rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-md active:scale-95"
                 >
                   <Copy className="w-4 h-4 text-slate-800" />
                   Copiar Formato
@@ -966,7 +951,7 @@ ${asesorSeleccionado}`;
                 <button
                   type="button"
                   onClick={enviarAppOutlook}
-                  className="py-3 px-4 bg-[#0078d4] hover:bg-[#006cc1] text-white font-black rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-blue-900/40 active:scale-95"
+                  className="py-3 px-4 bg-[#0078d4] hover:bg-[#006cc1] text-[var(--text-primary)] font-black rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-blue-900/40 active:scale-95"
                 >
                   <Monitor className="w-4 h-4 text-blue-100" />
                   App Outlook 🖥️
@@ -977,11 +962,11 @@ ${asesorSeleccionado}`;
               <button
                 type="button"
                 onClick={abrirEnGmailWeb}
-                className="w-full py-3.5 px-4 bg-[#ea4335] hover:bg-[#dc2626] text-white font-black rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-lg shadow-red-950/50 relative overflow-hidden active:scale-95"
+                className="w-full py-3.5 px-4 bg-[#ea4335] hover:bg-[#dc2626] text-[var(--text-primary)] font-black rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-lg shadow-red-950/50 relative overflow-hidden active:scale-95"
               >
                 <Mail className="w-4 h-4" />
                 <span>Abrir en Gmail</span>
-                <span className="ml-1.5 bg-white/20 text-white border border-white/30 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                <span className="ml-1.5 bg-[var(--bg-card)]/20 text-[var(--text-primary)] border border-white/30 text-[10px] font-bold px-2 py-0.5 rounded-full">
                   + CC Automático
                 </span>
               </button>

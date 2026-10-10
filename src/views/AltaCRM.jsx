@@ -17,11 +17,11 @@ export default function AltaCRM() {
           <span className="text-[10px] font-black tracking-widest text-cyan-400 uppercase">
             PORTAL GESTIÓN ESTRATÉGICA • CELINA
           </span>
-        </div><h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center"><UserPlus className="w-6 h-6 mr-2 text-cyan-400" /> Solicitud Alta de Usuarios CRM</h2></div>
+        </div><h2 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)] tracking-tight flex items-center"><UserPlus className="w-6 h-6 mr-2 text-cyan-400" /> Solicitud Alta de Usuarios CRM</h2></div>
       <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
-        <div className="bg-[#070e1c] p-5 sm:p-6 rounded-3xl shadow-2xl border border-[#14233c] text-slate-100 w-full min-w-0">
+        <div className="bg-[var(--bg-card)] p-5 sm:p-6 rounded-3xl shadow-2xl border border-[var(--border-glow)] text-[var(--text-primary)] w-full min-w-0">
           <Input label="Tu Nombre (Remitente)" name="asesor" value={formAltaCRM.asesor} onChange={handleChange} placeholder="Ej. Oscar Saravia" />
-          <div className="mt-4 mb-4 pb-2 border-b border-[#14233c] pb-2"><h3 className="text-xs font-black uppercase text-cyan-400 tracking-wider">Datos del Nuevo Asesor</h3></div>
+          <div className="mt-4 mb-4 pb-2 border-b border-[var(--border-glow)] pb-2"><h3 className="text-xs font-black uppercase text-cyan-400 tracking-wider">Datos del Nuevo Asesor</h3></div>
           <Input label="Nombre(s)" name="nombre" value={formAltaCRM.nombre} onChange={handleChange} placeholder="Ej. DANIEL" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mb-2">
             <Input label="Apellido Paterno" name="apPaterno" value={formAltaCRM.apPaterno} onChange={handleChange} placeholder="Ej. ANGULO" />

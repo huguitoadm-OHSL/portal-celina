@@ -31,15 +31,15 @@ export default function ProyeccionDiaria() {
           <span className="text-[10px] font-black tracking-widest text-cyan-400 uppercase">
             GERENCIA COMERCIAL • DIRECCIÓN ESTRATÉGICA
           </span>
-        </div><h2 className="text-2xl font-bold text-white flex items-center"><CalendarDays className="w-6 h-6 mr-2 text-cyan-400" /> Proyección Diaria</h2></div>
-      
+        </div><h2 className="text-2xl font-bold text-[var(--text-primary)] flex items-center"><CalendarDays className="w-6 h-6 mr-2 text-cyan-400" /> Proyección Diaria</h2></div>
+
       <div className="grid grid-cols-1 xl:grid-cols-[1.5fr_1fr] 2xl:grid-cols-[2fr_1fr] gap-8 w-full">
-        <div className="bg-[#070e1c] border border-[#14233c] rounded-3xl text-slate-100 shadow-2xl overflow-hidden shadow-sm flex flex-col min-w-0">
-          <div className="bg-[#091426] border-b border-[#14233c] text-white p-3"><h3 className="text-sm font-bold">Proyeccion Diaria Equipo "MAQUINA DE VENTAS"</h3></div>
+        <div className="bg-[var(--bg-card)] border border-[var(--border-glow)] rounded-3xl text-[var(--text-primary)] shadow-2xl overflow-hidden shadow-sm flex flex-col min-w-0">
+          <div className="bg-[var(--bg-card-inner)] border-b border-[var(--border-glow)] text-[var(--text-primary)] p-3"><h3 className="text-sm font-bold">Proyeccion Diaria Equipo "MAQUINA DE VENTAS"</h3></div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left border-collapse min-w-[800px]">
               <thead>
-                <tr className="bg-[#091426] border-b border-[#14233c] text-white border-b border-[#001540]">
+                <tr className="bg-[var(--bg-card-inner)] border-b border-[var(--border-glow)] text-[var(--text-primary)] border-b border-[#001540]">
                   <th className="p-2 border-r border-[#001540] text-center w-10">Nº</th>
                   <th className="p-2 border-r border-[#001540]">Asesor</th>
                   <th className="p-2 border-r border-[#001540] text-center w-24">Tipo</th>
@@ -52,28 +52,28 @@ export default function ProyeccionDiaria() {
               </thead>
               <tbody>
                 {formDiaria.map((a, idx) => (
-                  <tr key={idx} className="border-b border-[#14233c] hover:bg-[#050b18] font-semibold text-slate-200">
-                    <td className="p-2 border-r border-[#14233c] text-center">{idx + 1}</td>
-                    <td className="p-2 border-r border-[#14233c] uppercase text-xs">{a.nombre}</td>
-                    <td className="p-2 border-r border-[#14233c] text-center">{a.tipo}</td>
-                    <td className="p-0 border-r border-[#14233c]"><input type="number" value={a.visita} onChange={(e) => handleChange(idx, 'visita', e.target.value)} className="w-full h-full p-2 text-center focus:bg-[#081528] outline-none font-bold bg-transparent" placeholder="0" /></td>
-                    <td className="p-0 border-r border-[#14233c]"><input type="number" value={a.venta} onChange={(e) => handleChange(idx, 'venta', e.target.value)} className="w-full h-full p-2 text-center focus:bg-[#081528] outline-none font-bold bg-transparent" placeholder="0" /></td>
-                    <td className="p-0 border-r border-[#14233c]"><input type="number" value={a.colocacion} onChange={(e) => handleChange(idx, 'colocacion', e.target.value)} className="w-full h-full p-2 text-center focus:bg-[#081528] outline-none font-bold bg-transparent" placeholder="0,00" /></td>
-                    <td className="p-0 border-r border-[#14233c]"><input type="text" value={a.hora} onChange={(e) => handleChange(idx, 'hora', e.target.value)} className="w-full h-full p-2 focus:bg-[#081528] outline-none bg-transparent uppercase" /></td>
-                    <td className="p-0"><input type="text" value={a.medio} onChange={(e) => handleChange(idx, 'medio', e.target.value)} className="w-full h-full p-2 focus:bg-[#081528] outline-none bg-transparent uppercase" /></td>
+                  <tr key={idx} className="border-b border-[var(--border-glow)] hover:bg-[var(--bg-card-inner)] font-semibold text-[var(--text-primary)]">
+                    <td className="p-2 border-r border-[var(--border-glow)] text-center">{idx + 1}</td>
+                    <td className="p-2 border-r border-[var(--border-glow)] uppercase text-xs">{a.nombre}</td>
+                    <td className="p-2 border-r border-[var(--border-glow)] text-center">{a.tipo}</td>
+                    <td className="p-0 border-r border-[var(--border-glow)]"><input type="number" value={a.visita} onChange={(e) => handleChange(idx, 'visita', e.target.value)} className="w-full h-full p-2 text-center focus:bg-[var(--bg-card-hover)] outline-none font-bold bg-transparent" placeholder="0" /></td>
+                    <td className="p-0 border-r border-[var(--border-glow)]"><input type="number" value={a.venta} onChange={(e) => handleChange(idx, 'venta', e.target.value)} className="w-full h-full p-2 text-center focus:bg-[var(--bg-card-hover)] outline-none font-bold bg-transparent" placeholder="0" /></td>
+                    <td className="p-0 border-r border-[var(--border-glow)]"><input type="number" value={a.colocacion} onChange={(e) => handleChange(idx, 'colocacion', e.target.value)} className="w-full h-full p-2 text-center focus:bg-[var(--bg-card-hover)] outline-none font-bold bg-transparent" placeholder="0,00" /></td>
+                    <td className="p-0 border-r border-[var(--border-glow)]"><input type="text" value={a.hora} onChange={(e) => handleChange(idx, 'hora', e.target.value)} className="w-full h-full p-2 focus:bg-[var(--bg-card-hover)] outline-none bg-transparent uppercase" /></td>
+                    <td className="p-0"><input type="text" value={a.medio} onChange={(e) => handleChange(idx, 'medio', e.target.value)} className="w-full h-full p-2 focus:bg-[var(--bg-card-hover)] outline-none bg-transparent uppercase" /></td>
                   </tr>
                 ))}
-                <tr className="bg-[#050b18] font-bold border-t-2 border-[#1e3a5f]">
-                  <td colSpan="3" className="p-2 text-right border-r border-[#1e3a5f] text-white">TOTAL VISITAS</td>
-                  <td className="p-2 text-center border-r border-[#1e3a5f] bg-[#070e1c]">{formDiaria.reduce((sum, a) => sum + (parseFloat(a.visita) || 0), 0)}</td>
+                <tr className="bg-[var(--bg-card-inner)] font-bold border-t-2 border-[var(--border-highlight)]">
+                  <td colSpan="3" className="p-2 text-right border-r border-[var(--border-highlight)] text-[var(--text-primary)]">TOTAL VISITAS</td>
+                  <td className="p-2 text-center border-r border-[var(--border-highlight)] bg-[var(--bg-card)]">{formDiaria.reduce((sum, a) => sum + (parseFloat(a.visita) || 0), 0)}</td>
                   <td colSpan="4"></td>
                 </tr>
-                <tr className="bg-[#050b18] font-bold border-t border-[#1e3a5f]">
-                  <td colSpan="3" className="p-2 text-right border-r border-[#1e3a5f] text-white">TOTAL VENTAS</td>
-                  <td className="p-2 text-center border-r border-[#1e3a5f] bg-[#070e1c]">{formDiaria.reduce((sum, a) => sum + (parseFloat(a.venta) || 0), 0)}</td>
+                <tr className="bg-[var(--bg-card-inner)] font-bold border-t border-[var(--border-highlight)]">
+                  <td colSpan="3" className="p-2 text-right border-r border-[var(--border-highlight)] text-[var(--text-primary)]">TOTAL VENTAS</td>
+                  <td className="p-2 text-center border-r border-[var(--border-highlight)] bg-[var(--bg-card)]">{formDiaria.reduce((sum, a) => sum + (parseFloat(a.venta) || 0), 0)}</td>
                   <td colSpan="4"></td>
                 </tr>
-                <tr className="bg-[#091426] border-b border-[#14233c] font-bold text-white">
+                <tr className="bg-[var(--bg-card-inner)] border-b border-[var(--border-glow)] font-bold text-[var(--text-primary)]">
                   <td colSpan="3" className="p-2 text-right border-r border-[#001540]">TOTAL DÍA $us.</td>
                   <td className="p-2 text-center border-r border-[#001540]">{formatCurrency(formDiaria.reduce((sum, a) => sum + (parseFloat(a.colocacion) || 0), 0))}</td>
                   <td colSpan="4"></td>
@@ -84,13 +84,13 @@ export default function ProyeccionDiaria() {
         </div>
 
         <div className="w-full min-w-0">
-          <ResultCard 
-            title="Proyección Diaria" 
-            text={generarTextoDiariaCelular(formDiaria, supervisorData)} 
-            htmlContent={generarHtmlDiaria(formDiaria, supervisorData)} 
-            subject="Reporte de Proyección Diaria - Máquina de Ventas" 
-            supervisorDestino={supervisorDestino} 
-            setSupervisorDestino={setSupervisorDestino} 
+          <ResultCard
+            title="Proyección Diaria"
+            text={generarTextoDiariaCelular(formDiaria, supervisorData)}
+            htmlContent={generarHtmlDiaria(formDiaria, supervisorData)}
+            subject="Reporte de Proyección Diaria - Máquina de Ventas"
+            supervisorDestino={supervisorDestino}
+            setSupervisorDestino={setSupervisorDestino}
           />
         </div>
       </div>

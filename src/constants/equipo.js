@@ -1,3 +1,4 @@
+import { REFERENCE_ADVISORS } from './commercialReference';
 // --- ESTRUCTURA DEL EQUIPO COMERCIAL ---
 export const SUPERVISORES = [
   { id: 'mreyes', nombre: 'Mauricio Reyes Suarez', correo: 'mreyes@celina.com.bo', genero: 'M', titulo: 'Mauricio' },
@@ -14,15 +15,7 @@ export const SUPERVISORES = [
 ];
 
 export const EQUIPOS_ASESORES = {
-  "Oscar Saravia": [
-    { nombre: "Jimmy Gonzales Nuñez", colAct: 0, tipo: "Interno", ventas: 0 }, 
-    { nombre: "Marisol Urgel Pizarro", colAct: 0, tipo: "Interno", ventas: 0 },
-    { nombre: "Jaime Fabricio Rios Castro", colAct: 0, tipo: "Interno", ventas: 0 },
-    { nombre: "Ely Gonzales Garcia", colAct: 0, tipo: "Interno", ventas: 0 },
-    { nombre: "Carlos Enrique Calderon Montano", colAct: 0, tipo: "Interno", ventas: 0 },
-    { nombre: "Merly Mendez Hurtado", colAct: 0, tipo: "Interno", ventas: 0 },
-    { nombre: "Jose Gabriel Padilla Loayza", colAct: 0, tipo: "Interno", ventas: 0 }
-  ]
+  "Oscar Saravia": REFERENCE_ADVISORS.map(a => ({ nombre: a.nombre, colAct: a.actualBs, tipo: 'Interno', ventas: a.referenceSales, source: 'Referencia de supervisión' }))
 };
 
 // Compatibilidad defensiva por nombre completo

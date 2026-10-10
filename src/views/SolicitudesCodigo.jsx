@@ -1,3 +1,4 @@
+import { escapeTemplateData } from '../services/email';
 import React, { useState } from 'react';
 import { KeyRound, FileText, CheckCircle2 } from 'lucide-react';
 import { ResultCard } from '../components/ui/ResultCard';
@@ -6,7 +7,7 @@ import { formatCurrency } from '../utils/formatters';
 export default function SolicitudesCodigo() {
   const [tipoSolicitud, setTipoSolicitud] = useState('liquidacion'); // 'liquidacion' o 'amortizacion'
   const [destinatario, setDestinatario] = useState('elizarraga@celina.com.bo');
-  
+
   const [form, setForm] = useState({
     cliente: '',
     contrato: '',
@@ -24,18 +25,19 @@ export default function SolicitudesCodigo() {
 
   // GENERADOR DEL CUERPO DEL CORREO (IDÉNTICO A TUS IMÁGENES)
   const generarHtml = () => {
-    const saludoIntro = "Buenas [SALUDO_AUTO]"; // ResultCard lo cambiará por días/tardes/noches
-    
+    const safeForm = escapeTemplateData(form);
+    const saludoIntro = "{{SALUDO_TIEMPO}} {{NOMBRE_SUPERVISOR}},"; // ResultCard lo cambiará por días/tardes/noches
+
     if (tipoSolicitud === 'liquidacion') {
       return `
         <div style="font-family: Arial, sans-serif; font-size: 14px; color: #000; line-height: 1.6;">
           <p>${saludoIntro}</p>
-          <p>Estimado Enrique por favor tu ayuda en el código de liquidación del siguiente cliente:</p>
+          <p>Solicito su apoyo para generar el código de liquidación del siguiente cliente:</p>
           <br/>
-          <p><strong>Cliente Titular:</strong> ${form.cliente || '___________________'}</p>
-          <p><strong>Proyecto:</strong> ${form.proyecto}</p>
-          <p><strong>Lote:</strong> UV: ${form.uv} MZN: ${form.mzn} LOTE: ${form.lote}</p>
-          <p><strong>Nro. Contrato:</strong> ${form.contrato || '___________________'}</p>
+          <p><strong>Cliente Titular:</strong> ${safeForm.cliente || '___________________'}</p>
+          <p><strong>Proyecto:</strong> ${safeForm.proyecto}</p>
+          <p><strong>Lote:</strong> UV: ${safeForm.uv} MZN: ${safeForm.mzn} LOTE: ${safeForm.lote}</p>
+          <p><strong>Nro. Contrato:</strong> ${safeForm.contrato || '___________________'}</p>
           <br/>
           <p>Muchas gracias de antemano.</p>
           <br/>
@@ -47,12 +49,12 @@ export default function SolicitudesCodigo() {
       return `
         <div style="font-family: Arial, sans-serif; font-size: 14px; color: #000; line-height: 1.6;">
           <p>${saludoIntro}</p>
-          <p>Estimado Enrique por favor tu ayuda con el código de amortización por un monto de $${montoFormateado}:</p>
+          <p>Solicito su apoyo para generar el código de amortización por un monto de $${montoFormateado}:</p>
           <br/>
-          <p><strong>Cliente Titular:</strong> ${form.cliente || '___________________'}</p>
-          <p><strong>Proyecto:</strong> ${form.proyecto}</p>
-          <p><strong>Lote:</strong> UV: ${form.uv} MZN: ${form.mzn} LOTE: ${form.lote}</p>
-          <p><strong>Nro. Contrato:</strong> ${form.contrato || '___________________'}</p>
+          <p><strong>Cliente Titular:</strong> ${safeForm.cliente || '___________________'}</p>
+          <p><strong>Proyecto:</strong> ${safeForm.proyecto}</p>
+          <p><strong>Lote:</strong> UV: ${safeForm.uv} MZN: ${safeForm.mzn} LOTE: ${safeForm.lote}</p>
+          <p><strong>Nro. Contrato:</strong> ${safeForm.contrato || '___________________'}</p>
           <br/>
           <p>Muchas gracias de antemano.</p>
           <br/>
@@ -64,9 +66,9 @@ export default function SolicitudesCodigo() {
 
   const generarTextoPlano = () => {
     if (tipoSolicitud === 'liquidacion') {
-      return `Estimado Enrique por favor tu ayuda en el código de liquidación del cliente: ${form.cliente} - Contrato: ${form.contrato}`;
+      return `Solicito su apoyo para generar el código de liquidación del cliente: ${form.cliente} - Contrato: ${form.contrato}`;
     } else {
-      return `Estimado Enrique por favor tu ayuda con el código de amortización por un monto de $${form.montoAmortizar} para el cliente: ${form.cliente} - Contrato: ${form.contrato}`;
+      return `Solicito su apoyo para generar el código de amortización por un monto de $${form.montoAmortizar} para el cliente: ${form.cliente} - Contrato: ${form.contrato}`;
     }
   };
 
@@ -82,7 +84,7 @@ export default function SolicitudesCodigo() {
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center">
+          <h2 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)] tracking-tight flex items-center">
             <KeyRound className="w-6 h-6 mr-2 text-indigo-600" />
             Solicitud de Códigos en Plataforma
           </h2>
@@ -93,13 +95,13 @@ export default function SolicitudesCodigo() {
         <div className="flex bg-slate-100 p-1.5 rounded-xl border border-slate-200 shadow-inner">
           <button
             onClick={() => setTipoSolicitud('liquidacion')}
-            className={`flex items-center px-4 py-2 rounded-lg text-xs font-bold transition-all ${tipoSolicitud === 'liquidacion' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:text-white'}`}
+            className={`flex items-center px-4 py-2 rounded-lg text-xs font-bold transition-all ${tipoSolicitud === 'liquidacion' ? 'bg-indigo-600 text-[var(--text-primary)] shadow' : 'text-slate-500 hover:text-[var(--text-primary)]'}`}
           >
             📄 Cód. Liquidación
           </button>
           <button
             onClick={() => setTipoSolicitud('amortizacion')}
-            className={`flex items-center px-4 py-2 rounded-lg text-xs font-bold transition-all ${tipoSolicitud === 'amortizacion' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:text-white'}`}
+            className={`flex items-center px-4 py-2 rounded-lg text-xs font-bold transition-all ${tipoSolicitud === 'amortizacion' ? 'bg-indigo-600 text-[var(--text-primary)] shadow' : 'text-slate-500 hover:text-[var(--text-primary)]'}`}
           >
             💰 Cód. Amortización
           </button>
@@ -108,8 +110,8 @@ export default function SolicitudesCodigo() {
 
       <div className="grid grid-cols-1 xl:grid-cols-[1.5fr_1fr] gap-6">
         {/* FORMULARIO */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
-          <div className="flex items-center justify-between border-b pb-3 text-sm font-bold text-slate-200">
+        <div className="bg-[var(--bg-card)] rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+          <div className="flex items-center justify-between border-b pb-3 text-sm font-bold text-[var(--text-primary)]">
             <span>{tipoSolicitud === 'liquidacion' ? 'Datos para Código de Liquidación' : 'Datos para Código de Amortización'}</span>
             <span className="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded">CC: Olivia Mendoza</span>
           </div>
@@ -134,7 +136,7 @@ export default function SolicitudesCodigo() {
 
             <div className={tipoSolicitud === 'liquidacion' ? 'md:col-span-1' : 'md:col-span-2'}>
               <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Proyecto</label>
-              <select name="proyecto" value={form.proyecto} onChange={handleChange} className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-white font-semibold">
+              <select name="proyecto" value={form.proyecto} onChange={handleChange} className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-[var(--bg-card)] font-semibold">
                 <option value="CELINA MUYURINA">CELINA MUYURINA</option>
                 <option value="CELINA SANTA FE">CELINA SANTA FE</option>
                 <option value="EL RENACER">EL RENACER</option>
@@ -148,15 +150,15 @@ export default function SolicitudesCodigo() {
 
           <div className="grid grid-cols-3 gap-3 pt-2 border-t">
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">UV</label>
+              <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">UV</label>
               <input type="text" name="uv" value={form.uv} onChange={handleChange} className="w-full px-3 py-1.5 border rounded-lg text-center font-bold" placeholder="49" />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">MZN</label>
+              <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">MZN</label>
               <input type="text" name="mzn" value={form.mzn} onChange={handleChange} className="w-full px-3 py-1.5 border rounded-lg text-center font-bold" placeholder="37" />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">LOTE</label>
+              <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">LOTE</label>
               <input type="text" name="lote" value={form.lote} onChange={handleChange} className="w-full px-3 py-1.5 border rounded-lg text-center font-bold" placeholder="16" />
             </div>
           </div>
@@ -164,14 +166,14 @@ export default function SolicitudesCodigo() {
 
         {/* VISTA PREVIA CORREO */}
         <div className="w-full">
-          <ResultCard 
-            title={tipoSolicitud === 'liquidacion' ? 'Orden Cód. Liquidación' : 'Orden Cód. Amortización'} 
-            text={generarTextoPlano()} 
-            htmlContent={generarHtml()} 
+          <ResultCard
+            title={tipoSolicitud === 'liquidacion' ? 'Orden Cód. Liquidación' : 'Orden Cód. Amortización'}
+            text={generarTextoPlano()}
+            htmlContent={generarHtml()}
             subject={asuntoCorreo}
             cc={correoCc}
-            supervisorDestino={destinatario} 
-            setSupervisorDestino={setDestinatario} 
+            supervisorDestino={destinatario}
+            setSupervisorDestino={setDestinatario}
           />
         </div>
       </div>

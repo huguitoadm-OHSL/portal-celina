@@ -1,36 +1,37 @@
+import { getExchangeRate } from './exchangeRates';
 // ============================================================================
 // CONFIGURACIÓN CENTRAL PORTAL GESTIÓN ESTRATÉGICA • CELINA URBANIZACIONES
 // ============================================================================
 
-export const DATA_VERSION = "v3.0 - Octubre 2026";
+export const DATA_VERSION = "v4.0 - Octubre 2026";
 
 // Parámetros Financieros Oficiales
-export const TC_OFICIAL_BASE = 12.00;
-export const META_EQUIPO_OCTUBRE_USD = 111000;
+export const obtenerTCOficial = getExchangeRate;
+export const META_EQUIPO_OCTUBRE_BS = 111000;
 export const CORREO_SUPERVISION_RESPALDO = "ohsaravia@celina.com.bo";
 
 // Directorio de Aprobadores Oficiales (Quienes aplican descuentos en sistema)
 export const DIRECTORES_APROBACION = [
-  { 
-    id: "mreyes", 
-    nombre: "Lic. Mauricio Reyes", 
-    cargo: "Jefe de Ventas", 
-    email: "mreyes@celina.com.bo", 
-    genero: "M" 
+  {
+    id: "mreyes",
+    nombre: "Lic. Mauricio Reyes",
+    cargo: "Jefe de Ventas",
+    email: "mreyes@celina.com.bo",
+    genero: "M"
   },
-  { 
-    id: "rvaca", 
-    nombre: "Lic. Robert Vaca", 
-    cargo: "Gerente Regional", 
-    email: "rvaca@grupopaz.com.bo", 
-    genero: "M" 
+  {
+    id: "rvaca",
+    nombre: "Lic. Robert Vaca",
+    cargo: "Gerente Regional",
+    email: "rvaca@grupopaz.com.bo",
+    genero: "M"
   },
-  { 
-    id: "vchoque", 
-    nombre: "Lic. Verenice Choque", 
-    cargo: "Asistente de Inteligencia y Negocios", 
-    email: "vchoque@grupopaz.com.bo", 
-    genero: "F" 
+  {
+    id: "vchoque",
+    nombre: "Lic. Verenice Choque",
+    cargo: "Asistente de Inteligencia y Negocios",
+    email: "vchoque@grupopaz.com.bo",
+    genero: "F"
   }
 ];
 
@@ -71,6 +72,6 @@ export const ESQUEMA_CONTADO = {
 export const ESQUEMA_CREDITO = {
   descuentoUsdM2: 1.00, // 1 US$ x m2
   cuotaInicialMinimaPct: 1.5, // 1.50% de cuota inicial
-  tcOficialVenta: 12.00,
+  get tcOficialVenta() { return getExchangeRate(); },
   escalonadoMensual: false // Ventas nuevas no aplica escalonado
 };
