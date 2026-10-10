@@ -19,8 +19,8 @@ test('strings dinámicos se escapan en HTML y los datos comerciales conservan su
   assert.ok(html.includes('&lt;img'));
   assert.ok(html.includes('1234'));
 });
-test('proyección HTML y texto coinciden en Bs y contienen los siete proyectos', () => {
-  const form={equipo:'Oscar Saravia', fechaInicio:'2026-10-05',objetivoMensual:111000,asesores:REFERENCE_ADVISORS.map(a=>({nombre:a.nombre,colAct:a.actualBs,projectionBs:a.projectionBs,dias:Array(7).fill(0),proy:Array(7).fill(0)}))};
+test('proyección HTML y texto coinciden en USD y contienen los siete proyectos', () => {
+  const form={equipo:'Oscar Saravia', fechaInicio:'2026-10-05',objetivoMensual:111000,asesores:REFERENCE_ADVISORS.map(a=>({nombre:a.nombre,colAct:a.actualUsd,projectionUsd:a.projectionUsd,dias:Array(7).fill(0),proy:Array(7).fill(0)}))};
   for (const output of [generarHtmlProyeccion(form),generarTextoProyeccionCelular(form)]) {
     assert.ok(output.includes('17,700.00'));
     assert.ok(output.includes('65,300.00'));
@@ -28,7 +28,7 @@ test('proyección HTML y texto coinciden en Bs y contienen los siete proyectos',
     assert.ok(!output.includes('undefined'));
   }
   assert.ok(generarHtmlProyeccion(form).includes('Cañaveral'));
-  assert.ok(generarHtmlProyeccion(form).includes('Bs 65,300.00'));
+  assert.ok(generarHtmlProyeccion(form).includes('USD 65,300.00'));
 });
 test('redacción corregida en alta y pendiente de validación', () => {
   assert.ok(generarTextoAltaCRMCelular({}).includes('se está integrando'));

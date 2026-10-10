@@ -72,14 +72,14 @@ export const generarTextoAmortizacionCelular = (formAmortizacion, calculos) => {
 };
 
 export const generarTextoProyeccionCelular = (formProyeccion) => {
-  let texto = `{{SALUDO_TIEMPO}}\n{{NOMBRE_SUPERVISOR}},\n\nAdjunto la referencia comercial y la proyección semanal del equipo en bolivianos. Las proyecciones no representan ventas cerradas; su asignación diaria está pendiente.\n\n`;
+  let texto = `{{SALUDO_TIEMPO}}\n{{NOMBRE_SUPERVISOR}},\n\nAdjunto la referencia comercial y la proyección semanal del equipo en dólares americanos (USD). Las proyecciones no representan ventas cerradas; su asignación diaria está pendiente.\n\n`;
 
   let sumColAct = 0;
   let sumTotalColMes = 0;
 
   if (formProyeccion && Array.isArray(formProyeccion.asesores)) {
     formProyeccion.asesores.forEach((asesor, i) => {
-      const sumDias = asesor.projectionBs ?? (Array.isArray(asesor.dias) ? asesor.dias.reduce((a, b) => a + (Number(b) || 0), 0) : 0);
+      const sumDias = asesor.projectionUsd ?? (Array.isArray(asesor.dias) ? asesor.dias.reduce((a, b) => a + (Number(b) || 0), 0) : 0);
       const colActualNum = Number(asesor.colAct) || 0;
       const totalColMes = colActualNum + sumDias;
       sumColAct += colActualNum;
@@ -87,9 +87,9 @@ export const generarTextoProyeccionCelular = (formProyeccion) => {
 
       if (colActualNum > 0 || sumDias > 0) {
         texto += `*${i+1}. ${asesor.nombre || ''}*\n`;
-        texto += `   📈 Colocación Actual: Bs ${formatCurrency(colActualNum)}\n`;
-        texto += `   🎯 Proyección Semanal: Bs ${formatCurrency(sumDias)}\n`;
-        texto += `   🏁 Cierre de Mes: Bs ${formatCurrency(totalColMes)}\n\n`;
+        texto += `   ✅ Ventas realizadas: ${asesor.confirmedSales ?? 0}\n   📈 Colocación Actual: USD ${formatCurrency(colActualNum)}\n`;
+        texto += `   🎯 Proyección Semanal: USD ${formatCurrency(sumDias)}\n`;
+        texto += `   🏁 Cierre de Mes: USD ${formatCurrency(totalColMes)}\n\n`;
       }
     });
   }
@@ -101,9 +101,9 @@ export const generarTextoProyeccionCelular = (formProyeccion) => {
   const porcentajeFin = objMensual ? (sumTotalColMes / objMensual) * 100 : 0;
 
   texto += `*📊 RESUMEN DEL EQUIPO*\n`;
-  texto += `🎯 Objetivo ${capMes}: Bs ${formatCurrency(objMensual)}\n`;
-  texto += `📈 Colocación Actual: Bs ${formatCurrency(sumColAct)} (${formatCurrency(porcentajeAvance)}%)\n`;
-  texto += `🏁 Colocación Fin de Mes: Bs ${formatCurrency(sumTotalColMes)} (${formatCurrency(porcentajeFin)}%)\n\n`;
+  texto += `🎯 Objetivo ${capMes}: USD ${formatCurrency(objMensual)}\n`;
+  texto += `📈 Colocación Actual: USD ${formatCurrency(sumColAct)} (${formatCurrency(porcentajeAvance)}%)\n`;
+  texto += `🏁 Colocación Fin de Mes: USD ${formatCurrency(sumTotalColMes)} (${formatCurrency(porcentajeFin)}%)\n\n`;
   texto += `Saludos cordiales.`;
 
   return texto;

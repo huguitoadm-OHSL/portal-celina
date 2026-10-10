@@ -1,31 +1,22 @@
 import { reportedSalesByProject } from '../utils/commercial';
-import { REFERENCE_ADVISORS, REPORTED_SALES } from '../constants/commercialReference';
+import { useCommercial } from '../hooks/useCommercial';
 import React from 'react';
 import { Target, TrendingUp, Users } from 'lucide-react';
 import { formatCurrency } from '../utils/formatters';
 
 const PROYECTOS_ACTUALIZADOS = ['Muyurina', 'Renacer', 'Santa Fe', 'Rancho Nuevo', 'Jardines', 'Celina VII F3', 'Cañaveral'];
 
-// Ventas reportadas por supervisión; no se escriben registros en el CRM.
-const BASE_DE_DATOS_PBI = REFERENCE_ADVISORS.map(a => ({ nombre: a.nombre, colAct: a.actualBs, ventasReales: reportedSalesByProject(PROYECTOS_ACTUALIZADOS, REPORTED_SALES.filter(sale => sale.advisorId === a.id)), tipo: 'INTERNO' }));
-
 export default function SeguimientoVentas() {
-  const ventasPorProyecto = [0, 0, 0, 0, 0, 0, 0];
-
-  const datosProcesados = BASE_DE_DATOS_PBI.map(asesor => {
-    let totalVentas = 0;
-    asesor.ventasReales.forEach((cant, i) => {
-      ventasPorProyecto[i] += cant;
-      totalVentas += cant;
-    });
-
+  const { advisors, sales } = useCommercial();
+  const ventasPorProyecto = reportedSalesByProject(PROYECTOS_ACTUALIZADOS, sales);
+  const datosProcesados = advisors.map(asesor => {
     let clusterInfo = { texto: 'Venta Cero', color: 'text-[var(--text-muted)] font-semibold' };
-    if (asesor.colAct >= 18000) clusterInfo = { texto: 'Comisionan', color: 'text-emerald-600 font-bold' };
-    else if (asesor.colAct > 0) clusterInfo = { texto: 'No Comisionan', color: 'text-amber-600 font-bold' };
+    if (asesor.actualUsd >= 18000) clusterInfo = { texto: 'Comisionan', color: 'text-emerald-600 font-bold' };
+    else if (asesor.actualUsd > 0) clusterInfo = { texto: 'No Comisionan', color: 'text-amber-600 font-bold' };
 
     return {
       nombre: asesor.nombre, agencia: 'MONTERO', supervisor: 'OSCAR SARAVIA',
-      ventas: totalVentas, colocacion: asesor.colAct, tipo: asesor.tipo,
+      ventas: asesor.confirmedSales, colocacion: asesor.actualUsd, tipo: 'INTERNO',
       minima: 18000, cluster: clusterInfo
     };
   });
@@ -33,8 +24,8 @@ export default function SeguimientoVentas() {
   const maxVentaProy = Math.max(...ventasPorProyecto, 0);
 
   // KPIS EXACTOS DEL PBI DE CELINA
-  const totalAsesores = 7;
-  const totalAntiguos = 7;
+  const totalAsesores = advisors.length;
+  const totalAntiguos = advisors.length;
 
   const productivos = datosProcesados.filter(a => a.colocacion >= 18000).length;
   // Productividad calculada sobre la base de antiguos para igualar el 25% de Power BI
@@ -42,7 +33,7 @@ export default function SeguimientoVentas() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <p className="source-note">Ventas reportadas: Marisol, 1 lote en Los Jardines el 09/10/2026, USD 11.200. Colocación de este cuadro: referencia anterior en Bs, conservada sin reconvertir ni sumar nuevamente. Umbral heredado 18.000: moneda pendiente de confirmación.</p>
+      <p className="source-note">Solo ventas realizadas y colocación en USD, desde la misma fuente de Inicio, Proyección Semanal e Incentivos. Marisol: 1 lote en Los Jardines, USD 11.200, el 09/10/2026. Umbral heredado de comisiones: USD 18.000.</p>
       <div className="mb-6 flex justify-between items-end">
         <h2 className="text-2xl font-bold text-[var(--text-primary)] flex items-center">
           <Target className="w-6 h-6 mr-2 text-indigo-600" /> Detalle de Asesor Mes en Curso
@@ -89,9 +80,9 @@ export default function SeguimientoVentas() {
                 <th className="p-3 font-bold uppercase tracking-wider text-center">Agencia</th>
                 <th className="p-3 font-bold uppercase tracking-wider text-center">Supervisor</th>
                 <th className="p-3 font-black uppercase tracking-wider text-center bg-[var(--bg-card-inner)] border-b border-[var(--border-glow)]">Ventas</th>
-                <th className="p-3 font-bold uppercase tracking-wider text-right">Colocación ▼</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-right">Colocación USD ▼</th>
                 <th className="p-3 font-bold uppercase tracking-wider text-center">Tipo Asesor</th>
-                <th className="p-3 font-bold uppercase tracking-wider text-right">Venta Minima</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-right">Venta mínima USD</th>
                 <th className="p-3 font-bold uppercase tracking-wider text-center">Cluster</th>
               </tr>
             </thead>

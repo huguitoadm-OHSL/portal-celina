@@ -7,7 +7,7 @@ export const DATA_VERSION = "v4.0 - Octubre 2026";
 
 // Parámetros Financieros Oficiales
 export const obtenerTCOficial = getExchangeRate;
-export const META_EQUIPO_OCTUBRE_BS = 111000;
+export const META_EQUIPO_OCTUBRE_USD = 111000;
 export const CORREO_SUPERVISION_RESPALDO = "ohsaravia@celina.com.bo";
 
 // Directorio de Aprobadores Oficiales (Quienes aplican descuentos en sistema)

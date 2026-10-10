@@ -15,7 +15,7 @@ export const SUPERVISORES = [
 ];
 
 export const EQUIPOS_ASESORES = {
-  "Oscar Saravia": REFERENCE_ADVISORS.map(a => ({ nombre: a.nombre, colAct: a.actualBs, tipo: 'Interno', ventas: a.referenceSales, source: 'Referencia de supervisión' }))
+  "Oscar Saravia": REFERENCE_ADVISORS.map(a => ({ nombre: a.nombre, colAct: a.actualUsd, tipo: 'Interno', ventas: a.confirmedSales, source: 'Referencia de supervisión' }))
 };
 
 // Compatibilidad defensiva por nombre completo

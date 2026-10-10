@@ -3,9 +3,9 @@
 ## Ejecución local
 
 - ESLint: sin errores ni advertencias.
-- Pruebas unitarias: 17 aprobadas (autorización, totales, centavos, coincidencias, saludos, escape HTML, correos, TC y frontera de medianoche en Bolivia).
+- Pruebas unitarias: 20 aprobadas (autorización, totales, centavos, coincidencias, saludos, escape HTML, correos, TC y frontera de medianoche en Bolivia).
 - Compilación Vite: correcta; 25 vistas con carga diferida.
-- Pruebas de navegador: 8 aprobadas en Chromium 153, incluyendo recorrido de los 25 módulos, temas persistentes y automático, viewport 390 × 844, vista previa de CRM con intento de inyección, sanitización de estilos remotos, conciliación y rechazo de la antigua bandera de acceso.
+- Pruebas de navegador: 10 aprobadas en Chromium 153, incluyendo recorrido de los 25 módulos, temas persistentes y automático, viewport 390 × 844, vista previa de CRM con intento de inyección, sanitización de estilos remotos, conciliación y rechazo de la antigua bandera de acceso.
 - Compilación servida con `vite preview`: exige login y no expone el botón de revisión local.
 - Inspección visual de capturas del portal real en claro, oscuro y móvil.
 
@@ -25,6 +25,17 @@ El recorrido de los 25 módulos verifica renderizado y ausencia de errores JavaS
 - Outlook: prueba de la política compartida; conserva copias operativas, elimina la copia de supervisión y evita duplicar el destinatario.
 - Recorrido de las vistas previas de correo de los 25 módulos: sin tokens de saludo pendientes, tratamientos repetidos, undefined, NaN ni artefactos de separadores.
 - Concordancia singular/plural de seguro y reenvío; redacción profesional y tratamiento de usted en las plantillas auditadas.
-- ESLint, 17 pruebas unitarias y build aprobados. Navegación: 8 pruebas aprobadas.
+- ESLint, 20 pruebas unitarias y build aprobados. Navegación: 10 pruebas aprobadas.
 
 La publicación del portal vigente está autorizada, pero el destino de alojamiento y una cuenta de Firebase habilitada todavía no están identificados/verificados. La vista previa privada es independiente y no acredita un inicio de sesión de Firebase en producción.
+
+## Consistencia de las cuatro vistas en USD
+
+- Verificación de USD 17.700 realizados, USD 47.600 proyectados, USD 65.300 de cierre proyectado y USD 111.000 de meta.
+- Las cuatro vistas muestran 1 venta y USD 11.200 para Marisol.
+- Editar proyección y posibles lotes cambia solo el escenario proyectado; la colocación e Incentivos siguen con ventas realizadas.
+- Una venta de prueba añadida a un Provider aislado actualiza las cuatro vistas. Repetir su identificador/contrato no duplica el conteo ni el importe.
+- Una simulación de Incentivos no altera Seguimiento ni la colocación semanal.
+- El registro único rechaza moneda distinta de USD, importes inválidos, asesores desconocidos y ventas proyectadas como realizadas.
+
+Las referencias iniciales en Bs fueron sustituidas por USD tras confirmación expresa de supervisión. No se usó TC para cambiar la magnitud de los importes.

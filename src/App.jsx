@@ -1,10 +1,8 @@
-import { useBusinessDate } from './hooks/useBusinessDate';
 import { lazy, Suspense, useState } from 'react';
 import AuthGate from './components/AuthGate';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { ThemeSelector } from './components/ui/ThemeSelector';
 import { useTheme } from './hooks/useTheme';
-import { getExchangeRate } from './constants/exchangeRates';
 import { Sidebar } from './components/layout/Sidebar';
 import { MobileHeader } from './components/layout/MobileHeader';
 
@@ -47,7 +45,6 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [, setSupervisorDestino] = useState('');
   const [theme, setTheme] = useTheme();
-  const businessDay = useBusinessDate();
 
   const renderContent = () => {
     switch (activeTab) {
@@ -108,7 +105,7 @@ export default function App() {
 
       <main id="main-content" className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 md:p-8 w-full min-h-[calc(100vh-64px)] md:min-h-screen bg-[var(--bg-space)]">
         <div className="max-w-[1600px] mx-auto w-full pb-10">
-          <header className="workspace-toolbar"><div><p className="eyebrow">PORTAL CELINA / ESPACIO DE TRABAJO</p><span>Equipo Oscar Saravia · Montero</span></div><div className="toolbar-actions"><span className="rate-pill">TC Bs {getExchangeRate(businessDay).toFixed(2).replace('.', ',')} / USD</span><ThemeSelector theme={theme} onChange={setTheme}/></div></header>
+          <header className="workspace-toolbar"><div><p className="eyebrow">PORTAL CELINA / ESPACIO DE TRABAJO</p><span>Equipo Oscar Saravia · Montero</span></div><div className="toolbar-actions"><span className="rate-pill">Gestión comercial · USD</span><ThemeSelector theme={theme} onChange={setTheme}/></div></header>
           <ErrorBoundary key={activeTab}><Suspense fallback={<div className="panel" role="status">Cargando módulo…</div>}>{renderContent()}</Suspense></ErrorBoundary>
         </div>
       </main>

@@ -33,9 +33,10 @@ export default function ProyeccionDiaria() {
           </span>
         </div><h2 className="text-2xl font-bold text-[var(--text-primary)] flex items-center"><CalendarDays className="w-6 h-6 mr-2 text-cyan-400" /> Proyección Diaria</h2></div>
 
+      <p className="source-note">Posibles ventas y colocación proyectada en USD. Este cuadro no registra ventas realizadas ni alimenta la calificación de Incentivos.</p>
       <div className="grid grid-cols-1 xl:grid-cols-[1.5fr_1fr] 2xl:grid-cols-[2fr_1fr] gap-8 w-full">
         <div className="bg-[var(--bg-card)] border border-[var(--border-glow)] rounded-3xl text-[var(--text-primary)] shadow-2xl overflow-hidden shadow-sm flex flex-col min-w-0">
-          <div className="bg-[var(--bg-card-inner)] border-b border-[var(--border-glow)] text-[var(--text-primary)] p-3"><h3 className="text-sm font-bold">Proyeccion Diaria Equipo "MAQUINA DE VENTAS"</h3></div>
+          <div className="bg-[var(--bg-card-inner)] border-b border-[var(--border-glow)] text-[var(--text-primary)] p-3"><h3 className="text-sm font-bold">Proyección diaria del equipo · posibles ventas en USD</h3></div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left border-collapse min-w-[800px]">
               <thead>

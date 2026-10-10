@@ -1,13 +1,13 @@
-export function summarizeCommercial(advisors, targetBs) {
+export function summarizeCommercial(advisors, targetUsd) {
   const safe = value => {
     const n = Number(value);
     if (!Number.isFinite(n) || n < 0) throw new Error('Los importes deben ser positivos o cero');
     return Math.round(n * 100);
   };
-  const actual = advisors.reduce((total, a) => total + safe(a.actualBs), 0);
-  const projected = advisors.reduce((total, a) => total + safe(a.projectionBs), 0);
-  const target = safe(targetBs);
-  return { actualBs: actual / 100, projectionBs: projected / 100, totalBs: (actual + projected) / 100, gapBs: Math.max(0, target - actual - projected) / 100, achievementPct: target ? (actual + projected) / target * 100 : 0, currentPct: target ? actual / target * 100 : 0 };
+  const actual = advisors.reduce((total, a) => total + safe(a.actualUsd), 0);
+  const projected = advisors.reduce((total, a) => total + safe(a.projectionUsd), 0);
+  const target = safe(targetUsd);
+  return { actualUsd: actual / 100, projectionUsd: projected / 100, totalUsd: (actual + projected) / 100, gapUsd: Math.max(0, target - actual - projected) / 100, achievementPct: target ? (actual + projected) / target * 100 : 0, currentPct: target ? actual / target * 100 : 0 };
 }
 
 export function reconcileSale(reference, records) {
@@ -27,5 +27,6 @@ export function reportedSalesForAdvisor(advisorId, sales) {
 }
 
 export function reportedSalesByProject(projects, sales) {
-  return projects.map(project => sales.filter(sale => sale.project.replace(/^Los /, '') === project.replace(/^Los /, '')).reduce((total, sale) => total + sale.lots, 0));
+  const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase().replace(/^(el|los)\s+/, '');
+  return projects.map(project => sales.filter(sale => normalize(sale.project) === normalize(project)).reduce((total, sale) => total + sale.lots, 0));
 }

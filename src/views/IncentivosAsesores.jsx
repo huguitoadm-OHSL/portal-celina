@@ -1,5 +1,5 @@
 import { CORREO_SUPERVISION_RESPALDO as CORREO_RESPALDO_OSCAR } from '../constants/config';
-import { MARISOL_REFERENCE } from '../constants/commercialReference';
+import { useCommercial } from '../hooks/useCommercial';
 import { emailCopies, composeEmailUrl } from '../services/emailDelivery';
 import { escapeHtml, sanitizeEmailHtml, copyEmail, greeting } from '../services/email';
 import React, { useState, useMemo } from 'react';
@@ -43,20 +43,13 @@ const ETAPAS_CONCURSO = {
   }
 };
 
-const ASESORES_INICIALES = [
-  { id: 1, nombre: "Carlos Enrique Calderon Montano", ventas: 1, colocacion: 6500, carpetasAlDia: true },
-  { id: 2, nombre: "Ely Gonzales Garcia", ventas: 0, colocacion: 0, carpetasAlDia: true },
-  { id: 3, nombre: "Jaime Fabricio Rios Castro", ventas: 0, colocacion: 0, carpetasAlDia: true },
-  { id: 4, nombre: "Jimmy Gonzales Nuñez", ventas: 0, colocacion: 0, carpetasAlDia: true },
-  { id: 5, nombre: "Jose Gabriel Padilla Loayza", ventas: 0, colocacion: 0, carpetasAlDia: true },
-  { id: 6, nombre: MARISOL_REFERENCE.advisor, ventas: MARISOL_REFERENCE.lots, colocacion: MARISOL_REFERENCE.amountUsd, carpetasAlDia: true },
-  { id: 7, nombre: "Merly Mendez Hurtado", ventas: 0, colocacion: 0, carpetasAlDia: true }
-];
-
 export default function IncentivosAsesores() {
   const [etapaSeleccionada, setEtapaSeleccionada] = useState("sep_oct");
-  const [metaGrupalUSD, setMetaGrupalUSD] = useState(111000);
-  const [asesores, setAsesores] = useState(ASESORES_INICIALES);
+  const { advisors, targetUsd: metaGrupalUSD, setTargetUsd: setMetaGrupalUSD } = useCommercial();
+  const [simulation, setSimulation] = useState(null);
+  const [folders, setFolders] = useState({});
+  const actualAdvisors = useMemo(() => advisors.map(advisor => ({ id: advisor.id, nombre: advisor.nombre, ventas: advisor.confirmedSales, colocacion: advisor.actualUsd, carpetasAlDia: folders[advisor.id] ?? true })), [advisors, folders]);
+  const asesores = simulation ?? actualAdvisors;
   const [destinatarioEmail] = useState(DIRECTORES_APROBACION[0].email);
   const [notificacion, setNotificacion] = useState(null);
 
@@ -68,17 +61,13 @@ export default function IncentivosAsesores() {
   const getSaludoHorario = greeting;
 
   const handleAsesorChange = (id, field, value) => {
-    setAsesores(prev => prev.map(a => {
-      if (a.id === id) {
-        return { ...a, [field]: value };
-      }
-      return a;
-    }));
+    if (simulation) setSimulation(previous => previous.map(advisor => advisor.id === id ? { ...advisor, [field]: value } : advisor));
+    else if (field === 'carpetasAlDia') setFolders(previous => ({ ...previous, [id]: value }));
   };
 
   // ================= MOTOR DE EVALUACIÓN SEGÚN BASES OFICIALES =================
   const evaluacion = useMemo(() => {
-    const meta = parseFloat(metaGrupalUSD) || 111000;
+    const meta = Number(metaGrupalUSD);
     const meta110 = meta * 1.10;
     const meta120 = meta * 1.20;
 
@@ -122,20 +111,20 @@ export default function IncentivosAsesores() {
 
     // 3. Determinación de Niveles de Premiación Ganados
     let nivelGanado = null;
-    let bonoPorAsesorBs = 0;
+    let bonoPorAsesorUsd = 0;
     let textoBono = "Sin bono alcanzado";
     let claseEstado = "border-slate-800 bg-[var(--bg-card)]";
 
     if (cumpleProductividad) {
       if (porcentajeGrupal >= 120) {
         nivelGanado = "NIVEL 2";
-        bonoPorAsesorBs = 1100;
-        textoBono = "¡NIVEL 2 ALCANZADO (120%)! Bono de 1.100 Bs por asesor productivo";
+        bonoPorAsesorUsd = 1100;
+        textoBono = "¡NIVEL 2 ALCANZADO (120%)! Bono de 1.100 USD por asesor productivo";
         claseEstado = "border-emerald-500/60 bg-gradient-to-r from-[var(--bg-card-inner)] to-[var(--bg-card)]";
       } else if (porcentajeGrupal >= 110) {
         nivelGanado = "NIVEL 1";
-        bonoPorAsesorBs = 700;
-        textoBono = "¡NIVEL 1 ALCANZADO (110%)! Bono de 700 Bs por asesor productivo";
+        bonoPorAsesorUsd = 700;
+        textoBono = "¡NIVEL 1 ALCANZADO (110%)! Bono de 700 USD por asesor productivo";
         claseEstado = "border-cyan-500/60 bg-gradient-to-r from-[var(--bg-card-inner)] to-[var(--bg-card)]";
       } else {
         textoBono = `Productividad cumplida (${porcentajeProductividad.toFixed(0)}%), pero falta colocación para el 110% (Avance: ${porcentajeGrupal.toFixed(1)}%)`;
@@ -148,7 +137,7 @@ export default function IncentivosAsesores() {
       }
     }
 
-    const totalBonoEquipoBs = bonoPorAsesorBs * totalProductivos;
+    const totalBonoEquipoUsd = bonoPorAsesorUsd * totalProductivos;
     const faltaPara110Usd = Math.max(0, meta110 - colocacionTotal);
     const faltaPara120Usd = Math.max(0, meta120 - colocacionTotal);
     const faltanProductivos = Math.max(0, minProductivosRequeridos - totalProductivos);
@@ -165,8 +154,8 @@ export default function IncentivosAsesores() {
       minProductivosRequeridos,
       cumpleProductividad,
       nivelGanado,
-      bonoPorAsesorBs,
-      totalBonoEquipoBs,
+      bonoPorAsesorUsd,
+      totalBonoEquipoUsd,
       textoBono,
       claseEstado,
       faltaPara110Usd,
@@ -185,7 +174,7 @@ export default function IncentivosAsesores() {
     return emailCopies('outlook', otros, destinatarioEmail).join(', ');
   }, [destinatarioEmail]);
 
-  const asuntoCorreo = `Reporte y Solicitud de Incentivo Celina 2026 (${etapaActual.nombre}) - Equipo Montero Oscar Saravia`;
+  const asuntoCorreo = `${simulation ? '[SIMULACIÓN] ' : ''}Reporte y Solicitud de Incentivo Celina 2026 (${etapaActual.nombre}) - Equipo Montero Oscar Saravia`;
 
   const generarHTMLCorreo = () => {
     return `
@@ -193,7 +182,7 @@ export default function IncentivosAsesores() {
   <p style="margin: 0 0 10px; font-size: 15px;">${getSaludoHorario()}</p>
   <p style="margin: 0 0 16px; font-size: 15px;">Estimado <strong>${destinatarioObj.nombre}</strong>,</p>
   <p style="margin: 0 0 20px; font-size: 14px; color: #334155;">
-    Presento el informe de cumplimiento de metas del
+    ${simulation ? 'Presento una simulación que no registra ventas ni autoriza pagos del' : 'Presento el informe de cumplimiento de metas del'}
     <strong>CONCURSO INTERNO "INCENTIVO CELINA 2026"</strong> para la etapa <strong>${etapaActual.nombre}</strong>,
     correspondiente a la Supervisión Comercial de Montero (Supervisor: Oscar Hugo Saravia L.):
   </p>
@@ -219,11 +208,11 @@ export default function IncentivosAsesores() {
         <div style="margin: 20px 0 15px; text-align: center; background-color: #050b18; padding: 18px; border-radius: 12px; border: 1px solid #14233c;">
           <span style="font-size: 10px; color: #94a3b8; font-weight: bold; text-transform: uppercase;">BONO INDIVIDUAL POR ASESOR PRODUCTIVO</span>
           <div style="font-size: 42px; font-weight: 900; color: ${evaluacion.nivelGanado ? '#34d399' : '#e2e8f0'}; letter-spacing: -1px; margin: 4px 0;">
-            ${evaluacion.bonoPorAsesorBs > 0 ? `${formatMoneda(evaluacion.bonoPorAsesorBs)} Bs.` : '0 Bs.'}
+            ${evaluacion.bonoPorAsesorUsd > 0 ? `${formatMoneda(evaluacion.bonoPorAsesorUsd)} USD` : '0 USD'}
           </div>
           <div style="font-size: 13px; color: #94a3b8;">
             Total a liquidar equipo (${evaluacion.totalProductivos} asesores calificados):
-            <strong style="color: #ffffff; font-size: 15px;">${formatMoneda(evaluacion.totalBonoEquipoBs)} Bs.</strong>
+            <strong style="color: #ffffff; font-size: 15px;">${formatMoneda(evaluacion.totalBonoEquipoUsd)} USD</strong>
           </div>
         </div>
 
@@ -258,7 +247,7 @@ export default function IncentivosAsesores() {
         <th style="border: 1px solid #cbd5e1; text-align: right;">Colocación ($)</th>
         <th style="border: 1px solid #cbd5e1; text-align: center;">10 Días</th>
         <th style="border: 1px solid #cbd5e1; text-align: center;">Condición</th>
-        <th style="border: 1px solid #cbd5e1; text-align: right;">Bono Bs.</th>
+        <th style="border: 1px solid #cbd5e1; text-align: right;">Bono USD</th>
       </tr>
     </thead>
     <tbody>
@@ -272,8 +261,8 @@ export default function IncentivosAsesores() {
           <td style="border: 1px solid #cbd5e1; text-align: center; font-weight: bold; color: ${a.esProductivo ? '#16a34a' : '#64748b'};">
             ${a.esProductivo ? 'PRODUCTIVO' : 'NO CUMPLE'}
           </td>
-          <td style="border: 1px solid #cbd5e1; text-align: right; font-weight: bold; font-family: monospace; color: ${a.esProductivo && evaluacion.bonoPorAsesorBs > 0 ? '#16a34a' : '#94a3b8'};">
-            ${a.esProductivo && evaluacion.bonoPorAsesorBs > 0 ? `${formatMoneda(evaluacion.bonoPorAsesorBs)} Bs.` : '0 Bs.'}
+          <td style="border: 1px solid #cbd5e1; text-align: right; font-weight: bold; font-family: monospace; color: ${a.esProductivo && evaluacion.bonoPorAsesorUsd > 0 ? '#16a34a' : '#94a3b8'};">
+            ${a.esProductivo && evaluacion.bonoPorAsesorUsd > 0 ? `${formatMoneda(evaluacion.bonoPorAsesorUsd)} USD` : '0 USD'}
           </td>
         </tr>
       `).join('')}
@@ -293,7 +282,7 @@ export default function IncentivosAsesores() {
 
 Estimado ${destinatarioObj.nombre},
 
-Presento el informe de seguimiento del concurso "INCENTIVO CELINA 2026" (${etapaActual.nombre}):
+${simulation ? 'Presento una simulación, sin registrar ventas, del concurso' : 'Presento el informe de seguimiento del concurso'} "INCENTIVO CELINA 2026" (${etapaActual.nombre}):
 
 📍 SUPERVISIÓN: Oscar Saravia L. (Montero)
 🎯 META GRUPAL: $ ${formatMoneda(evaluacion.meta)} USD
@@ -302,11 +291,11 @@ Presento el informe de seguimiento del concurso "INCENTIVO CELINA 2026" (${etapa
 
 🏆 RESULTADO DEL EQUIPO:
 ${evaluacion.textoBono}
-• Bono por asesor calificado: ${formatMoneda(evaluacion.bonoPorAsesorBs)} Bs.
-• Total liquidación del equipo: ${formatMoneda(evaluacion.totalBonoEquipoBs)} Bs.
+• Bono por asesor calificado: ${formatMoneda(evaluacion.bonoPorAsesorUsd)} USD
+• Total liquidación del equipo: ${formatMoneda(evaluacion.totalBonoEquipoUsd)} USD
 
 RESUMEN POR ASESOR:
-${evaluacion.asesoresEvaluados.map(a => `• ${a.nombre}: ${a.ventasNum} ventas | USD ${formatMoneda(a.colocacionNum)} | ${a.esProductivo ? 'PRODUCTIVO (Gana ' + formatMoneda(evaluacion.bonoPorAsesorBs) + ' Bs)' : 'NO CUMPLE'}`).join('\n')}
+${evaluacion.asesoresEvaluados.map(a => `• ${a.nombre}: ${a.ventasNum} ventas | USD ${formatMoneda(a.colocacionNum)} | ${a.esProductivo ? 'PRODUCTIVO (Gana ' + formatMoneda(evaluacion.bonoPorAsesorUsd) + ' USD)' : 'NO CUMPLE'}`).join('\n')}
 
 Saludos cordiales,
 Oscar Hugo Saravia L.`;
@@ -342,7 +331,8 @@ Oscar Hugo Saravia L.`;
   return (
     <div className="w-full text-[var(--text-primary)] font-sans space-y-6 pb-12 antialiased">
       <details className="panel mb-6"><summary>Vista previa del correo · revisar antes de enviar</summary><div className="email-preview" dangerouslySetInnerHTML={{ __html: sanitizeEmailHtml(generarHTMLCorreo()) }}/></details>
-      <p className="source-note">Incentivos en USD. Marisol: 1 venta en Los Jardines, USD 11.200, ingresada el 09/10/2026 y reportada por supervisión. La regla individual se mantiene: 2 ventas o USD 15.000 y carpetas al día; esta venta sola no alcanza el umbral. La meta y el antecedente de Carlos se conservan según el simulador original. No se mezclan con los importes en Bs del dashboard ni se liquida un bono automáticamente.</p>
+      <p className="source-note">Colocación en USD y ventas realizadas desde la misma fuente de Inicio, Proyección Semanal y Seguimiento. Marisol: 1 venta en Los Jardines, USD 11.200, ingresada el 09/10/2026. Las posibles ventas no se usan para calificar. La regla se mantiene: 2 ventas realizadas o USD 15.000 y carpetas al día; esta venta sola no alcanza el umbral. No se paga un bono automáticamente.</p>
+      <div className="panel"><button className="primary-button" onClick={() => setSimulation(simulation ? null : actualAdvisors.map(advisor => ({ ...advisor })))}>{simulation ? 'Volver a ventas realizadas' : 'Simular escenario de incentivos'}</button><p role="status">{simulation ? 'Simulación: estos cambios no registran ventas ni afectan los otros módulos.' : 'Ventas realizadas: cantidades y colocación sincronizadas. Para probar valores distintos, active la simulación.'}</p></div>
       {/* ================= HERO PRINCIPAL ================= */}
       <div className={`rounded-3xl p-6 sm:p-8 border shadow-2xl relative overflow-hidden transition-all duration-500 ${evaluacion.claseEstado}`}>
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[140px] pointer-events-none"></div>
@@ -370,16 +360,16 @@ Oscar Hugo Saravia L.`;
               Bono Por Asesor Productivo
             </span>
             <div className="text-4xl font-black text-[var(--text-primary)] font-mono flex items-center justify-center gap-1.5">
-              <span className={evaluacion.bonoPorAsesorBs > 0 ? "text-emerald-400" : "text-[var(--text-muted)]"}>
-                {evaluacion.bonoPorAsesorBs > 0 ? `${formatMoneda(evaluacion.bonoPorAsesorBs)}` : '0'}
+              <span className={evaluacion.bonoPorAsesorUsd > 0 ? "text-emerald-400" : "text-[var(--text-muted)]"}>
+                {evaluacion.bonoPorAsesorUsd > 0 ? `${formatMoneda(evaluacion.bonoPorAsesorUsd)}` : '0'}
               </span>
-              <span className="text-lg text-[var(--text-muted)]">Bs.</span>
+              <span className="text-lg text-[var(--text-muted)]">USD</span>
             </div>
             <div className="text-[11px] font-bold text-cyan-300 mt-1">
               {evaluacion.nivelGanado ? `${evaluacion.nivelGanado} DESBLOQUEADO` : 'Aún no clasificado'}
             </div>
             <div className="text-[10px] text-slate-500 mt-0.5">
-              Total equipo: Bs. {formatMoneda(evaluacion.totalBonoEquipoBs)}
+              Total equipo: USD {formatMoneda(evaluacion.totalBonoEquipoUsd)}
             </div>
           </div>
         </div>
@@ -429,7 +419,7 @@ Oscar Hugo Saravia L.`;
               <p className="text-xs text-[var(--text-muted)]">+ Productividad {etapaActual.productividadRequeridaPct}% de la etapa</p>
             </div>
             <div className="text-right">
-              <span className="text-2xl font-black text-cyan-300 font-mono">700 Bs.</span>
+              <span className="text-2xl font-black text-cyan-300 font-mono">700 USD</span>
               <span className="block text-[9px] text-[var(--text-muted)] uppercase">Por Asesor</span>
             </div>
           </div>
@@ -454,7 +444,7 @@ Oscar Hugo Saravia L.`;
               <p className="text-xs text-[var(--text-muted)]">+ Productividad {etapaActual.productividadRequeridaPct}% de la etapa</p>
             </div>
             <div className="text-right">
-              <span className="text-2xl font-black text-emerald-400 font-mono">1.100 Bs.</span>
+              <span className="text-2xl font-black text-emerald-400 font-mono">1.100 USD</span>
               <span className="block text-[9px] text-[var(--text-muted)] uppercase">Por Asesor</span>
             </div>
           </div>
@@ -526,6 +516,7 @@ Oscar Hugo Saravia L.`;
                       min="0"
                       step="1"
                       aria-label={`Ventas de ${a.nombre}`}
+                      readOnly={!simulation}
                       value={a.ventas}
                       onChange={(e) => handleAsesorChange(a.id, 'ventas', e.target.value)}
                       className="w-16 px-2 py-1 bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-lg text-center font-black text-[var(--text-primary)] focus:border-cyan-400 outline-none"
@@ -541,6 +532,7 @@ Oscar Hugo Saravia L.`;
                         min="0"
                         step="0.01"
                         aria-label={`Colocación USD de ${a.nombre}`}
+                        readOnly={!simulation}
                         value={a.colocacion}
                         onChange={(e) => handleAsesorChange(a.id, 'colocacion', e.target.value)}
                         className="w-28 px-2 py-1 bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-lg text-right font-black text-[var(--text-primary)] font-mono focus:border-cyan-400 outline-none"
@@ -576,10 +568,10 @@ Oscar Hugo Saravia L.`;
 
                   {/* Bono Ganado */}
                   <td className="py-3 px-3 text-right font-mono font-black text-sm">
-                    {a.esProductivo && evaluacion.bonoPorAsesorBs > 0 ? (
-                      <span className="text-emerald-400">{formatMoneda(evaluacion.bonoPorAsesorBs)} Bs.</span>
+                    {a.esProductivo && evaluacion.bonoPorAsesorUsd > 0 ? (
+                      <span className="text-emerald-400">{formatMoneda(evaluacion.bonoPorAsesorUsd)} USD</span>
                     ) : (
-                      <span className="text-slate-600">0 Bs.</span>
+                      <span className="text-slate-600">0 USD</span>
                     )}
                   </td>
                 </tr>
@@ -662,8 +654,8 @@ Oscar Hugo Saravia L.`;
           <div className="bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] p-4 rounded-2xl">
             <span className="text-[10px] font-black text-emerald-400 uppercase block mb-1">4. Cumplan en Equipo</span>
             <p className="text-[var(--text-secondary)] leading-relaxed">
-              <strong>110% de colocación:</strong> 700 Bs.<br/>
-              <strong>120% de colocación:</strong> 1.100 Bs.<br/>
+              <strong>110% de colocación:</strong> 700 USD<br/>
+              <strong>120% de colocación:</strong> 1.100 USD<br/>
               (Exigiendo {etapaActual.productividadRequeridaPct}% del equipo productivo).
             </p>
           </div>

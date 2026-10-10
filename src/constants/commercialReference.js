@@ -1,22 +1,26 @@
-// Referencia del supervisor. No representa una inserción ni una consulta al CRM.
+import { actualsByAdvisor } from '../services/commercialLedger.js';
+// Moneda comercial confirmada por supervisión: USD. No representa escrituras en CRM.
 export const REFERENCE_DATE = '2026-10-10';
-export const MONTHLY_TARGET_BS = 111000;
-export const REFERENCE_ADVISORS = Object.freeze([
-  { id: 'carlos', nombre: 'Carlos Enrique Calderon Montano', actualBs: 6500, projectionBs: 5000, referenceSales: 1 },
-  { id: 'jimmy', nombre: 'Jimmy Gonzales Nuñez', actualBs: 0, projectionBs: 8000, referenceSales: 0 },
-  { id: 'ely', nombre: 'Ely Gonzales Garcia', actualBs: 0, projectionBs: 7500, referenceSales: 0 },
-  { id: 'jaime', nombre: 'Jaime Fabricio Rios Castro', actualBs: 0, projectionBs: 6600, referenceSales: 0 },
-  { id: 'marisol', nombre: 'Marisol Urgel Pizarro', actualBs: 11200, projectionBs: 6000, referenceSales: 1 },
-  { id: 'merly', nombre: 'Merly Mendez Hurtado', actualBs: 0, projectionBs: 7500, referenceSales: 0 },
-  { id: 'jose', nombre: 'Jose Gabriel Padilla Loayza', actualBs: 0, projectionBs: 7000, referenceSales: 0 },
+export const COMMERCIAL_CURRENCY = 'USD';
+export const MONTHLY_TARGET_USD = 111000;
+export const ADVISORS = Object.freeze([
+  { id: 'carlos', nombre: 'Carlos Enrique Calderon Montano' },
+  { id: 'jimmy', nombre: 'Jimmy Gonzales Nuñez' },
+  { id: 'ely', nombre: 'Ely Gonzales Garcia' },
+  { id: 'jaime', nombre: 'Jaime Fabricio Rios Castro' },
+  { id: 'marisol', nombre: 'Marisol Urgel Pizarro' },
+  { id: 'merly', nombre: 'Merly Mendez Hurtado' },
+  { id: 'jose', nombre: 'Jose Gabriel Padilla Loayza' },
 ].map(Object.freeze));
 export const PROJECT_NAMES = ['Muyurina', 'El Renacer', 'Santa Fe', 'Rancho Nuevo', 'Jardines', 'Celina VII F3', 'Cañaveral'];
-// La asignación individual y las fechas diarias no fueron proporcionadas.
+// Posibles ventas: no se incorporan al registro de ventas realizadas.
 export const PROJECT_PROJECTION = Object.freeze({ Muyurina: 0, 'El Renacer': 4, 'Rancho Nuevo': 1, Jardines: 2 });
-// Corrección expresa de supervisión del 10/10: venta ingresada el día anterior.
-// El cuadro anterior en Bs se conserva por separado; este importe USD no se agrega a sus totales.
-export const MARISOL_REFERENCE = Object.freeze({ id: 'supervision-marisol-2026-10-09', advisor: 'Marisol Urgel Pizarro', advisorId: 'marisol', project: 'Los Jardines', lots: 1, amountUsd: 11200, currency: 'USD', date: '2026-10-09', status: 'reported_by_supervisor' });
+export const ADVISOR_PROJECTIONS_USD = Object.freeze({ carlos: 5000, jimmy: 8000, ely: 7500, jaime: 6600, marisol: 6000, merly: 7500, jose: 7000 });
+export const MARISOL_REFERENCE = Object.freeze({ id: 'supervision-marisol-2026-10-09', advisor: 'Marisol Urgel Pizarro', advisorId: 'marisol', project: 'Los Jardines', lots: 1, amountUsd: 11200, currency: 'USD', date: '2026-10-09', period: '2026-10', status: 'reported_by_supervisor' });
 export const REPORTED_SALES = Object.freeze([
-  Object.freeze({ id: 'legacy-carlos', advisorId: 'carlos', project: 'Cañaveral', lots: 1, status: 'legacy_reference' }),
+  // Se conserva el antecedente de Carlos; su fecha exacta no fue proporcionada.
+  Object.freeze({ id: 'legacy-carlos', advisor: ADVISORS[0].nombre, advisorId: 'carlos', project: 'Cañaveral', lots: 1, amountUsd: 6500, currency: 'USD', date: null, period: '2026-10', status: 'legacy_reference' }),
   MARISOL_REFERENCE,
 ]);
+// Adaptador de compatibilidad: la colocación y los lotes se derivan del registro único.
+export const REFERENCE_ADVISORS = Object.freeze(actualsByAdvisor(ADVISORS, REPORTED_SALES).map(advisor => Object.freeze({ ...advisor, projectionUsd: ADVISOR_PROJECTIONS_USD[advisor.id] })));

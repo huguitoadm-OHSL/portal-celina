@@ -1,6 +1,6 @@
 # Portal Celina V4.0
 
-Aplicación React 19 + Vite para gestión comercial inmobiliaria. Los 25 módulos existentes se conservan. Esta rama introduce temas claro, oscuro y automático; dashboard en bolivianos; correos seguros; tipo de cambio con vigencia y pruebas automatizadas.
+Aplicación React 19 + Vite para gestión comercial inmobiliaria. Los 25 módulos existentes se conservan. Esta rama introduce temas claro, oscuro y automático; dashboard en USD; correos seguros; tipo de cambio con vigencia y pruebas automatizadas.
 
 ## Ejecutar y verificar
 
@@ -24,7 +24,9 @@ En desarrollo (`npm run dev`) hay un botón **Vista de revisión local**, sin ac
 
 ## Datos y condiciones financieras
 
-El dashboard y la proyección semanal usan la referencia entregada por supervisión el 10/10/2026. No son una lectura del CRM. El cuadro original conserva Bs 17.700 sin sumar de nuevo el antecedente de Marisol. La corrección posterior de supervisión identifica Los Jardines, 09/10/2026 y USD 11.200 para Incentivos; Seguimiento muestra una venta reportada. Son referencias separadas hasta conciliar su moneda, sin registrar una operación nueva en el CRM. La conciliación de un extracto JSON ocurre en memoria y solo muestra coincidencias candidatas.
+Inicio, Proyección Semanal, Seguimiento e Incentivos usan un mismo registro de ventas realizadas y una misma colocación en USD. Supervisión confirmó que 17.700 actuales, 47.600 proyectados y 111.000 de objetivo están en dólares americanos. Marisol: Los Jardines, 1 venta del 09/10/2026, USD 11.200. Carlos conserva 1 venta en Cañaveral y USD 6.500; su fecha exacta no fue proporcionada. Las proyecciones nunca se suman a ventas realizadas ni califican para Incentivos.
+
+La conversión a Bs se limita a las simulaciones de descuentos para el cliente. El estado compartido es de sesión; no existe conexión de ventas al CRM ni escritura remota. Agregar una venta en la fuente compartida actualiza las cuatro vistas; las operaciones definitivas requieren integración y autorización. El escenario editable de Incentivos está separado de los datos realizados.
 
 El TC gerencial 11,73 aplica únicamente el 10 y 11 de octubre de 2026, en `America/La_Paz`. Fuera del intervalo se conserva la base heredada 12,00; confirmar su siguiente vigencia con gerencia. Para contratos previos, especificar el TC pactado. Ver [reglas y conciliación](docs/financial-rules.md).
 

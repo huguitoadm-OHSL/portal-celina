@@ -509,7 +509,7 @@ const generarHtmlProyeccionRaw = (formProyeccion = {}) => {
 
   const listaAsesores = Array.isArray(formProyeccion.asesores) ? formProyeccion.asesores : [];
   listaAsesores.forEach((asesor, i) => {
-    const sumDias = asesor.projectionBs ?? (Array.isArray(asesor.dias) ? asesor.dias.reduce((a, b) => a + (Number(b) || 0), 0) : 0);
+    const sumDias = asesor.projectionUsd ?? (Array.isArray(asesor.dias) ? asesor.dias.reduce((a, b) => a + (Number(b) || 0), 0) : 0);
     const colActNum = Number(asesor.colAct) || 0;
     const totalColMes = colActNum + sumDias;
 
@@ -560,17 +560,17 @@ const generarHtmlProyeccionRaw = (formProyeccion = {}) => {
   return `
   <div style="background-color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 14px; color: #334155; line-height: 1.6; max-width: 1200px; text-align: left;">
     <p style="color: #0f172a; font-size: 16px;"><b>{{SALUDO_TIEMPO}} {{NOMBRE_SUPERVISOR}},</b></p>
-    <p style="color: #334155;">Adjunto el consolidado de proyecci&oacute;n de ventas semanal del equipo. A continuaci&oacute;n el detalle de referencia en bolivianos. La distribución por día y por asesor/proyecto está pendiente; las proyecciones no representan ventas cerradas:</p>
+    <p style="color: #334155;">Adjunto el consolidado de proyecci&oacute;n de ventas semanal del equipo. A continuaci&oacute;n el detalle de referencia en dólares americanos (USD). La distribución por día y por asesor/proyecto está pendiente; las proyecciones no representan ventas cerradas:</p>
 
     <div style="overflow-x: auto; width: 100%; max-width: 100%;">
     <table border="0" cellpadding="8" cellspacing="0" style="border-collapse: collapse; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 12px; margin-top: 15px; width: 100%; min-width: 900px; text-align: left; background-color: #ffffff; border: 1px solid #e2e8f0;">
       <thead>
         <tr>
           <th colspan="3" style="background-color: #f8fafc; border-bottom: 2px solid #cbd5e1; padding: 10px; text-align: left; color: #0f172a; font-size: 13px;"><b>Equipo: ${String(formProyeccion.equipo || '')}</b></th>
-          <th colspan="7" style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1; border-left: 1px solid #e2e8f0; padding: 10px; text-align: center; color: #334155; text-transform: uppercase; font-size: 11px; letter-spacing: 1px;"><b>Proyección diaria (Bs)</b></th>
+          <th colspan="7" style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1; border-left: 1px solid #e2e8f0; padding: 10px; text-align: center; color: #334155; text-transform: uppercase; font-size: 11px; letter-spacing: 1px;"><b>Proyección diaria (USD)</b></th>
           <th colspan="7" style="background-color: #eff6ff; border-bottom: 2px solid #bae6fd; border-left: 1px solid #e2e8f0; padding: 10px; text-align: center; color: #0369a1; text-transform: uppercase; font-size: 11px; letter-spacing: 1px;"><b>Proyectos</b></th>
           <th rowspan="2" style="background-color: #f8fafc; border-bottom: 2px solid #cbd5e1; border-left: 1px solid #e2e8f0; padding: 10px; text-align: right; color: #334155; vertical-align: bottom;"><b>Total<br>Proy. Semanal</b></th>
-          <th rowspan="2" style="background-color: #f0fdf4; border-bottom: 2px solid #6ee7b7; border-left: 1px solid #e2e8f0; padding: 10px; text-align: right; color: #065f46; vertical-align: bottom;"><b>Cierre Mes<br>(Bs)</b></th>
+          <th rowspan="2" style="background-color: #f0fdf4; border-bottom: 2px solid #6ee7b7; border-left: 1px solid #e2e8f0; padding: 10px; text-align: right; color: #065f46; vertical-align: bottom;"><b>Cierre Mes<br>(USD)</b></th>
         </tr>
         <tr>
           <th style="background-color: #f8fafc; border-bottom: 2px solid #cbd5e1; padding: 8px; color: #64748b; width: 30px; text-align: center;">#</th>
@@ -587,7 +587,7 @@ const generarHtmlProyeccionRaw = (formProyeccion = {}) => {
           <td colspan="7" style="padding: 10px 8px; border-top: 2px solid #cbd5e1;"></td>
           ${sumProyA.map(p => `<td style="padding: 10px 8px; text-align: center; color: #0284c7; border-top: 2px solid #bae6fd; font-weight: bold;">${p === 0 ? '-' : p}</td>`).join('')}
           <td style="padding: 10px 8px; text-align: right; color: #0f172a; border-top: 2px solid #cbd5e1;"><b>${formatCurr(sumTotalProySemanal)}</b></td>
-          <td style="padding: 10px 8px; text-align: right; color: #059669; border-top: 2px solid #6ee7b7; background-color: #d1fae5; font-size: 14px;"><b>Bs ${formatCurr(sumTotalColMes)}</b></td>
+          <td style="padding: 10px 8px; text-align: right; color: #059669; border-top: 2px solid #6ee7b7; background-color: #d1fae5; font-size: 14px;"><b>USD ${formatCurr(sumTotalColMes)}</b></td>
         </tr>
       </tbody>
     </table>
@@ -601,19 +601,19 @@ const generarHtmlProyeccionRaw = (formProyeccion = {}) => {
       </tr>
       <tr>
         <td style="padding: 12px 16px; color: #475569; font-size: 13px; border-bottom: 1px solid #f1f5f9;"><b>Objetivo del Mes</b></td>
-        <td style="padding: 12px 16px; text-align: right; color: #0f172a; font-size: 14px; font-weight: bold; border-bottom: 1px solid #f1f5f9;">Bs ${formatCurr(objMensual)}</td>
+        <td style="padding: 12px 16px; text-align: right; color: #0f172a; font-size: 14px; font-weight: bold; border-bottom: 1px solid #f1f5f9;">USD ${formatCurr(objMensual)}</td>
       </tr>
       <tr>
         <td style="padding: 12px 16px; color: #475569; font-size: 13px; border-bottom: 1px solid #f1f5f9;"><b>Colocaci&oacute;n Actual</b></td>
         <td style="padding: 12px 16px; text-align: right; border-bottom: 1px solid #f1f5f9;">
-          <span style="color: #0f172a; font-size: 14px; font-weight: bold;">Bs ${formatCurr(sumColAct)}</span>
+          <span style="color: #0f172a; font-size: 14px; font-weight: bold;">USD ${formatCurr(sumColAct)}</span>
           <span style="display: inline-block; background-color: #f1f5f9; color: #334155; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 8px; font-weight: bold;">${formatCurr(porcentajeAvance)}%</span>
         </td>
       </tr>
       <tr>
         <td style="padding: 14px 16px; color: #0f172a; font-size: 14px;"><b>Proyecci&oacute;n Cierre de Mes</b></td>
         <td style="padding: 14px 16px; text-align: right;">
-          <span style="color: #059669; font-size: 16px; font-weight: bold;">Bs ${formatCurr(sumTotalColMes)}</span>
+          <span style="color: #059669; font-size: 16px; font-weight: bold;">USD ${formatCurr(sumTotalColMes)}</span>
           <span style="display: inline-block; background-color: #d1fae5; color: #065f46; padding: 3px 8px; border-radius: 4px; font-size: 12px; margin-left: 8px; font-weight: bold;">${formatCurr(porcentajeFin)}%</span>
         </td>
       </tr>
