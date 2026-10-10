@@ -1,0 +1,37 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { summarizeCommercial, reconcileSale, reportedSalesForAdvisor, reportedSalesByProject } from '../src/utils/commercial.js';
+import { REFERENCE_ADVISORS, MONTHLY_TARGET_USD, MARISOL_REFERENCE, PROJECT_PROJECTION, REPORTED_SALES } from '../src/constants/commercialReference.js';
+
+test('los siete asesores concilian sin sumar dos veces USD 11.200', () => {
+  const summary = summarizeCommercial(REFERENCE_ADVISORS, MONTHLY_TARGET_USD);
+  assert.deepEqual({ ...summary, achievementPct: Number(summary.achievementPct.toFixed(2)), currentPct: Number(summary.currentPct.toFixed(2)) }, { actualUsd:17700, projectionUsd:47600, totalUsd:65300, gapUsd:45700, achievementPct:58.83, currentPct:15.95 });
+  assert.equal(REFERENCE_ADVISORS.find(a => a.id === 'marisol').actualUsd, 11200);
+  assert.equal(Object.values(PROJECT_PROJECTION).reduce((a,b) => a+b), 7);
+});
+test('el registro no consultado no se interpreta como venta ausente', () => {
+  assert.equal(reconcileSale(MARISOL_REFERENCE, null).status, 'unverified');
+  assert.equal(reconcileSale(MARISOL_REFERENCE, []).status, 'not_found_in_supplied_records');
+});
+test('coincidencias por asesor, proyecto, fecha, importe y cantidad se marcan para verificar', () => {
+  const records = [{...MARISOL_REFERENCE, contractId:'CRM-123', advisor:'  MARISOL URGEL PIZARRO ', project:'Jardines'}];
+  assert.equal(reconcileSale(MARISOL_REFERENCE, records).status, 'possible_duplicate');
+  assert.equal(reconcileSale(MARISOL_REFERENCE, [{...records[0], date:'2026-10-10'}]).matches.length, 0);
+  assert.equal(reconcileSale(MARISOL_REFERENCE, [{...records[0], amountUsd: 11201}]).matches.length, 0);
+  assert.equal(records.length, 1);
+});
+test('validación financiera y precisión de centavos', () => {
+  assert.throws(() => summarizeCommercial([{actualUsd: -1, projectionUsd:0}],111000));
+  assert.throws(() => summarizeCommercial([{actualUsd: Infinity, projectionUsd:0}],111000));
+  assert.equal(summarizeCommercial([{actualUsd:.1, projectionUsd:.2}],1).totalUsd,.3);
+  assert.equal(summarizeCommercial(REFERENCE_ADVISORS,0).achievementPct,0);
+});
+
+test('venta reportada de Marisol se cuenta una sola vez en Jardines y no altera la proyección', () => {
+  assert.equal(reportedSalesForAdvisor('marisol', REPORTED_SALES), 1);
+  assert.deepEqual(reportedSalesByProject(['Jardines', 'Cañaveral', 'Renacer'], REPORTED_SALES), [1, 1, 0]);
+  assert.equal(MARISOL_REFERENCE.amountUsd, 11200);
+  assert.equal(MARISOL_REFERENCE.date, '2026-10-09');
+  assert.equal(PROJECT_PROJECTION.Jardines, 2);
+  assert.equal(reconcileSale(MARISOL_REFERENCE, [{...MARISOL_REFERENCE, amountUsd: undefined, amountBs:11200}]).matches.length, 0);
+});

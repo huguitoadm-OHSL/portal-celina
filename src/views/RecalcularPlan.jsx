@@ -10,15 +10,15 @@ export default function RecalcularPlan() {
     cuotaInicial: '',
     plazoMesesOriginal: '',
     seguroMensual: '',
-    saldoCapital: '', 
-    cuotasPagadas: '0', 
-    nuevoPlazoMeses: '168' 
+    saldoCapital: '',
+    cuotasPagadas: '0',
+    nuevoPlazoMeses: '168'
   });
 
   const TASA_MENSUAL = 0.0101444; // 1.01444% Exacto
 
   const [calculado, setCalculado] = useState(false);
-  const [tabActiva, setTabActiva] = useState('RESUMEN'); 
+  const [tabActiva, setTabActiva] = useState('RESUMEN');
   const [ocultarDetalles, setOcultarDetalles] = useState(false);
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -32,31 +32,31 @@ export default function RecalcularPlan() {
     const n_orig = parseInt(form.plazoMesesOriginal) || 120;
     const n_nuevo_total = parseInt(form.nuevoPlazoMeses) || 168;
 
-    const Cuota_Total_Orig = n_orig > 0 ? (P_total_Orig - Enganche) / n_orig : 0; 
-    
+    const Cuota_Total_Orig = n_orig > 0 ? (P_total_Orig - Enganche) / n_orig : 0;
+
     // CAPITAL EXACTO DEL CRM
     let Capital_Actual = parseFloat(form.saldoCapital);
-    
+
     if (!Capital_Actual) {
       const Cuota_Pura_Orig = Math.max(0, Cuota_Total_Orig - Seguro);
       let PV_Original = 0;
       if (TASA_MENSUAL > 0 && n_orig > 0) {
         PV_Original = Cuota_Pura_Orig * (1 - Math.pow(1 + TASA_MENSUAL, -n_orig)) / TASA_MENSUAL;
       }
-      Capital_Actual = Math.round(PV_Original / 10) * 10; 
+      Capital_Actual = Math.round(PV_Original / 10) * 10;
     }
 
     const cuotasRestantesNuevas = n_nuevo_total - pagadas;
     let Cuota_Pura_Nueva = 0;
-    
+
     if (cuotasRestantesNuevas > 0 && Capital_Actual > 0) {
       const pmt_exacto = Capital_Actual * (TASA_MENSUAL * Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas)) / (Math.pow(1 + TASA_MENSUAL, cuotasRestantesNuevas) - 1);
-      
+
       // EL SECRETO MAESTRO: Truncamiento al entero inferior (Math.floor)
       // Esto fuerza los $337.00 exactos que usa la empresa.
-      Cuota_Pura_Nueva = Math.floor(pmt_exacto); 
+      Cuota_Pura_Nueva = Math.floor(pmt_exacto);
     }
-    
+
     const Cuota_Total_Nueva = Cuota_Pura_Nueva + Seguro;
 
     let tabla = [];
@@ -67,16 +67,16 @@ export default function RecalcularPlan() {
       let interes = Math.round(CapTemp * TASA_MENSUAL * 100) / 100;
       let capital = Math.round((Cuota_Pura_Nueva - interes) * 100) / 100;
       let seguroAplicado = Seguro;
-      
+
       // REGLA: Última cuota absorbe todo el capital sobrante y recalcula su interés
       if (i === cuotasRestantesNuevas) {
         capital = CapTemp;
-        interes = Math.round(CapTemp * TASA_MENSUAL * 100) / 100; 
+        interes = Math.round(CapTemp * TASA_MENSUAL * 100) / 100;
         seguroAplicado = Seguro; // El seguro SÍ se cobra en la última
       }
-      
+
       CapTemp = Math.round((CapTemp - capital) * 100) / 100;
-      
+
       let pagoMes = Math.round((capital + interes + seguroAplicado) * 100) / 100;
       Suma_Absoluta_Pagos = Math.round((Suma_Absoluta_Pagos + pagoMes) * 100) / 100;
 
@@ -84,10 +84,10 @@ export default function RecalcularPlan() {
         periodo: pagadas + i,
         capital: capital,
         plusvalia: interes,
-        cuotaBase: Cuota_Pura_Nueva, 
+        cuotaBase: Cuota_Pura_Nueva,
         seguro: seguroAplicado,
         pagoTotal: pagoMes,
-        balance: 0, 
+        balance: 0,
         pagada: 'NO'
       });
     }
@@ -114,25 +114,25 @@ export default function RecalcularPlan() {
 
   // ================= 3. INTERFAZ GRÁFICA =================
   return (
-    <div className="font-sans bg-[#f0f2f5] min-h-screen p-3 md:p-4 xl:p-8 pb-12">
-      
+    <div className="font-sans bg-[var(--bg-space)] min-h-screen p-3 md:p-4 xl:p-8 pb-12">
+
       <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
-        
+
         {/* ENCABEZADO */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between bg-white p-3 md:p-4 rounded-2xl shadow-sm border border-[#1e3a5f] gap-3 md:gap-0">
+        <div className="flex flex-col md:flex-row md:items-center justify-between bg-[var(--bg-card)] p-3 md:p-4 rounded-2xl shadow-sm border border-[var(--border-highlight)] gap-3 md:gap-0">
           <div className="flex items-center">
             <div className="bg-emerald-100 p-2 md:p-2.5 rounded-xl mr-3 md:mr-4">
               <RefreshCw className="w-5 h-5 md:w-6 md:h-6 text-emerald-600" />
             </div>
             <div>
-              <h1 className="text-base md:text-lg font-black text-white uppercase tracking-wide leading-tight">Recalcular Plan de Pagos</h1>
-              <p className="text-[9px] md:text-[11px] text-slate-400 font-medium">Motor de reestructuración 100% sincronizado al sistema original</p>
+              <h1 className="text-base md:text-lg font-black text-[var(--text-primary)] uppercase tracking-wide leading-tight">Recalcular Plan de Pagos</h1>
+              <p className="text-[9px] md:text-[11px] text-[var(--text-muted)] font-medium">Motor de reestructuración 100% sincronizado al sistema original</p>
             </div>
           </div>
           {calculado && (
-            <button 
+            <button
               onClick={() => setCalculado(false)}
-              className="bg-[#091426] hover:bg-slate-200 text-slate-200 px-4 py-2 rounded-lg text-[11px] font-bold transition-colors flex items-center justify-center w-full md:w-auto"
+              className="bg-[var(--bg-card-inner)] hover:bg-slate-200 text-[var(--text-primary)] px-4 py-2 rounded-lg text-[11px] font-bold transition-colors flex items-center justify-center w-full md:w-auto"
             >
               <RotateCcw className="w-4 h-4 mr-2" /> Nueva Reestructuración
             </button>
@@ -140,55 +140,55 @@ export default function RecalcularPlan() {
         </div>
 
         {/* PANEL DE CONFIGURACIÓN */}
-        <div className={"bg-[#070e1c] rounded-2xl border border-[#14233c] text-slate-100 shadow-xl border border-[#1e3a5f] shadow-sm overflow-hidden transition-all " + (calculado ? "opacity-70 pointer-events-none" : "")}>
+        <div className={"bg-[var(--bg-card)] rounded-2xl border border-[var(--border-glow)] text-[var(--text-primary)] shadow-xl border border-[var(--border-highlight)] shadow-sm overflow-hidden transition-all " + (calculado ? "opacity-70 pointer-events-none" : "")}>
           <div className="bg-slate-800 p-3 md:p-4 border-b border-slate-700">
-            <h2 className="text-[10px] md:text-xs font-bold text-white flex items-center tracking-widest uppercase">
+            <h2 className="text-[10px] md:text-xs font-bold text-[var(--text-primary)] flex items-center tracking-widest uppercase">
               <FileText className="w-3 h-3 md:w-4 md:h-4 mr-2 text-blue-400" /> Datos Extraídos del Contrato
             </h2>
           </div>
           <div className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 items-start">
-            
+
             <div className="md:col-span-2">
-              <label className="block text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-1">Cliente Titular</label>
-              <input type="text" name="cliente" value={form.cliente} onChange={handleChange} className="w-full px-3 py-2 md:py-2.5 border border-slate-300 rounded-lg text-xs md:text-sm outline-none focus:border-emerald-500 font-bold text-slate-200 bg-[#050b18]" />
-            </div>
-            
-            <div>
-              <label className="block text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-1">Total Orig. ($)</label>
-              <input type="number" name="precioTotalOriginal" value={form.precioTotalOriginal} onChange={handleChange} className="w-full px-3 py-2 md:py-2.5 border border-slate-300 rounded-lg text-xs md:text-sm outline-none focus:border-emerald-500 font-black text-white" />
-            </div>
-            
-            <div>
-              <label className="block text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-1">C. Inicial ($)</label>
-              <input type="number" name="cuotaInicial" value={form.cuotaInicial} onChange={handleChange} className="w-full px-3 py-2 md:py-2.5 border border-slate-300 rounded-lg text-xs md:text-sm outline-none focus:border-emerald-500 font-bold text-white" />
+              <label className="block text-[9px] md:text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">Cliente Titular</label>
+              <input type="text" name="cliente" value={form.cliente} onChange={handleChange} className="w-full px-3 py-2 md:py-2.5 border border-slate-300 rounded-lg text-xs md:text-sm outline-none focus:border-emerald-500 font-bold text-[var(--text-primary)] bg-[var(--bg-card-inner)]" />
             </div>
 
             <div>
-              <label className="block text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-1">Plazo Orig. (Meses)</label>
-              <input type="number" name="plazoMesesOriginal" value={form.plazoMesesOriginal} onChange={handleChange} className="w-full px-3 py-2 md:py-2.5 border border-slate-300 rounded-lg text-xs md:text-sm outline-none focus:border-emerald-500 font-bold text-white" />
+              <label className="block text-[9px] md:text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">Total Orig. ($)</label>
+              <input type="number" name="precioTotalOriginal" value={form.precioTotalOriginal} onChange={handleChange} className="w-full px-3 py-2 md:py-2.5 border border-slate-300 rounded-lg text-xs md:text-sm outline-none focus:border-emerald-500 font-black text-[var(--text-primary)]" />
             </div>
 
             <div>
-              <label className="block text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-1">Seguro Mensual ($)</label>
-              <input type="number" name="seguroMensual" value={form.seguroMensual} onChange={handleChange} className="w-full px-3 py-2 md:py-2.5 border border-slate-300 rounded-lg text-xs md:text-sm outline-none focus:border-emerald-500 font-bold text-white" />
+              <label className="block text-[9px] md:text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">C. Inicial ($)</label>
+              <input type="number" name="cuotaInicial" value={form.cuotaInicial} onChange={handleChange} className="w-full px-3 py-2 md:py-2.5 border border-slate-300 rounded-lg text-xs md:text-sm outline-none focus:border-emerald-500 font-bold text-[var(--text-primary)]" />
             </div>
-            
-            <div className="md:col-span-2 bg-[#081528] p-2 md:p-2.5 rounded-lg border border-blue-200">
+
+            <div>
+              <label className="block text-[9px] md:text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">Plazo Orig. (Meses)</label>
+              <input type="number" name="plazoMesesOriginal" value={form.plazoMesesOriginal} onChange={handleChange} className="w-full px-3 py-2 md:py-2.5 border border-slate-300 rounded-lg text-xs md:text-sm outline-none focus:border-emerald-500 font-bold text-[var(--text-primary)]" />
+            </div>
+
+            <div>
+              <label className="block text-[9px] md:text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">Seguro Mensual ($)</label>
+              <input type="number" name="seguroMensual" value={form.seguroMensual} onChange={handleChange} className="w-full px-3 py-2 md:py-2.5 border border-slate-300 rounded-lg text-xs md:text-sm outline-none focus:border-emerald-500 font-bold text-[var(--text-primary)]" />
+            </div>
+
+            <div className="md:col-span-2 bg-[var(--bg-card-hover)] p-2 md:p-2.5 rounded-lg border border-blue-200">
               <label className="block text-[9px] md:text-[10px] font-black text-blue-700 uppercase mb-1">Saldo Capital a Cancelar</label>
-              <input type="number" name="saldoCapital" value={form.saldoCapital} onChange={handleChange} placeholder="Dato exacto del CRM" className="w-full px-3 py-2 md:py-2 border border-blue-300 rounded text-xs md:text-sm outline-none focus:border-blue-600 font-black text-blue-900 bg-white shadow-inner" />
+              <input type="number" name="saldoCapital" value={form.saldoCapital} onChange={handleChange} placeholder="Dato exacto del CRM" className="w-full px-3 py-2 md:py-2 border border-blue-300 rounded text-xs md:text-sm outline-none focus:border-blue-600 font-black text-blue-900 bg-[var(--bg-card)] shadow-inner" />
             </div>
 
           </div>
 
-          <div className="bg-[#04241b]/50 p-4 md:p-5 border-t border-slate-100 flex flex-col md:flex-row items-end justify-between gap-3 md:gap-4">
+          <div className="bg-[var(--bg-card-inner)]/50 p-4 md:p-5 border-t border-slate-100 flex flex-col md:flex-row items-end justify-between gap-3 md:gap-4">
             <div className="flex flex-col md:flex-row gap-3 md:gap-5 w-full md:w-auto">
               <div className="w-full md:w-48">
                 <label className="block text-[9px] md:text-[10px] font-black text-emerald-700 uppercase mb-1">Cuotas Ya Pagadas</label>
-                <input type="number" name="cuotasPagadas" value={form.cuotasPagadas} onChange={handleChange} className="w-full px-3 py-2 md:py-3 border-2 border-emerald-500/40 rounded-lg text-xs md:text-sm outline-none focus:border-emerald-500 font-black text-emerald-300 bg-white shadow-sm" />
+                <input type="number" name="cuotasPagadas" value={form.cuotasPagadas} onChange={handleChange} className="w-full px-3 py-2 md:py-3 border-2 border-emerald-500/40 rounded-lg text-xs md:text-sm outline-none focus:border-emerald-500 font-black text-emerald-300 bg-[var(--bg-card)] shadow-sm" />
               </div>
               <div className="w-full md:w-64">
                 <label className="block text-[9px] md:text-[10px] font-black text-blue-700 uppercase mb-1">Nuevo Plazo Total</label>
-                <select name="nuevoPlazoMeses" value={form.nuevoPlazoMeses} onChange={handleChange} className="w-full px-3 py-2 md:py-3 border-2 border-blue-300 rounded-lg text-xs md:text-sm outline-none focus:border-blue-500 font-black text-blue-800 bg-white shadow-sm cursor-pointer">
+                <select name="nuevoPlazoMeses" value={form.nuevoPlazoMeses} onChange={handleChange} className="w-full px-3 py-2 md:py-3 border-2 border-blue-300 rounded-lg text-xs md:text-sm outline-none focus:border-blue-500 font-black text-blue-800 bg-[var(--bg-card)] shadow-sm cursor-pointer">
                   {[...Array(14)].map((_, index) => {
                     const anios = index + 1;
                     const meses = anios * 12;
@@ -203,16 +203,16 @@ export default function RecalcularPlan() {
             </div>
 
             {!calculado && (
-              <button 
+              <button
                 onClick={() => {
                   if(!form.precioTotalOriginal || !form.plazoMesesOriginal || !form.saldoCapital || !form.seguroMensual) {
                     alert("Por favor ingrese el Total Original, Plazo Original, Seguro y Saldo Capital para continuar.");
                     return;
                   }
                   setCalculado(true);
-                  setTabActiva('RESUMEN'); 
+                  setTabActiva('RESUMEN');
                 }}
-                className="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 md:px-10 md:py-3.5 rounded-xl font-black text-[10px] md:text-xs uppercase tracking-widest flex items-center justify-center transition-all shadow-lg hover:shadow-emerald-600/30 transform hover:-translate-y-0.5"
+                className="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-[var(--text-primary)] px-6 py-2.5 md:px-10 md:py-3.5 rounded-xl font-black text-[10px] md:text-xs uppercase tracking-widest flex items-center justify-center transition-all shadow-lg hover:shadow-emerald-600/30 transform hover:-translate-y-0.5"
               >
                 <Calculator className="w-4 h-4 md:w-5 md:h-5 mr-2" /> Calcular Nuevo Plan
               </button>
@@ -222,28 +222,28 @@ export default function RecalcularPlan() {
 
         {/* ================= RESULTADOS ================= */}
         {calculado && (
-          <div className="animate-in slide-in-from-bottom-8 duration-500 fade-in bg-[#070e1c] border border-[#14233c] text-slate-100 shadow-xl rounded-2xl overflow-hidden">
-            
-            <div className="flex flex-col md:flex-row border-b border-[#1e3a5f] bg-[#050b18] px-2 pt-2 justify-between items-center pr-2 md:pr-4 gap-2 md:gap-0">
+          <div className="animate-in slide-in-from-bottom-8 duration-500 fade-in bg-[var(--bg-card)] border border-[var(--border-glow)] text-[var(--text-primary)] shadow-xl rounded-2xl overflow-hidden">
+
+            <div className="flex flex-col md:flex-row border-b border-[var(--border-highlight)] bg-[var(--bg-card-inner)] px-2 pt-2 justify-between items-center pr-2 md:pr-4 gap-2 md:gap-0">
               <div className="flex w-full md:w-auto">
-                <button 
+                <button
                   onClick={() => setTabActiva('RESUMEN')}
-                  className={"flex-1 md:flex-none px-3 py-2 md:px-6 md:py-3 text-[9px] md:text-[11px] uppercase tracking-wider font-black rounded-t-lg transition-colors " + (tabActiva === 'RESUMEN' ? 'bg-white text-emerald-600 border-t-2 border-emerald-600 shadow-[0_-2px_10px_rgba(0,0,0,0.03)]' : 'text-slate-400 hover:text-slate-200 hover:bg-[#091426]')}
+                  className={"flex-1 md:flex-none px-3 py-2 md:px-6 md:py-3 text-[9px] md:text-[11px] uppercase tracking-wider font-black rounded-t-lg transition-colors " + (tabActiva === 'RESUMEN' ? 'bg-[var(--bg-card)] text-emerald-600 border-t-2 border-emerald-600 shadow-[0_-2px_10px_rgba(0,0,0,0.03)]' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-inner)]')}
                 >
                   Resumen General
                 </button>
-                <button 
+                <button
                   onClick={() => setTabActiva('TABLA')}
-                  className={"flex-1 md:flex-none px-3 py-2 md:px-6 md:py-3 text-[9px] md:text-[11px] uppercase tracking-wider font-black rounded-t-lg transition-colors " + (tabActiva === 'TABLA' ? 'bg-white text-emerald-600 border-t-2 border-emerald-600 shadow-[0_-2px_10px_rgba(0,0,0,0.03)]' : 'text-slate-400 hover:text-slate-200 hover:bg-[#091426]')}
+                  className={"flex-1 md:flex-none px-3 py-2 md:px-6 md:py-3 text-[9px] md:text-[11px] uppercase tracking-wider font-black rounded-t-lg transition-colors " + (tabActiva === 'TABLA' ? 'bg-[var(--bg-card)] text-emerald-600 border-t-2 border-emerald-600 shadow-[0_-2px_10px_rgba(0,0,0,0.03)]' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-inner)]')}
                 >
                   Plan de Pagos
                 </button>
               </div>
-              
+
               {tabActiva === 'TABLA' && (
-                <button 
+                <button
                   onClick={() => setOcultarDetalles(!ocultarDetalles)}
-                  className="flex items-center text-[9px] md:text-[10px] font-bold text-slate-400 hover:text-white transition-colors bg-[#070e1c] border border-[#14233c] text-slate-100 px-3 py-1.5 rounded-lg shadow-sm mb-2 md:mb-0 w-full md:w-auto justify-center"
+                  className="flex items-center text-[9px] md:text-[10px] font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors bg-[var(--bg-card)] border border-[var(--border-glow)] text-[var(--text-primary)] px-3 py-1.5 rounded-lg shadow-sm mb-2 md:mb-0 w-full md:w-auto justify-center"
                 >
                   {ocultarDetalles ? <Eye className="w-3 h-3 md:w-3.5 md:h-3.5 mr-1.5" /> : <EyeOff className="w-3 h-3 md:w-3.5 md:h-3.5 mr-1.5" />}
                   {ocultarDetalles ? 'Mostrar Interés/Seguro' : 'Ocultar al Cliente'}
@@ -252,34 +252,34 @@ export default function RecalcularPlan() {
             </div>
 
             <div className="p-4 md:p-6">
-              
+
               {tabActiva === 'RESUMEN' && (
                 <div className="animate-in fade-in duration-300">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-                    
+
                     <div className="space-y-3 md:space-y-4">
-                      <div className="bg-[#050b18] border border-slate-100 rounded-xl p-4 md:p-5 shadow-sm">
-                        <div className="flex justify-between items-center border-b border-[#1e3a5f] pb-2 md:pb-3 mb-2 md:mb-3">
-                          <span className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase">Monto Total en Contrato</span>
-                          <span className="text-base md:text-lg font-black text-white">{fD(calculos.Monto_Total_Contrato)}</span>
+                      <div className="bg-[var(--bg-card-inner)] border border-slate-100 rounded-xl p-4 md:p-5 shadow-sm">
+                        <div className="flex justify-between items-center border-b border-[var(--border-highlight)] pb-2 md:pb-3 mb-2 md:mb-3">
+                          <span className="text-[9px] md:text-[11px] font-bold text-[var(--text-muted)] uppercase">Monto Total en Contrato</span>
+                          <span className="text-base md:text-lg font-black text-[var(--text-primary)]">{fD(calculos.Monto_Total_Contrato)}</span>
                         </div>
-                        <div className="flex justify-between items-center border-b border-[#1e3a5f] pb-2 md:pb-3 mb-2 md:mb-3">
-                          <span className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase">Monto Cuota Inicial</span>
-                          <span className="text-xs md:text-sm font-bold text-slate-200">{fD(calculos.Enganche)}</span>
+                        <div className="flex justify-between items-center border-b border-[var(--border-highlight)] pb-2 md:pb-3 mb-2 md:mb-3">
+                          <span className="text-[9px] md:text-[11px] font-bold text-[var(--text-muted)] uppercase">Monto Cuota Inicial</span>
+                          <span className="text-xs md:text-sm font-bold text-[var(--text-primary)]">{fD(calculos.Enganche)}</span>
                         </div>
                         <div className="flex justify-between items-center pb-1">
-                          <span className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase">Monto Total Plan de Pago</span>
-                          <span className="text-xs md:text-sm font-bold text-slate-200">{fD(calculos.Monto_Total_Plan_Pago)}</span>
+                          <span className="text-[9px] md:text-[11px] font-bold text-[var(--text-muted)] uppercase">Monto Total Plan de Pago</span>
+                          <span className="text-xs md:text-sm font-bold text-[var(--text-primary)]">{fD(calculos.Monto_Total_Plan_Pago)}</span>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-3 md:gap-4">
-                        <div className="bg-[#081528] border border-blue-100 rounded-xl p-3 md:p-4 shadow-sm">
+                        <div className="bg-[var(--bg-card-hover)] border border-blue-100 rounded-xl p-3 md:p-4 shadow-sm">
                           <Clock className="w-4 h-4 md:w-5 md:h-5 text-blue-500 mb-1 md:mb-2" />
                           <span className="block text-[9px] md:text-[10px] font-bold text-cyan-400 uppercase mb-1">Nuevo Plazo</span>
                           <span className="block text-lg md:text-xl font-black text-blue-900">{calculos.n_nuevo_total / 12} Años</span>
                         </div>
-                        <div className="bg-[#201505] border border-amber-100 rounded-xl p-3 md:p-4 shadow-sm">
+                        <div className="bg-[var(--bg-card-inner)] border border-amber-100 rounded-xl p-3 md:p-4 shadow-sm">
                           <Calendar className="w-4 h-4 md:w-5 md:h-5 text-amber-500 mb-1 md:mb-2" />
                           <span className="block text-[9px] md:text-[10px] font-bold text-amber-600 uppercase mb-1">Períodos Totales</span>
                           <span className="block text-lg md:text-xl font-black text-amber-900">{calculos.n_nuevo_total} Meses</span>
@@ -287,30 +287,30 @@ export default function RecalcularPlan() {
                       </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-4 md:p-6 text-white shadow-xl relative overflow-hidden">
+                    <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-4 md:p-6 text-[var(--text-primary)] shadow-xl relative overflow-hidden">
                       <div className="absolute -right-10 -top-10 opacity-10">
                         <DollarSign className="w-32 h-32 md:w-48 md:h-48" />
                       </div>
-                      
-                      <h3 className="text-[9px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-4 md:mb-6">Variación de Cuotas Mensuales</h3>
-                      
+
+                      <h3 className="text-[9px] md:text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-4 md:mb-6">Variación de Cuotas Mensuales</h3>
+
                       <div className="flex items-end justify-between mb-6 md:mb-8 relative z-10">
                         <div>
-                          <span className="block text-[9px] md:text-[11px] font-medium text-slate-400 mb-1">Cuota Anterior Estimada</span>
-                          <span className="text-xl md:text-2xl font-black text-slate-300 line-through decoration-red-500/50">{fD(calculos.Cuota_Total_Orig)}</span>
+                          <span className="block text-[9px] md:text-[11px] font-medium text-[var(--text-muted)] mb-1">Cuota Anterior Estimada</span>
+                          <span className="text-xl md:text-2xl font-black text-[var(--text-secondary)] line-through decoration-red-500/50">{fD(calculos.Cuota_Total_Orig)}</span>
                         </div>
                         <div className="bg-slate-700/50 p-1.5 md:p-2 rounded-full mx-2 md:mx-4">
                           <ChevronRight className="w-4 h-4 md:w-6 md:h-6 text-emerald-400" />
                         </div>
                         <div className="text-right">
                           <span className="block text-[9px] md:text-[11px] font-bold text-emerald-400 mb-1 uppercase tracking-wider">Nueva Cuota</span>
-                          <span className="text-3xl md:text-4xl font-black text-white">{fD(calculos.Cuota_Total_Nueva)}</span>
+                          <span className="text-3xl md:text-4xl font-black text-[var(--text-primary)]">{fD(calculos.Cuota_Total_Nueva)}</span>
                         </div>
                       </div>
 
                       <div className="bg-slate-900/50 rounded-xl p-3 md:p-4 border border-slate-700/50 relative z-10">
                         <div className="flex justify-between items-center mb-2">
-                          <span className="text-[9px] md:text-[10px] text-slate-400 font-medium">Cuota Mensual por Seguro:</span>
+                          <span className="text-[9px] md:text-[10px] text-[var(--text-muted)] font-medium">Cuota Mensual por Seguro:</span>
                           <span className="text-[10px] md:text-xs font-bold">{fD(calculos.Seguro)}</span>
                         </div>
                         <div className="flex justify-between items-center pt-2 border-t border-slate-700">
@@ -326,32 +326,32 @@ export default function RecalcularPlan() {
 
               {/* TABLA 100% WIDTH */}
               {tabActiva === 'TABLA' && (
-                <div className="animate-in fade-in duration-300 overflow-hidden border border-[#1e3a5f] rounded-xl w-full">
+                <div className="animate-in fade-in duration-300 overflow-hidden border border-[var(--border-highlight)] rounded-xl w-full">
                   <div className="overflow-auto max-h-[500px] md:max-h-[700px] w-full">
                     <table className="w-full border-collapse text-[9px] md:text-[11px] min-w-[500px] md:min-w-full">
-                      <thead className="bg-[#091426] sticky top-0 shadow-sm z-10">
+                      <thead className="bg-[var(--bg-card-inner)] sticky top-0 shadow-sm z-10">
                         <tr>
-                          <th className="p-2 md:p-3 border-b border-r border-[#1e3a5f] font-bold text-white text-center uppercase tracking-wider">PERÍODO</th>
-                          <th className="p-2 md:p-3 border-b border-r border-[#1e3a5f] font-bold text-white text-right uppercase tracking-wider">CAPITAL</th>
-                          {!ocultarDetalles && <th className="p-2 md:p-3 border-b border-r border-[#1e3a5f] font-bold text-white text-right uppercase tracking-wider bg-[#050b18]">PLUSVALÍA</th>}
-                          {!ocultarDetalles && <th className="p-2 md:p-3 border-b border-r border-[#1e3a5f] font-bold text-white text-right uppercase tracking-wider bg-[#050b18]">CUOTA PURA</th>}
-                          {!ocultarDetalles && <th className="p-2 md:p-3 border-b border-r border-[#1e3a5f] font-bold text-white text-right uppercase tracking-wider bg-[#050b18]">SEGURO</th>}
-                          <th className="p-2 md:p-3 border-b border-r border-[#1e3a5f] font-black text-blue-700 text-right uppercase tracking-wider">TOTAL PAGO</th>
-                          <th className="p-2 md:p-3 border-b border-r border-[#1e3a5f] font-bold text-white text-right uppercase tracking-wider">BALANCE PRINCIPAL</th>
-                          <th className="p-2 md:p-3 border-b border-[#1e3a5f] font-bold text-white text-center uppercase tracking-wider">PAGADA</th>
+                          <th className="p-2 md:p-3 border-b border-r border-[var(--border-highlight)] font-bold text-[var(--text-primary)] text-center uppercase tracking-wider">PERÍODO</th>
+                          <th className="p-2 md:p-3 border-b border-r border-[var(--border-highlight)] font-bold text-[var(--text-primary)] text-right uppercase tracking-wider">CAPITAL</th>
+                          {!ocultarDetalles && <th className="p-2 md:p-3 border-b border-r border-[var(--border-highlight)] font-bold text-[var(--text-primary)] text-right uppercase tracking-wider bg-[var(--bg-card-inner)]">PLUSVALÍA</th>}
+                          {!ocultarDetalles && <th className="p-2 md:p-3 border-b border-r border-[var(--border-highlight)] font-bold text-[var(--text-primary)] text-right uppercase tracking-wider bg-[var(--bg-card-inner)]">CUOTA PURA</th>}
+                          {!ocultarDetalles && <th className="p-2 md:p-3 border-b border-r border-[var(--border-highlight)] font-bold text-[var(--text-primary)] text-right uppercase tracking-wider bg-[var(--bg-card-inner)]">SEGURO</th>}
+                          <th className="p-2 md:p-3 border-b border-r border-[var(--border-highlight)] font-black text-blue-700 text-right uppercase tracking-wider">TOTAL PAGO</th>
+                          <th className="p-2 md:p-3 border-b border-r border-[var(--border-highlight)] font-bold text-[var(--text-primary)] text-right uppercase tracking-wider">BALANCE PRINCIPAL</th>
+                          <th className="p-2 md:p-3 border-b border-[var(--border-highlight)] font-bold text-[var(--text-primary)] text-center uppercase tracking-wider">PAGADA</th>
                         </tr>
                       </thead>
                       <tbody>
                         {calculos.tabla.map((row, idx) => (
-                          <tr key={idx} className="border-b border-slate-100 hover:bg-[#050b18] transition-colors text-slate-200">
-                            <td className="p-2 md:p-3 border-r border-slate-100 text-center font-black text-white">{row.periodo}</td>
+                          <tr key={idx} className="border-b border-slate-100 hover:bg-[var(--bg-card-inner)] transition-colors text-[var(--text-primary)]">
+                            <td className="p-2 md:p-3 border-r border-slate-100 text-center font-black text-[var(--text-primary)]">{row.periodo}</td>
                             <td className="p-2 md:p-3 border-r border-slate-100 text-right">{fD(row.capital)}</td>
-                            {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-slate-100 text-right bg-[#050b18]">{fD(row.plusvalia)}</td>}
-                            {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-slate-100 text-right bg-[#050b18]">{fD(row.cuotaBase)}</td>}
-                            {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-slate-100 text-right bg-[#050b18]">{fD(row.seguro)}</td>}
-                            <td className="p-2 md:p-3 border-r border-slate-100 text-right font-black text-white">{fD(row.pagoTotal)}</td>
+                            {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-slate-100 text-right bg-[var(--bg-card-inner)]">{fD(row.plusvalia)}</td>}
+                            {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-slate-100 text-right bg-[var(--bg-card-inner)]">{fD(row.cuotaBase)}</td>}
+                            {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-slate-100 text-right bg-[var(--bg-card-inner)]">{fD(row.seguro)}</td>}
+                            <td className="p-2 md:p-3 border-r border-slate-100 text-right font-black text-[var(--text-primary)]">{fD(row.pagoTotal)}</td>
                             <td className="p-2 md:p-3 border-r border-slate-100 text-right font-medium">{fD(row.balance)}</td>
-                            <td className="p-2 md:p-3 text-center font-bold text-slate-300">{row.pagada}</td>
+                            <td className="p-2 md:p-3 text-center font-bold text-[var(--text-secondary)]">{row.pagada}</td>
                           </tr>
                         ))}
                       </tbody>

@@ -33,14 +33,14 @@ export default function ContratoFisico() {
             PORTAL GESTIÓN ESTRATÉGICA • CELINA
           </span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center">
+        <h2 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)] tracking-tight flex items-center">
           <FileText className="w-6 h-6 mr-2 text-cyan-400" /> Habilitación de Contrato Físico
         </h2>
       </div>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 w-full">
         {/* FORMULARIO */}
-        <div className="bg-[#070e1c] p-5 sm:p-6 rounded-3xl shadow-2xl border border-[#14233c] text-slate-100 w-full min-w-0">
+        <div className="bg-[var(--bg-card)] p-5 sm:p-6 rounded-3xl shadow-2xl border border-[var(--border-glow)] text-[var(--text-primary)] w-full min-w-0">
           <Input label="Nombre del Asesor" name="asesor" value={form.asesor} onChange={handleChange} placeholder="Ej. Oscar Saravia" />
           <Input label="Nombre Completo del Cliente" name="nombre" value={form.nombre} onChange={handleChange} placeholder="Ej. Juan Pérez" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
@@ -52,13 +52,13 @@ export default function ContratoFisico() {
 
         {/* TARJETA DE RESULTADO */}
         <div className="w-full min-w-0">
-          <ResultCard 
-            title="Contrato Físico" 
-            text={textoWhatsApp} 
-            htmlContent={textoHtml} 
-            subject={`Solicitud Contrato Físico - ${form.nombre || 'Cliente'}`} 
-            supervisorDestino={supervisorDestino} 
-            setSupervisorDestino={setSupervisorDestino} 
+          <ResultCard
+            title="Contrato Físico"
+            text={textoWhatsApp}
+            htmlContent={textoHtml}
+            subject={`Solicitud Contrato Físico - ${form.nombre || 'Cliente'}`}
+            supervisorDestino={supervisorDestino}
+            setSupervisorDestino={setSupervisorDestino}
           />
         </div>
       </div>

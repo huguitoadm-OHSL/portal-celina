@@ -9,13 +9,13 @@ export default function SimuladorAmortizacion() {
     seguroMensual: '',    // Ej. 23.80
     saldoCapital: '',     // Ej. 27130.00
     montoAmortizar: '',   // Ej. 3000
-    cuotasPagadas: '0', 
+    cuotasPagadas: '0',
   });
 
   const TASA_MENSUAL = 0.0101444; // 1.01444% Exacto de Celina
 
   const [calculado, setCalculado] = useState(false);
-  const [tabActiva, setTabActiva] = useState('RESUMEN'); 
+  const [tabActiva, setTabActiva] = useState('RESUMEN');
   const [ocultarDetalles, setOcultarDetalles] = useState(false);
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -30,7 +30,7 @@ export default function SimuladorAmortizacion() {
 
     // Cuota Fija Pura extraída matemáticamente
     const Cuota_Pura_Fija = Math.round((Cuota_Total_Actual - Seguro_Num) * 100) / 100;
-    
+
     // Convertimos todo a CENTAVOS para procesar el algoritmo bancario sin perder 1 solo decimal
     const SeguroCents = Math.round(Seguro_Num * 100);
     const CuotaPuraFijaCents = Math.round(Cuota_Pura_Fija * 100);
@@ -89,7 +89,7 @@ export default function SimuladorAmortizacion() {
             cuotaBase: Cuota_Pura_Fija,
             seguro: Seguro_Num,
             pagoTotal: pagoMesCents / 100,
-            balance: 0, 
+            balance: 0,
             pagada: 'NO'
           });
         }
@@ -139,25 +139,25 @@ export default function SimuladorAmortizacion() {
 
   // ================= 3. INTERFAZ GRÁFICA =================
   return (
-    <div className="font-sans bg-[#f0f2f5] min-h-screen p-3 md:p-4 xl:p-8 pb-12">
-      
+    <div className="font-sans bg-[var(--bg-space)] min-h-screen p-3 md:p-4 xl:p-8 pb-12">
+
       <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
-        
+
         {/* ENCABEZADO */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between bg-white p-3 md:p-4 rounded-2xl shadow-sm border border-[#1e3a5f] gap-3 md:gap-0">
+        <div className="flex flex-col md:flex-row md:items-center justify-between bg-[var(--bg-card)] p-3 md:p-4 rounded-2xl shadow-sm border border-[var(--border-highlight)] gap-3 md:gap-0">
           <div className="flex items-center">
             <div className="bg-blue-100 p-2 md:p-2.5 rounded-xl mr-3 md:mr-4">
               <Calculator className="w-5 h-5 md:w-6 md:h-6 text-cyan-400" />
             </div>
             <div>
-              <h1 className="text-base md:text-lg font-black text-white uppercase tracking-wide leading-tight">Amortización a Capital</h1>
-              <p className="text-[9px] md:text-[11px] text-slate-400 font-medium">Motor de reducción de plazo con cálculo exacto de ahorros</p>
+              <h1 className="text-base md:text-lg font-black text-[var(--text-primary)] uppercase tracking-wide leading-tight">Amortización a Capital</h1>
+              <p className="text-[9px] md:text-[11px] text-[var(--text-muted)] font-medium">Motor de reducción de plazo con cálculo exacto de ahorros</p>
             </div>
           </div>
           {calculado && (
-            <button 
+            <button
               onClick={() => setCalculado(false)}
-              className="bg-[#091426] hover:bg-slate-200 text-slate-200 px-3 py-2 md:px-4 md:py-2 rounded-lg text-[10px] md:text-[11px] font-bold transition-colors flex items-center justify-center w-full md:w-auto"
+              className="bg-[var(--bg-card-inner)] hover:bg-slate-200 text-[var(--text-primary)] px-3 py-2 md:px-4 md:py-2 rounded-lg text-[10px] md:text-[11px] font-bold transition-colors flex items-center justify-center w-full md:w-auto"
             >
               <RotateCcw className="w-3 h-3 md:w-4 md:h-4 mr-2" /> Nueva Amortización
             </button>
@@ -165,58 +165,58 @@ export default function SimuladorAmortizacion() {
         </div>
 
         {/* PANEL DE CONFIGURACIÓN */}
-        <div className={"bg-[#070e1c] rounded-2xl border border-[#14233c] text-slate-100 shadow-xl border border-[#1e3a5f] shadow-sm overflow-hidden transition-all " + (calculado ? "opacity-70 pointer-events-none" : "")}>
+        <div className={"bg-[var(--bg-card)] rounded-2xl border border-[var(--border-glow)] text-[var(--text-primary)] shadow-xl border border-[var(--border-highlight)] shadow-sm overflow-hidden transition-all " + (calculado ? "opacity-70 pointer-events-none" : "")}>
           <div className="bg-slate-800 p-3 md:p-4 border-b border-slate-700">
-            <h2 className="text-[10px] md:text-xs font-bold text-white flex items-center tracking-widest uppercase">
+            <h2 className="text-[10px] md:text-xs font-bold text-[var(--text-primary)] flex items-center tracking-widest uppercase">
               <FileText className="w-3 h-3 md:w-4 md:h-4 mr-2 text-blue-400" /> Datos del Contrato y Abono Extraordinario
             </h2>
           </div>
           <div className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 items-start">
-            
+
             <div className="md:col-span-2">
-              <label className="block text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-1">Cliente Titular</label>
-              <input type="text" name="cliente" value={form.cliente} onChange={handleChange} className="w-full px-3 py-2 md:py-2.5 border border-slate-300 rounded-lg text-xs md:text-sm outline-none focus:border-blue-500 font-bold text-slate-200 bg-[#050b18]" />
-            </div>
-            
-            <div>
-              <label className="block text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-1">Cuota Total Actual ($)</label>
-              <input type="number" name="cuotaTotalActual" value={form.cuotaTotalActual} onChange={handleChange} placeholder="Ej. 415.76" className="w-full px-3 py-2 md:py-2.5 border border-slate-300 rounded-lg text-xs md:text-sm outline-none focus:border-blue-500 font-black text-white" />
+              <label className="block text-[9px] md:text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">Cliente Titular</label>
+              <input type="text" name="cliente" value={form.cliente} onChange={handleChange} className="w-full px-3 py-2 md:py-2.5 border border-slate-300 rounded-lg text-xs md:text-sm outline-none focus:border-blue-500 font-bold text-[var(--text-primary)] bg-[var(--bg-card-inner)]" />
             </div>
 
             <div>
-              <label className="block text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-1">Seguro Mensual ($)</label>
-              <input type="number" name="seguroMensual" value={form.seguroMensual} onChange={handleChange} placeholder="Ej. 23.80" className="w-full px-3 py-2 md:py-2.5 border border-slate-300 rounded-lg text-xs md:text-sm outline-none focus:border-blue-500 font-bold text-white" />
+              <label className="block text-[9px] md:text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">Cuota Total Actual ($)</label>
+              <input type="number" name="cuotaTotalActual" value={form.cuotaTotalActual} onChange={handleChange} placeholder="Ej. 415.76" className="w-full px-3 py-2 md:py-2.5 border border-slate-300 rounded-lg text-xs md:text-sm outline-none focus:border-blue-500 font-black text-[var(--text-primary)]" />
             </div>
-            
-            <div className="md:col-span-2 bg-[#081528] p-2 md:p-3 rounded-xl border border-blue-200">
+
+            <div>
+              <label className="block text-[9px] md:text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">Seguro Mensual ($)</label>
+              <input type="number" name="seguroMensual" value={form.seguroMensual} onChange={handleChange} placeholder="Ej. 23.80" className="w-full px-3 py-2 md:py-2.5 border border-slate-300 rounded-lg text-xs md:text-sm outline-none focus:border-blue-500 font-bold text-[var(--text-primary)]" />
+            </div>
+
+            <div className="md:col-span-2 bg-[var(--bg-card-hover)] p-2 md:p-3 rounded-xl border border-blue-200">
               <label className="block text-[9px] md:text-[10px] font-black text-blue-700 uppercase mb-1">Saldo Capital a Cancelar (Dato CRM)</label>
-              <input type="number" name="saldoCapital" value={form.saldoCapital} onChange={handleChange} placeholder="Ej. 27130.00" className="w-full px-3 py-2 md:py-2.5 border border-blue-300 rounded-lg text-xs md:text-sm outline-none focus:border-blue-600 font-black text-blue-900 bg-white shadow-inner" />
+              <input type="number" name="saldoCapital" value={form.saldoCapital} onChange={handleChange} placeholder="Ej. 27130.00" className="w-full px-3 py-2 md:py-2.5 border border-blue-300 rounded-lg text-xs md:text-sm outline-none focus:border-blue-600 font-black text-blue-900 bg-[var(--bg-card)] shadow-inner" />
             </div>
 
-            <div className="md:col-span-2 bg-[#04241b] p-2 md:p-3 rounded-xl border border-emerald-500/40">
+            <div className="md:col-span-2 bg-[var(--bg-card-inner)] p-2 md:p-3 rounded-xl border border-emerald-500/40">
               <label className="block text-[9px] md:text-[10px] font-black text-emerald-700 uppercase mb-1">Monto de Inyección a Capital ($)</label>
-              <input type="number" name="montoAmortizar" value={form.montoAmortizar} onChange={handleChange} placeholder="Ej. 3000.00" className="w-full px-3 py-2 md:py-2.5 border border-emerald-300 rounded-lg text-xs md:text-sm outline-none focus:border-emerald-600 font-black text-emerald-200 bg-white shadow-inner" />
+              <input type="number" name="montoAmortizar" value={form.montoAmortizar} onChange={handleChange} placeholder="Ej. 3000.00" className="w-full px-3 py-2 md:py-2.5 border border-emerald-300 rounded-lg text-xs md:text-sm outline-none focus:border-emerald-600 font-black text-emerald-200 bg-[var(--bg-card)] shadow-inner" />
             </div>
 
           </div>
 
-          <div className="bg-[#050b18] p-4 md:p-5 border-t border-slate-100 flex flex-col md:flex-row items-end justify-between gap-3 md:gap-4">
+          <div className="bg-[var(--bg-card-inner)] p-4 md:p-5 border-t border-slate-100 flex flex-col md:flex-row items-end justify-between gap-3 md:gap-4">
             <div className="w-full md:w-64">
-              <label className="block text-[9px] md:text-[10px] font-bold text-slate-300 uppercase mb-1">Cuotas Ya Pagadas (Opcional)</label>
-              <input type="number" name="cuotasPagadas" value={form.cuotasPagadas} onChange={handleChange} className="w-full px-3 py-2 md:py-3 border border-slate-300 rounded-lg text-xs md:text-sm outline-none focus:border-blue-500 font-bold text-slate-200 bg-white" />
+              <label className="block text-[9px] md:text-[10px] font-bold text-[var(--text-secondary)] uppercase mb-1">Cuotas Ya Pagadas (Opcional)</label>
+              <input type="number" name="cuotasPagadas" value={form.cuotasPagadas} onChange={handleChange} className="w-full px-3 py-2 md:py-3 border border-slate-300 rounded-lg text-xs md:text-sm outline-none focus:border-blue-500 font-bold text-[var(--text-primary)] bg-[var(--bg-card)]" />
             </div>
 
             {!calculado && (
-              <button 
+              <button
                 onClick={() => {
                   if(!form.saldoCapital || !form.cuotaTotalActual || !form.montoAmortizar) {
                     alert("¡Atención! Ingrese la Cuota Actual, el Saldo Capital y el Monto a Amortizar para calcular.");
                     return;
                   }
                   setCalculado(true);
-                  setTabActiva('RESUMEN'); 
+                  setTabActiva('RESUMEN');
                 }}
-                className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 md:px-10 md:py-3.5 rounded-xl font-black text-[10px] md:text-xs uppercase tracking-widest flex items-center justify-center transition-all shadow-lg hover:shadow-blue-600/30 transform hover:-translate-y-0.5"
+                className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-[var(--text-primary)] px-6 py-2.5 md:px-10 md:py-3.5 rounded-xl font-black text-[10px] md:text-xs uppercase tracking-widest flex items-center justify-center transition-all shadow-lg hover:shadow-blue-600/30 transform hover:-translate-y-0.5"
               >
                 <Calculator className="w-4 h-4 md:w-5 md:h-5 mr-2" /> Procesar Amortización
               </button>
@@ -226,28 +226,28 @@ export default function SimuladorAmortizacion() {
 
         {/* ================= RESULTADOS (BENTO UI) ================= */}
         {calculado && (
-          <div className="animate-in slide-in-from-bottom-8 duration-500 fade-in bg-[#070e1c] border border-[#14233c] text-slate-100 shadow-xl rounded-2xl overflow-hidden">
-            
-            <div className="flex flex-col md:flex-row border-b border-[#1e3a5f] bg-[#050b18] px-2 pt-2 justify-between items-center md:pr-4 gap-2 md:gap-0">
+          <div className="animate-in slide-in-from-bottom-8 duration-500 fade-in bg-[var(--bg-card)] border border-[var(--border-glow)] text-[var(--text-primary)] shadow-xl rounded-2xl overflow-hidden">
+
+            <div className="flex flex-col md:flex-row border-b border-[var(--border-highlight)] bg-[var(--bg-card-inner)] px-2 pt-2 justify-between items-center md:pr-4 gap-2 md:gap-0">
               <div className="flex w-full md:w-auto">
-                <button 
+                <button
                   onClick={() => setTabActiva('RESUMEN')}
-                  className={"flex-1 md:flex-none px-3 py-2 md:px-6 md:py-3 text-[9px] md:text-[11px] uppercase tracking-wider font-black rounded-t-lg transition-colors " + (tabActiva === 'RESUMEN' ? 'bg-white text-cyan-400 border-t-2 border-blue-600 shadow-[0_-2px_10px_rgba(0,0,0,0.03)]' : 'text-slate-400 hover:text-slate-200 hover:bg-[#091426]')}
+                  className={"flex-1 md:flex-none px-3 py-2 md:px-6 md:py-3 text-[9px] md:text-[11px] uppercase tracking-wider font-black rounded-t-lg transition-colors " + (tabActiva === 'RESUMEN' ? 'bg-[var(--bg-card)] text-cyan-400 border-t-2 border-blue-600 shadow-[0_-2px_10px_rgba(0,0,0,0.03)]' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-inner)]')}
                 >
                   Resumen Estratégico
                 </button>
-                <button 
+                <button
                   onClick={() => setTabActiva('TABLA')}
-                  className={"flex-1 md:flex-none px-3 py-2 md:px-6 md:py-3 text-[9px] md:text-[11px] uppercase tracking-wider font-black rounded-t-lg transition-colors " + (tabActiva === 'TABLA' ? 'bg-white text-cyan-400 border-t-2 border-blue-600 shadow-[0_-2px_10px_rgba(0,0,0,0.03)]' : 'text-slate-400 hover:text-slate-200 hover:bg-[#091426]')}
+                  className={"flex-1 md:flex-none px-3 py-2 md:px-6 md:py-3 text-[9px] md:text-[11px] uppercase tracking-wider font-black rounded-t-lg transition-colors " + (tabActiva === 'TABLA' ? 'bg-[var(--bg-card)] text-cyan-400 border-t-2 border-blue-600 shadow-[0_-2px_10px_rgba(0,0,0,0.03)]' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-inner)]')}
                 >
                   Nuevo Plan de Pagos
                 </button>
               </div>
-              
+
               {tabActiva === 'TABLA' && (
-                <button 
+                <button
                   onClick={() => setOcultarDetalles(!ocultarDetalles)}
-                  className="flex items-center text-[9px] md:text-[10px] font-bold text-slate-400 bg-[#070e1c] border border-[#14233c] text-slate-100 px-3 py-1.5 rounded-lg shadow-sm mb-2 md:mb-0 w-full md:w-auto justify-center"
+                  className="flex items-center text-[9px] md:text-[10px] font-bold text-[var(--text-muted)] bg-[var(--bg-card)] border border-[var(--border-glow)] text-[var(--text-primary)] px-3 py-1.5 rounded-lg shadow-sm mb-2 md:mb-0 w-full md:w-auto justify-center"
                 >
                   {ocultarDetalles ? <Eye className="w-3 h-3 md:w-3.5 md:h-3.5 mr-1.5" /> : <EyeOff className="w-3 h-3 md:w-3.5 md:h-3.5 mr-1.5" />}
                   {ocultarDetalles ? 'Mostrar Interés/Seguro' : 'Vista Simple Cliente'}
@@ -256,13 +256,13 @@ export default function SimuladorAmortizacion() {
             </div>
 
             <div className="p-4 md:p-6">
-              
+
               {tabActiva === 'RESUMEN' && (
                 <div className="animate-in fade-in duration-300">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-                    
+
                     {/* BENTO: IMPACTO DE AMORTIZACIÓN */}
-                    <div className="md:col-span-2 bg-gradient-to-br from-emerald-600 to-teal-800 rounded-2xl p-4 md:p-6 text-white shadow-xl relative overflow-hidden flex flex-col justify-center transform transition-transform hover:scale-[1.01]">
+                    <div className="md:col-span-2 bg-gradient-to-br from-emerald-600 to-teal-800 rounded-2xl p-4 md:p-6 text-[var(--text-primary)] shadow-xl relative overflow-hidden flex flex-col justify-center transform transition-transform hover:scale-[1.01]">
                         <div className="absolute -right-10 -top-10 opacity-10">
                             <TrendingDown className="w-32 h-32 md:w-48 md:h-48" />
                         </div>
@@ -271,7 +271,7 @@ export default function SimuladorAmortizacion() {
                             <span className="text-3xl md:text-5xl font-black drop-shadow-md leading-none">{fD(calculos.Ahorro_Total)}</span>
                             <span className="text-[10px] md:text-sm font-medium text-emerald-200 mb-1">Ahorro en Intereses Futuros</span>
                         </div>
-                        <div className="inline-flex items-center bg-white/20 px-3 py-2 md:px-4 md:py-2.5 rounded-lg w-max backdrop-blur-sm border border-white/20">
+                        <div className="inline-flex items-center bg-[var(--bg-card)]/20 px-3 py-2 md:px-4 md:py-2.5 rounded-lg w-max backdrop-blur-sm border border-white/20">
                             <Clock className="w-4 h-4 md:w-5 md:h-5 mr-1.5 text-emerald-100" />
                             <span className="font-bold text-[10px] md:text-sm tracking-wide">¡El cliente se ha ahorrado <strong className="text-sm md:text-xl mx-1">{calculos.Meses_Ahorrados}</strong> meses de tiempo!</span>
                         </div>
@@ -279,22 +279,22 @@ export default function SimuladorAmortizacion() {
 
                     {/* BENTO: MÉTRICAS COMPARATIVAS */}
                     <div className="space-y-3 md:space-y-4">
-                        <div className="bg-[#050b18] border border-[#1e3a5f] rounded-xl p-3 md:p-4 shadow-sm relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-1.5 h-full bg-[#081528]0"></div>
-                            <span className="block text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-1">Nueva Deuda Futura Total</span>
-                            <span className="block text-xl md:text-2xl font-black text-white">{fD(calculos.Suma_Amortizada)}</span>
-                            <span className="block text-[9px] md:text-[10px] font-bold text-slate-400 mt-1 md:mt-2 border-t border-[#1e3a5f] pt-1 md:pt-2">Deuda Original Proyectada: {fD(calculos.Suma_Original)}</span>
+                        <div className="bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-xl p-3 md:p-4 shadow-sm relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-1.5 h-full bg-[var(--bg-card-hover)]0"></div>
+                            <span className="block text-[9px] md:text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">Nueva Deuda Futura Total</span>
+                            <span className="block text-xl md:text-2xl font-black text-[var(--text-primary)]">{fD(calculos.Suma_Amortizada)}</span>
+                            <span className="block text-[9px] md:text-[10px] font-bold text-[var(--text-muted)] mt-1 md:mt-2 border-t border-[var(--border-highlight)] pt-1 md:pt-2">Deuda Original Proyectada: {fD(calculos.Suma_Original)}</span>
                         </div>
-                        
-                        <div className="bg-[#081528] border border-blue-200 rounded-xl p-3 md:p-4 shadow-sm relative overflow-hidden">
+
+                        <div className="bg-[var(--bg-card-hover)] border border-blue-200 rounded-xl p-3 md:p-4 shadow-sm relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-1.5 h-full bg-blue-800"></div>
                             <span className="block text-[9px] md:text-[10px] font-bold text-blue-700 uppercase mb-1">Nuevo Plazo Restante</span>
                             <span className="block text-xl md:text-2xl font-black text-blue-900">{calculos.cuotas_nuevas} Meses</span>
                             <span className="block text-[9px] md:text-[10px] font-bold text-blue-500 mt-1 md:mt-2 border-t border-blue-200 pt-1 md:pt-2">Plazo Original Restante: {calculos.cuotas_originales} Meses</span>
                         </div>
 
-                        <div className="bg-slate-900 rounded-xl p-3 md:p-4 shadow-sm flex items-center justify-between text-white">
-                            <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400">Última Cuota<br/>a Pagar:</span>
+                        <div className="bg-slate-900 rounded-xl p-3 md:p-4 shadow-sm flex items-center justify-between text-[var(--text-primary)]">
+                            <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Última Cuota<br/>a Pagar:</span>
                             <span className="text-lg md:text-xl font-black text-emerald-400">{fD(calculos.ultimaCuota)}</span>
                         </div>
                     </div>
@@ -305,19 +305,19 @@ export default function SimuladorAmortizacion() {
 
               {/* TABLA 100% WIDTH - FULL PROTAGONISMO */}
               {tabActiva === 'TABLA' && (
-                <div className="animate-in fade-in duration-300 overflow-hidden border border-[#1e3a5f] rounded-xl w-full">
+                <div className="animate-in fade-in duration-300 overflow-hidden border border-[var(--border-highlight)] rounded-xl w-full">
                   <div className="overflow-auto max-h-[500px] md:max-h-[700px] w-full">
                     <table className="w-full border-collapse text-[9px] md:text-[11px] min-w-[500px] md:min-w-full">
-                      <thead className="bg-[#091426] sticky top-0 shadow-sm z-10">
+                      <thead className="bg-[var(--bg-card-inner)] sticky top-0 shadow-sm z-10">
                         <tr>
-                          <th className="p-2 md:p-3 border-b border-r border-[#1e3a5f] font-bold text-white text-center uppercase tracking-wider">PERÍODO</th>
-                          <th className="p-2 md:p-3 border-b border-r border-[#1e3a5f] font-bold text-white text-right uppercase tracking-wider">CAPITAL</th>
-                          {!ocultarDetalles && <th className="p-2 md:p-3 border-b border-r border-[#1e3a5f] font-bold text-white text-right uppercase tracking-wider bg-[#050b18]">PLUSVALÍA</th>}
-                          {!ocultarDetalles && <th className="p-2 md:p-3 border-b border-r border-[#1e3a5f] font-bold text-white text-right uppercase tracking-wider bg-[#050b18]">CUOTA PURA</th>}
-                          {!ocultarDetalles && <th className="p-2 md:p-3 border-b border-r border-[#1e3a5f] font-bold text-white text-right uppercase tracking-wider bg-[#050b18]">SEGURO</th>}
-                          <th className="p-2 md:p-3 border-b border-r border-[#1e3a5f] font-black text-blue-700 text-right uppercase tracking-wider">TOTAL PAGO</th>
-                          <th className="p-2 md:p-3 border-b border-r border-[#1e3a5f] font-bold text-white text-right uppercase tracking-wider">BALANCE PRINCIPAL</th>
-                          <th className="p-2 md:p-3 border-b border-[#1e3a5f] font-bold text-white text-center uppercase tracking-wider">PAGADA</th>
+                          <th className="p-2 md:p-3 border-b border-r border-[var(--border-highlight)] font-bold text-[var(--text-primary)] text-center uppercase tracking-wider">PERÍODO</th>
+                          <th className="p-2 md:p-3 border-b border-r border-[var(--border-highlight)] font-bold text-[var(--text-primary)] text-right uppercase tracking-wider">CAPITAL</th>
+                          {!ocultarDetalles && <th className="p-2 md:p-3 border-b border-r border-[var(--border-highlight)] font-bold text-[var(--text-primary)] text-right uppercase tracking-wider bg-[var(--bg-card-inner)]">PLUSVALÍA</th>}
+                          {!ocultarDetalles && <th className="p-2 md:p-3 border-b border-r border-[var(--border-highlight)] font-bold text-[var(--text-primary)] text-right uppercase tracking-wider bg-[var(--bg-card-inner)]">CUOTA PURA</th>}
+                          {!ocultarDetalles && <th className="p-2 md:p-3 border-b border-r border-[var(--border-highlight)] font-bold text-[var(--text-primary)] text-right uppercase tracking-wider bg-[var(--bg-card-inner)]">SEGURO</th>}
+                          <th className="p-2 md:p-3 border-b border-r border-[var(--border-highlight)] font-black text-blue-700 text-right uppercase tracking-wider">TOTAL PAGO</th>
+                          <th className="p-2 md:p-3 border-b border-r border-[var(--border-highlight)] font-bold text-[var(--text-primary)] text-right uppercase tracking-wider">BALANCE PRINCIPAL</th>
+                          <th className="p-2 md:p-3 border-b border-[var(--border-highlight)] font-bold text-[var(--text-primary)] text-center uppercase tracking-wider">PAGADA</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -325,27 +325,27 @@ export default function SimuladorAmortizacion() {
                           // RENDERIZADO ESPECIAL PARA LA FILA DE ABONO
                           if (row.esAbono) {
                             return (
-                              <tr key={"abono-"+idx} className="bg-[#04241b]/90 border-y-2 border-emerald-300 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] relative z-0">
+                              <tr key={"abono-"+idx} className="bg-[var(--bg-card-inner)]/90 border-y-2 border-emerald-300 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] relative z-0">
                                 <td className="p-2 md:p-3 border-r border-emerald-500/30 text-center font-black text-emerald-300">{row.periodo}</td>
                                 <td className="p-2 md:p-3 border-r border-emerald-500/30 text-right font-black text-emerald-300">{fD(row.capital)}</td>
                                 {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-emerald-500/30 text-center text-emerald-600/70 font-black text-[8px] md:text-[9px] uppercase tracking-widest" colSpan="3">Abono Extraordinario a Capital</td>}
                                 <td className="p-2 md:p-3 border-r border-emerald-500/30 text-right font-black text-emerald-300">{fD(row.pagoTotal)}</td>
-                                <td className="p-2 md:p-3 border-r border-emerald-500/30 text-right font-black text-blue-800 bg-white/40">{fD(row.balance)}</td>
+                                <td className="p-2 md:p-3 border-r border-emerald-500/30 text-right font-black text-blue-800 bg-[var(--bg-card)]/40">{fD(row.balance)}</td>
                                 <td className="p-2 md:p-3 text-center font-black text-emerald-600">SI</td>
                               </tr>
                             );
                           }
 
                           return (
-                            <tr key={idx} className="border-b border-slate-100 hover:bg-[#050b18] transition-colors text-slate-200">
-                              <td className="p-2 md:p-3 border-r border-slate-100 text-center font-black text-white">{row.periodo}</td>
+                            <tr key={idx} className="border-b border-slate-100 hover:bg-[var(--bg-card-inner)] transition-colors text-[var(--text-primary)]">
+                              <td className="p-2 md:p-3 border-r border-slate-100 text-center font-black text-[var(--text-primary)]">{row.periodo}</td>
                               <td className="p-2 md:p-3 border-r border-slate-100 text-right">{fD(row.capital)}</td>
-                              {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-slate-100 text-right bg-[#050b18]">{fD(row.plusvalia)}</td>}
-                              {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-slate-100 text-right bg-[#050b18]">{fD(row.cuotaBase)}</td>}
-                              {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-slate-100 text-right bg-[#050b18]">{fD(row.seguro)}</td>}
-                              <td className="p-2 md:p-3 border-r border-slate-100 text-right font-black text-white">{fD(row.pagoTotal)}</td>
+                              {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-slate-100 text-right bg-[var(--bg-card-inner)]">{fD(row.plusvalia)}</td>}
+                              {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-slate-100 text-right bg-[var(--bg-card-inner)]">{fD(row.cuotaBase)}</td>}
+                              {!ocultarDetalles && <td className="p-2 md:p-3 border-r border-slate-100 text-right bg-[var(--bg-card-inner)]">{fD(row.seguro)}</td>}
+                              <td className="p-2 md:p-3 border-r border-slate-100 text-right font-black text-[var(--text-primary)]">{fD(row.pagoTotal)}</td>
                               <td className="p-2 md:p-3 border-r border-slate-100 text-right font-medium">{fD(row.balance)}</td>
-                              <td className="p-2 md:p-3 text-center font-bold text-slate-300">{row.pagada}</td>
+                              <td className="p-2 md:p-3 text-center font-bold text-[var(--text-secondary)]">{row.pagada}</td>
                             </tr>
                           )
                         })}

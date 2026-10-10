@@ -11,12 +11,12 @@ import { generarHtmlRecompra } from '../utils/htmlTemplates';
 
 export default function Recompra() {
   const [formRecompra, setFormRecompra] = useState({
-    asesor: '', proyecto: 'Muyurina', sucursal: '', 
+    asesor: '', proyecto: 'Muyurina', sucursal: '',
     fechaVentaNuevo: '', nombreNuevo: '', contratoNuevo: '', aplicoDescuento: 'NO', cuotasPagadas: '', procesadoNuevo: 'SI', vigenteNuevo: 'SI',
     nombreAntiguo: '', contratoAntiguo: '', fechaVentaAntiguo: '', fechaPago: '', procesadoAntiguo: 'SI', vigenteAntiguo: 'SI', patrocinador: '',
     valorCuota: ''
   });
-  
+
   const [supervisorDestino, setSupervisorDestino] = useState(SUPERVISORES[0].correo);
 
   const handleRecompraChange = (e) => {
@@ -34,7 +34,7 @@ export default function Recompra() {
   // Cálculos y datos
   const beneficio = calcularBeneficioRecompra(formRecompra.proyecto);
   const supervisorData = obtenerDatosSupervisor(supervisorDestino, SUPERVISORES);
-  
+
   const textoWhatsApp = generarTextoRecompraCelular(formRecompra, supervisorData, beneficio);
   const textoHtml = generarHtmlRecompra(formRecompra, supervisorData, beneficio);
 
@@ -46,15 +46,15 @@ export default function Recompra() {
           <span className="text-[10px] font-black tracking-widest text-cyan-400 uppercase">
             PORTAL GESTIÓN ESTRATÉGICA • CELINA
           </span>
-        </div><h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center"><Repeat className="w-6 h-6 mr-2 text-cyan-400" /> Solicitud de Recompra</h2></div>
+        </div><h2 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)] tracking-tight flex items-center"><Repeat className="w-6 h-6 mr-2 text-cyan-400" /> Solicitud de Recompra</h2></div>
       <div className="grid grid-cols-1 xl:grid-cols-[1.3fr_1fr] 2xl:grid-cols-[1.5fr_1fr] gap-8 w-full">
-        <div className="bg-[#070e1c] p-5 sm:p-6 rounded-3xl shadow-2xl border border-[#14233c] text-slate-100 w-full min-w-0">
-           
+        <div className="bg-[var(--bg-card)] p-5 sm:p-6 rounded-3xl shadow-2xl border border-[var(--border-glow)] text-[var(--text-primary)] w-full min-w-0">
+
            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mb-6">
               <Input label="Nombre del Asesor" name="asesor" value={formRecompra.asesor} onChange={handleRecompraChange} placeholder="Ej. Oscar Saravia" />
               <div className="w-full">
-                <label className="block text-sm font-bold text-slate-200 mb-1.5 ml-0.5">Proyecto (Para Beneficio $)</label>
-                <select name="proyecto" value={formRecompra.proyecto} onChange={handleRecompraChange} className="w-full px-3.5 py-2.5 bg-[#050b18] border border-[#1e3a5f] rounded-xl text-xs font-bold text-white focus:outline-none focus:border-cyan-400 transition-all">
+                <label className="block text-sm font-bold text-[var(--text-primary)] mb-1.5 ml-0.5">Proyecto (Para Beneficio $)</label>
+                <select name="proyecto" value={formRecompra.proyecto} onChange={handleRecompraChange} className="w-full px-3.5 py-2.5 bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:outline-none focus:border-cyan-400 transition-all">
                    <option value="Muyurina">Muyurina ($200)</option>
                    <option value="El Renacer">El Renacer ($100)</option>
                    <option value="Los Jardines">Los Jardines ($100)</option>
@@ -80,27 +80,27 @@ export default function Recompra() {
                 </div>
                 <Input label="Nombre del Cliente" name="nombreNuevo" value={formRecompra.nombreNuevo} onChange={handleRecompraChange} placeholder="Ej. DILSON DURY MARIACA" />
                 <Input label="Contrato Nuevo" name="contratoNuevo" value={formRecompra.contratoNuevo} onChange={handleRecompraChange} placeholder="Ej. C2604001327" />
-                
+
                 <div className="grid grid-cols-2 gap-4 mt-2">
                    <div className="w-full">
-                     <label className="block text-xs font-bold text-slate-200 mb-1.5 truncate">¿Aplicó Dscto por m2?</label>
-                     <select name="aplicoDescuento" value={formRecompra.aplicoDescuento} onChange={handleRecompraChange} className="w-full px-3.5 py-2 bg-[#050b18] border border-[#1e3a5f] rounded-xl text-xs font-bold text-white focus:outline-none focus:border-cyan-400 transition-all">
+                     <label className="block text-xs font-bold text-[var(--text-primary)] mb-1.5 truncate">¿Aplicó Dscto por m2?</label>
+                     <select name="aplicoDescuento" value={formRecompra.aplicoDescuento} onChange={handleRecompraChange} className="w-full px-3.5 py-2 bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:outline-none focus:border-cyan-400 transition-all">
                        <option value="NO">NO</option><option value="SI">SI</option>
                      </select>
                    </div>
                    <div className="w-full">
-                     <label className="block text-xs font-bold text-slate-200 mb-1.5 truncate">Cuotas Pagadas</label>
-                     <input type="number" name="cuotasPagadas" value={formRecompra.cuotasPagadas} onChange={handleRecompraChange} className="w-full px-3.5 py-2 bg-[#050b18] border border-[#1e3a5f] rounded-xl text-xs font-bold text-white focus:outline-none focus:border-cyan-400 transition-all" placeholder="Ej. 2" />
+                     <label className="block text-xs font-bold text-[var(--text-primary)] mb-1.5 truncate">Cuotas Pagadas</label>
+                     <input type="number" name="cuotasPagadas" value={formRecompra.cuotasPagadas} onChange={handleRecompraChange} className="w-full px-3.5 py-2 bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:outline-none focus:border-cyan-400 transition-all" placeholder="Ej. 2" />
                    </div>
                    <div className="w-full">
-                     <label className="block text-xs font-bold text-slate-200 mb-1.5 truncate">¿Procesado?</label>
-                     <select name="procesadoNuevo" value={formRecompra.procesadoNuevo} onChange={handleRecompraChange} className="w-full px-3.5 py-2 bg-[#050b18] border border-[#1e3a5f] rounded-xl text-xs font-bold text-white focus:outline-none focus:border-cyan-400 transition-all">
+                     <label className="block text-xs font-bold text-[var(--text-primary)] mb-1.5 truncate">¿Procesado?</label>
+                     <select name="procesadoNuevo" value={formRecompra.procesadoNuevo} onChange={handleRecompraChange} className="w-full px-3.5 py-2 bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:outline-none focus:border-cyan-400 transition-all">
                        <option value="SI">SI</option><option value="NO">NO</option>
                      </select>
                    </div>
                    <div className="w-full">
-                     <label className="block text-xs font-bold text-slate-200 mb-1.5 truncate">¿Vigente?</label>
-                     <select name="vigenteNuevo" value={formRecompra.vigenteNuevo} onChange={handleRecompraChange} className="w-full px-3.5 py-2 bg-[#050b18] border border-[#1e3a5f] rounded-xl text-xs font-bold text-white focus:outline-none focus:border-cyan-400 transition-all">
+                     <label className="block text-xs font-bold text-[var(--text-primary)] mb-1.5 truncate">¿Vigente?</label>
+                     <select name="vigenteNuevo" value={formRecompra.vigenteNuevo} onChange={handleRecompraChange} className="w-full px-3.5 py-2 bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:outline-none focus:border-cyan-400 transition-all">
                        <option value="SI">SI</option><option value="NO">NO</option>
                      </select>
                    </div>
@@ -112,25 +112,25 @@ export default function Recompra() {
                 <h3 className="text-sm font-extrabold text-orange-600 mb-4 border-b border-orange-200 pb-2">DATOS CONTRATO ANTIGUO</h3>
                 <Input label="Nombre del Cliente Antiguo" name="nombreAntiguo" value={formRecompra.nombreAntiguo} onChange={handleRecompraChange} placeholder="Ej. DILSON DURY MARIACA" />
                 <Input label="Contrato Antiguo" name="contratoAntiguo" value={formRecompra.contratoAntiguo} onChange={handleRecompraChange} placeholder="Ej. C2604001326" />
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mb-2">
                    <Input label="Fecha de venta" name="fechaVentaAntiguo" value={formRecompra.fechaVentaAntiguo} onChange={handleRecompraChange} placeholder="Ej. 27/8/2026" />
                    <Input label="Fecha Pago de Cuota" name="fechaPago" value={formRecompra.fechaPago} onChange={handleRecompraChange} placeholder="Ej. 7-dic-26" />
                 </div>
-                
+
                 <Input label="Patrocinador" name="patrocinador" value={formRecompra.patrocinador} onChange={handleRecompraChange} placeholder="Ej. JHOVANA ALMANZA VALLEJOS" />
                 <Input label="Valor de Cuota ($)" name="valorCuota" value={formRecompra.valorCuota} onChange={handleRecompraChange} placeholder="Ej. 304.8" type="number" />
-                
+
                 <div className="grid grid-cols-2 gap-4 mt-2">
                    <div className="w-full">
-                     <label className="block text-xs font-bold text-slate-200 mb-1.5 truncate">¿Procesado?</label>
-                     <select name="procesadoAntiguo" value={formRecompra.procesadoAntiguo} onChange={handleRecompraChange} className="w-full px-3.5 py-2 bg-[#050b18] border border-[#1e3a5f] rounded-xl text-xs font-bold text-white focus:outline-none focus:border-cyan-400 transition-all">
+                     <label className="block text-xs font-bold text-[var(--text-primary)] mb-1.5 truncate">¿Procesado?</label>
+                     <select name="procesadoAntiguo" value={formRecompra.procesadoAntiguo} onChange={handleRecompraChange} className="w-full px-3.5 py-2 bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:outline-none focus:border-cyan-400 transition-all">
                        <option value="SI">SI</option><option value="NO">NO</option>
                      </select>
                    </div>
                    <div className="w-full">
-                     <label className="block text-xs font-bold text-slate-200 mb-1.5 truncate">¿Vigente?</label>
-                     <select name="vigenteAntiguo" value={formRecompra.vigenteAntiguo} onChange={handleRecompraChange} className="w-full px-3.5 py-2 bg-[#050b18] border border-[#1e3a5f] rounded-xl text-xs font-bold text-white focus:outline-none focus:border-cyan-400 transition-all">
+                     <label className="block text-xs font-bold text-[var(--text-primary)] mb-1.5 truncate">¿Vigente?</label>
+                     <select name="vigenteAntiguo" value={formRecompra.vigenteAntiguo} onChange={handleRecompraChange} className="w-full px-3.5 py-2 bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:outline-none focus:border-cyan-400 transition-all">
                        <option value="SI">SI</option><option value="NO">NO</option>
                      </select>
                    </div>
@@ -140,13 +140,13 @@ export default function Recompra() {
 
         </div>
         <div className="w-full min-w-0">
-           <ResultCard 
-             title="Solicitud Recompra" 
-             text={textoWhatsApp} 
-             htmlContent={textoHtml} 
-             subject={`solicitud de código de descuento RECOMPRA cliente: ${formRecompra.nombreNuevo || 'NOMBRE'}`} 
-             supervisorDestino={supervisorDestino} 
-             setSupervisorDestino={setSupervisorDestino} 
+           <ResultCard
+             title="Solicitud Recompra"
+             text={textoWhatsApp}
+             htmlContent={textoHtml}
+             subject={`solicitud de código de descuento RECOMPRA cliente: ${formRecompra.nombreNuevo || 'NOMBRE'}`}
+             supervisorDestino={supervisorDestino}
+             setSupervisorDestino={setSupervisorDestino}
            />
         </div>
       </div>

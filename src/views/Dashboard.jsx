@@ -1,111 +1,55 @@
-import React, { useState, useMemo } from 'react';
-import { 
-  Target, TrendingUp, Zap, Trophy, Activity, FileText, PhoneCall, Users, Crown
-} from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { ArrowUpRight, Target, TrendingUp, CalendarDays, CircleDollarSign, Search, ShieldCheck } from 'lucide-react';
+import { PROJECT_PROJECTION, MARISOL_REFERENCE } from '../constants/commercialReference';
+import { useCommercial } from '../hooks/useCommercial';
+import { reconcileSale } from '../utils/commercial';
+const money = value => `USD ${new Intl.NumberFormat('es-BO', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(value)}`;
+const percent = value => new Intl.NumberFormat('es-BO', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(value);
 
-export default function Dashboard() {
-  const [asesoresData] = useState([
-    { id: 1, nombre: 'Carlos Enrique Calderon', ventas: 1, colocacion: 6500 },
-    { id: 2, nombre: 'Ely Gonzales Garcia', ventas: 0, colocacion: 0 },
-    { id: 3, nombre: 'Jaime Fabricio Rios', ventas: 0, colocacion: 0 },
-    { id: 4, nombre: 'Jimmy Gonzales Nuñez', ventas: 0, colocacion: 0 },
-    { id: 5, nombre: 'Jose Gabriel Padilla', ventas: 0, colocacion: 0 },
-    { id: 6, nombre: 'Marisol Urgel Pizarro', ventas: 0, colocacion: 0 },
-    { id: 7, nombre: 'Merly Mendez Hurtado', ventas: 0, colocacion: 0 },
-  ]);
-
-  const ventasActuales = useMemo(() => asesoresData.reduce((sum, as) => sum + as.colocacion, 0), [asesoresData]);
-  const totalCierres = useMemo(() => asesoresData.reduce((sum, as) => sum + as.ventas, 0), [asesoresData]);
-  
-  const metaMensual = 111000;
-  const porcentajeAvance = (ventasActuales / metaMensual) * 100;
-
-  const fD = (num) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num || 0);
-
-  return (
-    <div className="w-full font-sans space-y-6 pb-12 antialiased">
-      {/* HERO SECTION DE IMPACTO CÓSMICO */}
-      <div className="bg-[#070e1c] rounded-3xl p-6 sm:p-8 md:p-10 shadow-2xl relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center border border-[#14233c]">
-        <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-cyan-500/10 rounded-full blur-[130px] pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-[350px] h-[350px] bg-blue-600/10 rounded-full blur-[110px] pointer-events-none"></div>
-
-        <div className="relative z-10">
-          <div className="flex items-center space-x-2.5 mb-3">
-            <span className="px-3 py-1 bg-cyan-950/80 text-cyan-300 text-[10px] font-black tracking-widest uppercase rounded-full border border-cyan-500/40">
-              Portal de Liderazgo • Octubre 2026
-            </span>
-            <span className="flex h-2.5 w-2.5 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-            </span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-2">
-            Máquina de <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400">Ventas</span>
-          </h1>
-          <p className="text-slate-400 text-xs sm:text-sm font-medium flex items-center bg-[#050b18] w-fit px-3.5 py-1.5 rounded-xl border border-[#14233c]">
-            <Activity className="w-4 h-4 mr-2 text-emerald-400" />
-            <span className="text-emerald-300 font-bold mr-1">{totalCierres} Cierre(s)</span> registrados en el ciclo de recuperación.
-          </p>
+export default function Dashboard({ onNavigate }) {
+  const [query, setQuery] = useState('');
+  const [sort, setSort] = useState('name');
+  const [records, setRecords] = useState(null);
+  const [error, setError] = useState('');
+  const { advisors, sales, summary, targetUsd } = useCommercial();
+  const reconciliation = reconcileSale(MARISOL_REFERENCE, records);
+  const rows = useMemo(() => advisors.filter(a => a.nombre.toLocaleLowerCase('es').includes(query.toLocaleLowerCase('es'))).sort((a, b) => sort === 'total' ? b.actualUsd + b.projectionUsd - a.actualUsd - a.projectionUsd : a.nombre.localeCompare(b.nombre)), [advisors, query, sort]);
+  async function readRecords(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setError(''); setRecords(null);
+    try {
+      if (file.size > 2_000_000) throw new Error('El archivo debe tener menos de 2 MB.');
+      const data = JSON.parse(await file.text());
+      if (!Array.isArray(data) || data.some(a => !a || typeof a !== 'object' || !['advisor', 'project', 'date', 'lots'].every(k => Object.hasOwn(a, k)) || !(Object.hasOwn(a, 'amountUsd') || (a.currency === 'USD' && Object.hasOwn(a, 'amount')) || Object.hasOwn(a, 'amountBs')))) throw new Error('Formato inválido. Se requiere una lista con advisor, project, date, lots y amountUsd (o amount y currency: USD). Los registros en Bs no se equiparan a USD.');
+      setRecords(data);
+    } catch (failure) { setError(failure.message); }
+  }
+  return <div className="executive-dashboard">
+    <section className="dashboard-hero">
+      <div className="hero-content">
+        <p className="eyebrow"><span className="hero-status-dot"/> DIRECCIÓN COMERCIAL · OCTUBRE 2026</p>
+        <h1>Una visión clara.<br/><span>Un equipo con rumbo.</span></h1>
+        <p>Resultados, oportunidades y decisiones en un solo lugar.</p>
+        <div className="hero-actions">
+          <button className="hero-action-primary" onClick={() => onNavigate?.('proyeccion')}>Revisar proyección <ArrowUpRight size={16}/></button>
+          <button onClick={() => onNavigate?.('seguimiento')}>Ver ventas <ArrowUpRight size={16}/></button>
         </div>
-
-        <div className="relative z-10 mt-6 md:mt-0 bg-[#050b18]/80 border border-[#1e3a5f] p-5 rounded-2xl text-center shadow-xl min-w-[170px] w-full md:w-auto">
-          <p className="text-[10px] text-cyan-400 font-black tracking-widest uppercase mb-1">Avance Global</p>
-          <p className="text-4xl sm:text-5xl font-black text-white font-mono">
-            {porcentajeAvance.toFixed(1)}<span className="text-2xl text-slate-400">%</span>
-          </p>
-        </div>
+        <div className="hero-meta"><CalendarDays size={15}/> Corte: 10 de octubre de 2026 <span>·</span> 7 asesores · {advisors.reduce((sum, a) => sum + a.confirmedSales, 0)} ventas realizadas</div>
       </div>
-
-      {/* 4 INDICADORES TÁCTICOS EN MODO OSCURO */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {[
-          { icon: FileText, label: 'Cotizaciones Activas', val: '12', color: 'cyan' },
-          { icon: PhoneCall, label: 'Llamadas ATC', val: '89', color: 'blue' },
-          { icon: Users, label: 'Visitas a Terreno', val: '1', color: 'emerald' },
-          { icon: Zap, label: 'Cierres en Puerta', val: totalCierres, color: 'amber' }
-        ].map((item, idx) => (
-          <div key={idx} className="bg-[#070e1c] border border-[#14233c] rounded-2xl p-4 flex items-center space-x-3.5 shadow-lg">
-            <div className="bg-[#050b18] border border-[#1e3a5f] p-3 rounded-xl text-cyan-400 shrink-0">
-              <item.icon className="w-4 h-4" />
-            </div>
-            <div>
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{item.label}</p>
-              <p className="text-lg sm:text-xl font-black text-white">{item.val}</p>
-            </div>
-          </div>
-        ))}
+      <div className="hero-score">
+        <div className="achievement-ring" style={{ '--achievement': `${Math.min(summary.achievementPct, 100)}%` }}><div><span className="ring-label">CIERRE PROYECTADO</span><strong>{percent(summary.achievementPct)}<small>%</small></strong><span>Cumplimiento proyectado</span></div></div>
+        <p>Objetivo mensual <strong>{money(targetUsd)}</strong></p>
       </div>
-
-      {/* METAS Y COLOCACIÓN (ELIMINADAS LAS TARJETAS BLANCAS) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Meta del Mes */}
-        <div className="bg-[#070e1c] rounded-3xl p-6 border border-[#14233c] shadow-xl relative overflow-hidden">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-1">Meta del Mes de Octubre</p>
-              <h3 className="text-3xl sm:text-4xl font-black text-white tracking-tight font-mono">{fD(metaMensual)}</h3>
-              <p className="text-xs text-slate-400 mt-2">Objetivo de equipo (7 Asesores Comerciales)</p>
-            </div>
-            <div className="bg-[#050b18] border border-[#1e3a5f] p-3 rounded-2xl text-cyan-400">
-              <Target className="w-6 h-6" />
-            </div>
-          </div>
-        </div>
-
-        {/* Colocación Actual */}
-        <div className="bg-[#070e1c] rounded-3xl p-6 border border-emerald-500/40 shadow-xl relative overflow-hidden">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Colocación Actual</p>
-              <h3 className="text-3xl sm:text-4xl font-black text-emerald-300 tracking-tight font-mono">{fD(ventasActuales)}</h3>
-              <p className="text-xs text-slate-400 mt-2">Ventas consolidadas en sistema</p>
-            </div>
-            <div className="bg-[#04241b] border border-emerald-500/50 p-3 rounded-2xl text-emerald-400">
-              <TrendingUp className="w-6 h-6" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+    </section>
+    <p className="source-note"><ShieldCheck size={16}/> Ventas realizadas reportadas por supervisión. Inicio, Proyección Semanal, Seguimiento e Incentivos comparten esta colocación en USD. Las oportunidades proyectadas se mantienen separadas.</p>
+    <div className="metric-grid">{[
+      { label: 'Colocación actual', value: summary.actualUsd, detail: 'Solo ventas realizadas · USD 11.200 de Marisol incluidos', icon: CircleDollarSign, className: 'current' },
+      { label: 'Proyección semanal', value: summary.projectionUsd, detail: '7 lotes proyectados · oportunidades abiertas', icon: TrendingUp },
+      { label: 'Cierre de mes proyectado', value: summary.totalUsd, detail: 'Actual + proyección semanal', icon: ArrowUpRight },
+      { label: 'Brecha proyectada', value: summary.gapUsd, detail: `Objetivo mensual: ${money(targetUsd)}`, icon: Target },
+    ].map(({label, value, detail, icon: Icon, className}) => <article className={`metric-card ${className || ''}`} key={label}><div><span>{label}</span><Icon size={20}/></div><strong>{money(value)}</strong><p>{detail}</p></article>)}</div>
+    <div className="dashboard-columns"><section className="panel"><div className="panel-heading"><div><p className="eyebrow">DESEMPEÑO DEL EQUIPO</p><h2>Colocación por asesor</h2></div><span className="subtle-badge">7 asesores · USD</span></div><div className="table-tools"><label><Search size={16}/><input aria-label="Buscar asesor" placeholder="Buscar asesor…" value={query} onChange={e => setQuery(e.target.value)}/></label><select aria-label="Orden de asesores" value={sort} onChange={e => setSort(e.target.value)}><option value="name">Nombre</option><option value="total">Mayor proyección</option></select></div><div className="table-scroll"><table className="executive-table"><thead><tr><th>Asesor</th><th>Ventas realizadas</th><th>Actual USD</th><th>Proyección USD</th><th>Total USD</th></tr></thead><tbody>{rows.map(a => <tr key={a.id}><td><span className="advisor-avatar">{a.nombre.split(' ').slice(0,2).map(n => n[0]).join('')}</span>{a.nombre}</td><td>{a.confirmedSales}</td><td>{money(a.actualUsd)}</td><td>{money(a.projectionUsd)}</td><td><strong>{money(a.actualUsd + a.projectionUsd)}</strong></td></tr>)}</tbody><tfoot><tr><th>Total equipo</th><td>{advisors.reduce((sum, a) => sum + a.confirmedSales, 0)}</td><td>{money(summary.actualUsd)}</td><td>{money(summary.projectionUsd)}</td><td>{money(summary.totalUsd)}</td></tr></tfoot></table>{!rows.length && <p>No se encontraron asesores.</p>}</div></section><section className="panel"><p className="eyebrow">OPORTUNIDADES</p><h2>7 lotes por concretar</h2><p className="muted">Distribución de la proyección, separada de los cierres.</p><div className="project-bars">{Object.entries(PROJECT_PROJECTION).map(([project, quantity]) => <div key={project}><div><span>{project}</span><strong>{quantity} {quantity === 1 ? 'lote' : 'lotes'}</strong></div><div className="bar-track"><div style={{width: `${quantity / 7 * 100}%`}}/></div></div>)}</div><div className="goal-progress"><div><span>Avance actual</span><strong>{percent(summary.currentPct)} %</strong></div><progress max="100" value={summary.currentPct} aria-label="Avance actual respecto al objetivo mensual"/><p>{money(summary.actualUsd)} de {money(targetUsd)}</p></div></section></div>
+    <div className="dashboard-columns"><section className="panel"><p className="eyebrow">CONCILIACIÓN DE OPERACIONES</p><h2>Marisol · {MARISOL_REFERENCE.project}</h2><p>{MARISOL_REFERENCE.lots} lote · USD {percent(MARISOL_REFERENCE.amountUsd)} · 09/10/2026. Venta reportada por supervisión e incluida una sola vez en las cuatro pestañas.</p><p>La colocación actual incluye únicamente ventas realizadas en USD. Las proyecciones no incrementan esta colocación ni la cantidad de ventas.</p><p className="reconciliation-status" role="status">{reconciliation.status === 'unverified' ? 'Registro remoto sin verificar: no existe conexión de ventas en esta versión.' : reconciliation.status === 'possible_duplicate' ? `${reconciliation.matches.length === 1 ? 'Se encontró 1 coincidencia candidata.' : `Se encontraron ${reconciliation.matches.length} coincidencias candidatas.`} Verifique el contrato antes de registrar.` : 'No se encontró coincidencia en el archivo proporcionado. Esto no confirma su ausencia en el CRM.'}</p><label className="file-label">Conciliar un extracto JSON del CRM (solo lectura)<input type="file" accept=".json,application/json" onChange={readRecords}/></label>{error && <p role="alert">{error}</p>}<details><summary>Datos pendientes para confirmar la operación</summary><p>Contrato o identificador único, cliente, UV, manzano, lote, comprobante y estado de validación. La referencia de supervisión no sustituye el registro ni la validación del contrato en el CRM. El archivo se analiza localmente y no se guarda ni envía.</p></details></section><section className="panel"><p className="eyebrow">VENTAS REALIZADAS</p><h2>Colocación del equipo · USD</h2><ul className="rate-history">{sales.map(sale => <li key={sale.id}><strong>{sale.advisor}</strong><span>{sale.project} · {sale.lots} lote · {money(sale.amountUsd)} · {sale.date ? sale.date.split('-').reverse().join('/') : 'Antecedente de octubre'}</span></li>)}</ul><details><summary>Reglas de productividad</summary><p>Incentivos: 2 ventas realizadas o USD 15.000, con carpetas al día. Seguimiento: umbral heredado de USD 18.000. Las posibles ventas no se usan para calificar. El tipo de cambio se utiliza únicamente en las simulaciones de descuentos para el cliente.</p></details></section></div>
+  </div>;
 }

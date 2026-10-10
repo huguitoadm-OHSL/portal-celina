@@ -1,11 +1,14 @@
+import { CORREO_SUPERVISION_RESPALDO as CORREO_RESPALDO_OSCAR } from '../constants/config';
+import { useCommercial } from '../hooks/useCommercial';
+import { emailCopies, composeEmailUrl } from '../services/emailDelivery';
+import { escapeHtml, sanitizeEmailHtml, copyEmail, greeting, emailSalutation } from '../services/email';
 import React, { useState, useMemo } from 'react';
-import { 
-  Trophy, Award, TrendingUp, Users, CheckCircle2, XCircle, 
-  AlertCircle, Copy, Monitor, Mail, Send, Sparkles, Clock, 
+import {
+  Trophy, Award, TrendingUp, Users, CheckCircle2, XCircle,
+  AlertCircle, Copy, Monitor, Mail, Send, Sparkles, Clock,
   Calendar, Flame, ShieldCheck, ChevronRight, FileText, ArrowRight
 } from 'lucide-react';
 
-const CORREO_RESPALDO_OSCAR = "ohsaravia@celina.com.bo";
 
 const DIRECTORES_APROBACION = [
   { nombre: "Lic. Mauricio Reyes", cargo: "Jefe de Ventas", email: "mreyes@celina.com.bo" },
@@ -40,21 +43,14 @@ const ETAPAS_CONCURSO = {
   }
 };
 
-const ASESORES_INICIALES = [
-  { id: 1, nombre: "Carlos Enrique Calderon Montano", ventas: 1, colocacion: 6500, carpetasAlDia: true },
-  { id: 2, nombre: "Ely Gonzales Garcia", ventas: 0, colocacion: 0, carpetasAlDia: true },
-  { id: 3, nombre: "Jaime Fabricio Rios Castro", ventas: 0, colocacion: 0, carpetasAlDia: true },
-  { id: 4, nombre: "Jimmy Gonzales Nuñez", ventas: 0, colocacion: 0, carpetasAlDia: true },
-  { id: 5, nombre: "Jose Gabriel Padilla Loayza", ventas: 0, colocacion: 0, carpetasAlDia: true },
-  { id: 6, nombre: "Marisol Urgel Pizarro", ventas: 0, colocacion: 0, carpetasAlDia: true },
-  { id: 7, nombre: "Merly Mendez Hurtado", ventas: 0, colocacion: 0, carpetasAlDia: true }
-];
-
 export default function IncentivosAsesores() {
   const [etapaSeleccionada, setEtapaSeleccionada] = useState("sep_oct");
-  const [metaGrupalUSD, setMetaGrupalUSD] = useState(111000);
-  const [asesores, setAsesores] = useState(ASESORES_INICIALES);
-  const [destinatarioEmail, setDestinatarioEmail] = useState(DIRECTORES_APROBACION[0].email);
+  const { advisors, targetUsd: metaGrupalUSD, setTargetUsd: setMetaGrupalUSD } = useCommercial();
+  const [simulation, setSimulation] = useState(null);
+  const [folders, setFolders] = useState({});
+  const actualAdvisors = useMemo(() => advisors.map(advisor => ({ id: advisor.id, nombre: advisor.nombre, ventas: advisor.confirmedSales, colocacion: advisor.actualUsd, carpetasAlDia: folders[advisor.id] ?? true })), [advisors, folders]);
+  const asesores = simulation ?? actualAdvisors;
+  const [destinatarioEmail] = useState(DIRECTORES_APROBACION[0].email);
   const [notificacion, setNotificacion] = useState(null);
 
   const etapaActual = ETAPAS_CONCURSO[etapaSeleccionada];
@@ -62,25 +58,16 @@ export default function IncentivosAsesores() {
   const formatMoneda = (val) =>
     new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val || 0);
 
-  const getSaludoHorario = () => {
-    const hora = new Date().getHours();
-    if (hora >= 5 && hora < 12) return "Buenos días";
-    if (hora >= 12 && hora < 19) return "Buenas tardes";
-    return "Buenas noches";
-  };
+  const getSaludoHorario = greeting;
 
   const handleAsesorChange = (id, field, value) => {
-    setAsesores(prev => prev.map(a => {
-      if (a.id === id) {
-        return { ...a, [field]: value };
-      }
-      return a;
-    }));
+    if (simulation) setSimulation(previous => previous.map(advisor => advisor.id === id ? { ...advisor, [field]: value } : advisor));
+    else if (field === 'carpetasAlDia') setFolders(previous => ({ ...previous, [id]: value }));
   };
 
   // ================= MOTOR DE EVALUACIÓN SEGÚN BASES OFICIALES =================
   const evaluacion = useMemo(() => {
-    const meta = parseFloat(metaGrupalUSD) || 111000;
+    const meta = Number(metaGrupalUSD);
     const meta110 = meta * 1.10;
     const meta120 = meta * 1.20;
 
@@ -126,19 +113,19 @@ export default function IncentivosAsesores() {
     let nivelGanado = null;
     let bonoPorAsesorBs = 0;
     let textoBono = "Sin bono alcanzado";
-    let claseEstado = "border-slate-800 bg-[#070e1c]";
+    let claseEstado = "border-slate-800 bg-[var(--bg-card)]";
 
     if (cumpleProductividad) {
       if (porcentajeGrupal >= 120) {
         nivelGanado = "NIVEL 2";
         bonoPorAsesorBs = 1100;
-        textoBono = "¡NIVEL 2 ALCANZADO (120%)! Bono de 1.100 Bs por asesor productivo";
-        claseEstado = "border-emerald-500/60 bg-gradient-to-r from-[#04241b] to-[#070e1c]";
+        textoBono = "¡NIVEL 2 ALCANZADO (120%)! Bono de 1.100 Bs. por asesor productivo";
+        claseEstado = "border-emerald-500/60 bg-gradient-to-r from-[var(--bg-card-inner)] to-[var(--bg-card)]";
       } else if (porcentajeGrupal >= 110) {
         nivelGanado = "NIVEL 1";
         bonoPorAsesorBs = 700;
-        textoBono = "¡NIVEL 1 ALCANZADO (110%)! Bono de 700 Bs por asesor productivo";
-        claseEstado = "border-cyan-500/60 bg-gradient-to-r from-[#08182b] to-[#070e1c]";
+        textoBono = "¡NIVEL 1 ALCANZADO (110%)! Bono de 700 Bs. por asesor productivo";
+        claseEstado = "border-cyan-500/60 bg-gradient-to-r from-[var(--bg-card-inner)] to-[var(--bg-card)]";
       } else {
         textoBono = `Productividad cumplida (${porcentajeProductividad.toFixed(0)}%), pero falta colocación para el 110% (Avance: ${porcentajeGrupal.toFixed(1)}%)`;
       }
@@ -184,19 +171,19 @@ export default function IncentivosAsesores() {
 
   const correosCC = useMemo(() => {
     const otros = DIRECTORES_APROBACION.filter(d => d.email !== destinatarioEmail).map(d => d.email);
-    return [...otros, CORREO_RESPALDO_OSCAR].join(", ");
+    return emailCopies('outlook', otros, destinatarioEmail).join(', ');
   }, [destinatarioEmail]);
 
-  const asuntoCorreo = `Reporte y Solicitud de Incentivo Celina 2026 (${etapaActual.nombre}) - Equipo Montero Oscar Saravia`;
+  const asuntoCorreo = `${simulation ? '[SIMULACIÓN] ' : ''}Reporte y Solicitud de Incentivo Celina 2026 (${etapaActual.nombre}) - Equipo Montero Oscar Saravia`;
 
   const generarHTMLCorreo = () => {
     return `
 <div style="font-family: Arial, Helvetica, sans-serif; color: #0f172a; max-width: 680px; margin: 0 auto; line-height: 1.5;">
   <p style="margin: 0 0 10px; font-size: 15px;">${getSaludoHorario()}</p>
-  <p style="margin: 0 0 16px; font-size: 15px;">Estimado <strong>${destinatarioObj.nombre}</strong>,</p>
+  <p style="margin: 0 0 16px; font-size: 15px;">${emailSalutation(destinatarioObj.nombre)},</p>
   <p style="margin: 0 0 20px; font-size: 14px; color: #334155;">
-    Por medio del presente correo, presento el informe de cumplimiento de metas y liquidación del 
-    <strong>CONCURSO INTERNO "INCENTIVO CELINA 2026"</strong> para la etapa <strong>${etapaActual.nombre}</strong>, 
+    ${simulation ? 'Presento una simulación que no registra ventas ni autoriza pagos del' : 'Presento el informe de cumplimiento de metas del'}
+    <strong>CONCURSO INTERNO "INCENTIVO CELINA 2026"</strong> para la etapa <strong>${etapaActual.nombre}</strong>,
     correspondiente a la Supervisión Comercial de Montero (Supervisor: Oscar Hugo Saravia L.):
   </p>
 
@@ -224,7 +211,7 @@ export default function IncentivosAsesores() {
             ${evaluacion.bonoPorAsesorBs > 0 ? `${formatMoneda(evaluacion.bonoPorAsesorBs)} Bs.` : '0 Bs.'}
           </div>
           <div style="font-size: 13px; color: #94a3b8;">
-            Total a liquidar equipo (${evaluacion.totalProductivos} asesores calificados): 
+            Total a liquidar equipo (${evaluacion.totalProductivos} asesores calificados):
             <strong style="color: #ffffff; font-size: 15px;">${formatMoneda(evaluacion.totalBonoEquipoBs)} Bs.</strong>
           </div>
         </div>
@@ -266,7 +253,7 @@ export default function IncentivosAsesores() {
     <tbody>
       ${evaluacion.asesoresEvaluados.map(a => `
         <tr style="background-color: ${a.esProductivo ? '#f0fdf4' : '#ffffff'};">
-          <td style="border: 1px solid #cbd5e1; font-weight: bold; color: #0f172a;">${a.nombre}</td>
+          <td style="border: 1px solid #cbd5e1; font-weight: bold; color: #0f172a;">${escapeHtml(a.nombre)}</td>
           <td style="border: 1px solid #cbd5e1; text-align: center;">${a.ventasNum}</td>           <td style="border: 1px solid #cbd5e1; text-align: right; font-family: monospace;">$ ${formatMoneda(a.colocacionNum)}</td>
           <td style="border: 1px solid #cbd5e1; text-align: center; color: ${a.carpetasAlDia ? '#16a34a' : '#dc2626'}; font-weight: bold;">
             ${a.carpetasAlDia ? 'AL DÍA' : 'OBSERVADO'}
@@ -282,7 +269,7 @@ export default function IncentivosAsesores() {
     </tbody>
   </table>
 
-  <p style="margin: 0 0 16px; font-size: 14px;">Quedo atento a la confirmación y proceso de pago del incentivo grupal.</p>
+  <p style="margin: 0 0 16px; font-size: 14px;">Solicito revisar los resultados y confirmar si corresponde el incentivo, de acuerdo con las bases vigentes.</p>
   <p style="margin: 0 0 4px; font-size: 14px;">Saludos cordiales,</p>
   <p style="margin: 0; font-size: 15px; font-weight: bold; color: #0f172a;">Oscar Hugo Saravia L.</p>
   <p style="margin: 0; font-size: 12px; color: #64748b;">Supervisor Comercial • Celina Urbanizaciones</p>
@@ -293,9 +280,9 @@ export default function IncentivosAsesores() {
   const generarTextoPlano = () => {
     return `${getSaludoHorario()}
 
-Estimado ${destinatarioObj.nombre},
+${emailSalutation(destinatarioObj.nombre)},
 
-Presento el informe oficial del concurso "INCENTIVO CELINA 2026" (${etapaActual.nombre}):
+${simulation ? 'Presento una simulación, sin registrar ventas, del concurso' : 'Presento el informe de seguimiento del concurso'} "INCENTIVO CELINA 2026" (${etapaActual.nombre}):
 
 📍 SUPERVISIÓN: Oscar Saravia L. (Montero)
 🎯 META GRUPAL: $ ${formatMoneda(evaluacion.meta)} USD
@@ -308,31 +295,19 @@ ${evaluacion.textoBono}
 • Total liquidación del equipo: ${formatMoneda(evaluacion.totalBonoEquipoBs)} Bs.
 
 RESUMEN POR ASESOR:
-${evaluacion.asesoresEvaluados.map(a => `• ${a.nombre}: ${a.ventasNum} vts \vert{}$${formatMoneda(a.colocacionNum)} \vert{}${a.esProductivo ? 'PRODUCTIVO (Gana ' + formatMoneda(evaluacion.bonoPorAsesorBs) + ' Bs)' : 'NO CUMPLE'}`).join('\n')}
+${evaluacion.asesoresEvaluados.map(a => `• ${a.nombre}: ${a.ventasNum} ventas | USD ${formatMoneda(a.colocacionNum)} | ${a.esProductivo ? 'PRODUCTIVO (Gana ' + formatMoneda(evaluacion.bonoPorAsesorBs) + ' Bs.)' : 'NO CUMPLE'}`).join('\n')}
 
 Saludos cordiales,
 Oscar Hugo Saravia L.`;
   };
 
   const copiarFormatoHTML = async () => {
-    const html = generarHTMLCorreo();
+    const html = sanitizeEmailHtml(generarHTMLCorreo());
     const texto = generarTextoPlano();
     try {
-      if (navigator.clipboard && window.ClipboardItem) {
-        const item = new ClipboardItem({
-          "text/html": new Blob([html], { type: "text/html" }),
-          "text/plain": new Blob([texto], { type: "text/plain" })
-        });
-        await navigator.clipboard.write([item]);
-        setNotificacion("¡Planilla copiada con formato! Pégala en tu correo.");
-      } else {
-        await navigator.clipboard.writeText(html);
-        setNotificacion("¡Planilla copiada!");
-      }
-    } catch {
-      await navigator.clipboard.writeText(texto);
-      setNotificacion("¡Texto copiado!");
-    }
+      await copyEmail(html, texto);
+      setNotificacion("Formato copiado. Revise el correo antes de enviarlo.");
+    } catch (error) { setNotificacion(error.message || "No se pudo copiar. Utilice la vista previa."); }
     setTimeout(() => setNotificacion(null), 3500);
   };
 
@@ -341,32 +316,23 @@ Oscar Hugo Saravia L.`;
     const bodyEncoded = encodeURIComponent(generarTextoPlano());
     const subjectEncoded = encodeURIComponent(asuntoCorreo);
     const toEncoded = encodeURIComponent(destinatarioEmail);
-    const ccEncoded = encodeURIComponent(correosCC);
+    const ccEncoded = encodeURIComponent(emailCopies('outlook', [correosCC], destinatarioEmail).join(','));
     window.location.href = `mailto:${toEncoded}?cc=${ccEncoded}&subject=${subjectEncoded}&body=${bodyEncoded}`;
-    setNotificacion("Abriendo Outlook con To y CC. ¡Pega el cuadro con Ctrl+V!");
+    setNotificacion("Outlook: sin copia automática a supervisión. Pegue el formato y revise el borrador.");
   };
 
   const abrirEnGmailWeb = () => {
+    const url = composeEmailUrl({ client: 'gmail', to: destinatarioEmail, subject: asuntoCorreo, body: generarTextoPlano() });
+    window.open(url, '_blank', 'noopener,noreferrer');
     copiarFormatoHTML();
-    const bodyEncoded = encodeURIComponent(generarTextoPlano());
-    const subjectEncoded = encodeURIComponent(asuntoCorreo);
-    const toEncoded = encodeURIComponent(destinatarioEmail);
-    const ccEncoded = encodeURIComponent(correosCC);
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${toEncoded}&cc=${ccEncoded}&su=${subjectEncoded}&body=${bodyEncoded}`;
-    window.open(gmailUrl, "_blank");
-    setNotificacion("Gmail abierto con copia a ohsaravia@celina.com.bo. ¡Pega con Ctrl+V!");
+    setNotificacion(`Gmail: copia exclusiva a ${CORREO_RESPALDO_OSCAR}. Revise el borrador antes de enviarlo.`);
   };
 
-  const textoWhatsApp = `🔥 *INCENTIVO CELINA 2026 - EQUIPO MONTERO* 🔥\n\n` +
-    `📅 *Etapa:* ${etapaActual.nombre}\n` +
-    `🎯 *Colocación:* $ ${formatMoneda(evaluacion.colocacionTotal)} / $ ${formatMoneda(evaluacion.meta)} (${evaluacion.porcentajeGrupal.toFixed(1)}%)\n` +
-    `👥 *Productividad:* ${evaluacion.totalProductivos}/${asesores.length} asesores (${evaluacion.porcentajeProductividad.toFixed(0)}%)\n\n` +
-    `🏆 *ESTADO ACTUAL:* ${evaluacion.nivelGanado ? `¡${evaluacion.nivelGanado} GANADO! (${formatMoneda(evaluacion.bonoPorAsesorBs)} Bs por asesor)` : 'EN CARRERA'}\n\n` +
-    `💡 *Regla individual:* 2 ventas o USD ${formatMoneda(etapaActual.minColocacionUsd)} + Carpetas en 10 días.\n` +
-    `Supervisor: Oscar Saravia L.`;
-
   return (
-    <div className="w-full text-slate-100 font-sans space-y-6 pb-12 antialiased">
+    <div className="w-full text-[var(--text-primary)] font-sans space-y-6 pb-12 antialiased">
+      <details className="panel mb-6"><summary>Vista previa del correo · revisar antes de enviar</summary><div className="email-preview" dangerouslySetInnerHTML={{ __html: sanitizeEmailHtml(generarHTMLCorreo()) }}/></details>
+      <p className="source-note">Colocación en USD y ventas realizadas desde la misma fuente de Inicio, Proyección Semanal y Seguimiento. Marisol: 1 venta en Los Jardines, USD 11.200, ingresada el 09/10/2026. Las posibles ventas no se usan para calificar. La regla se mantiene: 2 ventas realizadas o USD 15.000 y carpetas al día; esta venta sola no alcanza el umbral. No se paga un bono automáticamente.</p>
+      <div className="panel"><button className="primary-button" onClick={() => setSimulation(simulation ? null : actualAdvisors.map(advisor => ({ ...advisor })))}>{simulation ? 'Volver a ventas realizadas' : 'Simular escenario de incentivos'}</button><p role="status">{simulation ? 'Simulación: estos cambios no registran ventas ni afectan los otros módulos.' : 'Ventas realizadas: cantidades y colocación sincronizadas. Para probar valores distintos, active la simulación.'}</p></div>
       {/* ================= HERO PRINCIPAL ================= */}
       <div className={`rounded-3xl p-6 sm:p-8 border shadow-2xl relative overflow-hidden transition-all duration-500 ${evaluacion.claseEstado}`}>
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[140px] pointer-events-none"></div>
@@ -379,25 +345,25 @@ Oscar Hugo Saravia L.`;
                 CONCURSO INTERNO OFICIAL CELINA 2026
               </span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight flex items-center gap-3">
+            <h1 className="text-2xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight flex items-center gap-3">
               <Trophy className={`w-8 h-8 ${evaluacion.nivelGanado ? 'text-emerald-400 animate-bounce' : 'text-amber-400'}`} />
               INCENTIVO <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-cyan-400 to-emerald-400">CELINA 2026</span>
             </h1>
-            <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-1 max-w-xl leading-relaxed">
               Recuperación del incentivo grupal por colocación de equipo (110% o 120%) + productividad escalonada individual.
             </p>
           </div>
 
           {/* CARD DE BONO DESBLOQUEADO */}
-          <div className="bg-[#050b18]/90 border border-[#1e3a5f] p-5 rounded-2xl text-center shadow-xl min-w-[240px] w-full lg:w-auto">
-            <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider block mb-1">
+          <div className="bg-[var(--bg-card-inner)]/90 border border-[var(--border-highlight)] p-5 rounded-2xl text-center shadow-xl min-w-[240px] w-full lg:w-auto">
+            <span className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-wider block mb-1">
               Bono Por Asesor Productivo
             </span>
-            <div className="text-4xl font-black text-white font-mono flex items-center justify-center gap-1.5">
-              <span className={evaluacion.bonoPorAsesorBs > 0 ? "text-emerald-400" : "text-slate-400"}>
+            <div className="text-4xl font-black text-[var(--text-primary)] font-mono flex items-center justify-center gap-1.5">
+              <span className={evaluacion.bonoPorAsesorBs > 0 ? "text-emerald-400" : "text-[var(--text-muted)]"}>
                 {evaluacion.bonoPorAsesorBs > 0 ? `${formatMoneda(evaluacion.bonoPorAsesorBs)}` : '0'}
               </span>
-              <span className="text-lg text-slate-400">Bs.</span>
+              <span className="text-lg text-[var(--text-muted)]">Bs.</span>
             </div>
             <div className="text-[11px] font-bold text-cyan-300 mt-1">
               {evaluacion.nivelGanado ? `${evaluacion.nivelGanado} DESBLOQUEADO` : 'Aún no clasificado'}
@@ -418,9 +384,9 @@ Oscar Hugo Saravia L.`;
               key={et.id}
               onClick={() => setEtapaSeleccionada(et.id)}
               className={`p-4 rounded-2xl border text-left transition-all ${
-                esActiva 
-                  ? 'bg-cyan-950/80 border-cyan-400 text-white shadow-[0_0_20px_rgba(0,229,255,0.15)] ring-1 ring-cyan-400' 
-                  : 'bg-[#070e1c] border-[#14233c] text-slate-400 hover:border-slate-700'
+                esActiva
+                  ? 'bg-cyan-950/80 border-cyan-400 text-[var(--text-primary)] shadow-[0_0_20px_rgba(0,229,255,0.15)] ring-1 ring-cyan-400'
+                  : 'bg-[var(--bg-card)] border-[var(--border-glow)] text-[var(--text-muted)] hover:border-slate-700'
               }`}
             >
               <div className="flex justify-between items-center mb-1">
@@ -434,7 +400,7 @@ Oscar Hugo Saravia L.`;
               <p className="text-[11px] font-bold text-cyan-300">
                 Productividad requerida: {et.productividadRequeridaPct}%
               </p>
-              <p className="text-[10px] text-slate-400 mt-1">
+              <p className="text-[10px] text-[var(--text-muted)] mt-1">
                 Asesor productivo: <strong>{et.minVentas} ventas</strong> o <strong>USD {formatMoneda(et.minColocacionUsd)}</strong>
               </p>
             </button>
@@ -445,24 +411,24 @@ Oscar Hugo Saravia L.`;
       {/* ================= CONDICIÓN DE PREMIACIÓN (110% vs 120%) ================= */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* NIVEL 1: 110% */}
-        <div className={`p-5 rounded-3xl border transition-all ${evaluacion.porcentajeGrupal >= 110 && evaluacion.cumpleProductividad ? 'bg-[#06201a] border-emerald-500/60 shadow-lg' : 'bg-[#070e1c] border-[#14233c]'}`}>
+        <div className={`p-5 rounded-3xl border transition-all ${evaluacion.porcentajeGrupal >= 110 && evaluacion.cumpleProductividad ? 'bg-[#06201a] border-emerald-500/60 shadow-lg' : 'bg-[var(--bg-card)] border-[var(--border-glow)]'}`}>
           <div className="flex justify-between items-start mb-3">
             <div>
               <span className="text-[10px] font-black uppercase tracking-widest text-cyan-400 block mb-0.5">NIVEL 1 DE PREMIACIÓN</span>
-              <h3 className="text-xl font-black text-white">COLOCACIÓN GRUPAL 110%</h3>
-              <p className="text-xs text-slate-400">+ Productividad {etapaActual.productividadRequeridaPct}% de la etapa</p>
+              <h3 className="text-xl font-black text-[var(--text-primary)]">COLOCACIÓN GRUPAL 110%</h3>
+              <p className="text-xs text-[var(--text-muted)]">+ Productividad {etapaActual.productividadRequeridaPct}% de la etapa</p>
             </div>
             <div className="text-right">
               <span className="text-2xl font-black text-cyan-300 font-mono">700 Bs.</span>
-              <span className="block text-[9px] text-slate-400 uppercase">Por Asesor</span>
+              <span className="block text-[9px] text-[var(--text-muted)] uppercase">Por Asesor</span>
             </div>
           </div>
-          <div className="text-xs flex justify-between pt-2 border-t border-[#14233c]">
-            <span className="text-slate-400">Meta Requerida:</span>
-            <strong className="text-white font-mono">$ {formatMoneda(evaluacion.meta110)} USD</strong>
+          <div className="text-xs flex justify-between pt-2 border-t border-[var(--border-glow)]">
+            <span className="text-[var(--text-muted)]">Meta Requerida:</span>
+            <strong className="text-[var(--text-primary)] font-mono">$ {formatMoneda(evaluacion.meta110)} USD</strong>
           </div>
           <div className="text-xs flex justify-between mt-1">
-            <span className="text-slate-400">Estado:</span>
+            <span className="text-[var(--text-muted)]">Estado:</span>
             <strong className={evaluacion.porcentajeGrupal >= 110 ? "text-emerald-400" : "text-amber-400"}>
               {evaluacion.colocacionTotal >= evaluacion.meta110 ? "✓ Colocación cumplida" : `Faltan $ ${formatMoneda(evaluacion.faltaPara110Usd)} USD`}
             </strong>
@@ -470,24 +436,24 @@ Oscar Hugo Saravia L.`;
         </div>
 
         {/* NIVEL 2: 120% */}
-        <div className={`p-5 rounded-3xl border transition-all ${evaluacion.porcentajeGrupal >= 120 && evaluacion.cumpleProductividad ? 'bg-[#06201a] border-emerald-500/60 shadow-lg' : 'bg-[#070e1c] border-[#14233c]'}`}>
+        <div className={`p-5 rounded-3xl border transition-all ${evaluacion.porcentajeGrupal >= 120 && evaluacion.cumpleProductividad ? 'bg-[#06201a] border-emerald-500/60 shadow-lg' : 'bg-[var(--bg-card)] border-[var(--border-glow)]'}`}>
           <div className="flex justify-between items-start mb-3">
             <div>
               <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 block mb-0.5">NIVEL 2 DE PREMIACIÓN</span>
-              <h3 className="text-xl font-black text-white">COLOCACIÓN GRUPAL 120%</h3>
-              <p className="text-xs text-slate-400">+ Productividad {etapaActual.productividadRequeridaPct}% de la etapa</p>
+              <h3 className="text-xl font-black text-[var(--text-primary)]">COLOCACIÓN GRUPAL 120%</h3>
+              <p className="text-xs text-[var(--text-muted)]">+ Productividad {etapaActual.productividadRequeridaPct}% de la etapa</p>
             </div>
             <div className="text-right">
               <span className="text-2xl font-black text-emerald-400 font-mono">1.100 Bs.</span>
-              <span className="block text-[9px] text-slate-400 uppercase">Por Asesor</span>
+              <span className="block text-[9px] text-[var(--text-muted)] uppercase">Por Asesor</span>
             </div>
           </div>
-          <div className="text-xs flex justify-between pt-2 border-t border-[#14233c]">
-            <span className="text-slate-400">Meta Requerida:</span>
-            <strong className="text-white font-mono">$ {formatMoneda(evaluacion.meta120)} USD</strong>
+          <div className="text-xs flex justify-between pt-2 border-t border-[var(--border-glow)]">
+            <span className="text-[var(--text-muted)]">Meta Requerida:</span>
+            <strong className="text-[var(--text-primary)] font-mono">$ {formatMoneda(evaluacion.meta120)} USD</strong>
           </div>
           <div className="text-xs flex justify-between mt-1">
-            <span className="text-slate-400">Estado:</span>
+            <span className="text-[var(--text-muted)]">Estado:</span>
             <strong className={evaluacion.porcentajeGrupal >= 120 ? "text-emerald-400" : "text-amber-400"}>
               {evaluacion.colocacionTotal >= evaluacion.meta120 ? "✓ Colocación cumplida" : `Faltan $ ${formatMoneda(evaluacion.faltaPara120Usd)} USD`}
             </strong>
@@ -496,25 +462,25 @@ Oscar Hugo Saravia L.`;
       </div>
 
       {/* ================= TABLA DE ASESORES Y GESTIÓN ================= */}
-      <div className="bg-[#070e1c] border border-[#14233c] rounded-3xl p-5 sm:p-7 shadow-2xl space-y-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-[#14233c] pb-4">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-glow)] rounded-3xl p-5 sm:p-7 shadow-2xl space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-[var(--border-glow)] pb-4">
           <div>
-            <h3 className="text-base font-black text-white flex items-center gap-2">
+            <h3 className="text-base font-black text-[var(--text-primary)] flex items-center gap-2">
               <Users className="w-5 h-5 text-cyan-400" /> Plantilla de Asesores de Montero (Oscar Saravia)
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-[var(--text-muted)]">
               Registra las ventas y colocación para verificar quién califica según las bases oficiales.
             </p>
           </div>
-          
+
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-400">Meta Base (100%):</span>
-            <div className="flex items-center bg-[#050b18] border border-[#1e3a5f] rounded-xl px-3 py-1 text-xs font-mono font-bold text-cyan-400">
+            <span className="text-xs font-bold text-[var(--text-muted)]">Meta Base (100%):</span>
+            <div className="flex items-center bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-xl px-3 py-1 text-xs font-mono font-bold text-cyan-400">
               $ <input
                 type="number"
                 value={metaGrupalUSD}
                 onChange={(e) => setMetaGrupalUSD(e.target.value)}
-                className="w-24 bg-transparent outline-none text-right font-black text-white ml-1"
+                className="w-24 bg-transparent outline-none text-right font-black text-[var(--text-primary)] ml-1"
               />
             </div>
           </div>
@@ -524,7 +490,7 @@ Oscar Hugo Saravia L.`;
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-xs text-left border-collapse min-w-[700px]">
             <thead>
-              <tr className="border-b border-[#14233c] text-[10px] text-slate-400 uppercase tracking-wider font-black">
+              <tr className="border-b border-[var(--border-glow)] text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-black">
                 <th className="py-3 px-3">Asesor Comercial</th>
                 <th className="py-3 px-3 text-center">Ventas Realizadas</th>
                 <th className="py-3 px-3 text-right">Colocación ($ USD)</th>
@@ -535,8 +501,8 @@ Oscar Hugo Saravia L.`;
             </thead>
             <tbody className="divide-y divide-[#14233c]">
               {evaluacion.asesoresEvaluados.map(a => (
-                <tr key={a.id} className={`hover:bg-[#091426] transition-colors ${a.esProductivo ? 'bg-[#04241b]/20' : ''}`}>
-                  <td className="py-3 px-3 font-bold text-white">
+                <tr key={a.id} className={`hover:bg-[var(--bg-card-inner)] transition-colors ${a.esProductivo ? 'bg-[var(--bg-card-inner)]/20' : ''}`}>
+                  <td className="py-3 px-3 font-bold text-[var(--text-primary)]">
                     <div className="flex items-center gap-2">
                       <span className={`w-2 h-2 rounded-full ${a.esProductivo ? 'bg-emerald-400' : 'bg-slate-600'}`}></span>
                       <span>{a.nombre}</span>
@@ -548,9 +514,12 @@ Oscar Hugo Saravia L.`;
                     <input
                       type="number"
                       min="0"
+                      step="1"
+                      aria-label={`Ventas de ${a.nombre}`}
+                      readOnly={!simulation}
                       value={a.ventas}
                       onChange={(e) => handleAsesorChange(a.id, 'ventas', e.target.value)}
-                      className="w-16 px-2 py-1 bg-[#050b18] border border-[#1e3a5f] rounded-lg text-center font-black text-white focus:border-cyan-400 outline-none"
+                      className="w-16 px-2 py-1 bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-lg text-center font-black text-[var(--text-primary)] focus:border-cyan-400 outline-none"
                     />
                   </td>
 
@@ -561,10 +530,12 @@ Oscar Hugo Saravia L.`;
                       <input
                         type="number"
                         min="0"
-                        step="500"
+                        step="0.01"
+                        aria-label={`Colocación USD de ${a.nombre}`}
+                        readOnly={!simulation}
                         value={a.colocacion}
                         onChange={(e) => handleAsesorChange(a.id, 'colocacion', e.target.value)}
-                        className="w-28 px-2 py-1 bg-[#050b18] border border-[#1e3a5f] rounded-lg text-right font-black text-white font-mono focus:border-cyan-400 outline-none"
+                        className="w-28 px-2 py-1 bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-lg text-right font-black text-[var(--text-primary)] font-mono focus:border-cyan-400 outline-none"
                       />
                     </div>
                   </td>
@@ -575,8 +546,8 @@ Oscar Hugo Saravia L.`;
                       type="button"
                       onClick={() => handleAsesorChange(a.id, 'carpetasAlDia', !a.carpetasAlDia)}
                       className={`px-2.5 py-1 rounded-lg text-[10px] font-black transition ${
-                        a.carpetasAlDia 
-                          ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40' 
+                        a.carpetasAlDia
+                          ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40'
                           : 'bg-rose-950 text-rose-300 border border-rose-500/40'
                       }`}
                     >
@@ -587,9 +558,9 @@ Oscar Hugo Saravia L.`;
                   {/* Estado Individual */}
                   <td className="py-3 px-3 text-center">
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black ${
-                      a.esProductivo 
-                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' 
-                        : 'bg-slate-800 text-slate-400'
+                      a.esProductivo
+                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                        : 'bg-slate-800 text-[var(--text-muted)]'
                     }`}>
                       {a.esProductivo ? "PRODUCTIVO" : "PENDIENTE"}
                     </span>
@@ -610,13 +581,13 @@ Oscar Hugo Saravia L.`;
         </div>
 
         {/* RESUMEN DE CONTROL DE CIERRE */}
-        <div className="bg-[#050b18] border border-[#1e3a5f] rounded-2xl p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mt-4">
+        <div className="bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-2xl p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mt-4">
           <div className="space-y-1">
             <span className="text-[10px] font-black uppercase text-cyan-400 tracking-wider">DIAGNÓSTICO GRUPAL DEL EQUIPO</span>
-            <p className="text-xs text-slate-300 font-bold">
+            <p className="text-xs text-[var(--text-secondary)] font-bold">
               {evaluacion.textoBono}
             </p>
-            <div className="text-[11px] text-slate-400 flex items-center gap-3">
+            <div className="text-[11px] text-[var(--text-muted)] flex items-center gap-3">
               <span>Colocación Grupal: <strong>$ {formatMoneda(evaluacion.colocacionTotal)} USD</strong> ({evaluacion.porcentajeGrupal.toFixed(1)}%)</span>
               <span>•</span>
               <span>Asesores Productivos: <strong>{evaluacion.totalProductivos} de {asesores.length}</strong> ({evaluacion.porcentajeProductividad.toFixed(0)}%)</span>
@@ -626,19 +597,19 @@ Oscar Hugo Saravia L.`;
           <div className="flex gap-2 w-full md:w-auto">
             <button
               onClick={copiarFormatoHTML}
-              className="flex-1 md:flex-initial px-4 py-2.5 bg-slate-100 hover:bg-white text-slate-900 font-black rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow"
+              className="flex-1 md:flex-initial px-4 py-2.5 bg-slate-100 hover:bg-[var(--bg-card)] text-slate-900 font-black rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow"
             >
               <Copy className="w-3.5 h-3.5" /> Copiar Planilla
             </button>
             <button
               onClick={enviarAppOutlook}
-              className="flex-1 md:flex-initial px-4 py-2.5 bg-[#0078d4] hover:bg-[#006cc1] text-white font-black rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow"
+              className="flex-1 md:flex-initial px-4 py-2.5 bg-[#0078d4] hover:bg-[#006cc1] text-[var(--text-primary)] font-black rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow"
             >
               <Monitor className="w-3.5 h-3.5" /> Outlook 🖥️
             </button>
             <button
               onClick={abrirEnGmailWeb}
-              className="flex-1 md:flex-initial px-4 py-2.5 bg-[#ea4335] hover:bg-[#dc2626] text-white font-black rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow"
+              className="flex-1 md:flex-initial px-4 py-2.5 bg-[#ea4335] hover:bg-[#dc2626] text-[var(--text-primary)] font-black rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow"
             >
               <Mail className="w-3.5 h-3.5" /> Gmail (+CC)
             </button>
@@ -653,36 +624,36 @@ Oscar Hugo Saravia L.`;
       </div>
 
       {/* ================= REGLAS OFICIALES EXPLICADAS ================= */}
-      <div className="bg-[#070e1c] border border-[#14233c] rounded-3xl p-6 shadow-2xl space-y-4">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-glow)] rounded-3xl p-6 shadow-2xl space-y-4">
         <h4 className="text-xs font-black uppercase text-cyan-400 tracking-wider flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-emerald-400" /> Resumen de Políticas Oficiales para Cobrar el Bono
         </h4>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
-          <div className="bg-[#050b18] border border-[#1e3a5f] p-4 rounded-2xl">
+          <div className="bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] p-4 rounded-2xl">
             <span className="text-[10px] font-black text-amber-400 uppercase block mb-1">1. Vende</span>
-            <p className="text-slate-300 leading-relaxed">
+            <p className="text-[var(--text-secondary)] leading-relaxed">
               Cierra ventas de lotes en cualquier proyecto de Celina Urbanizaciones.
             </p>
           </div>
 
-          <div className="bg-[#050b18] border border-[#1e3a5f] p-4 rounded-2xl">
+          <div className="bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] p-4 rounded-2xl">
             <span className="text-[10px] font-black text-cyan-400 uppercase block mb-1">2. Sé Productivo</span>
-            <p className="text-slate-300 leading-relaxed">
+            <p className="text-[var(--text-secondary)] leading-relaxed">
               Concreta <strong>{etapaActual.minVentas} ventas</strong> o la colocación mínima de la etapa vigente (USD {formatMoneda(etapaActual.minColocacionUsd)}).
             </p>
           </div>
 
-          <div className="bg-[#050b18] border border-[#1e3a5f] p-4 rounded-2xl">
+          <div className="bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] p-4 rounded-2xl">
             <span className="text-[10px] font-black text-rose-400 uppercase block mb-1">3. Procesa tu Carpeta</span>
-            <p className="text-slate-300 leading-relaxed">
+            <p className="text-[var(--text-secondary)] leading-relaxed">
               Entrega y procesa la carpeta dentro de los <strong>10 días</strong> posteriores a la fecha de venta.
             </p>
           </div>
 
-          <div className="bg-[#050b18] border border-[#1e3a5f] p-4 rounded-2xl">
+          <div className="bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] p-4 rounded-2xl">
             <span className="text-[10px] font-black text-emerald-400 uppercase block mb-1">4. Cumplan en Equipo</span>
-            <p className="text-slate-300 leading-relaxed">
+            <p className="text-[var(--text-secondary)] leading-relaxed">
               <strong>110% de colocación:</strong> 700 Bs.<br/>
               <strong>120% de colocación:</strong> 1.100 Bs.<br/>
               (Exigiendo {etapaActual.productividadRequeridaPct}% del equipo productivo).

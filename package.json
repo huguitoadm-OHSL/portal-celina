@@ -1,15 +1,20 @@
 {
-  "name": "vite-react-starter",
+  "name": "portal-celina",
   "private": true,
-  "version": "0.0.0",
+  "version": "4.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test tests/*.test.js",
+    "test:e2e": "playwright test",
+    "check": "npm run lint && npm test && npm run build"
   },
   "dependencies": {
+    "@vercel/functions": "^3.9.11",
+    "dompurify": "^3.4.16",
     "firebase": "^10.12.2",
     "lucide-react": "^1.8.0",
     "react": "^19.2.5",
@@ -17,13 +22,17 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@playwright/test": "^1.64.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "autoprefixer": "^10.6.1",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
+    "postcss": "^8.5.29",
+    "tailwindcss": "^3.4.19",
     "vite": "^8.0.8"
   }
 }
