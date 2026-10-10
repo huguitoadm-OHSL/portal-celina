@@ -47,3 +47,8 @@ ESLint, 20 pruebas unitarias, build y las 10 pruebas de navegador aprobados. La 
 ## Saludos y Recursos Humanos
 
 21 pruebas unitarias y 11 pruebas de navegador aprobadas, además de ESLint y build. Saludo compartido por primer nombre sin títulos ni apellidos; RRHH usa «Estimado Ulrich». La nueva regresión verifica HTML y texto copiado de los cinco módulos: alta CRM, renuncia, evaluación, postulante y memorándum. El recorrido de los 25 módulos rechaza «Estimado/a» y títulos en los saludos. No se enviaron correos.
+
+
+## Acabado visual claro/oscuro
+
+ESLint, las 21 pruebas unitarias, build y las 11 pruebas de navegador aprobados. Revisión visual de escritorio en claro y oscuro y de móvil a 390 px. Tras ajustar la tabla se repitió la prueba de temas/móvil con los nuevos accesos directos «Revisar proyección» y «Ver ventas». Selector claro/oscuro/automático persistente, seguimiento del dispositivo y ausencia de desbordamiento horizontal del documento comprobados. Las tablas anchas mantienen desplazamiento horizontal propio en móvil.

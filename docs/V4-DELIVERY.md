@@ -51,3 +51,14 @@ Los valores realizados de Incentivos son de lectura. Se conserva un escenario ed
 Corrección de moneda de premios: Bs 700 (110/60) y Bs 1.100 (120/60), incluidos bonos individuales, total del equipo y correos. Colocación, ventas y metas permanecen en USD; las reglas de calificación no cambian.
 
 Corrección de saludos: todos los correos usan el primer nombre del destinatario, sin títulos ni apellidos (por ejemplo, «Estimado Ulrich»). Se corrigió la vía de destinatario fijo de RRHH y se unificaron Incentivos, Campañas y simulaciones. Las identidades completas se conservan en los datos operativos. Revisada la redacción de alta CRM, renuncia, evaluación y postulantes, en HTML y texto.
+
+
+## Acabado visual ejecutivo
+
+- Encabezado azul profundo con acentos turquesa y accesos directos a proyección y ventas.
+- Navegación refinada, estado activo claro, perfil y marca Celina; menú móvil conservado.
+- Tarjetas de indicadores, tablas y formularios con superficies y espaciado consistentes.
+- Modo claro, oscuro y automático con preferencia persistente e icono correspondiente.
+- Diseño adaptable, navegación por teclado y respeto a movimiento reducido.
+
+Capturas actualizadas de escritorio claro/oscuro, móvil, Seguimiento e Incentivos. No se modificaron cálculos, registros comerciales, premios ni plantillas de correo.

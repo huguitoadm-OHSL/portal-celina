@@ -1,7 +1,7 @@
 import React from 'react';
 
 export const Input = ({ label, name, value, onChange, placeholder, type = "text", required = false, className = "" }) => (
-  <div className={`mb-3.5 w-full ${className}`}>
+  <div className={`form-field mb-3.5 w-full ${className}`}>
     {label && (
       <label className="block text-[11px] font-black text-[var(--text-secondary)] uppercase tracking-wider mb-1.5 ml-0.5 truncate">
         {String(label)}

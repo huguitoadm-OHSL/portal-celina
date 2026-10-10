@@ -49,7 +49,7 @@ export default function App() {
   const renderContent = () => {
     switch (activeTab) {
       // 1. Gerencia
-      case 'dashboard': return <Dashboard />;
+      case 'dashboard': return <Dashboard onNavigate={setActiveTab} />;
       case 'incentivos': return <IncentivosAsesores />; // 🟢 RUTA DEL CONCURSO DE INCENTIVOS
       case 'proyeccion': return <ProyeccionSemanal />;
       case 'diaria': return <ProyeccionDiaria />;
@@ -92,7 +92,7 @@ export default function App() {
   };
 
   return (
-    <AuthGate><a className="skip-link" href="#main-content">Ir al contenido</a><div className="min-h-screen bg-[var(--bg-space)] text-[var(--text-primary)] flex flex-col md:flex-row font-sans w-full overflow-x-hidden">
+    <AuthGate><a className="skip-link" href="#main-content">Ir al contenido</a><div className="workspace-shell min-h-screen bg-[var(--bg-space)] text-[var(--text-primary)] flex flex-col md:flex-row font-sans w-full overflow-x-hidden">
       <MobileHeader onMenuClick={() => setIsSidebarOpen(true)} />
 
       <Sidebar
@@ -103,8 +103,8 @@ export default function App() {
         setSupervisorDestino={setSupervisorDestino}
       />
 
-      <main id="main-content" className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 md:p-8 w-full min-h-[calc(100vh-64px)] md:min-h-screen bg-[var(--bg-space)]">
-        <div className="max-w-[1600px] mx-auto w-full pb-10">
+      <main id="main-content" className="workspace-main flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 md:p-8 w-full min-h-[calc(100vh-64px)] md:min-h-screen bg-[var(--bg-space)]">
+        <div className="workspace-content max-w-[1600px] mx-auto w-full pb-10">
           <header className="workspace-toolbar"><div><p className="eyebrow">PORTAL CELINA / ESPACIO DE TRABAJO</p><span>Equipo Oscar Saravia · Montero</span></div><div className="toolbar-actions"><span className="rate-pill">Gestión comercial · USD</span><ThemeSelector theme={theme} onChange={setTheme}/></div></header>
           <ErrorBoundary key={activeTab}><Suspense fallback={<div className="panel" role="status">Cargando módulo…</div>}>{renderContent()}</Suspense></ErrorBoundary>
         </div>

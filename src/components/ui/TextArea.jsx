@@ -1,7 +1,7 @@
 import React from 'react';
 
 export const TextArea = ({ label, name, value, onChange, placeholder, rows = 4 }) => (
-  <div className="mb-3.5 w-full">
+  <div className="form-field mb-3.5 w-full">
     {label && (
       <label className="block text-[11px] font-black text-[var(--text-secondary)] uppercase tracking-wider mb-1.5 ml-0.5 truncate">
         {String(label)}

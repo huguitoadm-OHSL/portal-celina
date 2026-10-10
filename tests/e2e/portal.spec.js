@@ -8,6 +8,12 @@ async function enter(page) {
 
 test('temas persistentes, sistema operativo y dashboard móvil',async ({page}) => {
   await enter(page);
+  await page.getByRole('button', {name:'Ver ventas', exact:true}).click();
+  await expect(page.getByRole('heading', {name:'Detalle de Asesor Mes en Curso'})).toBeVisible();
+  await page.getByRole('button', {name:'Inicio', exact:true}).click();
+  await page.getByRole('button', {name:'Revisar proyección', exact:true}).click();
+  await expect(page.locator('.email-preview')).toContainText('65,300.00');
+  await page.getByRole('button', {name:'Inicio', exact:true}).click();
   const selector=page.getByRole('combobox',{name:'Tema de apariencia'});
   await selector.selectOption('light');
   await expect(page.locator('html')).toHaveAttribute('data-theme','light');
