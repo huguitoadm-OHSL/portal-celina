@@ -20,7 +20,7 @@ export default function PostulanteNuevo() {
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
-  const textoWhatsApp = `📋 *POSTULANTE NUEVO - EQUIPO COMERCIAL* 📋\n\n` +
+  const textoCorreo = `{{SALUDO_TIEMPO}}\n{{NOMBRE_SUPERVISOR}},\n\nPresento la postulación del siguiente candidato para incorporarse al equipo comercial de Montero:\n\n` +
     `👤 *Postulante:* ${form.nombrePostulante || '---'}\n` +
     `🪪 *C.I.:* ${form.ci || '---'}\n` +
     `📱 *Celular:* ${form.celular || '---'}\n` +
@@ -28,13 +28,13 @@ export default function PostulanteNuevo() {
     `📍 *Ciudad:* ${form.ciudad}\n` +
     `💼 *Experiencia:* ${form.experiencia || 'En evaluación'}\n` +
     `🎯 *Medio:* ${form.medioReclutamiento}\n\n` +
-    `Presentado por Supervisor: ${form.asesor}`;
+    `Quedo a su disposición para coordinar la evaluación del candidato.\n\nSaludos cordiales,\n${form.asesor}`;
 
   const safeForm = escapeTemplateData(form);
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; font-size: 14px; color: #0f172a; line-height: 1.6; max-width: 650px;">
       <p>{{SALUDO_TIEMPO}} {{NOMBRE_SUPERVISOR}},</p>
-      <p>Por medio de la presente, presento la postulación de un nuevo candidato para incorporarse al equipo comercial de Montero:</p>
+      <p>Presento la postulación del siguiente candidato para incorporarse al equipo comercial de Montero:</p>
 
       <table style="width: 100%; border-collapse: collapse; margin: 15px 0; border: 1px solid #cbd5e1; border-radius: 8px;">
         <tr style="background-color: #f1f5f9;">
@@ -141,7 +141,7 @@ export default function PostulanteNuevo() {
         <div className="w-full min-w-0">
           <ResultCard
             title="Ficha Postulante Nuevo"
-            text={textoWhatsApp}
+            text={textoCorreo}
             htmlContent={htmlContent}
             subject={`Presentación Postulante Nuevo Equipo Montero - ${form.nombrePostulante || 'Candidato'}`}
             fixedDestinoLabel="Ulrich Klein Montano"

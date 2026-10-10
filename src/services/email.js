@@ -5,9 +5,19 @@ export function greeting(date = new Date()) {
   return hour >= 5 && hour < 12 ? 'Buenos días' : hour >= 12 && hour < 19 ? 'Buenas tardes' : 'Buenas noches';
 }
 
+// El saludo usa solo el primer nombre; la identidad completa se conserva en datos y destinatarios.
+export function firstName(name) {
+  return String(name ?? '').trim().replace(/^(?:(?:Lic|Ing|Dr|Dra|Sr|Sra)\.?\s+)+/i, '').split(/\s+/)[0] || '';
+}
+
+export function emailSalutation(name, gender = 'M') {
+  const nameOnly = firstName(name);
+  return nameOnly ? `${gender === 'F' ? 'Estimada' : 'Estimado'} ${nameOnly}` : 'Buen día';
+}
+
 // Reemplazo único de tokens: no se vuelve a procesar el saludo ya resuelto.
 export function resolveEmail(content, recipient, date = new Date()) {
-  return String(content || '').replace(/\{\{SALUDO_TIEMPO\}\}/g, () => greeting(date)).replace(/\{\{NOMBRE_SUPERVISOR\}\}/g, () => String(recipient || 'Estimado/a'));
+  return String(content || '').replace(/\{\{SALUDO_TIEMPO\}\}/g, () => greeting(date)).replace(/\{\{NOMBRE_SUPERVISOR\}\}/g, () => String(recipient || 'Buen día'));
 }
 
 export function escapeHtml(value) {

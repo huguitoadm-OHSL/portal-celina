@@ -1,5 +1,5 @@
 import { getExchangeRate } from '../constants/exchangeRates.js';
-import { escapeTemplateData } from '../services/email.js';
+import { escapeTemplateData, emailSalutation } from '../services/email.js';
 import { formatCurrency } from './formatters.js';
 
 const generarHtmlFisicoRaw = (formFisico = {}) => {
@@ -29,7 +29,7 @@ const generarHtmlAmortizacionRaw = (formAmortizacion = {}, calculos = {}) => {
   } = calculos;
 
   if (error) return `<div style="color:red; font-weight:bold;">Error: ${error}</div>`;
-  const clienteStr = formAmortizacion.cliente ? `Estimado/a <strong>${formAmortizacion.cliente}</strong>` : 'Estimado/a cliente';
+  const clienteStr = emailSalutation(formAmortizacion.cliente);
 
   return `
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 650px; line-height: 1.6; text-align: left;">
@@ -267,7 +267,7 @@ const generarHtmlRenunciaRaw = (formRenuncia = {}) => {
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 20px; color: #333333;">{{SALUDO_TIEMPO}} {{NOMBRE_SUPERVISOR}},</p>
     <p style="margin-bottom: 20px; color: #333333;">Adjunto la carta de renuncia de <strong>${formRenuncia.nombre || '[Nombre]'}</strong>, quien se desempe&ntilde;aba como <strong>${formRenuncia.cargo || 'Asesor de Ventas'}</strong> desde ${formRenuncia.fechaIngreso || '[Fecha]'}.</p>
-    <p style="margin-bottom: 20px; color: #333333;">En su nota, con fecha ${formRenuncia.fechaRenuncia || '[Fecha]'}, la persona comunica que su retiro se debe a ${formRenuncia.motivo || '[motivos...]'}. Adjunto el documento escaneado para que se proceda con el tr&aacute;mite correspondiente en el departamento de Recursos Humanos.</p>
+    <p style="margin-bottom: 20px; color: #333333;">En su nota, con fecha ${formRenuncia.fechaRenuncia || '[Fecha]'}, la persona comunica que su retiro se debe a ${formRenuncia.motivo || '[motivos...]'}. Solicito gestionar el tr&aacute;mite correspondiente en Recursos Humanos con el documento adjunto.</p>
     <p style="margin-bottom: 20px; color: #333333;">Quedo atento a cualquier requerimiento adicional para cerrar este proceso.</p>
     <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
     <p style="margin-top: 0; font-weight: bold; color: #333333;">${formRenuncia.asesor || 'Asesor'}</p>
@@ -290,7 +290,6 @@ const generarHtmlAltaCRMRaw = (formAltaCRM = {}) => {
       <li style="margin-bottom: 5px;">Correo Electr&oacute;nico: ${formAltaCRM.correo || '---'}</li>
     </ul>
     <p style="margin-bottom: 5px; color: #333333;">Agradecer&eacute; confirmar la habilitaci&oacute;n del usuario y el procedimiento de acceso.</p>
-    <p style="margin-bottom: 20px; color: #333333;">Gracias por su colaboraci&oacute;n.</p>
     <p style="margin-top: 0; margin-bottom: 2px; color: #333333;">Saludos cordiales,</p>
     <p style="margin-top: 0; font-weight: bold; color: #333333;">${formAltaCRM.asesor || 'Asesor'}</p>
   </div>`;
@@ -301,7 +300,7 @@ const generarHtmlEvaluacionRaw = (formEvaluacion = {}) => {
   <div style="background-color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; color: #333333; max-width: 800px; line-height: 1.5; text-align: left;">
     <p style="margin-bottom: 5px; color: #333333;">{{SALUDO_TIEMPO}}</p>
     <p style="margin-top: 0; margin-bottom: 20px; color: #333333;">{{NOMBRE_SUPERVISOR}},</p>
-    <p style="margin-bottom: 20px; color: #333333;">En respuesta a su correo, adjunto el formulario de evaluaci&oacute;n de desempe&ntilde;o debidamente completado del asesor de la sucursal Montero que acaba de finalizar su programa de aprendizaje.</p>
+    <p style="margin-bottom: 20px; color: #333333;">En respuesta a su correo, adjunto el formulario de evaluaci&oacute;n de desempe&ntilde;o del asesor de Montero al finalizar su programa de aprendizaje.</p>
     <p style="margin-bottom: 10px; color: #333333;"><strong>1. ${formEvaluacion.nombre || '[Nombre Completo]'}</strong></p>
     <ul style="margin-bottom: 20px; padding-left: 20px; color: #333333;">
       <li style="margin-bottom: 10px;"><strong>Punteo Total:</strong> ${formEvaluacion.punteo || '0'} (${formEvaluacion.calificacion || 'Muy Bueno'})</li>

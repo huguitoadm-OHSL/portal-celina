@@ -1,7 +1,7 @@
 import { CORREO_SUPERVISION_RESPALDO as CORREO_RESPALDO_OSCAR } from '../constants/config';
 import { emailCopies, composeEmailUrl } from '../services/emailDelivery';
 import { getExchangeRate } from '../constants/exchangeRates';
-import { escapeHtml, sanitizeEmailHtml, copyEmail, greeting } from '../services/email';
+import { escapeHtml, sanitizeEmailHtml, copyEmail, greeting, emailSalutation } from '../services/email';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   Tag,
@@ -312,14 +312,14 @@ export default function DescuentosCampanas() {
   }, [destinatarioEmail]);
 
   const asuntoCorreo = `Solicitud Descuento Campañas - ${proyectoSeleccionado} UV:${uvSeleccionada} Mz${mznSeleccionada} Lt${loteSeleccionado} (Nuevo P.M2: $${formatMoneda(calculos.nuevoPrecioM2)})`;
-  const tratamientoDirecto = destinatarioObj.genero === "F" ? "Estimada" : "Estimado";
+  const saludoDestinatario = emailSalutation(destinatarioObj.nombre, destinatarioObj.genero);
 
   // HTML con estilos inline exactos para Gmail / Outlook
   const generarHTMLCorreo = () => {
     return `
 <div style="font-family: Arial, Helvetica, sans-serif; color: #0f172a; max-width: 650px; margin: 0 auto; line-height: 1.5;">
   <p style="margin: 0 0 10px; font-size: 15px;">${getSaludoHorario()}</p>
-  <p style="margin: 0 0 16px; font-size: 15px;">${tratamientoDirecto} <strong>${destinatarioObj.nombre}</strong>,</p>
+  <p style="margin: 0 0 16px; font-size: 15px;">${saludoDestinatario},</p>
   <p style="margin: 0 0 20px; font-size: 14px; color: #334155;">
     Solicito la aplicación del descuento de la
     <strong>Campaña Oficial de Octubre</strong> para el proyecto <strong>${escapeHtml(proyectoSeleccionado)}</strong>.
@@ -490,7 +490,7 @@ export default function DescuentosCampanas() {
   const generarTextoPlano = () => {
     return `${getSaludoHorario()}
 
-${tratamientoDirecto} ${destinatarioObj.nombre},
+${saludoDestinatario},
 
 Por favor le solicito la aplicación del descuento de campaña vigente para el proyecto ${proyectoSeleccionado}:
 

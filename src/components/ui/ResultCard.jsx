@@ -1,5 +1,5 @@
 import { emailCopies, composeEmailUrl } from '../../services/emailDelivery';
-import { resolveEmail, sanitizeEmailHtml, copyEmail } from '../../services/email';
+import { resolveEmail, sanitizeEmailHtml, copyEmail, emailSalutation } from '../../services/email';
 import React, { useState, useMemo } from 'react';
 import { Copy, Check, ChevronDown, Clock, MousePointerClick, Zap, Users, Monitor, Mail } from 'lucide-react';
 
@@ -25,47 +25,48 @@ export function ResultCard({
     {
       pantallas: ["recompra"],
       contactos: [
-        { email: 'cbarretto@celina.com.bo', nombre: 'Ing. Charles Barretto', saludo: 'Estimado Ing. Charles' },
-        { email: 'csalvatierra@celina.com.bo', nombre: 'Cinthia Salvatierra', saludo: 'Estimada Cinthia' },
-        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' },
-        { email: 'omendoza@celina.com.bo', nombre: 'Olivia Mendoza', saludo: 'Estimada Olivia' }
+        { email: 'cbarretto@celina.com.bo', nombre: 'Ing. Charles Barretto', genero: 'M' },
+        { email: 'csalvatierra@celina.com.bo', nombre: 'Cinthia Salvatierra', genero: 'F' },
+        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', genero: 'M' },
+        { email: 'omendoza@celina.com.bo', nombre: 'Olivia Mendoza', genero: 'F' }
       ]
     },
     {
       pantallas: ["renuncia", "alta", "crm", "evaluación", "evaluacion", "postulante", "memorándum", "memorandum", "rrhh"],
       contactos: [
-        { email: 'uklein@grupopaz.com.bo', nombre: 'Ulrich Klein Montano', saludo: 'Estimado Ulrich' },
-        { email: 'mfroca@celina.com.bo', nombre: 'Maria Fernanda Roca', saludo: 'Estimada Maria Fernanda' },
-        { email: 'mreyes@celina.com.bo', nombre: 'Lic. Mauricio Reyes', saludo: 'Estimado Lic. Mauricio' },
-        { email: 'rvaca@grupopaz.com.bo', nombre: 'Lic. Robert Vaca', saludo: 'Estimado Lic. Robert' }
+        { email: 'uklein@grupopaz.com.bo', nombre: 'Ulrich Klein Montano', genero: 'M' },
+        { email: 'mfroca@celina.com.bo', nombre: 'Maria Fernanda Roca', genero: 'F' },
+        { email: 'mreyes@celina.com.bo', nombre: 'Lic. Mauricio Reyes', genero: 'M' },
+        { email: 'rvaca@grupopaz.com.bo', nombre: 'Lic. Robert Vaca', genero: 'M' }
       ]
     },
     {
       pantallas: ["llamada", "validación", "validacion", "código", "codigo", "códigos", "codigos", "pend.", "penalidad", "penalidades"],
       contactos: [
-        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', saludo: 'Estimado Enrique' },
-        { email: 'omendoza@celina.com.bo', nombre: 'Olivia Mendoza Duran', saludo: 'Estimada Olivia' },
-        { email: 'rmartinez@celina.com.bo', nombre: 'Rodolfo Martínez', saludo: 'Estimado Rodolfo' }
+        { email: 'elizarraga@celina.com.bo', nombre: 'Enrique Lizarraga', genero: 'M' },
+        { email: 'omendoza@celina.com.bo', nombre: 'Olivia Mendoza Duran', genero: 'F' },
+        { email: 'rmartinez@celina.com.bo', nombre: 'Rodolfo Martínez', genero: 'M' }
       ]
     },
     {
       pantallas: ["proyección", "proyeccion", "diaria", "semanal", "seguimiento", "físico", "fisico", "reenvío", "reenvio", "firma", "seguro", "descuento", "campaña", "campana", "inc.", "cuota", "bloqueo", "lote", "liquidación", "liquidacion", "contado", "amortización", "amortizacion", "recalcular", "consolidación", "consolidacion"],
       contactos: [
-        { email: 'mreyes@celina.com.bo', nombre: 'Lic. Mauricio Reyes', saludo: 'Estimado Lic. Mauricio' },
-        { email: 'rvaca@grupopaz.com.bo', nombre: 'Lic. Robert Vaca', saludo: 'Estimado Lic. Robert' },
-        { email: 'vchoque@grupopaz.com.bo', nombre: 'Lic. Verenice Choque', saludo: 'Estimada Lic. Verenice' }
+        { email: 'mreyes@celina.com.bo', nombre: 'Lic. Mauricio Reyes', genero: 'M' },
+        { email: 'rvaca@grupopaz.com.bo', nombre: 'Lic. Robert Vaca', genero: 'M' },
+        { email: 'vchoque@grupopaz.com.bo', nombre: 'Lic. Verenice Choque', genero: 'F' }
       ]
     }
   ], []);
 
   const RESPALDO = useMemo(() => [
-    { email: 'mreyes@celina.com.bo', nombre: 'Lic. Mauricio Reyes', saludo: 'Estimado Lic. Mauricio' },
-    { email: 'rvaca@grupopaz.com.bo', nombre: 'Lic. Robert Vaca', saludo: 'Estimado Lic. Robert' }
+    { email: 'mreyes@celina.com.bo', nombre: 'Lic. Mauricio Reyes', genero: 'M' },
+    { email: 'rvaca@grupopaz.com.bo', nombre: 'Lic. Robert Vaca', genero: 'M' }
   ], []);
 
   const contactosDisponibles = useMemo(() => {
     if (fixedDestinoEmail && fixedDestinoLabel) {
-      return [{ email: fixedDestinoEmail, nombre: fixedDestinoLabel, saludo: `Estimado/a ${fixedDestinoLabel}` }];
+      const knownContact = MAPA_CORREOS.flatMap(group => group.contactos).find(contact => contact.email === fixedDestinoEmail);
+      return [{ email: fixedDestinoEmail, nombre: fixedDestinoLabel, genero: knownContact?.genero }];
     }
     const contextoTotal = [title, subject].join(" ").toLowerCase();
     for (const grupo of MAPA_CORREOS) {
@@ -77,6 +78,7 @@ export function ResultCard({
   const contactoSeleccionado = contactosDisponibles.find(c => c.email === supervisorDestino);
   const destinatarioEfectivo = fixedDestinoEmail || (contactoSeleccionado ? contactoSeleccionado.email : contactosDisponibles[0].email);
   const objetoDestinatario = contactoSeleccionado || contactosDisponibles[0];
+  const saludoDestinatario = emailSalutation(objetoDestinatario.nombre, objetoDestinatario.genero);
 
   const ccDinamicoArray = (() => {
     const copiasExtra = fixedDestinoEmail ? [] : contactosDisponibles.filter(c => c.email !== destinatarioEfectivo).map(c => c.email);
@@ -88,8 +90,8 @@ export function ResultCard({
   const gmailCopies = emailCopies('gmail', ccDinamicoArray, destinatarioEfectivo);
   const outlookCopies = emailCopies('outlook', ccDinamicoArray, destinatarioEfectivo);
 
-  const htmlFinal = sanitizeEmailHtml(resolveEmail(htmlContent, objetoDestinatario.saludo));
-  const textoPlanoFinal = resolveEmail(text, objetoDestinatario.saludo);
+  const htmlFinal = sanitizeEmailHtml(resolveEmail(htmlContent, saludoDestinatario));
+  const textoPlanoFinal = resolveEmail(text, saludoDestinatario);
 
   const ejecutarFlujoSeguro = async (callbackApp) => {
     setClipboardError('');

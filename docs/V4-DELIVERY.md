@@ -49,3 +49,5 @@ Los valores realizados de Incentivos son de lectura. Se conserva un escenario ed
 ![Colocación en USD y premios en bolivianos](previews/incentives-usd.png)
 
 Corrección de moneda de premios: Bs 700 (110/60) y Bs 1.100 (120/60), incluidos bonos individuales, total del equipo y correos. Colocación, ventas y metas permanecen en USD; las reglas de calificación no cambian.
+
+Corrección de saludos: todos los correos usan el primer nombre del destinatario, sin títulos ni apellidos (por ejemplo, «Estimado Ulrich»). Se corrigió la vía de destinatario fijo de RRHH y se unificaron Incentivos, Campañas y simulaciones. Las identidades completas se conservan en los datos operativos. Revisada la redacción de alta CRM, renuncia, evaluación y postulantes, en HTML y texto.

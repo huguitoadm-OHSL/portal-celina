@@ -1,7 +1,7 @@
 import { CORREO_SUPERVISION_RESPALDO as CORREO_RESPALDO_OSCAR } from '../constants/config';
 import { useCommercial } from '../hooks/useCommercial';
 import { emailCopies, composeEmailUrl } from '../services/emailDelivery';
-import { escapeHtml, sanitizeEmailHtml, copyEmail, greeting } from '../services/email';
+import { escapeHtml, sanitizeEmailHtml, copyEmail, greeting, emailSalutation } from '../services/email';
 import React, { useState, useMemo } from 'react';
 import {
   Trophy, Award, TrendingUp, Users, CheckCircle2, XCircle,
@@ -180,7 +180,7 @@ export default function IncentivosAsesores() {
     return `
 <div style="font-family: Arial, Helvetica, sans-serif; color: #0f172a; max-width: 680px; margin: 0 auto; line-height: 1.5;">
   <p style="margin: 0 0 10px; font-size: 15px;">${getSaludoHorario()}</p>
-  <p style="margin: 0 0 16px; font-size: 15px;">Estimado <strong>${destinatarioObj.nombre}</strong>,</p>
+  <p style="margin: 0 0 16px; font-size: 15px;">${emailSalutation(destinatarioObj.nombre)},</p>
   <p style="margin: 0 0 20px; font-size: 14px; color: #334155;">
     ${simulation ? 'Presento una simulación que no registra ventas ni autoriza pagos del' : 'Presento el informe de cumplimiento de metas del'}
     <strong>CONCURSO INTERNO "INCENTIVO CELINA 2026"</strong> para la etapa <strong>${etapaActual.nombre}</strong>,
@@ -280,7 +280,7 @@ export default function IncentivosAsesores() {
   const generarTextoPlano = () => {
     return `${getSaludoHorario()}
 
-Estimado ${destinatarioObj.nombre},
+${emailSalutation(destinatarioObj.nombre)},
 
 ${simulation ? 'Presento una simulación, sin registrar ventas, del concurso' : 'Presento el informe de seguimiento del concurso'} "INCENTIVO CELINA 2026" (${etapaActual.nombre}):
 

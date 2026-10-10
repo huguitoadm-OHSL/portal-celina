@@ -45,7 +45,7 @@ test('los 25 módulos se renderizan sin errores y sin perder navegación',async 
     const previews = page.locator('.email-preview');
     for (const preview of await previews.all()) {
       const content = await preview.innerText();
-      expect(content, labels[i]).not.toMatch(/\{\{(?:SALUDO_TIEMPO|NOMBRE_SUPERVISOR)\}\}|Estimad[oa](?:\/a)?\s+Estimad[oa]|\\vert\{\}|undefined|NaN/);
+      expect(content, labels[i]).not.toMatch(/\{\{(?:SALUDO_TIEMPO|NOMBRE_SUPERVISOR)\}\}|Estimad[oa](?:\/a)?\s+Estimad[oa]|Estimado\/a|Estimad[oa]\s+(?:Lic|Ing)\.|\\vert\{\}|undefined|NaN/);
       expect(content, labels[i]).not.toMatch(/\b(por favor le solicito|tu colaboración|tu apoyo|por si necesitas|Máquina de Ventas)\b/i);
     }
   }
@@ -63,8 +63,10 @@ test('saludo, redacción y protección de HTML dinámico en alta de CRM', async 
   expect(await preview.locator('img,script,iframe').count()).toBe(0);
   expect(await page.evaluate(()=>Boolean(window.attacked))).toBeFalsy();
   const text=await preview.innerText();
-  expect((text.match(/Estimado\/a Ulrich/g)||[]).length).toBe(1);
+  expect((text.match(/Estimado Ulrich/g)||[]).length).toBe(1);
   expect(text).not.toContain('{{SALUDO_TIEMPO}}');
+  expect(text).not.toContain('Estimado/a');
+  expect(text).not.toContain('Klein Montano');
 });
 
 test('conciliación de Marisol alerta coincidencias sin modificar importes', async ({page}) => {
@@ -202,4 +204,26 @@ test('una venta nueva en la fuente compartida actualiza las cuatro vistas y un r
   await add.click();
   await expect(harness.locator('#view-0 .metric-card.current strong')).toContainText('USD 20.700');
   await expect(harness.locator('#view-0 .metric-card').nth(1).locator('strong')).toContainText('USD 47.600');
+});
+
+
+test('los cinco correos de RRHH saludan a Ulrich por su primer nombre en HTML y texto', async ({page}) => {
+  await enter(page);
+  await page.evaluate(() => {
+    window.copiedEmail = '';
+    window.ClipboardItem = undefined;
+    Object.defineProperty(navigator, 'clipboard', {value: {writeText: async text => { window.copiedEmail = text; }}, configurable: true});
+  });
+  for (const module of ['Alta Usuarios CRM', 'Carta de Renuncia', 'Evaluación Fin de Mes', 'Postulante Nuevo', 'Solicitud Memorándum']) {
+    await page.getByRole('button', {name: module, exact: true}).click();
+    const preview = page.locator('.email-preview');
+    await expect(preview).toContainText('Estimado Ulrich,');
+    await expect(preview).not.toContainText('Estimado/a');
+    await expect(preview).not.toContainText('Klein Montano');
+    await page.evaluate(() => { window.copiedEmail = ''; });
+    await page.getByRole('button', {name: 'Copiar Formato', exact: true}).click();
+    await expect.poll(() => page.evaluate(() => window.copiedEmail)).toContain('Estimado Ulrich,');
+    const text = await page.evaluate(() => window.copiedEmail);
+    expect(text).not.toMatch(/Estimado\/a|Klein Montano|\{\{NOMBRE_SUPERVISOR\}\}/);
+  }
 });

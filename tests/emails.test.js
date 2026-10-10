@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveEmail, escapeHtml } from '../src/services/email.js';
+import { resolveEmail, escapeHtml, firstName, emailSalutation } from '../src/services/email.js';
 import { generarHtmlProyeccion, generarHtmlAltaCRM, generarHtmlDescuento, generarHtmlSeguro, generarHtmlPostulante, generarHtmlReenvio } from '../src/utils/htmlTemplates.js';
 import { generarTextoProyeccionCelular, generarTextoPendienteValidacion, generarTextoAltaCRMCelular } from '../src/utils/textTemplates.js';
 import { REFERENCE_ADVISORS } from '../src/constants/commercialReference.js';
@@ -51,4 +51,21 @@ test('plantillas corporativas mantienen concordancia y tratamiento profesional',
   const applicant = generarHtmlPostulante({});
   assert.ok(!applicant.includes('M&aacute;quina de Ventas'));
   assert.ok(applicant.includes('equipo comercial'));
+});
+
+
+test('saludos usan primer nombre sin títulos, apellidos ni Estimado/a', () => {
+  for (const [name, gender, expected] of [
+    ['Ulrich Klein Montano', 'M', 'Estimado Ulrich'],
+    ['Lic. Mauricio Reyes', 'M', 'Estimado Mauricio'],
+    ['Ing. Charles Barretto', 'M', 'Estimado Charles'],
+    ['Lic. Robert Vaca', 'M', 'Estimado Robert'],
+    ['  Maria Fernanda Roca Miranda  ', 'F', 'Estimada Maria'],
+    ['Lic. Verenice Choque', 'F', 'Estimada Verenice']
+  ]) {
+    assert.equal(emailSalutation(name, gender), expected);
+    assert.equal(resolveEmail('{{NOMBRE_SUPERVISOR}},', emailSalutation(name, gender)), `${expected},`);
+  }
+  assert.equal(firstName(' Ulrich   Klein Montano '), 'Ulrich');
+  assert.equal(emailSalutation(''), 'Buen día');
 });
