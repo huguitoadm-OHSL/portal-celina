@@ -18,7 +18,8 @@
     "firebase": "^10.12.2",
     "lucide-react": "^1.8.0",
     "react": "^19.2.5",
-    "react-dom": "^19.2.5"
+    "react-dom": "^19.2.5",
+    "read-excel-file": "^9.3.12"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",

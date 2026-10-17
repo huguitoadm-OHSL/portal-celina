@@ -1,6 +1,7 @@
 import { reportedSalesByProject } from '../utils/commercial';
 import { useCommercial } from '../hooks/useCommercial';
 import React from 'react';
+import SalesImport from '../components/SalesImport';
 import { Target, TrendingUp, Users } from 'lucide-react';
 import { formatCurrency } from '../utils/formatters';
 
@@ -33,7 +34,8 @@ export default function SeguimientoVentas() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <p className="source-note">Solo ventas realizadas y colocación en USD, desde la misma fuente de Inicio, Proyección Semanal e Incentivos. Marisol: 1 lote en Los Jardines, USD 11.200, el 09/10/2026. Umbral heredado de comisiones: USD 18.000.</p>
+      <p className="source-note">Solo ventas realizadas y colocación en USD, desde la misma fuente de Inicio, Proyección Semanal e Incentivos. Corte de supervisión: 16/10/2026. Umbral heredado de comisiones: USD 18.000.</p>
+      <SalesImport />
       <div className="mb-6 flex justify-between items-end">
         <h2 className="text-2xl font-bold text-[var(--text-primary)] flex items-center">
           <Target className="w-6 h-6 mr-2 text-indigo-600" /> Detalle de Asesor Mes en Curso

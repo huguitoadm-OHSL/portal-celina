@@ -28,11 +28,13 @@ Antes de fusionar: configurar el secreto, verificar la vista previa de Vercel co
 
 ## Datos y condiciones financieras
 
-Inicio, Proyección Semanal, Seguimiento e Incentivos usan un mismo registro de ventas realizadas y una misma colocación en USD. Supervisión confirmó que 17.700 actuales, 47.600 proyectados y 111.000 de objetivo están en dólares americanos. Marisol: Los Jardines, 1 venta del 09/10/2026, USD 11.200. Carlos conserva 1 venta en Cañaveral y USD 6.500; su fecha exacta no fue proporcionada. Las proyecciones nunca se suman a ventas realizadas ni califican para Incentivos.
+Corte de supervisión del 16/10/2026: 4 ventas, USD 73.005 realizados; fin de semana 17–18/oct, 3 lotes y USD 20.420 proyectados. Total USD 93.425, objetivo USD 111.000, brecha USD 17.575 y cumplimiento 84,17 %. Carlos: USD 13.925 y 2 ventas. Marisol: USD 59.080 y 2 ventas. El nuevo detalle corrige su venta de USD 11.200 a El Renacer sin duplicarla; la nueva venta es Muyurina, USD 47.880. Las cuatro vistas comparten un registro; proyecciones separadas de cierres e incentivos en Bs.
 
-La conversión a Bs se limita a las simulaciones de descuentos para el cliente. El estado compartido es de sesión; no existe conexión de ventas al CRM ni escritura remota. Agregar una venta en la fuente compartida actualiza las cuatro vistas; las operaciones definitivas requieren integración y autorización. El escenario editable de Incentivos está separado de los datos realizados.
+**Importación:** Seguimiento de Ventas → Cargar ventas desde Excel. Primera hoja .xlsx, hasta 5 MB / 1.000 filas. Encabezados: Urbanización, Vendedor, Fecha de Venta, Precio al Contado. Opcionales: Contrato, Lotes, Moneda y Estado. Vista previa, validación del lote completo y confirmación explícita. Coincidencias se omiten; identificadores contradictorios requieren conciliación. Solo USD y ventas realizadas de octubre de 2026. Los archivos no se envían a terceros.
 
-El TC gerencial 11,73 aplica únicamente el 10 y 11 de octubre de 2026, en `America/La_Paz`. Fuera del intervalo se conserva la base heredada 12,00; confirmar su siguiente vigencia con gerencia. Para contratos previos, especificar el TC pactado. Ver [reglas y conciliación](docs/financial-rules.md).
+Las importaciones confirmadas se guardan en este navegador y actualizan Inicio, Proyección, Seguimiento e Incentivos; persisten al recargar, sin CRM ni sincronización entre dispositivos. Conservar el Excel como respaldo. La edición de posibles ventas sigue siendo de sesión.
+
+TC 11,68 vigente desde 16/10/2026 en America/La_Paz hasta nueva instrucción. Se conservan el 11,73 de 10–11/oct y los contratos históricos; conversión solo en simulaciones para el cliente. Ver [reglas y conciliación](docs/financial-rules.md).
 
 El simulador de incentivos conserva su regla original en USD y se identifica como simulador independiente. No debe usarse para liquidar bonos sin conciliar moneda, ventas y carpetas. No se han convertido proyecciones en operaciones cerradas.
 
