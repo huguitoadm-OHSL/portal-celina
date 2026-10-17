@@ -25,3 +25,13 @@ test('cotizaciones de crédito usan la fecha de operación y preservan TC contra
   assert.equal(calcularDescuento({...form,tcHistorico:6.97}).nuevoPrecioBs,6970);
   assert.equal(calcularDescuento({...form,fechaOperacion:'2026-10-12'}).nuevoPrecioBs,12000);
 });
+
+test('TC 11,68 desde 16/10 Bolivia sin modificar el historial ni contratos', () => {
+  assert.equal(getExchangeRate('2026-10-15'),12);
+  assert.equal(getExchangeRate('2026-10-16T03:59:59Z'),12);
+  assert.equal(getExchangeRate('2026-10-16T04:00:00Z'),11.68);
+  for (const date of ['2026-10-16','2026-10-17','2026-10-18','2026-10-19']) assert.equal(getExchangeRate(date),11.68);
+  assert.equal(getExchangeRate('2026-10-10'),11.73);
+  assert.equal(convertUsdToBs(100,{date:'2026-10-16'}),1168);
+  assert.equal(getExchangeRate('2026-10-16',11.73),11.73);
+});

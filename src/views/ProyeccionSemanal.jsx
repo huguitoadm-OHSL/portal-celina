@@ -1,5 +1,5 @@
 import { useCommercial } from '../hooks/useCommercial';
-import { PROJECT_PROJECTION } from '../constants/commercialReference';
+import { PROJECTION_WEEK_START, PROJECT_NAMES } from '../constants/commercialReference';
 import React, { useState } from 'react';
 import { BarChart, ShieldCheck } from 'lucide-react';
 import { ResultCard } from '../components/ui/ResultCard';
@@ -9,13 +9,13 @@ import { generarTextoProyeccionCelular } from '../utils/textTemplates';
 import { generarHtmlProyeccion } from '../utils/htmlTemplates';
 import { SUPERVISORES } from '../constants/equipo';
 
-const PROYECTOS_ACTUALIZADOS = ['Muyurina', 'Renacer', 'Santa Fe', 'Rancho Nuevo', 'Jardines', 'Celina VII F3', 'Cañaveral'];
+const PROYECTOS_ACTUALIZADOS = PROJECT_NAMES;
 
 export default function ProyeccionSemanal() {
   const [supervisorDestino, setSupervisorDestino] = useState('mreyes@celina.com.bo');
 
   const { advisors, targetUsd, setTargetUsd, updateProjection } = useCommercial();
-  const [settings, setSettings] = useState({ equipo: 'Oscar Saravia', fechaInicio: '2026-10-05' });
+  const [settings, setSettings] = useState({ equipo: 'Oscar Saravia', fechaInicio: PROJECTION_WEEK_START });
   const formProyeccion = { ...settings, objetivoMensual: targetUsd, asesores: advisors.map(advisor => ({ ...advisor, colAct: advisor.actualUsd, dias: advisor.days, proy: advisor.projectedLots })) };
 
   const handleLocalArrayChange = (idx, type, arrIdx, val) => {
@@ -40,8 +40,8 @@ export default function ProyeccionSemanal() {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
 
-      <p className="source-note">Importes en USD. Colocación actual: solo ventas realizadas, compartidas con Inicio, Seguimiento e Incentivos. Puede editar las posibles ventas y su proyección; no modificarán la colocación realizada. La distribución diaria e individual de proyectos está pendiente.</p>
-      <div className="panel mb-6"><strong>7 lotes proyectados:</strong> {Object.entries(PROJECT_PROJECTION).map(([p, n]) => `${p}: ${n}`).join(' · ')}</div>
+      <p className="source-note">Importes en USD. Colocación actual: solo ventas realizadas, compartidas con Inicio, Seguimiento e Incentivos. Puede editar las posibles ventas y su proyección; no modificarán la colocación realizada. Proyección de referencia: 17 y 18 de octubre de 2026.</p>
+      <div className="panel mb-6"><strong>{totalesProy.reduce((sum, n) => sum + n, 0)} lotes proyectados:</strong> {PROYECTOS_ACTUALIZADOS.map((p, i) => `${p}: ${totalesProy[i]}`).join(' · ')}</div>
       <div className="mb-6 flex justify-between items-end">
         <div>
           <h2 className="text-2xl font-bold text-[var(--text-primary)] flex items-center">

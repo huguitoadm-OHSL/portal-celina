@@ -59,3 +59,12 @@ ESLint, las 21 pruebas unitarias, build y las 11 pruebas de navegador aprobados.
 Pruebas de servidor: secreto ausente/corto; comparación de contraseña; firma, expiración, rotación y dominio de la sesión; cookie segura; bloqueo de bundles y rutas sin sesión; origen de POST; acceso y cierre; límite por instancia. La contraseña usada en pruebas es ficticia y solo existe en esas pruebas. El login definitivo en Vercel requiere la contraseña nueva introducida por el propietario. La comprobación anterior de Firebase se sustituye por este acceso personal. El límite de intentos en memoria es por instancia y no sustituye protección distribuida.
 
 Resultado local final: ESLint, 25 pruebas unitarias, build y 12 pruebas de navegador aprobados. La regresión nueva verifica ingreso solo con contraseña por API, sin campo de correo ni bandera de acceso en localStorage. La verificación de login real en Vercel queda pendiente de configurar PORTAL_PASSWORD por el propietario.
+
+
+## Actualización del 16/10/2026: ventas, proyección y Excel
+
+Se conciliaron los dos cuadros de supervisión: 4 ventas / USD 73.005, proyección 17–18/oct USD 20.420 / 3 lotes; cierre proyectado USD 93.425, brecha USD 17.575 y cumplimiento 84,17 %. Corregida la referencia de USD 11.200 de Marisol a El Renacer, conservando su ID. TC 11,68 desde 16/10 Bolivia; contratos históricos y excepción 10–11/oct preservados.
+
+Pruebas de navegador: 13 aprobadas (25 módulos, temas y móvil, cuatro vistas, incentivos Bs, correos, acceso personal e importación XLSX real con vista previa, observaciones, aplicación, recarga e idempotencia). Pruebas unitarias cubren fechas y separadores regionales, duplicados/contratos en conflicto, otras monedas, proyecciones, otros meses, respaldo local y límites. Archivos de prueba sintéticos, sin CRM ni correos enviados.
+
+Importaciones locales persistentes en el navegador; no son escrituras al CRM ni sincronización entre dispositivos. Las referencias nuevas de supervisión forman parte del código de esta actualización.

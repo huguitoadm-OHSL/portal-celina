@@ -1,6 +1,33 @@
 # Reglas financieras V4
 
-## Moneda y fuente única
+## Corte vigente: 16/10/2026
+
+Fuente: dos cuadros remitidos por supervisión. Ventas y colocación en USD; premios en Bs.
+
+| Asesor | Ventas | Actual USD | Proyección 17–18/oct USD | Total USD |
+| --- | ---: | ---: | ---: | ---: |
+| Carlos Enrique Calderon Montano | 2 | 13.925 | 5.000 | 18.925 |
+| Marisol Urgel Pizarro | 2 | 59.080 | 0 | 59.080 |
+| Merly Mendez Hurtado | 0 | 0 | 7.920 | 7.920 |
+| Jose Gabriel Padilla Loayza | 0 | 0 | 7.500 | 7.500 |
+| Jimmy / Ely / Jaime | 0 | 0 | 0 | 0 |
+| **Total** | **4** | **73.005** | **20.420** | **93.425** |
+
+Meta USD 111.000; brecha USD 17.575; cumplimiento proyectado 84,17 %; avance actual 65,77 %. Carlos: Cañaveral 06/10 USD 6.500 y 13/10 USD 7.425. Marisol: El Renacer 09/10 USD 11.200 y Muyurina 16/10 USD 47.880. El extracto nuevo corrige la referencia previa de Los Jardines a El Renacer para la misma operación de USD 11.200; se conserva su ID y la procedencia de la corrección, sin sumarla de nuevo. La fecha desconocida de Carlos se completa con el extracto.
+
+Tres lotes posibles: Jose/El Renacer el sábado 17 (USD 7.500), Carlos/Rancho Nuevo el domingo 18 (USD 5.000), Merly/Santa Fe el domingo 18 (USD 7.920). No son ventas cerradas.
+
+TC 11,68 desde 16/10/2026 America/La_Paz, hasta nueva instrucción. Conservados TC 11,73 del 10–11/oct, base heredada de otras fechas y prioridad de TC contractual histórico. Solo simulaciones de descuentos.
+
+### Importación de ventas
+
+Seguimiento → Cargar ventas desde Excel. Primera hoja .xlsx, menos de 5 MB, hasta 1.000 filas. Columnas: Urbanización, Vendedor, Fecha de Venta, Precio al Contado; opcionales Contrato, Lotes, Moneda, Estado. Una venta/un lote por fila por defecto. Importes numéricos en USD o cadenas con separadores consistentes; fechas Excel, DD/MM/AAAA o ISO. Sin inferir ni convertir Bs. Se validan asesores y proyectos contra el equipo. Otra moneda, proyección, fecha inválida/fuera de octubre o contrato contradictorio bloquean el lote entero.
+
+La vista previa no aplica cambios. Al confirmar se incorporan solo nuevas filas y se revalida contra el estado vigente. Coincidencias por contrato/ID o asesor+proyecto+fecha+importe+lotes se omiten preventivamente; no prueban identidad contractual. La referencia ya incluida nunca se suma otra vez. No hay correcciones o eliminaciones silenciosas. Se guardan solo las ventas importadas en localStorage bajo celina.sales.imports.v1; se concilian con la base al recargar y se preserva el respaldo si está corrupto. El fichero se procesa localmente, sin subirse a terceros. No hay CRM ni sincronización entre navegadores/dispositivos; conservar el Excel como respaldo. Las proyecciones editadas siguen siendo de sesión.
+
+## Histórico: corte del 10/10/2026 (sustituido por el corte anterior)
+
+### Moneda y fuente única
 
 El 10/10/2026, supervisión confirmó expresamente que todos los importes comerciales están en **USD**: colocación realizada, proyecciones, objetivo y seguimiento. Esta confirmación sustituye las etiquetas Bs del requerimiento inicial, sin multiplicar ni convertir los valores.
 
@@ -39,7 +66,7 @@ El estado es local a la sesión, sin persistencia financiera ni conexión al CRM
 | Incentivos desde diciembre | 2 ventas realizadas **o** USD 21.000; productividad grupal 70 %. |
 | Seguimiento/comisiones | Umbral heredado USD 18.000. Es una regla separada, no se sustituye por el umbral de Incentivos. |
 
-Marisol tiene 1 venta y USD 11.200: no alcanza la regla individual vigente. Las proyecciones, aunque superen el umbral, nunca califican. El escenario opcional editable de Incentivos se marca como SIMULACIÓN y no modifica el registro de ventas ni los otros módulos. La colocación y las ventas se expresan en USD. Los premios se expresan en bolivianos: Bs 700 en el nivel 110/60 y Bs 1.100 en el nivel 120/60; los totales de bonos y sus correos también se expresan en Bs. No se convierten estos premios con el tipo de cambio ni se liquida o paga un bono automáticamente.
+En el corte vigente Carlos y Marisol alcanzan 2 ventas individuales; no hay pago automático y la condición grupal sigue sin alcanzarse. En el corte histórico Marisol tenía 1 venta y USD 11.200. Las proyecciones, aunque superen el umbral, nunca califican. El escenario opcional editable de Incentivos se marca como SIMULACIÓN y no modifica el registro de ventas ni los otros módulos. La colocación y las ventas se expresan en USD. Los premios se expresan en bolivianos: Bs 700 en el nivel 110/60 y Bs 1.100 en el nivel 120/60; los totales de bonos y sus correos también se expresan en Bs. No se convierten estos premios con el tipo de cambio ni se liquida o paga un bono automáticamente.
 
 ## Tipo de cambio: exclusivamente simulaciones de descuentos
 
