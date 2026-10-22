@@ -3,6 +3,7 @@ export const EXCHANGE_RATE_HISTORY = Object.freeze([
   Object.freeze({ id: 'base-octubre-2026', from: null, through: null, rate: 12, source: 'Base heredada de config.js (vigencia pendiente de gerencia)' }),
   Object.freeze({ id: 'fin-semana-2026-10-10', from: '2026-10-10', through: '2026-10-11', rate: 11.73, source: 'Gerencia: instrucción 10/10/2026' }),
   Object.freeze({ id: 'vigente-2026-10-16', from: '2026-10-16', through: null, rate: 11.68, source: 'Supervisión: instrucción 16/10/2026; vigente hasta nueva instrucción' }),
+  Object.freeze({ id: 'vigente-2026-10-22', from: '2026-10-22', through: null, rate: 11.75, source: 'Supervisión: instrucción 22/10/2026; vigente hasta nueva instrucción' }),
 ]);
 
 export function businessDate(value = new Date()) {

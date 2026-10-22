@@ -40,7 +40,7 @@ export default function ProyeccionSemanal() {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
 
-      <p className="source-note">Importes en USD. Colocación actual: solo ventas realizadas, compartidas con Inicio, Seguimiento e Incentivos. Puede editar las posibles ventas y su proyección; no modificarán la colocación realizada. Proyección de referencia: 17 y 18 de octubre de 2026.</p>
+      <p className="source-note">Importes en USD. Colocación actual: solo ventas realizadas, compartidas con Inicio, Seguimiento e Incentivos. Puede editar las posibles ventas y su proyección; no modificarán la colocación realizada. Proyección de referencia: 19 al 25 de octubre de 2026.</p>
       <div className="panel mb-6"><strong>{totalesProy.reduce((sum, n) => sum + n, 0)} lotes proyectados:</strong> {PROYECTOS_ACTUALIZADOS.map((p, i) => `${p}: ${totalesProy[i]}`).join(' · ')}</div>
       <div className="mb-6 flex justify-between items-end">
         <div>

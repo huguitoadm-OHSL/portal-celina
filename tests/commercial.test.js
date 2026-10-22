@@ -5,9 +5,9 @@ import { REFERENCE_ADVISORS, MONTHLY_TARGET_USD, MARISOL_REFERENCE, PROJECT_PROJ
 
 test('los siete asesores concilian sin sumar dos veces USD 11.200', () => {
   const summary = summarizeCommercial(REFERENCE_ADVISORS, MONTHLY_TARGET_USD);
-  assert.deepEqual({ ...summary, achievementPct: Number(summary.achievementPct.toFixed(2)), currentPct: Number(summary.currentPct.toFixed(2)) }, { actualUsd:73005, projectionUsd:20420, totalUsd:93425, gapUsd:17575, achievementPct:84.17, currentPct:65.77 });
+  assert.deepEqual({ ...summary, achievementPct: Number(summary.achievementPct.toFixed(2)), currentPct: Number(summary.currentPct.toFixed(2)) }, { actualUsd:78705, projectionUsd:24200, totalUsd:102905, gapUsd:8095, achievementPct:92.71, currentPct:70.91 });
   assert.equal(REFERENCE_ADVISORS.find(a => a.id === 'marisol').actualUsd, 59080);
-  assert.equal(Object.values(PROJECT_PROJECTION).reduce((a,b) => a+b), 3);
+  assert.equal(Object.values(PROJECT_PROJECTION).reduce((a,b) => a+b), 4);
 });
 test('el registro no consultado no se interpreta como venta ausente', () => {
   assert.equal(reconcileSale(MARISOL_REFERENCE, null).status, 'unverified');
@@ -29,9 +29,9 @@ test('validación financiera y precisión de centavos', () => {
 
 test('venta reportada de Marisol se cuenta una sola vez en Renacer y no altera la proyección', () => {
   assert.equal(reportedSalesForAdvisor('marisol', REPORTED_SALES), 2);
-  assert.deepEqual(reportedSalesByProject(['Jardines', 'Cañaveral', 'Renacer'], REPORTED_SALES), [0, 2, 1]);
+  assert.deepEqual(reportedSalesByProject(['Jardines', 'Cañaveral', 'Renacer'], REPORTED_SALES), [0, 2, 2]);
   assert.equal(MARISOL_REFERENCE.amountUsd, 11200);
   assert.equal(MARISOL_REFERENCE.date, '2026-10-09');
-  assert.equal(PROJECT_PROJECTION.Jardines, 0);
+  assert.equal(PROJECT_PROJECTION.Jardines, 1);
   assert.equal(reconcileSale(MARISOL_REFERENCE, [{...MARISOL_REFERENCE, amountUsd: undefined, amountBs:11200}]).matches.length, 0);
 });

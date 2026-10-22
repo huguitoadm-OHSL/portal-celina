@@ -6,8 +6,8 @@ import { ADVISORS, REPORTED_SALES, MARISOL_REFERENCE } from '../src/constants/co
 test('registro único suma solo colocación realizada USD y excluye proyecciones y otros meses', () => {
   const records = [...REPORTED_SALES, {...MARISOL_REFERENCE, id:'projected', status:'projected', amountUsd:6000}, {...MARISOL_REFERENCE, id:'november', date:'2026-11-01', period:'2026-11'}];
   const advisors = actualsByAdvisor(ADVISORS, records);
-  assert.equal(advisors.reduce((sum,a)=>sum+a.actualUsd,0),73005);
-  assert.equal(advisors.reduce((sum,a)=>sum+a.confirmedSales,0),4);
+  assert.equal(advisors.reduce((sum,a)=>sum+a.actualUsd,0),78705);
+  assert.equal(advisors.reduce((sum,a)=>sum+a.confirmedSales,0),5);
   assert.equal(advisors.find(a=>a.id==='marisol').actualUsd,59080);
   assert.equal(advisors.find(a=>a.id==='marisol').confirmedSales,2);
 });
@@ -17,8 +17,8 @@ test('una nueva venta actualiza colocación y lotes del registro; reintentos no 
   const again = addClosedSale(records, {...sale,id:'TEST-RETRY'});
   assert.equal(again,records);
   const advisors=actualsByAdvisor(ADVISORS,records);
-  assert.equal(advisors.reduce((sum,a)=>sum+a.actualUsd,0),81005);
-  assert.equal(advisors.reduce((sum,a)=>sum+a.confirmedSales,0),5);
+  assert.equal(advisors.reduce((sum,a)=>sum+a.actualUsd,0),86705);
+  assert.equal(advisors.reduce((sum,a)=>sum+a.confirmedSales,0),6);
   assert.equal(advisors.find(a=>a.id==='jimmy').confirmedSales,1);
   assert.throws(()=>addClosedSale(records,{...sale,amountUsd:8100}),/datos distintos/);
   assert.throws(()=>actualsByAdvisor(ADVISORS,[...records,sale]),/duplicada/);

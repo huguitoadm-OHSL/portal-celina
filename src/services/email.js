@@ -1,4 +1,5 @@
 import DOMPurify from 'dompurify';
+import { CREDIT_IMAGE_MARKER, validInlineLotImage } from './inlineLotImage.js';
 
 export function greeting(date = new Date()) {
   const hour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'America/La_Paz', hour: '2-digit', hourCycle: 'h23' }).format(date));
@@ -31,13 +32,14 @@ export function escapeTemplateData(value) {
   return value;
 }
 
-export function sanitizeEmailHtml(html) {
+export function sanitizeEmailHtml(html, { inlineImage } = {}) {
   const withoutRemoteStyles = String(html || '').replace(/style\s*=\s*(["'])(.*?)\1/gi, (match, quote, style) => /url\s*\(|@import|expression\s*\(/i.test(style) ? '' : match);
-  return DOMPurify.sanitize(withoutRemoteStyles, { USE_PROFILES: { html: true }, FORBID_TAGS: ['a', 'img', 'style', 'iframe', 'form', 'input', 'button', 'svg', 'video', 'audio'], FORBID_ATTR: ['src', 'srcset', 'background'] });
+  const clean = DOMPurify.sanitize(withoutRemoteStyles, { USE_PROFILES: { html: true }, FORBID_TAGS: ['a', 'img', 'style', 'iframe', 'form', 'input', 'button', 'svg', 'video', 'audio'], FORBID_ATTR: ['src', 'srcset', 'background'] });
+  return clean.replaceAll(CREDIT_IMAGE_MARKER, validInlineLotImage(inlineImage) ? `<img src="${inlineImage}" alt="Captura del lote seleccionado" width="340" style="display:block;max-width:100%;height:auto;margin:0 auto;"/>` : '');
 }
 
-export async function copyEmail(html, text) {
-  const cleanHtml = sanitizeEmailHtml(html);
+export async function copyEmail(html, text, options) {
+  const cleanHtml = sanitizeEmailHtml(html, options);
   if (!navigator.clipboard) throw new Error('El portapapeles requiere un navegador compatible y una conexión segura.');
   if (typeof ClipboardItem !== 'undefined') {
     try {

@@ -35,3 +35,13 @@ test('TC 11,68 desde 16/10 Bolivia sin modificar el historial ni contratos', () 
   assert.equal(convertUsdToBs(100,{date:'2026-10-16'}),1168);
   assert.equal(getExchangeRate('2026-10-16',11.73),11.73);
 });
+
+test('TC 11,75 desde hoy 22/10 Bolivia sin recalcular fechas anteriores', () => {
+  assert.equal(getExchangeRate('2026-10-22T03:59:59Z'),11.68);
+  assert.equal(getExchangeRate('2026-10-22T04:00:00Z'),11.75);
+  for (const date of ['2026-10-22','2026-10-23','2026-10-25']) assert.equal(getExchangeRate(date),11.75);
+  assert.equal(getExchangeRate('2026-10-21'),11.68);
+  assert.equal(getExchangeRate('2026-10-10'),11.73);
+  assert.equal(getExchangeRate('2026-10-22',11.68),11.68);
+  assert.equal(convertUsdToBs(5700,{date:'2026-10-22'}),66975);
+});

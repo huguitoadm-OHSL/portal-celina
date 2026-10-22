@@ -28,13 +28,13 @@ Antes de fusionar: configurar el secreto, verificar la vista previa de Vercel co
 
 ## Datos y condiciones financieras
 
-Corte de supervisión del 16/10/2026: 4 ventas, USD 73.005 realizados; fin de semana 17–18/oct, 3 lotes y USD 20.420 proyectados. Total USD 93.425, objetivo USD 111.000, brecha USD 17.575 y cumplimiento 84,17 %. Carlos: USD 13.925 y 2 ventas. Marisol: USD 59.080 y 2 ventas. El nuevo detalle corrige su venta de USD 11.200 a El Renacer sin duplicarla; la nueva venta es Muyurina, USD 47.880. Las cuatro vistas comparten un registro; proyecciones separadas de cierres e incentivos en Bs.
+Corte de supervisión del 22/10/2026: 5 ventas, USD 78.705 realizados. Jaime: 1 lote en El Renacer, cerrado el 18/10/2026, USD 5.700, confirmado por supervisión. Semana 19–25/oct: 4 lotes posibles, USD 24.200. Total proyectado USD 102.905, objetivo USD 111.000, brecha USD 8.095 y cumplimiento 92,71 %. Los USD 5.700 que Jaime proyecta para el 24/oct son una oportunidad distinta del cierre del 18/oct; no cuentan como otra venta realizada. Las cuatro vistas comparten los cierres; premios en Bs.
 
 **Importación:** Seguimiento de Ventas → Cargar ventas desde Excel. Primera hoja .xlsx, hasta 5 MB / 1.000 filas. Encabezados: Urbanización, Vendedor, Fecha de Venta, Precio al Contado. Opcionales: Contrato, Lotes, Moneda y Estado. Vista previa, validación del lote completo y confirmación explícita. Coincidencias se omiten; identificadores contradictorios requieren conciliación. Solo USD y ventas realizadas de octubre de 2026. Los archivos no se envían a terceros.
 
 Las importaciones confirmadas se guardan en este navegador y actualizan Inicio, Proyección, Seguimiento e Incentivos; persisten al recargar, sin CRM ni sincronización entre dispositivos. Conservar el Excel como respaldo. La edición de posibles ventas sigue siendo de sesión.
 
-TC 11,68 vigente desde 16/10/2026 en America/La_Paz hasta nueva instrucción. Se conservan el 11,73 de 10–11/oct y los contratos históricos; conversión solo en simulaciones para el cliente. Ver [reglas y conciliación](docs/financial-rules.md).
+TC 11,75 vigente desde 22/10/2026 en America/La_Paz hasta nueva instrucción. Se conservan el 11,68 de 16–21/oct, el 11,73 de 10–11/oct y los contratos históricos; conversión solo en simulaciones para el cliente. Ver [reglas y conciliación](docs/financial-rules.md).
 
 El simulador de incentivos conserva su regla original en USD y se identifica como simulador independiente. No debe usarse para liquidar bonos sin conciliar moneda, ventas y carpetas. No se han convertido proyecciones en operaciones cerradas.
 
@@ -48,3 +48,11 @@ El simulador de incentivos conserva su regla original en USD y se identifica com
 ### Copias de correo
 
 Gmail añade exclusivamente una copia a `ohsaravia@celina.com.bo`. Outlook no añade la copia automática de supervisión y conserva las copias operativas. Abrir el cliente prepara un borrador; el portal no envía mensajes.
+
+## Correo de descuento a crédito
+
+Solo la modalidad Crédito utiliza el modelo remitido el 22/oct: dato para el sistema (precio de lista, equivalente informativo y precio nuevo por m²), proyecto/UV/manzano/lote, descuento fijo y total, equivalencia con TC vigente, captura opcional y firma del asesor. Se conservan las plantillas de contado y liquidación y sus cálculos. La captura se carga localmente (PNG/JPG/WebP, hasta 1,5 MB), se vincula al lote seleccionado y no se almacena ni se envía automáticamente. «Copiar formato» prepara HTML y texto. Si el cliente de correo elimina la imagen al pegar, adjuntarla manualmente. Gmail y Outlook conservan sus reglas de copia; no hay envío automático.
+
+## Entrega del 22/oct: solo GitHub
+
+Por instrucción del propietario, esta actualización se entrega en la rama feat/actualizacion-oct22-credito y su pull request, sin publicación ni fusión a main. vercel.json desactiva la creación automática de despliegues para esta rama concreta; no modifica otras plataformas o proyectos. Para publicar más adelante se requiere una nueva instrucción.

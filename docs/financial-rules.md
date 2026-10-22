@@ -1,6 +1,25 @@
 # Reglas financieras V4
 
-## Corte vigente: 16/10/2026
+## Corte vigente: 22/10/2026
+
+Se conservan las cuatro ventas anteriores y se incorpora una sola venta de Jaime Fabricio Rios Castro: El Renacer, 18/10/2026, USD 5.700 y 1 lote. Proyecto y fecha fueron confirmados expresamente por supervisión durante la implementación. Identificador estable: supervision-jaime-2026-10-18. No se inventa contrato, cliente o ubicación del lote.
+
+| Asesor | Ventas | Actual USD | Proyección 19–25/oct USD | Total USD |
+| --- | ---: | ---: | ---: | ---: |
+| Carlos | 2 | 13.925 | 5.000 | 18.925 |
+| Jimmy | 0 | 0 | 0 | 0 |
+| Ely | 0 | 0 | 7.500 | 7.500 |
+| Jaime | 1 | 5.700 | 5.700 | 11.400 |
+| Marisol | 2 | 59.080 | 0 | 59.080 |
+| Merly | 0 | 0 | 0 | 0 |
+| Jose | 0 | 0 | 6.000 | 6.000 |
+| **Total** | **5** | **78.705** | **24.200** | **102.905** |
+
+USD 111.000 de meta, USD 8.095 de brecha y 92,71 % proyectado; avance realizado 70,91 %. Viernes 23: Jose/El Renacer USD 6.000. Sábado 24: Carlos/Rancho Nuevo USD 5.000 y Jaime/El Renacer USD 5.700. Domingo 25: Ely/Jardines USD 7.500. Cuatro lotes posibles: Renacer 2, Rancho Nuevo 1 y Jardines 1. La proyección del 24/oct de Jaime no se convierte en una venta cerrada ni duplica su cierre del 18/oct.
+
+TC 11,75 desde 22/10/2026, America/La_Paz, hasta nueva instrucción. Las fechas del 16 al 21 conservan 11,68; el 10 y 11 conservan 11,73. Siempre prevalece el TC contractual explícito. No se convierte la colocación ni los premios en Bs.
+
+## Histórico: corte del 16/10/2026
 
 Fuente: dos cuadros remitidos por supervisión. Ventas y colocación en USD; premios en Bs.
 

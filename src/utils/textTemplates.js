@@ -73,7 +73,7 @@ export const generarTextoAmortizacionCelular = (formAmortizacion, calculos) => {
 };
 
 export const generarTextoProyeccionCelular = (formProyeccion) => {
-  let texto = `{{SALUDO_TIEMPO}}\n{{NOMBRE_SUPERVISOR}},\n\nAdjunto la referencia comercial y la proyección semanal del equipo en dólares americanos (USD). Las proyecciones no representan ventas cerradas; su asignación diaria está pendiente.\n\n`;
+  let texto = `{{SALUDO_TIEMPO}}\n{{NOMBRE_SUPERVISOR}},\n\nAdjunto la referencia comercial y la proyección semanal del equipo en dólares americanos (USD). Las proyecciones no representan ventas cerradas; la distribución diaria se detalla a continuación.\n\n`;
 
   let sumColAct = 0;
   let sumTotalColMes = 0;
