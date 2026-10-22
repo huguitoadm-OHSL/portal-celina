@@ -1,5 +1,7 @@
 import { CORREO_SUPERVISION_RESPALDO as CORREO_RESPALDO_OSCAR } from '../constants/config';
 import { emailCopies, composeEmailUrl } from '../services/emailDelivery';
+import { creditDiscountEmail } from '../services/creditDiscountEmail';
+import { validInlineLotImage } from '../services/inlineLotImage';
 import { getExchangeRate } from '../constants/exchangeRates';
 import { escapeHtml, sanitizeEmailHtml, copyEmail, greeting, emailSalutation } from '../services/email';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
@@ -85,6 +87,24 @@ export default function DescuentosCampanas() {
   const [destinatarioEmail, setDestinatarioEmail] = useState(DIRECTORES_APROBACION[0].email);
   const [asesorSeleccionado, setAsesorSeleccionado] = useState(ASESORES_EQUIPO[0]);
   const [notificacion, setNotificacion] = useState(null);
+  const [lotImage, setLotImage] = useState(null);
+  const [imageError, setImageError] = useState('');
+  const imageKey = [proyectoSeleccionado, uvSeleccionada, mznSeleccionada, loteSeleccionado].join('|');
+  const inlineImage = lotImage?.key === imageKey ? lotImage.data : '';
+  const creditEmailOptions = modalidad === 'CREDITO' ? { inlineImage } : undefined;
+  async function selectLotImage(event) {
+    const file = event.target.files?.[0];
+    const key = imageKey;
+    event.target.value = '';
+    setImageError(''); setLotImage(null);
+    if (!file) return;
+    try {
+      if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 1500000) throw new Error('Use una captura PNG, JPG o WebP de hasta 1,5 MB.');
+      const data = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = () => reject(new Error('No se pudo leer la captura.')); reader.readAsDataURL(file); });
+      if (!validInlineLotImage(data)) throw new Error('La captura no tiene un formato permitido.');
+      setLotImage({ key, data });
+    } catch (failure) { setImageError(failure.message); }
+  }
 
   const fileInputRef = useRef(null);
 
@@ -314,8 +334,11 @@ export default function DescuentosCampanas() {
   const asuntoCorreo = `Solicitud Descuento Campañas - ${proyectoSeleccionado} UV:${uvSeleccionada} Mz${mznSeleccionada} Lt${loteSeleccionado} (Nuevo P.M2: $${formatMoneda(calculos.nuevoPrecioM2)})`;
   const saludoDestinatario = emailSalutation(destinatarioObj.nombre, destinatarioObj.genero);
 
+  const creditEmail = () => creditDiscountEmail({ project: proyectoSeleccionado, uv: uvSeleccionada, block: mznSeleccionada, lot: loteSeleccionado, category: categoria, advisor: asesorSeleccionado, salutation: saludoDestinatario, greeting: getSaludoHorario(), calculations: calculos, exchangeRate: TC_OFICIAL_BASE, hasImage: Boolean(inlineImage) });
+
   // HTML con estilos inline exactos para Gmail / Outlook
   const generarHTMLCorreo = () => {
+    if (modalidad === "CREDITO") return creditEmail().html;
     return `
 <div style="font-family: Arial, Helvetica, sans-serif; color: #0f172a; max-width: 650px; margin: 0 auto; line-height: 1.5;">
   <p style="margin: 0 0 10px; font-size: 15px;">${getSaludoHorario()}</p>
@@ -488,6 +511,7 @@ export default function DescuentosCampanas() {
   };
 
   const generarTextoPlano = () => {
+    if (modalidad === "CREDITO") return creditEmail().text;
     return `${getSaludoHorario()}
 
 ${saludoDestinatario},
@@ -522,10 +546,10 @@ ${asesorSeleccionado}`;
   };
 
   const copiarFormatoHTML = async () => {
-    const html = sanitizeEmailHtml(generarHTMLCorreo());
+    const html = modalidad === "CREDITO" ? generarHTMLCorreo() : sanitizeEmailHtml(generarHTMLCorreo());
     const texto = generarTextoPlano();
     try {
-      await copyEmail(html, texto);
+      await copyEmail(html, texto, creditEmailOptions);
       setNotificacion("Formato copiado. Revise el correo antes de enviarlo.");
     } catch (error) { setNotificacion(error.message || "No se pudo copiar. Utilice la vista previa."); }
     setTimeout(() => setNotificacion(null), 3500);
@@ -563,7 +587,15 @@ ${asesorSeleccionado}`;
 
   return (
     <div className="w-full text-[var(--text-primary)] font-sans overflow-x-hidden">
-      <details className="panel mb-6"><summary>Vista previa del correo · revisar antes de enviar</summary><div className="email-preview" dangerouslySetInnerHTML={{ __html: sanitizeEmailHtml(generarHTMLCorreo()) }}/></details>
+      <details className="panel mb-6"><summary>Vista previa del correo · revisar antes de enviar</summary><div className="email-preview" dangerouslySetInnerHTML={{ __html: sanitizeEmailHtml(generarHTMLCorreo(), creditEmailOptions) }}/></details>
+      {modalidad === 'CREDITO' && <section className="panel mb-6">
+        <h2 className="text-lg font-bold">Captura del lote para el correo</h2>
+        <p>Opcional: agrega la captura del lote seleccionado para usar el modelo solicitado. Se procesa localmente y no se guarda. Al cambiar de lote, no se reutiliza la imagen de otro terreno.</p>
+        <label className="file-label">Seleccionar captura del lote<input aria-label="Captura del lote" type="file" accept="image/png,image/jpeg,image/webp" onChange={selectLotImage}/></label>
+        {inlineImage && <button type="button" onClick={() => setLotImage(null)}>Quitar captura</button>}
+        {imageError && <p role="alert">{imageError}</p>}
+        <p className="muted">Usa «Copiar formato» y pégalo en el borrador. Si Gmail u Outlook no conserva la imagen, adjunta la captura manualmente antes de enviar.</p>
+      </section>}
       {/* BARRA SUPERIOR */}
       <div className="max-w-6xl mx-auto mb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-[var(--border-glow)] pb-4">
         <div>
@@ -670,7 +702,7 @@ ${asesorSeleccionado}`;
               <div>
                 <label className="block text-[10px] text-[var(--text-muted)] mb-1 font-bold">PROYECTO</label>
                 <select
-                  value={proyectoSeleccionado}
+                  aria-label="Proyecto de campaña" value={proyectoSeleccionado}
                   onChange={(e) => setProyectoSeleccionado(e.target.value)}
                   className="w-full bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-xl px-3 py-2 text-xs font-bold text-[var(--text-primary)] focus:outline-none"
                 >
@@ -682,7 +714,7 @@ ${asesorSeleccionado}`;
                 <div>
                   <label className="block text-[10px] text-[var(--text-muted)] mb-1 text-center font-bold">UV</label>
                   <select
-                    value={uvSeleccionada}
+                    aria-label="UV de campaña" value={uvSeleccionada}
                     onChange={(e) => setUvSeleccionada(e.target.value)}
                     className="w-full bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-lg py-1.5 text-xs text-center font-bold text-cyan-300 focus:outline-none"
                   >
@@ -692,7 +724,7 @@ ${asesorSeleccionado}`;
                 <div>
                   <label className="block text-[10px] text-[var(--text-muted)] mb-1 text-center font-bold">MZN</label>
                   <select
-                    value={mznSeleccionada}
+                    aria-label="Manzano de campaña" value={mznSeleccionada}
                     onChange={(e) => setMznSeleccionada(e.target.value)}
                     className="w-full bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-lg py-1.5 text-xs text-center font-bold text-cyan-300 focus:outline-none"
                   >
@@ -702,7 +734,7 @@ ${asesorSeleccionado}`;
                 <div>
                   <label className="block text-[10px] text-[var(--text-muted)] mb-1 text-center font-bold">LOTE</label>
                   <select
-                    value={loteSeleccionado}
+                    aria-label="Lote de campaña" value={loteSeleccionado}
                     onChange={(e) => setLoteSeleccionado(e.target.value)}
                     className="w-full bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-lg py-1.5 text-xs text-center font-bold text-cyan-300 focus:outline-none"
                   >
@@ -738,7 +770,7 @@ ${asesorSeleccionado}`;
                 SOLICITUD DIRIGIDA A (QUIEN APLICA EN SISTEMA):
               </label>
               <select
-                value={destinatarioEmail}
+                aria-label="Destinatario de campaña" value={destinatarioEmail}
                 onChange={(e) => setDestinatarioEmail(e.target.value)}
                 className="w-full bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] font-bold focus:outline-none"
               >
@@ -762,7 +794,7 @@ ${asesorSeleccionado}`;
                 ASESOR RESPONSABLE:
               </label>
               <select
-                value={asesorSeleccionado}
+                aria-label="Asesor de campaña" value={asesorSeleccionado}
                 onChange={(e) => setAsesorSeleccionado(e.target.value)}
                 className="w-full bg-[var(--bg-card-inner)] border border-[var(--border-highlight)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] font-bold focus:outline-none"
               >

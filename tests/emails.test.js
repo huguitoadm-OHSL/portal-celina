@@ -22,13 +22,13 @@ test('strings dinámicos se escapan en HTML y los datos comerciales conservan su
 test('proyección HTML y texto coinciden en USD y contienen los siete proyectos', () => {
   const form={equipo:'Oscar Saravia', fechaInicio:'2026-10-05',objetivoMensual:111000,asesores:REFERENCE_ADVISORS.map(a=>({nombre:a.nombre,colAct:a.actualUsd,projectionUsd:a.projectionUsd,dias:Array(7).fill(0),proy:Array(7).fill(0)}))};
   for (const output of [generarHtmlProyeccion(form),generarTextoProyeccionCelular(form)]) {
-    assert.ok(output.includes('73,005.00'));
-    assert.ok(output.includes('93,425.00'));
-    assert.ok(output.includes('84.17'));
+    assert.ok(output.includes('78,705.00'));
+    assert.ok(output.includes('102,905.00'));
+    assert.ok(output.includes('92.71'));
     assert.ok(!output.includes('undefined'));
   }
   assert.ok(generarHtmlProyeccion(form).includes('Cañaveral'));
-  assert.ok(generarHtmlProyeccion(form).includes('USD 93,425.00'));
+  assert.ok(generarHtmlProyeccion(form).includes('USD 102,905.00'));
 });
 test('redacción corregida en alta y pendiente de validación', () => {
   assert.ok(generarTextoAltaCRMCelular({}).includes('se está integrando'));

@@ -68,3 +68,16 @@ Se conciliaron los dos cuadros de supervisión: 4 ventas / USD 73.005, proyecci�
 Pruebas de navegador: 13 aprobadas (25 módulos, temas y móvil, cuatro vistas, incentivos Bs, correos, acceso personal e importación XLSX real con vista previa, observaciones, aplicación, recarga e idempotencia). Pruebas unitarias cubren fechas y separadores regionales, duplicados/contratos en conflicto, otras monedas, proyecciones, otros meses, respaldo local y límites. Archivos de prueba sintéticos, sin CRM ni correos enviados.
 
 Importaciones locales persistentes en el navegador; no son escrituras al CRM ni sincronización entre dispositivos. Las referencias nuevas de supervisión forman parte del código de esta actualización.
+
+
+## Actualización del 22/10/2026
+
+Historia verificada: referencias de supervisión → registro compartido → Inicio/Proyección/Seguimiento/Incentivos. Cinco ventas USD 78.705 y cuatro oportunidades USD 24.200; Jaime USD 5.700 en Renacer del 18/oct una sola vez. El importador y la restauración del navegador omiten una copia idéntica de este cierre. Las proyecciones permanecen separadas. Cambio de TC comprobado en el límite 22/oct 04:00Z Bolivia y con prioridad contractual histórica.
+
+Correo de crédito: cálculos existentes → plantilla específica según captura → vista previa saneada → HTML/texto en portapapeles → borrador del cliente. Sin enviar correos ni datos a servicios externos. El HTML/texto de contado y liquidación se conserva; regresión compara la vista previa antes y después de entrar/salir de crédito. Captura opcional local raster (sin SVG ni URL remota), limitada a 1,5 MB y vinculada al lote; el cliente de correo puede requerir adjuntarla manualmente.
+
+ESLint, 36 pruebas unitarias y build aprobados. La autenticación y API no han cambiado; las pruebas existentes siguen verificando bloqueo sin sesión. No se consultan secretos ni se escriben contratos en CRM.
+
+Resultado del navegador: 15 escenarios aprobados (13 aprobados en el recorrido completo y los otros 2 repetidos tras actualizar sus expectativas al nuevo corte). El formato de crédito con captura y su copia HTML/texto pasan; contado vuelve al mismo HTML exacto al regresar de crédito. Comparación adicional contra el commit base: los literales originales de generarHTMLCorreo y generarTextoPlano para contado/liquidación permanecen idénticos.
+
+Entrega solo en GitHub por instrucción posterior del propietario: rama feat/actualizacion-oct22-credito, sin fusionar a main ni publicar. vercel.json desactiva los despliegues Git únicamente de esta rama para evitar una vista previa automática; el resto de ramas mantiene su política previa. La versión del enlace habitual no se actualiza con esta entrega.

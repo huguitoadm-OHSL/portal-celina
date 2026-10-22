@@ -34,7 +34,7 @@ export default function SeguimientoVentas() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <p className="source-note">Solo ventas realizadas y colocación en USD, desde la misma fuente de Inicio, Proyección Semanal e Incentivos. Corte de supervisión: 16/10/2026. Umbral heredado de comisiones: USD 18.000.</p>
+      <p className="source-note">Solo ventas realizadas y colocación en USD, desde la misma fuente de Inicio, Proyección Semanal e Incentivos. Corte de supervisión: 22/10/2026. Umbral heredado de comisiones: USD 18.000.</p>
       <SalesImport />
       <div className="mb-6 flex justify-between items-end">
         <h2 className="text-2xl font-bold text-[var(--text-primary)] flex items-center">
