@@ -76,6 +76,7 @@ export const Sidebar = ({ activeTab, setActiveTab, isOpen, closeSidebar, setSupe
           <NavItem activeTab={activeTab} handleTabChange={handleTabChange} id="dashboard" icon={LayoutDashboard} label="Inicio" />
 
           <NavSection title="Gerencia" />
+          <NavItem activeTab={activeTab} handleTabChange={handleTabChange} id="crm" icon={Target} label="Inteligencia comercial" badge="Prueba" />
           <NavItem activeTab={activeTab} handleTabChange={handleTabChange} id="incentivos" icon={Trophy} label="Incentivos Celina" badge="Nuevo" />
           <NavItem activeTab={activeTab} handleTabChange={handleTabChange} id="proyeccion" icon={BarChart} label="Proyección Semanal" onClickAction={() => { handleTabChange('proyeccion'); setSupervisorDestino('mreyes@celina.com.bo'); }} />
           <NavItem activeTab={activeTab} handleTabChange={handleTabChange} id="diaria" icon={CalendarDays} label="Proyección Diaria" />

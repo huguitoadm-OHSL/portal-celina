@@ -36,14 +36,14 @@ test('temas persistentes, sistema operativo y dashboard móvil',async ({page}) =
   await expect(page.locator('.email-preview')).toContainText('102,905.00');
 });
 
-test('los 25 módulos se renderizan sin errores y sin perder navegación',async ({page}) => {
+test('los 26 módulos se renderizan sin errores y sin perder navegación',async ({page}) => {
   const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.setViewportSize({width:1440,height:1000});
   await enter(page);
   const buttons=page.locator('aside nav button');
   const labels=await buttons.allTextContents();
-  expect(labels).toHaveLength(25);
+  expect(labels).toHaveLength(26);
   for (let i=0;i<labels.length;i++) {
     await buttons.nth(i).click();
     await expect(page.locator('main h1, main h2').first()).toBeVisible();

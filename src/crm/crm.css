@@ -1,0 +1,139 @@
+.crm {
+  display: grid;
+  gap: 20px;
+}
+.crm h1 {
+  font-size: clamp(25px, 3vw, 40px);
+  font-weight: 750;
+  line-height: 1.2;
+}
+.crm h2 {
+  font-size: 19px;
+  font-weight: 700;
+}
+.crm h3 {
+  font-weight: 700;
+  margin-top: 12px;
+}
+.crm-hero {
+  padding: 28px;
+  border-radius: 20px;
+  background: #102849;
+  color: #f1f6ff;
+  display: grid;
+  gap: 12px;
+}
+.crm label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+.crm input:not([type="checkbox"]),
+.crm select {
+  min-width: 0;
+  width: 100%;
+  background: var(--bg-card-inner);
+  color: var(--text-primary);
+  border: 1px solid var(--border-glow);
+  border-radius: 9px;
+  padding: 10px;
+}
+.crm button {
+  border: 1px solid var(--border-glow);
+  padding: 10px 14px;
+  border-radius: 9px;
+  text-align: left;
+  background: var(--bg-card-inner);
+  color: var(--text-primary);
+}
+.crm button:hover,
+.crm button[aria-pressed="true"] {
+  outline: 2px solid #298cda;
+}
+.crm button:disabled {
+  opacity: 0.5;
+}
+.crm button:focus-visible {
+  outline: 3px solid #298cda;
+}
+.crm-filters,
+.crm-kpis,
+.crm-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 14px;
+}
+.crm-kpis article {
+  display: grid;
+  gap: 12px;
+}
+.crm-kpis strong {
+  font-size: 26px;
+}
+.crm-kpis span,
+.crm-note {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.crm-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.crm-form {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+.crm-opportunity {
+  text-align: left;
+  display: grid;
+  gap: 10px;
+}
+.crm-alert {
+  background: #a8471620;
+  border-left: 3px solid #d87a35;
+  padding: 7px;
+  font-size: 12px;
+  display: block;
+}
+.crm-agenda-row {
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border-glow);
+  width: 100%;
+  flex-wrap: wrap;
+}
+.crm-table {
+  overflow: auto;
+}
+.crm th,
+.crm td {
+  padding: 12px;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border-glow);
+  font-size: 12px;
+}
+.crm-detail {
+  display: grid;
+  gap: 12px;
+  scroll-margin-top: 20px;
+}
+.crm-detail small,
+.crm-detail p {
+  overflow-wrap: anywhere;
+}
+.crm form button {
+  background: #145591;
+  color: white;
+}
+.crm .panel {
+  padding: 20px;
+}
+.crm-hero strong {
+  color: #8fd4ff;
+  font-size: 12px;
+}
