@@ -6,6 +6,8 @@ import { useTheme } from './hooks/useTheme';
 import { Sidebar } from './components/layout/Sidebar';
 import { MobileHeader } from './components/layout/MobileHeader';
 
+const CommercialIntelligence = lazy(() => import('./crm/AdvisorIntelligence'));
+
 // Vistas - Gerencia
 const Dashboard = lazy(() => import('./views/Dashboard'));
 const ProyeccionSemanal = lazy(() => import('./views/ProyeccionSemanal'));
@@ -49,6 +51,7 @@ export default function App() {
   const renderContent = () => {
     switch (activeTab) {
       // 1. Gerencia
+      case 'crm': return <CommercialIntelligence />;
       case 'dashboard': return <Dashboard onNavigate={setActiveTab} />;
       case 'incentivos': return <IncentivosAsesores />; // 🟢 RUTA DEL CONCURSO DE INCENTIVOS
       case 'proyeccion': return <ProyeccionSemanal />;
