@@ -1,112 +1,143 @@
-import process from "node:process";
 import { test, expect } from "@playwright/test";
-test.skip(
-  process.env.CRM_SYNTHETIC_LOCAL !== "1",
-  "Requiere servidor sintético local explícito.",
-);
-test("CRM flujo real: guardar, recargar, alertar, completar tarea, reasignar y bloquear acceso ajeno", async ({
-  page,
-  browser,
-}) => {
+import { readFile } from "node:fs/promises";
+import { leadsWorkbook, activitiesWorkbook } from "./private-workbooks.js";
+async function enter(page) {
+  await page.clock.install({ time: new Date("2026-10-28T16:00:00Z") });
   await page.goto("/");
   await page
     .getByRole("button", { name: "Vista de revisión local", exact: true })
     .click();
   await page.getByRole("button", { name: /Inteligencia comercial/ }).click();
+  await expect(
+    page.getByRole("heading", {
+      name: "Tu equipo, con el siguiente paso claro.",
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Cargar primer reporte" }),
+  ).toBeVisible();
+}
+async function upload(page, buffer, name) {
   await page
-    .getByRole("button", { name: "Asesor sintético 1", exact: true })
+    .getByRole("button", { name: "Cargar reportes", exact: true })
     .click();
   await page
-    .getByRole("button", { name: "Nueva oportunidad", exact: true })
-    .click();
-  const name = `Cliente sintético E2E ${Date.now()}`;
-  await page.getByLabel("Nombre del cliente").fill(name);
-  await page.getByLabel("Identificador estable del cliente").fill(name);
-  await page.getByLabel("Teléfono", { exact: true }).fill("00000000");
+    .getByLabel("Archivo Excel del CRM", { exact: true })
+    .setInputFiles({
+      name,
+      mimeType:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      buffer: Buffer.from(buffer, "base64"),
+    });
+  await expect(
+    page.getByRole("heading", { name: /Vista previa/ }),
+  ).toBeVisible();
+  await page.getByLabel(/Confirmo mes completo/).check();
   await page
-    .getByLabel("Proyecto", { exact: true })
-    .last()
-    .fill("Proyecto sintético");
-  await page.getByLabel("Origen", { exact: true }).fill("Prueba");
-  await page.getByLabel("Valor estimado USD").fill("100");
-  await page.getByRole("button", { name: "Guardar oportunidad" }).click();
-  await page.getByRole("button", { name: "Cartera", exact: true }).click();
+    .getByRole("button", { name: "Confirmar importación", exact: true })
+    .click();
+  await expect(page.getByRole("status")).toContainText(
+    /Importación guardada|ya estaba guardada/,
+  );
+}
+test("inteligencia privada: Excel real sintético, idempotencia, persistencia, notas, agenda y restauración", async ({
+  page,
+  browser,
+}) => {
+  const outgoing = [];
+  page.on("request", (r) => {
+    if (r.method() === "POST") outgoing.push(r.url());
+  });
+  await enter(page);
+  await expect(
+    page.getByRole("button", { name: "Asesor sintético 1", exact: true }),
+  ).toHaveCount(0);
+  await upload(page, leadsWorkbook, "Listado-sintetico.xlsx");
+  await upload(page, activitiesWorkbook, "Actividades-sinteticas.xlsx");
+  await upload(page, activitiesWorkbook, "Actividades-sinteticas.xlsx");
+  await expect(page.getByRole("status")).toContainText("No se duplicó");
+  await page
+    .getByRole("button", { name: "Historial y cambios", exact: true })
+    .click();
+  await expect(page.locator(".crm-history")).toHaveCount(2);
+  await page
+    .getByRole("button", { name: "Equipo y metas", exact: true })
+    .click();
+  await expect(page.locator("main")).toContainText("Filas exportadas: 5");
+  await expect(page.locator("main")).toContainText(
+    "Grupos de mismo lead, tipo y minuto: 4",
+  );
+  await page.getByRole("button", { name: "Prioridades", exact: true }).click();
   await page
     .getByRole("button")
-    .filter({ has: page.getByRole("heading", { name, exact: true }) })
+    .filter({
+      has: page.getByRole("heading", {
+        name: "Cliente Alfa Sintético",
+        exact: true,
+      }),
+    })
     .click();
   await expect(
-    page.getByRole("heading", { name: `Ficha 360° · ${name}` }),
+    page.getByRole("heading", { name: "Caliente · Atender hoy" }),
   ).toBeVisible();
   await page
-    .getByLabel("Resultado", { exact: true })
-    .fill("Respondió y pidió propuesta");
-  await page.getByLabel("Hubo contacto efectivo").check();
-  await page.getByLabel("Próxima fecha", { exact: true }).fill("2026-01-01");
+    .getByLabel("Nota y fundamento")
+    .fill("Supervisor confirmó interés con evidencia sintética");
   await page
     .getByLabel("Próxima acción", { exact: true })
-    .fill("Confirmar propuesta sintética");
-  await page.getByRole("button", { name: "Guardar gestión" }).click();
-  await expect(page.locator(".crm-detail")).toContainText("Gestiones vencidas");
+    .fill("Confirmar documentos de prueba");
+  await page.getByLabel("Fecha del compromiso").fill("2026-10-27");
+  await page.getByRole("button", { name: "Guardar intervención" }).click();
+  await expect(page.getByRole("status")).toContainText(
+    "Nota de supervisión guardada",
+  );
+  await page.getByRole("button", { name: "Agenda", exact: true }).click();
+  await expect(page.locator("main")).toContainText("VENCIDA");
   await page.reload();
   await page
     .getByRole("button", { name: "Vista de revisión local", exact: true })
     .click();
   await page.getByRole("button", { name: /Inteligencia comercial/ }).click();
-  await page
-    .getByRole("button")
-    .filter({ has: page.getByRole("heading", { name, exact: true }) })
-    .click();
-  await expect(page.locator(".crm-detail")).toContainText(
-    "Respondió y pidió propuesta",
+  await page.getByRole("button", { name: "Agenda", exact: true }).click();
+  await expect(page.locator("main")).toContainText(
+    "Confirmar documentos de prueba",
   );
+  const download = page.waitForEvent("download");
   await page
-    .getByLabel("Resultado de tarea")
-    .fill("Propuesta revisada con cliente");
-  await page.getByRole("button", { name: "Completar tarea" }).click();
-  await expect(page.locator(".crm-detail")).toContainText("Realizada");
-  const other = await browser.newContext();
-  const otherPage = await other.newPage();
-  await otherPage.goto("/");
-  const login = await otherPage.request.post("/api/crm", {
-    headers: { Origin: "http://127.0.0.1:5173" },
-    data: { action: "demoLogin", userId: "asesor-2" },
-  });
-  expect(login.ok()).toBeTruthy();
-  expect((await login.json()).clients.some((c) => c.name === name)).toBeFalsy();
-  const state = await (await page.request.get("/api/crm")).json();
-  const o = state.opportunities.find(
-    (o) => state.clients.find((c) => c.id === o.clientId)?.name === name,
+    .getByRole("button", { name: "Descargar respaldo privado", exact: true })
+    .click();
+  const file = await download;
+  const bytes = await readFile(await file.path());
+  const backup = JSON.parse(bytes.toString());
+  expect(backup.batches).toHaveLength(2);
+  expect(backup.notes).toHaveLength(1);
+  const context = await browser.newContext(),
+    other = await context.newPage();
+  await enter(other);
+  await other
+    .getByRole("button", { name: "Configuración", exact: true })
+    .click();
+  await other
+    .getByLabel("Archivo de respaldo", { exact: true })
+    .setInputFiles({
+      name: "Respaldo-sintetico.json",
+      mimeType: "application/json",
+      buffer: bytes,
+    });
+  await other.getByRole("button", { name: "Confirmar restauración" }).click();
+  await expect(other.getByRole("status")).toContainText("restaurado");
+  await other.getByRole("button", { name: "Agenda", exact: true }).click();
+  await expect(other.locator("main")).toContainText(
+    "Confirmar documentos de prueba",
   );
-  const forbidden = await otherPage.request.post("/api/crm", {
-    headers: { Origin: "http://127.0.0.1:5173" },
-    data: {
-      action: "stage",
-      id: o.id,
-      version: o.version,
-      stage: "Contactado",
-    },
-  });
-  expect(forbidden.status()).toBe(403);
-  const forged = await otherPage.request.post("/api/crm", {
-    headers: { Origin: "https://ajeno.invalid" },
-    data: { action: "demoLogin", userId: "supervisor-demo" },
-  });
-  expect(forged.status()).toBe(403);
-  await page.getByRole("button", { name: "Cambiar perfil de prueba" }).click();
-  await page
-    .getByRole("button", { name: "Supervisor de prueba", exact: true })
+  await other
+    .getByRole("button", { name: "Completar acción", exact: true })
     .click();
-  await page
-    .getByRole("button")
-    .filter({ has: page.getByRole("heading", { name, exact: true }) })
-    .click();
-  await page.getByLabel("Nuevo responsable").selectOption("asesor-2");
-  await page.getByRole("button", { name: "Reasignar", exact: true }).click();
-  await expect(page.locator(".crm-detail")).toContainText("reassign");
-  const after = await (await otherPage.request.get("/api/crm")).json();
-  expect(after.clients.some((c) => c.name === name)).toBeTruthy();
+  await expect(
+    other.getByRole("button", { name: "Completar acción", exact: true }),
+  ).toHaveCount(0);
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("button", { name: "Prioridades", exact: true }).click();
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -118,13 +149,39 @@ test("CRM flujo real: guardar, recargar, alertar, completar tarea, reasignar y b
     )
     .toBeLessThanOrEqual(0);
   await page.screenshot({
-    path: "test-results/crm-mobile.png",
+    path: "test-results/private-mobile.png",
     fullPage: true,
   });
-  await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.screenshot({
-    path: "test-results/crm-desktop.png",
-    fullPage: true,
-  });
-  await other.close();
+  expect(outgoing).toEqual([]);
+  await context.close();
+});
+test("restauración manipulada se rechaza sin borrar el historial", async ({
+  page,
+}) => {
+  await enter(page);
+  await upload(page, leadsWorkbook, "Listado-sintetico.xlsx");
+  const dl = page.waitForEvent("download");
+  await page
+    .getByRole("button", { name: "Descargar respaldo privado" })
+    .click();
+  const payload = JSON.parse(
+    (await readFile(await (await dl).path())).toString(),
+  );
+  payload.batches[0].records[0].name = "Alteración sin huella";
+  await page
+    .getByRole("button", { name: "Configuración", exact: true })
+    .click();
+  await page
+    .getByLabel("Archivo de respaldo", { exact: true })
+    .setInputFiles({
+      name: "Respaldo-manipulado.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(payload)),
+    });
+  await page.getByRole("button", { name: "Confirmar restauración" }).click();
+  await expect(page.getByRole("alert")).toContainText("huella");
+  await page.getByRole("button", { name: "Prioridades", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Cliente Alfa Sintético", exact: true }),
+  ).toBeVisible();
 });

@@ -1,3 +1,7 @@
+## Inteligencia comercial privada — rama de prueba
+
+El módulo de supervisión importa los dos reportes del CRM y conserva el historial en IndexedDB con respaldo y restauración. Uso exclusivo del propietario, sin cuentas de asesores ni subida de datos del cliente al servidor. [Guía de ejecución, reglas y límites](docs/INTELIGENCIA-PRIVADA.md). No publicado en producción.
+
 # Portal Celina V4.0
 
 Aplicación React 19 + Vite para gestión comercial inmobiliaria. Los 25 módulos existentes se conservan. Esta rama introduce temas claro, oscuro y automático; dashboard en USD; correos seguros; tipo de cambio con vigencia y pruebas automatizadas.

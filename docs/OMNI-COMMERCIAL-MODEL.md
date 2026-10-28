@@ -1,3 +1,5 @@
+> DOCUMENTO HISTÓRICO DEL PROTOTIPO MULTIUSUARIO. Sustituido por [Inteligencia privada](INTELIGENCIA-PRIVADA.md) tras la decisión de uso exclusivo del propietario. Las cuentas individuales, SQLite y el bloqueo por falta de identidad descritos aquí ya no definen el módulo actual.
+
 # Modelo, permisos y definiciones CRM
 
 ## Modelo lógico y correspondencia del prototipo

@@ -1,3 +1,5 @@
+> DOCUMENTO HISTÓRICO DEL PROTOTIPO MULTIUSUARIO. Sustituido por [Inteligencia privada](INTELIGENCIA-PRIVADA.md) tras la decisión de uso exclusivo del propietario. Las cuentas individuales, SQLite y el bloqueo por falta de identidad descritos aquí ya no definen el módulo actual.
+
 # OMNI Commercial Intelligence V1.0 — auditoría y entrega de prueba
 
 Fecha de elaboración: 27 de octubre de 2026, Bolivia. Repositorio: `huguitoadm-OHSL/portal-celina`. Base auditada: `5c49eb2d0c770ed72d2fe79e53bdb385b056d49e`. Rama de trabajo: `feat/omni-commercial-intelligence-v1`.

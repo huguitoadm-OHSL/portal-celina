@@ -6,7 +6,7 @@ import { useTheme } from './hooks/useTheme';
 import { Sidebar } from './components/layout/Sidebar';
 import { MobileHeader } from './components/layout/MobileHeader';
 
-const CommercialIntelligence = lazy(() => import('./crm/CommercialIntelligence'));
+const CommercialIntelligence = lazy(() => import('./crm/AdvisorIntelligence'));
 
 // Vistas - Gerencia
 const Dashboard = lazy(() => import('./views/Dashboard'));
