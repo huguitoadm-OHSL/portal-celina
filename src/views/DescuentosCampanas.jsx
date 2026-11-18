@@ -59,6 +59,7 @@ const ASESORES_EQUIPO = [
   "Jimmy Gonzales Nuñez",
   "Jose Gabriel Padilla Loayza",
   "Marisol Urgel Pizarro",
+  "Merly Mendez Hurtado",
   "Ana Karla Castro Alvis"
 ];
 
