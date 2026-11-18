@@ -9,7 +9,8 @@ const PROYECTOS_ACTUALIZADOS = ['Muyurina', 'Renacer', 'Santa Fe', 'Rancho Nuevo
 
 export default function SeguimientoVentas() {
   const { advisors, sales } = useCommercial();
-  const ventasPorProyecto = reportedSalesByProject(PROYECTOS_ACTUALIZADOS, sales);
+  const proyectosVisibles = [...new Set([...PROYECTOS_ACTUALIZADOS, ...sales.map(venta => venta.project)])];
+  const ventasPorProyecto = reportedSalesByProject(proyectosVisibles, sales);
   const datosProcesados = advisors.map(asesor => {
     let clusterInfo = { texto: 'Venta Cero', color: 'text-[var(--text-muted)] font-semibold' };
     if (asesor.actualUsd >= 18000) clusterInfo = { texto: 'Comisionan', color: 'text-emerald-600 font-bold' };
@@ -60,7 +61,7 @@ export default function SeguimientoVentas() {
         <div className="bg-[var(--bg-card)] rounded-2xl p-6 border border-[var(--border-glow)] shadow-sm flex flex-col justify-between">
           <p className="text-sm font-bold text-[var(--text-primary)] flex items-center mb-4"><Target className="w-4 h-4 mr-2 text-emerald-500"/> Ventas Acumuladas</p>
           <div className="space-y-3.5 w-full">
-            {PROYECTOS_ACTUALIZADOS.map((nombre, i) => (
+            {proyectosVisibles.map((nombre, i) => (
               <div key={i} className="flex items-center text-xs">
                 <span className="w-24 font-semibold text-[var(--text-muted)] truncate">{nombre}</span>
                 <div className="flex-1 h-2.5 bg-[var(--bg-card-inner)] rounded-full mx-3 overflow-hidden">
