@@ -3,7 +3,7 @@ import { normalize } from './reportParser.js';
 const has = (text, pattern) => pattern.test(normalize(text));
 const recentDays = (now, at) => at ? (Date.parse(now.slice(0,10)+'T12:00:00Z') - Date.parse(at.slice(0,10)+'T12:00:00Z')) / 86400000 : Infinity;
 const MATCH = Object.freeze({
-  commitment: /confirmo (la )?compra|decidio comprar|listo para comprar|entrego documentos|confirmo reserva|firmara|pago (la )?reserva|separar el lote/,
+  commitment: /confirmo (la )?compra|quiere comprar|decidio comprar|listo para comprar|entrego documentos|confirmo reserva|firmara|pago (la )?reserva|separar el lote/,
   visit: /visita (de )?terreno|visito el proyecto|recorrio el proyecto/,
   quote: /cotiz|propuesta|financiam|cuota inicial|mensualidad|capacidad de pago|precio/,
   scheduled: /agenda a visita|agendo visita|visita programada|cita confirmada/,
