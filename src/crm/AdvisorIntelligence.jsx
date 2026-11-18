@@ -223,7 +223,7 @@ export default function AdvisorIntelligence() {
         const result = await saveBatch(db.current, batch);
         if (result.duplicate) duplicates++; else saved++;
       }
-      setMessage(`${saved} reportes de asesores guardados · ${duplicates} ya existían. Indicadores actualizados.`);
+      setMessage(`Importación guardada: ${saved} reportes de asesores · ${duplicates} ya estaba guardada. Indicadores actualizados.`);
       setPreview(null);
     });
   }
