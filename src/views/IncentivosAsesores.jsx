@@ -17,14 +17,6 @@ const DIRECTORES_APROBACION = [
 
 // REGLAS OFICIALES DEL CONCURSO INTERNO CELINA 2026
 const ETAPAS_CONCURSO = {
-  "sep_oct": {
-    id: "sep_oct",
-    nombre: "Septiembre – Octubre",
-    productividadRequeridaPct: 60,
-    minVentas: 2,
-    minColocacionUsd: 15000,
-    descripcion: "Etapa de Recuperación e Impulso (Vigente)"
-  },
   "nov": {
     id: "nov",
     nombre: "Noviembre",
@@ -44,7 +36,7 @@ const ETAPAS_CONCURSO = {
 };
 
 export default function IncentivosAsesores() {
-  const [etapaSeleccionada, setEtapaSeleccionada] = useState("sep_oct");
+  const [etapaSeleccionada, setEtapaSeleccionada] = useState("nov");
   const { advisors, targetUsd: metaGrupalUSD, setTargetUsd: setMetaGrupalUSD } = useCommercial();
   const [simulation, setSimulation] = useState(null);
   const [folders, setFolders] = useState({});
