@@ -22,8 +22,8 @@ export const EQUIPOS_ASESORES = {
 EQUIPOS_ASESORES["Oscar Hugo Saravia L."] = EQUIPOS_ASESORES["Oscar Saravia"];
 
 export const OBJETIVOS_MENSUALES = {
-  "Oscar Saravia": 111000,
-  "Oscar Hugo Saravia L.": 111000
+  "Oscar Saravia": 110000,
+  "Oscar Hugo Saravia L.": 110000
 };
 
 
