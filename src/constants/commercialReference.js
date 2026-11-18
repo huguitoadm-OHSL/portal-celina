@@ -44,7 +44,7 @@ export const NOVEMBER_PROJECTION_DETAILS = Object.freeze({
  ana:{days:[0,0,8000,0,0,0,0],lots:[0,0,0,0,1,0,0]}
 });
 // Adaptador de compatibilidad: la colocación y los lotes se derivan del registro único.
-export const REFERENCE_ADVISORS = Object.freeze(actualsByAdvisor(ADVISORS, REPORTED_SALES).map(advisor => Object.freeze({ ...advisor, projectionUsd: ADVISOR_PROJECTIONS_USD[advisor.id] })));
+export const REFERENCE_ADVISORS = Object.freeze(actualsByAdvisor(ADVISORS, REPORTED_SALES).map(advisor => Object.freeze({ ...advisor, projectionUsd: ADVISOR_PROJECTIONS_USD[advisor.id] ?? 0 })));
 
 export const PROJECTION_WEEK_START = '2026-10-19';
 // Lunes a domingo; proyectos en el orden PROJECT_NAMES. Solo oportunidades, no cierres.
