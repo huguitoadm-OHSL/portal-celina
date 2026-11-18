@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ADVISORS, ADVISOR_PROJECTIONS_USD, MONTHLY_TARGET_USD, REPORTED_SALES, PROJECTION_DETAILS } from '../constants/commercialReference';
+import { ADVISORS, NOVEMBER_PROJECTIONS_USD, NOVEMBER_TARGET_USD, REPORTED_SALES, NOVEMBER_REPORTED_SALES, NOVEMBER_PROJECTION_DETAILS } from '../constants/commercialReference';
 import { actualsByAdvisor, addClosedSale, closedSales } from '../services/commercialLedger';
 import { summarizeCommercial } from '../utils/commercial';
 import { mergeSavedSales, planSalesImport, SALES_STORAGE_KEY } from '../services/salesImport';
@@ -9,19 +9,19 @@ export function CommercialProvider({ children }) {
   const [initial] = useState(() => {
     try {
       const saved = localStorage.getItem(SALES_STORAGE_KEY);
-      return { sales: saved ? mergeSavedSales(REPORTED_SALES, JSON.parse(saved)) : REPORTED_SALES, error: '' };
+      return { sales: saved ? mergeSavedSales([...REPORTED_SALES, ...NOVEMBER_REPORTED_SALES], JSON.parse(saved)) : [...REPORTED_SALES, ...NOVEMBER_REPORTED_SALES], error: '' };
     } catch { return { sales: REPORTED_SALES, error: 'No se pudo restaurar el registro local. Los datos guardados no se han borrado; revise el respaldo antes de importar.' }; }
   });
   const [sales, setSales] = useState(initial.sales);
   const [storageError] = useState(initial.error);
-  const [projections, setProjections] = useState(() => Object.fromEntries(ADVISORS.map(advisor => [advisor.id, { amountUsd: ADVISOR_PROJECTIONS_USD[advisor.id], days: PROJECTION_DETAILS[advisor.id]?.days ?? Array(7).fill(0), lots: PROJECTION_DETAILS[advisor.id]?.lots ?? Array(7).fill(0) }])));
-  const [targetUsd, setTarget] = useState(MONTHLY_TARGET_USD);
+  const [projections, setProjections] = useState(() => Object.fromEntries(ADVISORS.map(advisor => [advisor.id, { amountUsd: NOVEMBER_PROJECTIONS_USD[advisor.id] ?? 0, days: NOVEMBER_PROJECTION_DETAILS[advisor.id]?.days ?? Array(7).fill(0), lots: NOVEMBER_PROJECTION_DETAILS[advisor.id]?.lots ?? Array(7).fill(0) }])));
+  const [targetUsd, setTarget] = useState(NOVEMBER_TARGET_USD);
   const setTargetUsd = amount => {
     const value = Number(amount);
     if (!Number.isFinite(value) || value < 0) throw new Error('El objetivo USD debe ser positivo o cero.');
     setTarget(Math.round(value * 100) / 100);
   };
-  const actuals = useMemo(() => actualsByAdvisor(ADVISORS, sales), [sales]);
+  const actuals = useMemo(() => actualsByAdvisor(ADVISORS, sales, '2026-11'), [sales]);
   const advisors = useMemo(() => actuals.map(advisor => ({ ...advisor, projectionUsd: projections[advisor.id].amountUsd, days: projections[advisor.id].days, projectedLots: projections[advisor.id].lots })), [actuals, projections]);
   const summary = useMemo(() => summarizeCommercial(advisors, targetUsd), [advisors, targetUsd]);
   const updateProjection = (advisorId, amount, days, lots) => {
@@ -31,7 +31,7 @@ export function CommercialProvider({ children }) {
   };
   const importSales = rows => {
     if (storageError) throw new Error(storageError);
-    const plan = planSalesImport(rows, sales);
+    const plan = planSalesImport(rows, sales, '2026-11');
     if (plan.errors.length) throw new Error('Corrija las filas observadas antes de aplicar.');
     const saved = plan.next.filter(sale => sale.source === 'excel');
     if (saved.length > 1000) throw new Error('El registro local admite como máximo 1.000 ventas importadas.');
@@ -41,5 +41,5 @@ export function CommercialProvider({ children }) {
     return plan;
   };
   const recordSale = sale => setSales(previous => addClosedSale(previous, sale));
-  return <CommercialContext.Provider value={{ advisors, sales: closedSales(sales), summary, targetUsd, setTargetUsd, updateProjection, recordSale, importSales, storageError }}>{children}</CommercialContext.Provider>;
+  return <CommercialContext.Provider value={{ advisors, sales: closedSales(sales, '2026-11'), summary, targetUsd, setTargetUsd, updateProjection, recordSale, importSales, storageError }}>{children}</CommercialContext.Provider>;
 }
