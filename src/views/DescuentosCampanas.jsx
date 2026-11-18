@@ -29,9 +29,9 @@ import {
   };
 
 const VENTANAS_CONTADO = {
-  "0_5": { plazo: "Primeros 5 días", descuentoPct: 18, labelBadge: "CONTADO (PRIMEROS 5 DÍAS)" },
-  "6_30": { plazo: "6 a 30 días", descuentoPct: 15, labelBadge: "CONTADO (6 A 30 DÍAS)" },
-  "31_60": { plazo: "31 a 60 días", descuentoPct: 10, labelBadge: "CONTADO (31 A 60 DÍAS)" }
+  "0_5": { plazo: "Contado inmediato", descuentoPct: 18, labelBadge: "VENTA AL CONTADO" },
+  "6_30": { plazo: "Liquidación hasta 5 días", descuentoPct: 15, labelBadge: "LIQUIDACIÓN EN 5 DÍAS" },
+  "31_60": { plazo: "Liquidación hasta 30 días", descuentoPct: 10, labelBadge: "LIQUIDACIÓN EN 30 DÍAS" }
 };
 
 
