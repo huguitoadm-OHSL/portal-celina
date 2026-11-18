@@ -2,7 +2,7 @@ import { CORREO_SUPERVISION_RESPALDO as CORREO_RESPALDO_OSCAR } from '../constan
 import { emailCopies, composeEmailUrl } from '../services/emailDelivery';
 import { creditDiscountEmail } from '../services/creditDiscountEmail';
 import { validInlineLotImage } from '../services/inlineLotImage';
-import { getExchangeRate } from '../constants/exchangeRates';
+import { businessDate, getExchangeRate, saveManualExchangeRate } from '../constants/exchangeRates';
 import { escapeHtml, sanitizeEmailHtml, copyEmail, greeting, emailSalutation } from '../services/email';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
@@ -29,8 +29,8 @@ import {
   };
 
 const VENTANAS_CONTADO = {
-  "0_5": { plazo: "Primeros 5 días", descuentoPct: 25, labelBadge: "CONTADO (PRIMEROS 5 DÍAS)" },
-  "6_30": { plazo: "6 a 30 días", descuentoPct: 20, labelBadge: "CONTADO (6 A 30 DÍAS)" },
+  "0_5": { plazo: "Primeros 5 días", descuentoPct: 18, labelBadge: "CONTADO (PRIMEROS 5 DÍAS)" },
+  "6_30": { plazo: "6 a 30 días", descuentoPct: 15, labelBadge: "CONTADO (6 A 30 DÍAS)" },
   "31_60": { plazo: "31 a 60 días", descuentoPct: 10, labelBadge: "CONTADO (31 A 60 DÍAS)" }
 };
 
@@ -38,9 +38,9 @@ const VENTANAS_CONTADO = {
 
 const obtenerDescuentoCreditoFijo = (valorLoteUSD) => {
   if (valorLoteUSD <= 0) return 0;
-  if (valorLoteUSD <= 7500) return 300;
-  if (valorLoteUSD <= 15000) return 600;
-  if (valorLoteUSD <= 22500) return 900;
+  if (valorLoteUSD <= 7500) return 250;
+  if (valorLoteUSD <= 15000) return 500;
+  if (valorLoteUSD <= 22500) return 800;
   if (valorLoteUSD <= 30000) return 1200;
   if (valorLoteUSD <= 45000) return 1500;
   return 1800;
@@ -59,11 +59,19 @@ const ASESORES_EQUIPO = [
   "Jimmy Gonzales Nuñez",
   "Jose Gabriel Padilla Loayza",
   "Marisol Urgel Pizarro",
-  "Merly Mendez Hurtado"
+  "Ana Karla Castro Alvis"
 ];
 
 export default function DescuentosCampanas() {
+  const [rateRevision, setRateRevision] = useState(0);
+  const [rateInput, setRateInput] = useState(() => String(getExchangeRate()));
+  const [rateError, setRateError] = useState('');
   const TC_OFICIAL_BASE = getExchangeRate();
+  const saveRate = () => {
+    try { saveManualExchangeRate(rateInput.replace(',', '.')); setRateRevision(v => v + 1); setRateError(''); }
+    catch (e) { setRateError(e.message); }
+  };
+  void rateRevision;
   const [lotes, setLotes] = useState([]);
   const [cargandoBD, setCargandoBD] = useState(true);
   const [errorCarga, setErrorCarga] = useState(null);
@@ -587,6 +595,7 @@ ${asesorSeleccionado}`;
 
   return (
     <div className="w-full text-[var(--text-primary)] font-sans overflow-x-hidden">
+      <section className="panel mb-4" aria-label="Tipo de cambio de supervisión"><div className="flex flex-wrap items-center gap-3"><strong>Campaña noviembre 2026 · TC referencial: Bs {TC_OFICIAL_BASE.toFixed(2)} / USD</strong><label className="text-xs">Actualizar TC <input aria-label="Nuevo tipo de cambio" type="number" min="0.01" max="100" step="0.01" value={rateInput} onChange={e => setRateInput(e.target.value)} className="ml-2 rounded border px-2 py-1 text-slate-900 w-28" /></label><button type="button" onClick={saveRate} className="rounded bg-blue-700 px-3 py-2 text-white text-xs font-semibold">Guardar TC del día</button><small>Vigencia desde {businessDate()} · guardado en este navegador</small></div>{rateError && <p role="alert" className="text-red-600">{rateError}</p>}</section>
       <details className="panel mb-6"><summary>Vista previa del correo · revisar antes de enviar</summary><div className="email-preview" dangerouslySetInnerHTML={{ __html: sanitizeEmailHtml(generarHTMLCorreo(), creditEmailOptions) }}/></details>
       {modalidad === 'CREDITO' && <section className="panel mb-6">
         <h2 className="text-lg font-bold">Captura del lote para el correo</h2>
