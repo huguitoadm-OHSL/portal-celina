@@ -20,7 +20,7 @@ export function saveManualExchangeRate(rate, date = businessDate()) {
 function readManualRates() {
   try {
     const rows = JSON.parse(localStorage.getItem(RATE_KEY) || '[]');
-    return Array.isArray(rows) ? rows.filter(r => /^\\d{4}-\\d{2}-\\d{2}$/.test(r.date) && Number.isFinite(r.rate) && r.rate > 0) : [];
+    return Array.isArray(rows) ? rows.filter(r => /^\d{4}-\d{2}-\d{2}$/.test(r.date) && Number.isFinite(r.rate) && r.rate > 0) : [];
   } catch { return []; }
 }
 
