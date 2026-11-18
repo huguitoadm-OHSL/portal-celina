@@ -17,14 +17,6 @@ const DIRECTORES_APROBACION = [
 
 // REGLAS OFICIALES DEL CONCURSO INTERNO CELINA 2026
 const ETAPAS_CONCURSO = {
-  "sep_oct": {
-    id: "sep_oct",
-    nombre: "Septiembre – Octubre",
-    productividadRequeridaPct: 60,
-    minVentas: 2,
-    minColocacionUsd: 15000,
-    descripcion: "Etapa de Recuperación e Impulso (Vigente)"
-  },
   "nov": {
     id: "nov",
     nombre: "Noviembre",
@@ -44,7 +36,7 @@ const ETAPAS_CONCURSO = {
 };
 
 export default function IncentivosAsesores() {
-  const [etapaSeleccionada, setEtapaSeleccionada] = useState("sep_oct");
+  const [etapaSeleccionada, setEtapaSeleccionada] = useState("nov");
   const { advisors, targetUsd: metaGrupalUSD, setTargetUsd: setMetaGrupalUSD } = useCommercial();
   const [simulation, setSimulation] = useState(null);
   const [folders, setFolders] = useState({});
@@ -331,7 +323,7 @@ Oscar Hugo Saravia L.`;
   return (
     <div className="w-full text-[var(--text-primary)] font-sans space-y-6 pb-12 antialiased">
       <details className="panel mb-6"><summary>Vista previa del correo · revisar antes de enviar</summary><div className="email-preview" dangerouslySetInnerHTML={{ __html: sanitizeEmailHtml(generarHTMLCorreo()) }}/></details>
-      <p className="source-note">Colocación en USD y ventas realizadas desde la misma fuente de Inicio, Proyección Semanal y Seguimiento. Corte de supervisión: 22/10/2026. Las posibles ventas no se usan para calificar. La regla se mantiene: 2 ventas realizadas o USD 15.000 y carpetas al día. No se paga un bono automáticamente.</p>
+      <p className="source-note">Colocación en USD y ventas realizadas desde la misma fuente de Inicio, Proyección Semanal y Seguimiento. Corte CESI: 17/11/2026. Las posibles ventas no se usan para calificar. Noviembre: 2 ventas o USD 18.000 y carpetas al día. No se paga un bono automáticamente.</p>
       <div className="panel"><button className="primary-button" onClick={() => setSimulation(simulation ? null : actualAdvisors.map(advisor => ({ ...advisor })))}>{simulation ? 'Volver a ventas realizadas' : 'Simular escenario de incentivos'}</button><p role="status">{simulation ? 'Simulación: estos cambios no registran ventas ni afectan los otros módulos.' : 'Ventas realizadas: cantidades y colocación sincronizadas. Para probar valores distintos, active la simulación.'}</p></div>
       {/* ================= HERO PRINCIPAL ================= */}
       <div className={`rounded-3xl p-6 sm:p-8 border shadow-2xl relative overflow-hidden transition-all duration-500 ${evaluacion.claseEstado}`}>

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { parseReport, prepareBatch } from "./reportParser.js";
+import { prepareBatch } from "./reportParser.js";
+import { splitReportByAdvisor } from "./multiAdvisorReport.js";
+import { PIPELINE_STAGES, scoreOpportunity } from "./opportunityScore.js";
 import {
   buildIntelligence,
   chronologicalChanges,
@@ -18,6 +20,7 @@ import {
 } from "./privateStore.js";
 import "./crm.css";
 const EMPTY = { batches: [], notes: [], settings: DEFAULT_SETTINGS };
+const whatsappNumber = phone => { const n = String(phone ?? "").replace(/\\D/g,""); return /^\\d{8}$/.test(n) ? "591"+n : /^591\\d{8}$/.test(n) ? n : ""; };
 const labelKind = (k) =>
   k === "leads" ? "Listado de leads" : "Reporte de actividades";
 const number = (n) =>
@@ -61,7 +64,7 @@ export default function AdvisorIntelligence() {
     [now, setNow] = useState(laPazNow()),
     [period, setPeriod] = useState(laPazNow().slice(0, 7)),
     [advisor, setAdvisor] = useState(""),
-    [tab, setTab] = useState("Prioridades"),
+    [tab, setTab] = useState("Embudo comercial"),
     [selected, setSelected] = useState(""),
     [search, setSearch] = useState(""),
     [temperature, setTemperature] = useState(""),
@@ -153,7 +156,8 @@ export default function AdvisorIntelligence() {
       },
     };
   });
-  const filtered = clients.filter(
+  const opportunities = clients.map(c => ({...c, opportunity: scoreOpportunity(c, now, c.supervisorNotes)}));
+  const filtered = opportunities.filter(
     (c) =>
       (!advisor || c.advisorKey === advisor) &&
       (!temperature || c.analysis.temperature === temperature) &&
@@ -169,7 +173,7 @@ export default function AdvisorIntelligence() {
           .toLowerCase()
           .includes(search.toLowerCase())),
   );
-  const selectedClient = clients.find((c) => c.id === selected);
+  const selectedClient = opportunities.find((c) => c.id === selected);
   const team = model.advisors.filter((a) => !advisor || a.key === advisor);
   const rank = (c) =>
     c.blacklisted
@@ -195,10 +199,10 @@ export default function AdvisorIntelligence() {
         throw new Error("Seleccione un .xlsx de hasta 5 MB.");
       const { readSheet } = await import("read-excel-file/browser");
       const rows = await readSheet(file);
-      const plan = parseReport(rows, period);
-      setPreview({ rows, plan, fileName: file.name, period });
+      const grouped = splitReportByAdvisor(rows, period);
+      setPreview({ ...grouped, fileName: file.name, period });
       setComplete(false);
-      if (plan.exportedAt) setDownloadAt(plan.exportedAt.slice(0, 16));
+      if (grouped.plans[0].plan.exportedAt) setDownloadAt(grouped.plans[0].plan.exportedAt.slice(0, 16));
     } catch (e) {
       setError(e.message);
     } finally {
@@ -209,18 +213,17 @@ export default function AdvisorIntelligence() {
     await action(async () => {
       if (!preview || preview.period !== period)
         throw new Error("El periodo cambió: vuelva a seleccionar el archivo.");
-      const batch = await prepareBatch(preview.rows, {
-        period,
-        fileName: preview.fileName,
-        exportedAt: downloadAt,
-        complete,
-      });
-      const result = await saveBatch(db.current, batch);
-      setMessage(
-        result.duplicate
-          ? "Esta misma exportación ya estaba guardada. No se duplicó ningún registro."
-          : "Importación guardada. Historial e indicadores actualizados.",
-      );
+      if (preview.plans.some(part => part.plan.errors.length)) throw new Error("Corrija las filas observadas antes de guardar.");
+      // Validar todas las particiones antes de escribir cualquiera.
+      const batches = await Promise.all(preview.plans.map(part => prepareBatch(part.rows, {
+        period, fileName: preview.fileName, exportedAt: downloadAt, complete,
+      })));
+      let saved = 0, duplicates = 0;
+      for (const batch of batches) {
+        const result = await saveBatch(db.current, batch);
+        if (result.duplicate) duplicates++; else saved++;
+      }
+      setMessage(saved ? `Importación guardada: ${saved} reporte(s) de asesores · ${duplicates} coincidencias omitidas. Indicadores actualizados.` : `Importación guardada. No se duplicó ningún registro: ${duplicates} reporte(s) ya estaban guardados.`);
       setPreview(null);
     });
   }
@@ -273,7 +276,7 @@ export default function AdvisorIntelligence() {
           supervisión.
         </p>
         <strong>
-          Rama de prueba · El CRM de la empresa conserva su operación original
+          Módulo de supervisión · El CRM de la empresa conserva su operación original
         </strong>
       </header>
       <div className="panel crm-storage">
@@ -379,6 +382,7 @@ export default function AdvisorIntelligence() {
       </div>
       <nav className="crm-tabs" aria-label="Inteligencia privada">
         {[
+          "Embudo comercial",
           "Prioridades",
           "Cargar reportes",
           "Equipo y metas",
@@ -403,8 +407,8 @@ export default function AdvisorIntelligence() {
         <div className="panel">
           <h2>Comienza con los dos reportes del CRM</h2>
           <p>
-            Carga el listado de leads y el reporte de actividades del mismo
-            asesor y mes. Podrás sumar a tus siete asesores, uno por archivo,
+            Carga el listado de leads o el reporte de actividades del mes,
+            incluso consolidado para los ocho asesores,
             sin crearles cuentas.
           </p>
           <button onClick={() => setTab("Cargar reportes")}>
@@ -416,8 +420,8 @@ export default function AdvisorIntelligence() {
         <div className="panel crm-form">
           <h2>Cargar Excel del CRM</h2>
           <p>
-            Exporta un asesor, el mes completo y todos los estados y
-            actividades. El sistema reconoce ambos formatos por sus columnas.
+            Puedes subir el informe consolidado de los ocho asesores en un solo Excel.
+            Se separan los registros por asesor y se conservan los historiales individuales.
             Para otro mes, cambia primero Mes de análisis.
           </p>
           <label>
@@ -431,27 +435,24 @@ export default function AdvisorIntelligence() {
           </label>
           {preview && (
             <>
-              <h3>Vista previa · {labelKind(preview.plan.kind)}</h3>
+              <h3>Vista previa · {labelKind(preview.kind)}</h3>
               <p>
-                {preview.fileName} · {preview.plan.advisor} ·{" "}
-                {preview.plan.rawCount} filas · {period}
+                {preview.fileName} · {preview.plans.length} asesores ·{" "}
+                {preview.count} filas · {period}
               </p>
-              {preview.plan.warnings.map((w) => (
-                <p className="crm-alert" key={w}>
-                  {w}
-                </p>
+              <p>{preview.plans.map(part => `${part.plan.advisor}: ${part.plan.rawCount}`).join(" · ")}</p>
+              {preview.plans.flatMap(part => part.plan.warnings).filter((w,i,all)=>all.indexOf(w)===i).map(w => (
+                <p className="crm-alert" key={w}>{w}</p>
               ))}
-              {preview.plan.errors.map((e, i) => (
-                <p role="alert" key={i}>
-                  Fila {e.row}: {e.message}
-                </p>
+              {preview.plans.flatMap(part => part.plan.errors.map(e => ({...e,advisor:part.plan.advisor}))).map((e,i) => (
+                <p role="alert" key={i}>{e.advisor} · Fila {e.row}: {e.message}</p>
               ))}
               <label>
                 Fecha y hora de descarga (Bolivia)
                 <input
                   type="datetime-local"
                   value={downloadAt}
-                  disabled={!!preview.plan.exportedAt}
+                  disabled={!!preview.plans[0].plan.exportedAt}
                   onChange={(e) => setDownloadAt(e.target.value)}
                   required
                 />
@@ -480,7 +481,7 @@ export default function AdvisorIntelligence() {
                     </tr>
                   </thead>
                   <tbody>
-                    {preview.plan.records.slice(0, 8).map((r, i) => (
+                    {preview.plans.flatMap(part => part.plan.records).slice(0, 8).map((r, i) => (
                       <tr key={i}>
                         <td>{r.name || "Sin nombre"}</td>
                         <td>{r.kind || r.state}</td>
@@ -496,7 +497,7 @@ export default function AdvisorIntelligence() {
                 guardar.
               </p>
               <button
-                disabled={busy || !!preview.plan.errors.length}
+                disabled={busy || preview.plans.some(part => part.plan.errors.length)}
                 onClick={confirmImport}
               >
                 Confirmar importación
@@ -506,6 +507,31 @@ export default function AdvisorIntelligence() {
               </button>
             </>
           )}
+        </div>
+      )}
+      {tab === "Embudo comercial" && (
+        <div className="crm-pipeline">
+          <div className="panel crm-pipeline-heading">
+            <h2>Embudo de oportunidades · Supervisión</h2>
+            <p>Etapas inferidas de actividades y notas del CRM. Abre una ficha para verificar y registrar tu próxima intervención. El puntaje mide prioridad operativa, no probabilidad de venta.</p>
+            <div className="crm-pipeline-stats"><span><strong>{filtered.length}</strong> leads visibles</span><span><strong>{filtered.filter(c => c.opportunity.score >= 50).length}</strong> requieren revisión de cierre</span><span><strong>{filtered.filter(c => c.pending.some(n=>n.due && n.due < now.slice(0,10))).length}</strong> compromisos vencidos</span></div>
+          </div>
+          <div className="crm-pipeline-columns">
+            {PIPELINE_STAGES.map(stage => {
+              const group = filtered.filter(c => c.opportunity.stage === stage).sort((a,b) => b.opportunity.score-a.opportunity.score || a.name.localeCompare(b.name));
+              return <section className="crm-pipeline-stage" key={stage}>
+                <div className="crm-stage-header"><strong>{stage}</strong><span>{group.length}</span></div>
+                {group.slice(0,80).map(c=><button type="button" key={c.id} className="crm-pipeline-lead" onClick={()=>openClient(c.id)}>
+                  <small>{c.advisor}</small>
+                  <strong>{c.name || "Lead sin nombre"}</strong>
+                  <span className="crm-score">Prioridad {c.opportunity.score}/100 · {c.analysis.temperature}</span>
+                  <span>{c.opportunity.nextAction}</span>
+                  <small>Actividad: {c.opportunity.lastDays === null ? "Sin registro" : `${c.opportunity.lastDays} día(s) atrás`}</small>
+                </button>)}
+                {group.length>80 && <p className="crm-note">Mostrando 80 de {group.length}. Usa los filtros para acotar.</p>}
+              </section>;
+            })}
+          </div>
         </div>
       )}
       {tab === "Prioridades" && (
@@ -548,7 +574,8 @@ export default function AdvisorIntelligence() {
                   >
                     {c.analysis.temperature}
                   </span>
-                  <strong>{c.analysis.priority}</strong>
+                  <strong>{c.analysis.priority} · Prioridad {c.opportunity.score}/100</strong>
+                  <small>{c.opportunity.nextAction}</small>
                   <p>{c.analysis.reason}</p>
                   <small>
                     Última actividad registrada:{" "}
@@ -786,6 +813,10 @@ export default function AdvisorIntelligence() {
                 {selectedClient.phone} · {selectedClient.advisor} ·{" "}
                 {selectedClient.state}
               </p>
+              <p className="crm-contact-actions">
+                {whatsappNumber(selectedClient.phone) && <a href={`https://wa.me/${whatsappNumber(selectedClient.phone)}`} target="_blank" rel="noopener noreferrer">Abrir WhatsApp del lead</a>}
+                <button type="button" onClick={()=>navigator.clipboard?.writeText(String(selectedClient.phone))}>Copiar teléfono</button>
+              </p>
               <small>
                 ID: {selectedClient.id}{" "}
                 {selectedClient.provisional &&
@@ -796,6 +827,8 @@ export default function AdvisorIntelligence() {
                 {selectedClient.analysis.priority}
               </h3>
               <p>{selectedClient.analysis.reason}</p>
+              <p><strong>Prioridad {selectedClient.opportunity.score}/100</strong> · {selectedClient.opportunity.stage}. {selectedClient.opportunity.nextAction}</p>
+              {selectedClient.opportunity.evidence.map((reason,i)=><p key={i} className="crm-evidence">{reason}</p>)}
               <p>
                 Regla operativa provisional. No es probabilidad de cierre ni
                 venta confirmada.

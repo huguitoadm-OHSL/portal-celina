@@ -8,13 +8,13 @@ export function creditDiscountEmail({ project, uv, block, lot, category, advisor
   const c = calculations;
   const h = escapeHtml;
   const money = formatCurrency;
-  const intro = `Solicito la aplicación del descuento de la Campaña Oficial de Octubre para el proyecto ${project}.`;
+  const intro = `Solicito la aplicación del descuento de la Campaña Oficial de Noviembre para el proyecto ${project}.`;
   const closing = 'Solicito su aprobación y la aplicación de las condiciones en el sistema para continuar con el cierre de la venta.';
   const text = `${greeting}\n${salutation},\n\n${intro}\n\nDATO CLAVE PARA MODIFICAR EN EL SISTEMA\nPrecio anterior de lista: USD ${money(c.precioM2Anterior)}/m²\nDescuento equivalente por m² (informativo): USD ${money(c.reduccionM2)}/m²\nNUEVO PRECIO M²: USD ${money(c.nuevoPrecioM2)}/m²\n\nPROYECTO: ${project}${category ? ` / ${category}` : ''}\nUV ${uv} · MZN ${block} · LT ${lot}\n\n${c.labelBadge}\nPrecio con descuento: USD ${money(c.capitalFinalUSD)}\nEquivalente: Bs. ${money(c.totalBs)} · TC ${exchangeRate.toFixed(2)}\n${hasImage ? '\nCaptura del lote: pegar el formato con imagen o adjuntarla al borrador.\n' : ''}\n${closing}\n\nSaludos cordiales,\n${advisor}`;
   const html = `<div style="font-family:Arial,Helvetica,sans-serif;color:#0f172a;max-width:650px;margin:0 auto;line-height:1.5;">
 <p style="margin:0 0 8px;font-size:14px;">${h(greeting)}</p>
 <p style="margin:0 0 16px;font-size:14px;">${h(salutation)},</p>
-<p style="margin:0 0 20px;font-size:14px;">Solicito la aplicación del descuento de la <strong>Campaña Oficial de Octubre</strong> para el proyecto <strong>${h(project)}</strong>.</p>
+<p style="margin:0 0 20px;font-size:14px;">Solicito la aplicación del descuento de la <strong>Campaña Oficial de Noviembre</strong> para el proyecto <strong>${h(project)}</strong>.</p>
 <table width="100%" cellpadding="0" cellspacing="0" style="border:2px solid #16a34a;border-radius:10px;background-color:#f0fdf4;margin-bottom:20px;"><tbody><tr><td style="padding:14px 16px;">
 <p style="font-size:11px;font-weight:bold;color:#15803d;margin:0 0 8px;">📌 DATO CLAVE PARA MODIFICAR EN EL SISTEMA</p>
 <table width="100%" cellpadding="0" cellspacing="0"><tbody><tr><td style="font-size:12px;vertical-align:top;">Precio anterior de lista: <strong>USD ${money(c.precioM2Anterior)}/m²</strong><br/>Descuento equivalente por m² (informativo): <strong>USD ${money(c.reduccionM2)}/m²</strong></td>

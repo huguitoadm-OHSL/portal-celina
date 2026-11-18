@@ -2,7 +2,8 @@ import { CORREO_SUPERVISION_RESPALDO as CORREO_RESPALDO_OSCAR } from '../constan
 import { emailCopies, composeEmailUrl } from '../services/emailDelivery';
 import { creditDiscountEmail } from '../services/creditDiscountEmail';
 import { validInlineLotImage } from '../services/inlineLotImage';
-import { getExchangeRate } from '../constants/exchangeRates';
+import { bonusForIncreasedInitial, CUOTA_INCREMENT_BONUSES_USD, CUOTA_INCREMENT_RANGES, PRICE_RANGES } from '../services/novemberInitialBonus';
+import { businessDate, getExchangeRate, saveManualExchangeRate } from '../constants/exchangeRates';
 import { escapeHtml, sanitizeEmailHtml, copyEmail, greeting, emailSalutation } from '../services/email';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
@@ -29,18 +30,18 @@ import {
   };
 
 const VENTANAS_CONTADO = {
-  "0_5": { plazo: "Primeros 5 días", descuentoPct: 25, labelBadge: "CONTADO (PRIMEROS 5 DÍAS)" },
-  "6_30": { plazo: "6 a 30 días", descuentoPct: 20, labelBadge: "CONTADO (6 A 30 DÍAS)" },
-  "31_60": { plazo: "31 a 60 días", descuentoPct: 10, labelBadge: "CONTADO (31 A 60 DÍAS)" }
+  "0_5": { plazo: "Contado inmediato", descuentoPct: 18, labelBadge: "VENTA AL CONTADO" },
+  "6_30": { plazo: "Liquidación hasta 5 días", descuentoPct: 15, labelBadge: "LIQUIDACIÓN EN 5 DÍAS" },
+  "31_60": { plazo: "Liquidación hasta 30 días", descuentoPct: 10, labelBadge: "LIQUIDACIÓN EN 30 DÍAS" }
 };
 
 
 
 const obtenerDescuentoCreditoFijo = (valorLoteUSD) => {
   if (valorLoteUSD <= 0) return 0;
-  if (valorLoteUSD <= 7500) return 300;
-  if (valorLoteUSD <= 15000) return 600;
-  if (valorLoteUSD <= 22500) return 900;
+  if (valorLoteUSD <= 7500) return 250;
+  if (valorLoteUSD <= 15000) return 500;
+  if (valorLoteUSD <= 22500) return 800;
   if (valorLoteUSD <= 30000) return 1200;
   if (valorLoteUSD <= 45000) return 1500;
   return 1800;
@@ -59,11 +60,22 @@ const ASESORES_EQUIPO = [
   "Jimmy Gonzales Nuñez",
   "Jose Gabriel Padilla Loayza",
   "Marisol Urgel Pizarro",
-  "Merly Mendez Hurtado"
+  "Merly Mendez Hurtado",
+  "Ana Karla Castro Alvis"
 ];
 
 export default function DescuentosCampanas() {
+  const [rateRevision, setRateRevision] = useState(0);
+  const [rateInput, setRateInput] = useState(() => String(getExchangeRate()));
+  const [rateError, setRateError] = useState('');
   const TC_OFICIAL_BASE = getExchangeRate();
+  const saveRate = () => {
+    try { saveManualExchangeRate(rateInput.replace(',', '.')); setRateRevision(v => v + 1); setRateError(''); }
+    catch (e) { setRateError(e.message); }
+  };
+  void rateRevision;
+  // Anexo III se muestra por separado y nunca altera el descuento base sin validación.
+
   const [lotes, setLotes] = useState([]);
   const [cargandoBD, setCargandoBD] = useState(true);
   const [errorCarga, setErrorCarga] = useState(null);
@@ -83,6 +95,7 @@ export default function DescuentosCampanas() {
 
   const [cuotaInicialPct] = useState(1.5);
   const [plazoAnios] = useState(10);
+  const [nuevaCuotaInicialUsd, setNuevaCuotaInicialUsd] = useState("");
 
   const [destinatarioEmail, setDestinatarioEmail] = useState(DIRECTORES_APROBACION[0].email);
   const [asesorSeleccionado, setAsesorSeleccionado] = useState(ASESORES_EQUIPO[0]);
@@ -345,7 +358,7 @@ export default function DescuentosCampanas() {
   <p style="margin: 0 0 16px; font-size: 15px;">${saludoDestinatario},</p>
   <p style="margin: 0 0 20px; font-size: 14px; color: #334155;">
     Solicito la aplicación del descuento de la
-    <strong>Campaña Oficial de Octubre</strong> para el proyecto <strong>${escapeHtml(proyectoSeleccionado)}</strong>.
+    <strong>Campaña Oficial de Noviembre</strong> para el proyecto <strong>${escapeHtml(proyectoSeleccionado)}</strong>.
   </p>
 
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0fdf4; border: 2px solid #16a34a; border-radius: 12px; margin-bottom: 22px;">
@@ -587,6 +600,31 @@ ${asesorSeleccionado}`;
 
   return (
     <div className="w-full text-[var(--text-primary)] font-sans overflow-x-hidden">
+      <section className="panel mb-4" aria-label="Tipo de cambio de supervisión"><div className="flex flex-wrap items-center gap-3"><strong>Campaña noviembre 2026 · TC referencial: Bs {TC_OFICIAL_BASE.toFixed(2)} / USD</strong><label className="text-xs">Actualizar TC <input aria-label="Nuevo tipo de cambio" type="number" min="0.01" max="100" step="0.01" value={rateInput} onChange={e => setRateInput(e.target.value)} className="ml-2 rounded border px-2 py-1 text-slate-900 w-28" /></label><button type="button" onClick={saveRate} className="rounded bg-blue-700 px-3 py-2 text-white text-xs font-semibold">Guardar TC del día</button><small>Vigencia desde {businessDate()} · guardado en este navegador</small></div>{rateError && <p role="alert" className="text-red-600">{rateError}</p>}</section>
+      <section className="panel mb-4" aria-label="Anexo III cuota inicial">
+        <details>
+          <summary className="font-bold">Anexo III · Descuento adicional por incremento de cuota inicial (noviembre)</summary>
+          <p className="text-xs mt-3">Solo nuevas ventas a plazos con incremento acreditado sobre la cuota inicial parametrizada. Los tramos se calculan en puntos porcentuales y no sustituyen la autorización comercial.</p>
+          <div className="overflow-x-auto my-3"><table className="w-full text-xs">
+            <thead><tr><th className="p-2">Incremento</th>{PRICE_RANGES.map(r=><th key={r} className="p-2">{r}</th>)}</tr></thead>
+            <tbody>{CUOTA_INCREMENT_BONUSES_USD.map((row,i)=><tr key={CUOTA_INCREMENT_RANGES[i]}><td className="p-2">{CUOTA_INCREMENT_RANGES[i]}</td>{row.map((v,j)=><td className="p-2 text-right" key={j}>USD {v.toLocaleString('es-BO')}</td>)}</tr>)}</tbody>
+          </table></div>
+          <label className="text-xs font-bold">Nueva cuota inicial acreditada (USD)
+            <input type="number" min="0" step="0.01" value={nuevaCuotaInicialUsd} onChange={e=>setNuevaCuotaInicialUsd(e.target.value)} className="block mt-1 rounded border p-2 text-slate-900 w-full max-w-xs" placeholder="Escribe el importe" />
+          </label>
+          {modalidad === "CREDITO" && superficie > 0 && precioBaseM2 > 0 && nuevaCuotaInicialUsd !== "" && (() => {
+            const base = superficie * precioBaseM2;
+            const baseline = base * cuotaInicialPct / 100;
+            const next = Number(nuevaCuotaInicialUsd);
+            const points = Number.isFinite(next) ? (next / base * 100 - cuotaInicialPct) : -1;
+            const result = bonusForIncreasedInitial(base, Math.max(0,points));
+            return <div className="mt-3 text-sm"><p>Cuota parametrizada: USD {formatMoneda(baseline)} · Incremento: {points.toFixed(2)} puntos porcentuales</p>
+              <strong>Descuento adicional potencial: USD {result.bonusUsd.toLocaleString('es-BO')}</strong>
+              <p className="text-xs">Cálculo orientativo, pendiente de verificar pago inicial y compatibilidad de campañas. No se aplica automáticamente al correo ni al precio.</p></div>;
+          })()}
+          {modalidad !== "CREDITO" && <p className="text-xs">Seleccione venta a crédito para calcular el incremento aplicable.</p>}
+        </details>
+      </section>
       <details className="panel mb-6"><summary>Vista previa del correo · revisar antes de enviar</summary><div className="email-preview" dangerouslySetInnerHTML={{ __html: sanitizeEmailHtml(generarHTMLCorreo(), creditEmailOptions) }}/></details>
       {modalidad === 'CREDITO' && <section className="panel mb-6">
         <h2 className="text-lg font-bold">Captura del lote para el correo</h2>
@@ -650,7 +688,7 @@ ${asesorSeleccionado}`;
             }`}
           >
             <Banknote className="w-3.5 h-3.5" />
-            VENTAS CONTADO - LIQUIDACIÓN (25%/20%/10%)
+            VENTAS CONTADO - LIQUIDACIÓN (18%/15%/10%)
           </button>
           <button
             type="button"

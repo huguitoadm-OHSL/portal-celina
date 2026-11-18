@@ -9,7 +9,8 @@ const PROYECTOS_ACTUALIZADOS = ['Muyurina', 'Renacer', 'Santa Fe', 'Rancho Nuevo
 
 export default function SeguimientoVentas() {
   const { advisors, sales } = useCommercial();
-  const ventasPorProyecto = reportedSalesByProject(PROYECTOS_ACTUALIZADOS, sales);
+  const proyectosVisibles = [...new Set([...PROYECTOS_ACTUALIZADOS, ...sales.map(venta => venta.project)])];
+  const ventasPorProyecto = reportedSalesByProject(proyectosVisibles, sales);
   const datosProcesados = advisors.map(asesor => {
     let clusterInfo = { texto: 'Venta Cero', color: 'text-[var(--text-muted)] font-semibold' };
     if (asesor.actualUsd >= 18000) clusterInfo = { texto: 'Comisionan', color: 'text-emerald-600 font-bold' };
@@ -30,11 +31,11 @@ export default function SeguimientoVentas() {
 
   const productivos = datosProcesados.filter(a => a.colocacion >= 18000).length;
   // Productividad calculada sobre la base de antiguos para igualar el 25% de Power BI
-  const productividad = Math.round((productivos / totalAntiguos) * 100);
+  const productividad = totalAntiguos ? Math.round((productivos / totalAntiguos) * 100) : 0;
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <p className="source-note">Solo ventas realizadas y colocación en USD, desde la misma fuente de Inicio, Proyección Semanal e Incentivos. Corte de supervisión: 22/10/2026. Umbral heredado de comisiones: USD 18.000.</p>
+      <p className="source-note">Solo ventas realizadas y colocación en USD, desde la misma fuente de Inicio, Proyección Semanal e Incentivos. Corte CESI: 17/11/2026. Umbral heredado de comisiones: USD 18.000.</p>
       <SalesImport />
       <div className="mb-6 flex justify-between items-end">
         <h2 className="text-2xl font-bold text-[var(--text-primary)] flex items-center">
@@ -60,7 +61,7 @@ export default function SeguimientoVentas() {
         <div className="bg-[var(--bg-card)] rounded-2xl p-6 border border-[var(--border-glow)] shadow-sm flex flex-col justify-between">
           <p className="text-sm font-bold text-[var(--text-primary)] flex items-center mb-4"><Target className="w-4 h-4 mr-2 text-emerald-500"/> Ventas Acumuladas</p>
           <div className="space-y-3.5 w-full">
-            {PROYECTOS_ACTUALIZADOS.map((nombre, i) => (
+            {proyectosVisibles.map((nombre, i) => (
               <div key={i} className="flex items-center text-xs">
                 <span className="w-24 font-semibold text-[var(--text-muted)] truncate">{nombre}</span>
                 <div className="flex-1 h-2.5 bg-[var(--bg-card-inner)] rounded-full mx-3 overflow-hidden">
