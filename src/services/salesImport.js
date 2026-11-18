@@ -54,8 +54,9 @@ export function planSalesImport(rows, existing, period = '2026-11') {
       const get = key => columns[key] >= 0 ? row[columns[key]] : undefined;
       const advisor = ADVISORS.find(a => normalize(a.nombre) === normalize(get('advisor')));
       if (!advisor) { skippedOtherAdvisors++; return; }
-      const project = PROJECT_NAMES.find(p => projectKey(p) === projectKey(get('project')));
-      if (!project) throw new Error('Proyecto no reconocido.');
+      const rawProject = String(get('project') ?? '').trim();
+      if (!rawProject || rawProject.length > 100 || /^[=+@]/.test(rawProject)) throw new Error('Proyecto ausente o inválido.');
+      const project = PROJECT_NAMES.find(p => projectKey(p) === projectKey(rawProject)) || rawProject;
       if (get('currency') != null && !['', 'usd', 'dolares', 'dolares americanos', '$', 'us$'].includes(normalize(get('currency')))) throw new Error('Solo se admiten ventas en USD; no se convierte moneda.');
       if (get('status') != null && !['', 'confirmada', 'confirmado', 'realizada', 'realizado', 'vendido', 'venta al contado', 'venta a plazos', 'venta a credito'].includes(normalize(get('status')))) throw new Error('Estado no corresponde a venta reportada.');
       const date = parseSaleDate(get('date'));
@@ -91,7 +92,7 @@ export function mergeSavedSales(base, saved) {
   for (const sale of saved) {
     if (sale.source !== 'excel' || sale.status !== 'reported_by_supervisor' || sale.date?.slice(0, 7) !== '2026-11') throw new Error('Respaldo local inválido.');
     parseSaleDate(sale.date); parseUsd(sale.amountUsd);
-    if (!PROJECT_NAMES.includes(sale.project)) throw new Error('Proyecto local inválido.');
+    if (typeof sale.project !== 'string' || !sale.project.trim() || sale.project.length > 100) throw new Error('Proyecto local inválido.');
     const duplicate = next.find(s => s.id === sale.id || (sale.contractId && s.contractId === sale.contractId) || (sameSale(s, sale) && (!s.contractId || !sale.contractId || s.contractId === sale.contractId)));
     if (duplicate) {
       if (!sameSale(duplicate, sale)) throw new Error('Una importación local requiere conciliación con la referencia vigente.');
