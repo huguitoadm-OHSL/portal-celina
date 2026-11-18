@@ -36,7 +36,7 @@ export const saleFingerprint = sale => [sale.advisorId, projectKey(sale.project)
 const sameSale = (a, b) => saleFingerprint(a) === saleFingerprint(b) && a.currency === b.currency;
 
 // Una vista previa no modifica el estado. Cualquier error bloquea el lote completo.
-export function planSalesImport(rows, existing, period = '2026-11') {
+export function planSalesImport(rows, existing, period = '2026-10') {
   if (!Array.isArray(rows) || rows.length < 2 || rows.length > 1001) throw new Error('Use una hoja con encabezados y entre 1 y 1.000 ventas.');
   const headers = rows[0].map(normalize);
   const columns = Object.fromEntries(Object.entries(aliases).map(([key, names]) => {
@@ -53,14 +53,14 @@ export function planSalesImport(rows, existing, period = '2026-11') {
     try {
       const get = key => columns[key] >= 0 ? row[columns[key]] : undefined;
       const advisor = ADVISORS.find(a => normalize(a.nombre) === normalize(get('advisor')));
-      if (!advisor) { skippedOtherAdvisors++; return; }
+      if (!advisor) { if (period === '2026-11') { skippedOtherAdvisors++; return; } throw new Error('Asesor no reconocido. Use el nombre completo del equipo.'); }
       const rawProject = String(get('project') ?? '').trim();
       if (!rawProject || rawProject.length > 100 || /^[=+@]/.test(rawProject)) throw new Error('Proyecto ausente o inválido.');
       const project = PROJECT_NAMES.find(p => projectKey(p) === projectKey(rawProject)) || rawProject;
       if (get('currency') != null && !['', 'usd', 'dolares', 'dolares americanos', '$', 'us$'].includes(normalize(get('currency')))) throw new Error('Solo se admiten ventas en USD; no se convierte moneda.');
       if (get('status') != null && !['', 'confirmada', 'confirmado', 'realizada', 'realizado', 'vendido', 'venta al contado', 'venta a plazos', 'venta a credito'].includes(normalize(get('status')))) throw new Error('Estado no corresponde a venta reportada.');
       const date = parseSaleDate(get('date'));
-      if (date.slice(0, 7) !== period) throw new Error('La venta no corresponde a noviembre de 2026.');
+      if (date.slice(0, 7) !== period) throw new Error('La venta no corresponde al período '+period+'.');
       const lots = get('lots') == null || get('lots') === '' ? 1 : Number(get('lots'));
       if (!Number.isInteger(lots) || lots < 1 || lots > 100) throw new Error('Cantidad de lotes inválida.');
       const contractId = String(get('contract') ?? '').trim();
@@ -90,7 +90,7 @@ export function mergeSavedSales(base, saved) {
   if (!Array.isArray(saved) || saved.length > 1000) throw new Error('Respaldo local inválido.');
   let next = [...base];
   for (const sale of saved) {
-    if (sale.source !== 'excel' || sale.status !== 'reported_by_supervisor' || sale.date?.slice(0, 7) !== '2026-11') throw new Error('Respaldo local inválido.');
+    if (sale.source !== 'excel' || sale.status !== 'reported_by_supervisor' || !['2026-10','2026-11'].includes(sale.date?.slice(0, 7))) throw new Error('Respaldo local inválido.');
     parseSaleDate(sale.date); parseUsd(sale.amountUsd);
     if (typeof sale.project !== 'string' || !sale.project.trim() || sale.project.length > 100) throw new Error('Proyecto local inválido.');
     const duplicate = next.find(s => s.id === sale.id || (sale.contractId && s.contractId === sale.contractId) || (sameSale(s, sale) && (!s.contractId || !sale.contractId || s.contractId === sale.contractId)));
@@ -98,8 +98,9 @@ export function mergeSavedSales(base, saved) {
       if (!sameSale(duplicate, sale)) throw new Error('Una importación local requiere conciliación con la referencia vigente.');
       continue;
     }
-    next = addClosedSale(next, sale, '2026-11');
+    next = addClosedSale(next, sale, sale.period);
   }
   actualsByAdvisor(ADVISORS, next, '2026-11');
+  actualsByAdvisor(ADVISORS, next, '2026-10');
   return next;
 }
