@@ -812,6 +812,10 @@ export default function AdvisorIntelligence() {
                 {selectedClient.phone} · {selectedClient.advisor} ·{" "}
                 {selectedClient.state}
               </p>
+              <p className="crm-contact-actions">
+                <a href={`https://wa.me/${String(selectedClient.phone).replace(/\\D/g,'').replace(/^591/,'').padStart(8,'0').replace(/^/,'591')}`} target="_blank" rel="noopener noreferrer">Abrir WhatsApp del lead</a>
+                <button type="button" onClick={()=>navigator.clipboard?.writeText(String(selectedClient.phone))}>Copiar teléfono</button>
+              </p>
               <small>
                 ID: {selectedClient.id}{" "}
                 {selectedClient.provisional &&
