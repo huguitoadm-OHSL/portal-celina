@@ -10,7 +10,7 @@ async function enter(page) {
   await page.getByRole("button", { name: /Inteligencia comercial/ }).click();
   await expect(
     page.getByRole("heading", {
-      name: "Tu equipo, con el siguiente paso claro.",
+      name: "Radar de cierres · Inteligencia Comercial",
     }),
   ).toBeVisible();
   await expect(
@@ -77,9 +77,8 @@ test("inteligencia privada: Excel real sintético, idempotencia, persistencia, n
       }),
     })
     .click();
-  await expect(
-    page.getByRole("heading", { name: "Caliente · Atender hoy" }),
-  ).toBeVisible();
+  await expect(page.locator(".crm-auto-plan")).toBeVisible();
+  await expect(page.locator(".crm-auto-plan ol li")).toHaveCount(3);
   await page
     .getByLabel("Nota y fundamento")
     .fill("Supervisor confirmó interés con evidencia sintética");
