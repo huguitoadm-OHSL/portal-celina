@@ -218,3 +218,40 @@
 .crm-pipeline-lead small,.crm-pipeline-lead span {font-size:11px;line-height:1.4}
 .crm-score {font-weight:800;color:var(--text-primary);border-left:3px solid #2dc8bb;padding:4px 8px;background:var(--bg-card-inner)}
 @media (max-width: 640px) {.crm-pipeline-stage {flex-basis:83vw}.crm-pipeline-columns {margin-right:-10px}}
+
+/* Radar y planes de acción: integra el tema claro/oscuro del Portal Celina. */
+.crm-radar {display:grid;gap:16px;min-width:0}
+.crm-radar-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;background:linear-gradient(120deg,var(--bg-card),var(--bg-card-inner))}
+.crm-radar-head p {max-width:720px;font-size:13px;line-height:1.5;color:var(--text-secondary)}
+.crm-radar-head .eyebrow{font-size:10px;color:#35bcae;letter-spacing:1.4px}
+.crm-radar-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.crm-radar-kpi{display:flex;flex-direction:column;gap:8px;border-top:2px solid #2c9fbb}
+.crm-radar-kpi small,.crm-radar-kpi span{font-size:12px;color:var(--text-secondary)}
+.crm-radar-kpi strong{font-size:clamp(24px,3vw,36px);color:var(--text-primary)}
+.crm-radar-main{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(260px,1fr);gap:16px}
+.crm-radar-list{display:grid;gap:7px;max-height:700px;overflow-y:auto;margin-top:15px}
+.crm .crm-radar-lead{display:grid;grid-template-columns:32px minmax(0,1fr) 100px;align-items:center;gap:12px;text-align:left;background:var(--bg-card-inner);border:1px solid var(--border-glow);padding:12px;border-radius:12px}
+.crm-radar-lead:hover{border-color:#39b9c1;box-shadow:0 2px 14px #06b6d421}
+.crm-radar-rank{font-weight:800;color:#3eb9be;font-size:18px}
+.crm-radar-person,.crm-radar-score{display:flex;flex-direction:column;gap:5px;min-width:0}
+.crm-radar-person strong{font-size:13px;overflow-wrap:anywhere}
+.crm-radar-person small,.crm-radar-score small{font-size:11px;color:var(--text-secondary)}
+.crm-radar-score strong{font-size:24px;line-height:1;color:var(--text-primary)}
+.crm-radar-score strong small{font-size:11px;font-weight:400}
+.crm-radar-meter{display:block;background:var(--border-glow);height:7px;border-radius:99px;overflow:hidden;width:100%}
+.crm-radar-meter>span{display:block;height:100%;background:linear-gradient(90deg,#2479b9,#35c8aa);border-radius:99px}
+.crm-radar-side{display:flex;flex-direction:column;gap:12px}
+.crm-radar-stage{display:grid;grid-template-columns:minmax(0,1fr) 36px;gap:5px 12px;align-items:center;font-size:12px}
+.crm-radar-stage strong{text-align:right}
+.crm-radar-stage .crm-radar-meter{grid-column:1/-1}
+.crm-auto-plan{border:1px solid #298e9d;border-radius:16px;padding:18px;background:linear-gradient(140deg,var(--bg-card-inner),var(--bg-card))}
+.crm-auto-plan-title{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.crm-auto-plan-title small{color:#40b9b9;font-weight:800;letter-spacing:0.9px;font-size:10px}
+.crm-auto-plan-title h3{font-size:20px;margin:5px 0}
+.crm-score-number{text-align:right;white-space:nowrap}
+.crm-score-number strong{font-size:32px;display:block;line-height:1;color:var(--text-primary)}
+.crm-auto-plan ol{display:grid;gap:10px;padding:0;margin:14px 0;list-style:none;counter-reset:none}
+.crm-auto-plan li{display:flex;align-items:flex-start;gap:10px;font-size:13px;line-height:1.5}
+.crm-auto-plan li span{flex:0 0 25px;height:25px;border-radius:50%;display:grid;place-items:center;background:#176582;color:white;font-weight:800}
+@media(max-width:1050px){.crm-radar-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.crm-radar-main{grid-template-columns:1fr}}
+@media(max-width:520px){.crm-radar-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.crm .crm-radar-lead{grid-template-columns:22px minmax(0,1fr) 72px;gap:8px;padding:10px}.crm-radar-score strong{font-size:20px}.crm-auto-plan-title{flex-wrap:wrap}}

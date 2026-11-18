@@ -1,10 +1,11 @@
+import { projectIdentity, canonicalProjectName } from './projectIdentity.js';
 import { ADVISORS, PROJECT_NAMES } from '../constants/commercialReference.js';
 import { businessDate } from '../constants/exchangeRates.js';
 import { actualsByAdvisor, addClosedSale } from './commercialLedger.js';
 
 export const SALES_STORAGE_KEY = 'celina.sales.imports.v2.nov';
 export const normalize = value => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/\s+/g, ' ');
-const projectKey = value => normalize(value).replace(/^celina\s+/, '').replace(/^(el|los)\s+/, '').replace(/\s+(del bosque|fase 3)$/, '');
+const projectKey = projectIdentity;
 const aliases = {
   advisor: ['vendedor', 'asesor'], project: ['urbanizacion', 'proyecto'], date: ['fecha de venta', 'fecha venta', 'fecha'],
   amount: ['precio al contado', 'colocacion usd', 'importe usd', 'monto usd'],
@@ -56,7 +57,7 @@ export function planSalesImport(rows, existing, period = '2026-10') {
       if (!advisor) { if (period === '2026-11') { skippedOtherAdvisors++; return; } throw new Error('Asesor no reconocido. Use el nombre completo del equipo.'); }
       const rawProject = String(get('project') ?? '').trim();
       if (!rawProject || rawProject.length > 100 || /^[=+@]/.test(rawProject)) throw new Error('Proyecto ausente o inválido.');
-      const project = PROJECT_NAMES.find(p => projectKey(p) === projectKey(rawProject)) || (period === '2026-11' ? rawProject : null);
+      const project = PROJECT_NAMES.find(p => projectKey(p) === projectKey(rawProject)) || (period === '2026-11' ? canonicalProjectName(rawProject) : null);
       if (!project) throw new Error('Proyecto no reconocido.');
       if (get('currency') != null && !['', 'usd', 'dolares', 'dolares americanos', '$', 'us$'].includes(normalize(get('currency')))) throw new Error('Solo se admiten ventas en USD; no se convierte moneda.');
       if (get('status') != null && !['', 'confirmada', 'confirmado', 'realizada', 'realizado', 'vendido', 'venta al contado', 'venta a plazos', 'venta a credito'].includes(normalize(get('status')))) throw new Error('Estado no corresponde a venta reportada.');

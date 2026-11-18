@@ -64,7 +64,7 @@ export default function AdvisorIntelligence() {
     [now, setNow] = useState(laPazNow()),
     [period, setPeriod] = useState(laPazNow().slice(0, 7)),
     [advisor, setAdvisor] = useState(""),
-    [tab, setTab] = useState("Embudo comercial"),
+    [tab, setTab] = useState("Radar de cierres"),
     [selected, setSelected] = useState(""),
     [search, setSearch] = useState(""),
     [temperature, setTemperature] = useState(""),
@@ -156,7 +156,15 @@ export default function AdvisorIntelligence() {
       },
     };
   });
-  const opportunities = clients.map(c => ({...c, opportunity: scoreOpportunity(c, now, c.supervisorNotes)}));
+  const opportunities = clients.map(c => {
+    const opportunity = scoreOpportunity(c, now, c.supervisorNotes);
+    const override = c.supervisorNotes.find(n => n.temperature && n.expires >= now.slice(0,10));
+    const temperature = override ? override.temperature : opportunity.temperature;
+    return {...c, analysis:{...c.analysis, temperature, priority:opportunity.plan.headline,
+      reason:override ? 'Clasificación confirmada por supervisión: '+override.text :
+        opportunity.evidence.map(e=>e.reason).join(' · ') || 'Sin señales de avance suficientes.'},
+      opportunity:{...opportunity,temperature}};
+  });
   const filtered = opportunities.filter(
     (c) =>
       (!advisor || c.advisorKey === advisor) &&
@@ -182,11 +190,7 @@ export default function AdvisorIntelligence() {
         ? 0
         : c.analysis.temperature === "Caliente"
           ? 1
-          : c.analysis.priority === "Confirmar visita"
-            ? 2
-            : c.analysis.priority === "Recuperación prioritaria"
-              ? 3
-              : 4;
+          : c.opportunity.prospect ? 2 : c.opportunity.score >= 35 ? 3 : 4;
   async function chooseFile(event) {
     const file = event.target.files?.[0];
     event.target.value = "";
@@ -270,10 +274,9 @@ export default function AdvisorIntelligence() {
     <section className="crm">
       <header className="crm-hero">
         <p className="eyebrow">OMNI / INTELIGENCIA COMERCIAL PRIVADA</p>
-        <h1>Tu equipo, con el siguiente paso claro.</h1>
+        <h1>Radar de cierres · Inteligencia Comercial</h1>
         <p>
-          Prioridades comerciales y disciplina de seguimiento · Uso exclusivo de
-          supervisión.
+          Un solo Excel. Análisis de prospectos, embudo, prioridades y planes de acción sugeridos automáticamente para cada lead.
         </p>
         <strong>
           Módulo de supervisión · El CRM de la empresa conserva su operación original
@@ -382,6 +385,7 @@ export default function AdvisorIntelligence() {
       </div>
       <nav className="crm-tabs" aria-label="Inteligencia privada">
         {[
+          "Radar de cierres",
           "Embudo comercial",
           "Prioridades",
           "Cargar reportes",
@@ -509,11 +513,53 @@ export default function AdvisorIntelligence() {
           )}
         </div>
       )}
+      {tab === "Radar de cierres" && (
+        <div className="crm-radar">
+          <div className="crm-radar-head panel">
+            <div>
+              <p className="eyebrow">CENTRO DE DECISIONES · {period}</p>
+              <h2>¿A quién debemos atender primero?</h2>
+              <p>Orden automático con evidencia del Excel. Ningún porcentaje expresa probabilidad estadística de cierre.</p>
+            </div>
+            <button type="button" onClick={()=>setTab("Cargar reportes")}>Actualizar análisis con Excel</button>
+          </div>
+          <div className="crm-radar-kpis">
+            {[
+              ['Leads analizados',filtered.length,'Total visible'],
+              ['Prospectos CRM',filtered.filter(c=>c.opportunity.prospect).length,'Mayor ponderación'],
+              ['Prioridad alta',filtered.filter(c=>c.opportunity.score>=60 && !c.blacklisted).length,'Negociaciones a revisar'],
+              ['Compromisos vencidos',filtered.filter(c=>c.pending.some(n=>n.due && !n.completedAt && n.due<now.slice(0,10))).length,'Intervención inmediata']
+            ].map(([title,count,detail])=><article className="panel crm-radar-kpi" key={title}><small>{title}</small><strong>{count}</strong><span>{detail}</span></article>)}
+          </div>
+          <div className="crm-radar-main">
+            <div className="panel">
+              <h2>Cola inteligente de gestión</h2>
+              <p className="crm-note">Ordena primero las gestiones más urgentes y con mayor evidencia comercial. Selecciona un lead para abrir su ficha completa.</p>
+              <div className="crm-radar-list">
+                {[...filtered].sort((a,b)=>(a.blacklisted?1:0)-(b.blacklisted?1:0) || (b.pending.some(n=>n.due&&!n.completedAt&&n.due<now.slice(0,10))?1:0)-(a.pending.some(n=>n.due&&!n.completedAt&&n.due<now.slice(0,10))?1:0) || b.opportunity.score-a.opportunity.score).slice(0,35).map((c,i)=>
+                <button className="crm-radar-lead" key={c.id} onClick={()=>openClient(c.id)}>
+                  <span className="crm-radar-rank">{i+1}</span>
+                  <span className="crm-radar-person"><strong>{c.name || 'Lead sin nombre'}</strong><small>{c.advisor} · {c.opportunity.stage}</small><small>{c.opportunity.plan.headline} · {c.opportunity.plan.urgency}</small></span>
+                  <span className="crm-radar-score"><strong>{c.opportunity.score}<small>/100</small></strong><span className="crm-radar-meter"><span style={{width:`${c.opportunity.score}%`}} /></span><small>{c.opportunity.temperature}</small></span>
+                </button>)}
+                {!filtered.length&&<p>Importa los Excel de leads y actividades para calcular el radar automáticamente.</p>}
+              </div>
+            </div>
+            <div className="panel crm-radar-side">
+              <h2>Distribución del embudo</h2>
+              <p className="crm-note">Etapas inferidas de registros del CRM.</p>
+              {PIPELINE_STAGES.map(stage=>{const count=filtered.filter(c=>c.opportunity.stage===stage).length;return <div key={stage} className="crm-radar-stage"><span>{stage}</span><strong>{count}</strong><div className="crm-radar-meter"><span style={{width:`${filtered.length ? count/filtered.length*100 : 0}%`}}/></div></div>})}
+              <button type="button" onClick={()=>setTab("Embudo comercial")}>Abrir embudo completo</button>
+              <p className="crm-note">La clasificación se recalcula cuando cargas un informe. Si faltan datos, la herramienta propone verificarlos: no inventa documentos, reservas ni cotizaciones.</p>
+            </div>
+          </div>
+        </div>
+      )}
       {tab === "Embudo comercial" && (
         <div className="crm-pipeline">
           <div className="panel crm-pipeline-heading">
             <h2>Embudo de oportunidades · Supervisión</h2>
-            <p>Etapas inferidas de actividades y notas del CRM. Abre una ficha para verificar y registrar tu próxima intervención. El puntaje mide prioridad operativa, no probabilidad de venta.</p>
+            <p>Etapas del CRM, prospectos y señales de negociación. Abre cualquier ficha para ver su plan de acción generado automáticamente; el puntaje no representa probabilidad estadística de cierre.</p>
             <div className="crm-pipeline-stats"><span><strong>{filtered.length}</strong> leads visibles</span><span><strong>{filtered.filter(c => c.opportunity.score >= 50).length}</strong> requieren revisión de cierre</span><span><strong>{filtered.filter(c => c.pending.some(n=>n.due && n.due < now.slice(0,10))).length}</strong> compromisos vencidos</span></div>
           </div>
           <div className="crm-pipeline-columns">
@@ -525,7 +571,7 @@ export default function AdvisorIntelligence() {
                   <small>{c.advisor}</small>
                   <strong>{c.name || "Lead sin nombre"}</strong>
                   <span className="crm-score">Prioridad {c.opportunity.score}/100 · {c.analysis.temperature}</span>
-                  <span>{c.opportunity.nextAction}</span>
+                  <span><strong>Plan automático:</strong> {c.opportunity.nextAction}</span>
                   <small>Actividad: {c.opportunity.lastDays === null ? "Sin registro" : `${c.opportunity.lastDays} día(s) atrás`}</small>
                 </button>)}
                 {group.length>80 && <p className="crm-note">Mostrando 80 de {group.length}. Usa los filtros para acotar.</p>}
@@ -574,8 +620,8 @@ export default function AdvisorIntelligence() {
                   >
                     {c.analysis.temperature}
                   </span>
-                  <strong>{c.analysis.priority} · Prioridad {c.opportunity.score}/100</strong>
-                  <small>{c.opportunity.nextAction}</small>
+                  <strong>{c.opportunity.stage} · Prioridad {c.opportunity.score}/100</strong>
+                  <small>{c.opportunity.plan.headline} · {c.opportunity.plan.urgency}</small>
                   <p>{c.analysis.reason}</p>
                   <small>
                     Última actividad registrada:{" "}
@@ -827,8 +873,19 @@ export default function AdvisorIntelligence() {
                 {selectedClient.analysis.priority}
               </h3>
               <p>{selectedClient.analysis.reason}</p>
-              <p><strong>Prioridad {selectedClient.opportunity.score}/100</strong> · {selectedClient.opportunity.stage}. {selectedClient.opportunity.nextAction}</p>
-              {selectedClient.opportunity.evidence.map((reason,i)=><p key={i} className="crm-evidence">{reason}</p>)}
+              <div className="crm-auto-plan">
+                <div className="crm-auto-plan-title">
+                  <div><small>PLAN DE ACCIÓN GENERADO POR EL SISTEMA</small>
+                    <h3>{selectedClient.opportunity.plan.headline}</h3>
+                    <p>{selectedClient.opportunity.stage} · {selectedClient.analysis.temperature}</p>
+                  </div>
+                  <div className="crm-score-number"><strong>{selectedClient.opportunity.score}</strong><small>/100 · {selectedClient.opportunity.plan.urgency}</small></div>
+                </div>
+                <ol>{selectedClient.opportunity.plan.steps.map((step,i)=><li key={i}><span>{i+1}</span>{step}</li>)}</ol>
+                <p className="crm-note">Son recomendaciones generadas automáticamente a partir del Excel y la fecha actual. No se envían mensajes ni se declara una venta de forma automática.</p>
+              </div>
+              <h3>Evidencia que explica la prioridad</h3>
+              {selectedClient.opportunity.evidence.map((e,i)=><p key={i} className="crm-evidence">{e.points>0?'+':''}{e.points} puntos · {e.reason}</p>)}
               <p>
                 Regla operativa provisional. No es probabilidad de cierre ni
                 venta confirmada.
@@ -892,7 +949,8 @@ export default function AdvisorIntelligence() {
                   });
                 }}
               >
-                <h3>Tu intervención y próximo paso</h3>
+                <h3>Intervención opcional del supervisor</h3>
+                <p className="crm-note">El sistema ya propone los próximos pasos automáticamente. Usa este formulario solo para registrar hechos, acuerdos o una corrección documentada.</p>
                 <label>
                   Nota y fundamento
                   <textarea name="text" required maxLength={4000} />

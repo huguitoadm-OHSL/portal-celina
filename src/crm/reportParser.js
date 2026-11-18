@@ -136,6 +136,10 @@ export function parseReport(rows, period) {
         state: text(get("estado del lead"), 100),
         source: text(get("medio de contacto"), 100),
         campaign: text(get("campana"), 200),
+        // Se guarda solo la presencia de identificación, nunca el número de CI.
+        identityComplete: headers.includes("cedula de identidad") &&
+          String(get("cedula de identidad") ?? "").trim().length > 0 &&
+          !["-", "sin dato", "no registrado"].includes(normalize(get("cedula de identidad"))),
       };
       if (kind === "activities") {
         record.leadId = text(get("id lead"), 128);

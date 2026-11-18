@@ -1,3 +1,4 @@
+import { projectIdentity } from '../services/projectIdentity.js';
 export function summarizeCommercial(advisors, targetUsd) {
   const safe = value => {
     const n = Number(value);
@@ -27,6 +28,5 @@ export function reportedSalesForAdvisor(advisorId, sales) {
 }
 
 export function reportedSalesByProject(projects, sales) {
-  const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase().replace(/^(el|los)\s+/, '');
-  return projects.map(project => sales.filter(sale => normalize(sale.project) === normalize(project)).reduce((total, sale) => total + sale.lots, 0));
+  return projects.map(project => sales.filter(sale => projectIdentity(sale.project) === projectIdentity(project)).reduce((total, sale) => total + sale.lots, 0));
 }

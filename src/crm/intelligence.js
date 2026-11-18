@@ -196,7 +196,14 @@ export function buildIntelligence(
         aliases: ["provisional:" + leadRowKey(r)],
         blacklisted: false,
       });
-    clients.get(id).activities.push(r);
+    const client = clients.get(id);
+    client.identityComplete = client.identityComplete || r.identityComplete;
+    // El estado del lead corresponde al registro cronológicamente más reciente.
+    if (!client.latestStateAt || r.at >= client.latestStateAt) {
+      client.state = r.state;
+      client.latestStateAt = r.at;
+    }
+    client.activities.push(r);
   }
   for (const b of leadBatches)
     for (const r of unique(b.records, leadRowKey)) {
@@ -220,6 +227,7 @@ export function buildIntelligence(
         provisional: !matched,
         aliases: ["provisional:" + leadRowKey(r)],
         blacklisted: r.blacklisted,
+        identityComplete: r.identityComplete || old?.identityComplete || false,
       });
     }
   for (const b of current)
