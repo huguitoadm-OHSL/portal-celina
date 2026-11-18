@@ -1,3 +1,4 @@
+import { canonicalProjectName } from '../services/projectIdentity';
 import { reportedSalesByProject } from '../utils/commercial';
 import { useCommercial } from '../hooks/useCommercial';
 import React from 'react';
@@ -9,7 +10,7 @@ const PROYECTOS_ACTUALIZADOS = ['Muyurina', 'Renacer', 'Santa Fe', 'Rancho Nuevo
 
 export default function SeguimientoVentas() {
   const { advisors, sales } = useCommercial();
-  const proyectosVisibles = [...new Set([...PROYECTOS_ACTUALIZADOS, ...sales.map(venta => venta.project)])];
+  const proyectosVisibles = [...new Set([...PROYECTOS_ACTUALIZADOS, ...sales.map(venta => canonicalProjectName(venta.project))])];
   const ventasPorProyecto = reportedSalesByProject(proyectosVisibles, sales);
   const datosProcesados = advisors.map(asesor => {
     let clusterInfo = { texto: 'Venta Cero', color: 'text-[var(--text-muted)] font-semibold' };
