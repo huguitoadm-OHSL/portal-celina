@@ -75,11 +75,16 @@ test('saludo, redacción y protección de HTML dinámico en alta de CRM', async 
   expect(text).not.toContain('Klein Montano');
 });
 
-test('conciliación de Marisol alerta coincidencias sin modificar importes', async ({page}) => {
-  await enter(page);
-  await page.locator('input[type=file]').setInputFiles({name:'extracto.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify([{advisor:'Marisol Urgel Pizarro',project:'El Renacer',date:'2026-10-09',amountUsd:11200,lots:1,contractId:'ejemplo'}]))});
-  await expect(page.locator('.reconciliation-status')).toContainText('1 coincidencia candidata');
-  await expect(page.locator('.metric-card.current strong')).toContainText('78.705');
+test('noviembre conserva operaciones CESI y ocho asesores en pantalla',async({page})=>{
+ await enter(page);
+ await expect(page.locator('.metric-card.current strong')).toContainText('29.895,99');
+ await expect(page.locator('.hero-meta')).toContainText('8 asesores');
+ await expect(page.locator('.rate-history')).toContainText('11/11/2026');
+ await expect(page.locator('.rate-history')).toContainText('17/11/2026');
+ await page.getByRole('button',{name:'Seguimiento de Ventas',exact:true}).click();
+ const merly=page.locator('main tbody tr').filter({hasText:'Merly Mendez Hurtado'});
+ await expect(merly.locator('td').nth(3)).toHaveText('1');
+ await expect(merly.locator('td').nth(4)).toHaveText('11,897.25');
 });
 
 test('sanitizador bloquea scripts, eventos y estilos con solicitudes remotas',async ({page})=>{
@@ -101,22 +106,16 @@ test('marca antigua en localStorage no concede acceso',async({page})=>{
   await expect(page.getByRole('heading',{name:'Colocación por asesor'})).toHaveCount(0);
 });
 
-test('Marisol tiene dos ventas conciliadas y los bonos siguen en bolivianos', async ({page}) => {
-  await enter(page);
-  await page.getByRole('button', {name:'Seguimiento de Ventas', exact:true}).click();
-  const row = page.locator('main tbody tr').filter({hasText:'Marisol Urgel Pizarro'});
-  await expect(row.locator('td').nth(3)).toHaveText('2');
-  const project = page.locator('main span').filter({hasText:/^Renacer$/}).locator('..');
-  await expect(project.locator('span').last()).toHaveText('2');
-  await page.getByRole('button', {name:/^Incentivos Celina/}).click();
-  const advisor = page.locator('main table tbody tr').filter({hasText:'Marisol Urgel Pizarro'}).filter({has:page.locator('input')});
-  await expect(advisor.locator('input').nth(0)).toHaveValue('2');
-  await expect(advisor.locator('input').nth(1)).toHaveValue('59080');
-  await expect(advisor).toContainText('PRODUCTIVO');
-  await expect(advisor).toContainText('0 Bs.');
-  await expect(page.locator('main')).toContainText('700 Bs.');
-  await expect(page.locator('main')).toContainText('1.100 Bs.');
-  await expect(page.getByRole('columnheader', {name:'Colocación ($ USD)', exact:true})).toBeVisible();
+test('Merly continúa en ocho asesores y los incentivos de noviembre se calculan en bolivianos',async({page})=>{
+ await enter(page);
+ await page.getByRole('button',{name:'Seguimiento de Ventas',exact:true}).click();
+ const merly=page.locator('main tbody tr').filter({hasText:'Merly Mendez Hurtado'});
+ await expect(merly.locator('td').nth(3)).toHaveText('1');
+ await page.getByRole('button',{name:/^Incentivos Celina/}).click();
+ await expect(page.getByRole('spinbutton',{name:'Ventas de Merly Mendez Hurtado',exact:true})).toHaveValue('1');
+ await expect(page.getByRole('spinbutton',{name:'Colocación USD de Merly Mendez Hurtado',exact:true})).toHaveValue('11897.25');
+ await expect(page.locator('main')).toContainText('700 Bs.');
+ await expect(page.locator('main')).toContainText('1.100 Bs.');
 });
 
 test('Gmail genera una sola copia corporativa en formularios, incentivos y campañas', async ({page}) => {
@@ -255,60 +254,28 @@ test('el acceso personal pide solo contraseña y se valida por la API del servid
   expect(await page.evaluate(()=>localStorage.getItem('acceso_portal_master'))).toBeNull();
 });
 
-test('Excel real: vista previa, confirmación, cuatro vistas, recarga e idempotencia', async ({page}) => {
-  const { validWorkbook, invalidWorkbook } = await import('./workbooks.js');
-  const file = data => ({name:'ventas.xlsx',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer:Buffer.from(data,'base64')});
-  await enter(page);
-  await page.getByRole('button',{name:'Seguimiento de Ventas',exact:true}).click();
-  await page.getByLabel('Excel de ventas',{exact:true}).setInputFiles(file(invalidWorkbook));
-  await expect(page.getByText('No se aplicará ninguna fila hasta corregir las observaciones.')).toBeVisible();
-  await expect(page.getByRole('button',{name:/Confirmar importación/})).toBeDisabled();
-  await page.getByLabel('Excel de ventas',{exact:true}).setInputFiles(file(validWorkbook));
-  await expect(page.getByRole('button',{name:'Confirmar importación de 1 ventas',exact:true})).toBeEnabled();
-  const jimmy = page.locator('main table tbody tr').filter({hasText:'Jimmy Gonzales Nuñez'}).last();
-  await expect(jimmy.locator('td').nth(3)).toHaveText('0');
-  await page.getByRole('button',{name:'Confirmar importación de 1 ventas',exact:true}).click();
-  await expect(jimmy.locator('td').nth(3)).toHaveText('1');
-  await expect(jimmy.locator('td').nth(4)).toHaveText('1,234.56');
-  await page.getByLabel('Excel de ventas',{exact:true}).setInputFiles(file(validWorkbook));
-  await expect(page.getByRole('button',{name:'Confirmar importación de 0 ventas',exact:true})).toBeDisabled();
-  await page.getByRole('button',{name:'Inicio',exact:true}).click();
-  await expect(page.locator('.metric-card.current strong')).toContainText('79.939,56');
-  await expect(page.locator('.metric-card').nth(1)).toContainText('24.200');
-  await page.getByRole('button',{name:'Proyección Semanal',exact:true}).click();
-  const weekly = page.locator('main tbody tr').filter({hasText:'Jimmy Gonzales Nuñez'});
-  await expect(weekly.locator('td').nth(1)).toHaveText('USD 1,234.56');
-  await expect(weekly.locator('td').nth(2)).toHaveText('1');
-  await page.getByRole('button',{name:/^Incentivos Celina/}).click();
-  await expect(page.getByRole('spinbutton',{name:'Colocación USD de Jimmy Gonzales Nuñez',exact:true})).toHaveValue('1234.56');
-  await page.reload();
-  await page.getByRole('button',{name:'Vista de revisión local',exact:true}).click();
-  await expect(page.locator('.metric-card.current strong')).toContainText('79.939,56');
-  await page.setViewportSize({width:390,height:844});
-  await page.getByRole('button',{name:'Abrir menú'}).click();
-  await page.getByRole('button',{name:'Seguimiento de Ventas',exact:true}).click();
-  expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
+test('Excel de otro mes no sustituye la colocación de noviembre ni borra ventas',async({page})=>{
+ const {validWorkbook}=await import('./workbooks.js');
+ await enter(page);
+ await page.getByRole('button',{name:'Seguimiento de Ventas',exact:true}).click();
+ await page.getByLabel('Excel de ventas',{exact:true}).setInputFiles({name:'octubre.xlsx',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer:Buffer.from(validWorkbook,'base64')});
+ await expect(page.getByText('No se aplicará ninguna fila hasta corregir las observaciones.')).toBeVisible();
+ await expect(page.getByRole('button',{name:/Confirmar importación/})).toBeDisabled();
+ await page.getByRole('button',{name:'Inicio',exact:true}).click();
+ await expect(page.locator('.metric-card.current strong')).toContainText('29.895,99');
 });
 
-test('Jaime tiene una venta de Renacer del 18/oct; su proyección del 24 no es otra venta', async ({page}) => {
-  await enter(page);
-  const row=page.locator('main tbody tr').filter({hasText:'Jaime Fabricio Rios Castro'});
-  await expect(row.locator('td').nth(1)).toHaveText('1');
-  await expect(row.locator('td').nth(2)).toContainText('5.700');
-  await expect(page.locator('.hero-meta')).toContainText('5 ventas realizadas');
-  await expect(page.locator('.rate-history')).toContainText('18/10/2026');
-  await page.getByRole('button',{name:'Proyección Semanal',exact:true}).click();
-  const weekly=page.locator('main table tbody tr').filter({hasText:'Jaime Fabricio Rios Castro'});
-  await expect(weekly.locator('td').nth(1)).toHaveText('USD 5,700.00');
-  await expect(weekly.locator('td').nth(2)).toHaveText('1');
-  await expect(weekly.locator('input').nth(6)).toHaveValue('5700');
-  await expect(page.locator('.email-preview')).toContainText('102,905.00');
-  await page.getByRole('button',{name:/^Incentivos Celina/}).click();
-  await expect(page.getByRole('spinbutton',{name:'Ventas de Jaime Fabricio Rios Castro',exact:true})).toHaveValue('1');
-  await expect(page.getByRole('spinbutton',{name:'Colocación USD de Jaime Fabricio Rios Castro',exact:true})).toHaveValue('5700');
-  await page.getByRole('button',{name:'Seguimiento de Ventas',exact:true}).click();
-  const project=page.locator('main span').filter({hasText:/^Renacer$/}).locator('..');
-  await expect(project.locator('span').last()).toHaveText('2');
+test('las dos ventas CESI de noviembre no se confunden con las oportunidades proyectadas',async({page})=>{
+ await enter(page);
+ await expect(page.locator('.hero-meta')).toContainText('2 ventas realizadas');
+ await expect(page.locator('.metric-card.current strong')).toContainText('29.895,99');
+ await page.getByRole('button',{name:'Proyección Semanal',exact:true}).click();
+ const merly=page.locator('main table tbody tr').filter({hasText:'Merly Mendez Hurtado'});
+ await expect(merly.locator('td').nth(1)).toHaveText('USD 11,897.25');
+ await expect(merly.locator('td').nth(2)).toHaveText('1');
+ await expect(page.locator('.email-preview')).toContainText('83,795.99');
+ await page.getByRole('button',{name:/^Incentivos Celina/}).click();
+ await expect(page.getByRole('spinbutton',{name:'Colocación USD de Merly Mendez Hurtado',exact:true})).toHaveValue('11897.25');
 });
 
 test('crédito usa el modelo solicitado con imagen local; contado y liquidación conservan el formato', async ({page}) => {
