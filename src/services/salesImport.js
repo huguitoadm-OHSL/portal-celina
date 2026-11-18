@@ -56,7 +56,8 @@ export function planSalesImport(rows, existing, period = '2026-10') {
       if (!advisor) { if (period === '2026-11') { skippedOtherAdvisors++; return; } throw new Error('Asesor no reconocido. Use el nombre completo del equipo.'); }
       const rawProject = String(get('project') ?? '').trim();
       if (!rawProject || rawProject.length > 100 || /^[=+@]/.test(rawProject)) throw new Error('Proyecto ausente o inválido.');
-      const project = PROJECT_NAMES.find(p => projectKey(p) === projectKey(rawProject)) || rawProject;
+      const project = PROJECT_NAMES.find(p => projectKey(p) === projectKey(rawProject)) || (period === '2026-11' ? rawProject : null);
+      if (!project) throw new Error('Proyecto no reconocido.');
       if (get('currency') != null && !['', 'usd', 'dolares', 'dolares americanos', '$', 'us$'].includes(normalize(get('currency')))) throw new Error('Solo se admiten ventas en USD; no se convierte moneda.');
       if (get('status') != null && !['', 'confirmada', 'confirmado', 'realizada', 'realizado', 'vendido', 'venta al contado', 'venta a plazos', 'venta a credito'].includes(normalize(get('status')))) throw new Error('Estado no corresponde a venta reportada.');
       const date = parseSaleDate(get('date'));
