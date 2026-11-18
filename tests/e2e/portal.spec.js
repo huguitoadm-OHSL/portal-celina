@@ -259,7 +259,7 @@ test('las dos ventas CESI de noviembre no se confunden con las oportunidades pro
 });
 
 test('crédito usa el modelo solicitado con imagen local; contado y liquidación conservan el formato', async ({page}) => {
-  await page.clock.setFixedTime(new Date('2026-10-22T16:00:00Z'));
+  await page.clock.setFixedTime(new Date('2026-11-17T16:00:00Z'));
   await page.route('**/inventario_lotes.json',route=>route.fulfill({json:[
     {proyecto:'EL RENACER',estado:'DISPONIBLE',categoria:'CALLE - ZONA 3',uv:'SN',mzn:'76',lote:'8',superficie:300,precio:20},
     {proyecto:'EL RENACER',estado:'DISPONIBLE',categoria:'CALLE - ZONA 3',uv:'SN',mzn:'76',lote:'9',superficie:300,precio:20}
@@ -269,7 +269,7 @@ test('crédito usa el modelo solicitado con imagen local; contado y liquidación
   await expect(page.getByLabel('Lote de campaña',{exact:true})).toHaveValue('8');
   await page.locator('summary').filter({hasText:'Vista previa del correo'}).click();
   const preview=page.locator('.email-preview');
-  await expect(preview).toContainText('4,500.00');
+  await expect(preview).toContainText('4,920.00');
   const cashBefore=await preview.innerHTML();
   await expect(preview).toContainText('ÓPTICA 1');
   await page.evaluate(()=>{
@@ -280,16 +280,16 @@ test('crédito usa el modelo solicitado con imagen local; contado y liquidación
   await page.getByRole('button',{name:'CRÉDITO (DESCUENTO FIJO POR LOTE)',exact:true}).click();
   await page.getByLabel('Asesor de campaña',{exact:true}).selectOption('Jaime Fabricio Rios Castro');
   await expect(preview).toContainText('NUEVO PRECIO M²');
-  await expect(preview).toContainText('USD 19.00');
-  await expect(preview).toContainText('USD 5,700.00');
-  await expect(preview).toContainText('Bs. 66,975.00 · TC 11.75');
+  await expect(preview).toContainText('USD 19.17');
+  await expect(preview).toContainText('USD 5,750.00');
+  await expect(preview).toContainText('Bs. 67,275.00 · TC 11.70');
   await expect(preview).not.toContainText('ÓPTICA');
   await expect(preview).not.toContainText('BASE');
   await expect(preview).toContainText('Jaime Fabricio Rios Castro');
   await page.getByLabel('Captura del lote',{exact:true}).setInputFiles({name:'lote.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j7lUAAAAASUVORK5CYII=','base64')});
   await expect(preview.locator('img')).toHaveCount(1);
   await page.getByRole('button',{name:'Copiar Formato',exact:false}).click();
-  await expect.poll(()=>page.evaluate(()=>window.copiedEmail.text||'')).toContain('USD 5,700.00');
+  await expect.poll(()=>page.evaluate(()=>window.copiedEmail.text||'')).toContain('USD 5,750.00');
   const copied=await page.evaluate(()=>window.copiedEmail);
   expect(copied.html).toContain('data:image/png;base64,');
   expect(copied.text).not.toMatch(/ÓPTICA|Capital Final a Liquidar|Por favor le solicito/);
@@ -297,8 +297,8 @@ test('crédito usa el modelo solicitado con imagen local; contado y liquidación
   await expect(preview.locator('img')).toHaveCount(0);
   await page.getByLabel('Lote de campaña',{exact:true}).selectOption('8');
   await page.getByLabel('Asesor de campaña',{exact:true}).selectOption('Carlos Enrique Calderon Montano');
-  await page.getByRole('button',{name:'VENTAS CONTADO - LIQUIDACIÓN (25%/20%/10%)',exact:true}).click();
-  await expect(preview).toContainText('4,500.00');
+  await page.getByRole('button',{name:'VENTAS CONTADO - LIQUIDACIÓN (18%/15%/10%)',exact:true}).click();
+  await expect(preview).toContainText('4,920.00');
   expect(await preview.innerHTML()).toBe(cashBefore);
   await expect(preview.locator('img')).toHaveCount(0);
 });
