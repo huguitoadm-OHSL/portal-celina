@@ -358,7 +358,7 @@ export default function DescuentosCampanas() {
   <p style="margin: 0 0 16px; font-size: 15px;">${saludoDestinatario},</p>
   <p style="margin: 0 0 20px; font-size: 14px; color: #334155;">
     Solicito la aplicación del descuento de la
-    <strong>Campaña Oficial de Octubre</strong> para el proyecto <strong>${escapeHtml(proyectoSeleccionado)}</strong>.
+    <strong>Campaña Oficial de Noviembre</strong> para el proyecto <strong>${escapeHtml(proyectoSeleccionado)}</strong>.
   </p>
 
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0fdf4; border: 2px solid #16a34a; border-radius: 12px; margin-bottom: 22px;">
@@ -688,7 +688,7 @@ ${asesorSeleccionado}`;
             }`}
           >
             <Banknote className="w-3.5 h-3.5" />
-            VENTAS CONTADO - LIQUIDACIÓN (25%/20%/10%)
+            VENTAS CONTADO - LIQUIDACIÓN (18%/15%/10%)
           </button>
           <button
             type="button"
