@@ -20,6 +20,7 @@ import {
 } from "./privateStore.js";
 import "./crm.css";
 const EMPTY = { batches: [], notes: [], settings: DEFAULT_SETTINGS };
+const whatsappNumber = phone => { const n = String(phone ?? "").replace(/\\D/g,""); return /^\\d{8}$/.test(n) ? "591"+n : /^591\\d{8}$/.test(n) ? n : ""; };
 const labelKind = (k) =>
   k === "leads" ? "Listado de leads" : "Reporte de actividades";
 const number = (n) =>
@@ -813,7 +814,7 @@ export default function AdvisorIntelligence() {
                 {selectedClient.state}
               </p>
               <p className="crm-contact-actions">
-                <a href={`https://wa.me/${String(selectedClient.phone).replace(/\\D/g,'').replace(/^591/,'').padStart(8,'0').replace(/^/,'591')}`} target="_blank" rel="noopener noreferrer">Abrir WhatsApp del lead</a>
+                {whatsappNumber(selectedClient.phone) && <a href={`https://wa.me/${whatsappNumber(selectedClient.phone)}`} target="_blank" rel="noopener noreferrer">Abrir WhatsApp del lead</a>}
                 <button type="button" onClick={()=>navigator.clipboard?.writeText(String(selectedClient.phone))}>Copiar teléfono</button>
               </p>
               <small>
